@@ -14,20 +14,26 @@ class DepthChartManager:
         self.depth_chart = self._initialize_chart()
 
     def _initialize_chart(self) -> Dict[str, List[Any]]:
-        chart = {
+        base_chart = {
             "QB": [], "RB": [], "WR": [], "TE": [],
             "LT": [], "LG": [], "C": [], "RG": [], "RT": [],
             "DE": [], "DT": [], "LB": [], "CB": [],
             "S": [], "K": [], "P": []
         }
-        healthy_players = get_healthy_players(self.team.players)
-        for player in healthy_players:
-            pos = getattr(player, "position", None)
-            if pos in chart:
-                chart[pos].append(player)
-        for pos in chart:
-            chart[pos] = sorted(chart[pos], key=lambda p: getattr(p, "overall", 0), reverse=True)
-        return chart
+
+        generated = generate_depth_chart(self.team)
+
+        # Merge the generated chart into the base so predefined positions always exist
+        for pos in base_chart:
+            if pos in generated:
+                base_chart[pos] = generated[pos]
+
+        # Include any additional positions that may exist on the roster
+        for pos, players in generated.items():
+            if pos not in base_chart:
+                base_chart[pos] = players
+
+        return base_chart
 
     def get_starters_by_scheme(self, scheme: Dict[str, int]) -> Dict[str, List[Any]]:
         """
@@ -90,12 +96,37 @@ class SubstitutionManagerV2:
                 lineup[key] = player
         return lineup, bench_log
 
-def generate_depth_chart(team):
+def generate_depth_chart(team: Any) -> Dict[str, List[Any]]:
+    """Generate a depth chart from a team or list of players.
+
+    This utility accepts either a Team object/dict with ``roster`` or
+    ``players`` attribute or a direct list of players. Injured players are
+    filtered out and each position list is sorted by ``overall`` rating in
+    descending order.
     """
-    Stub: Generates a depth chart for the given team.
-    """
-    # TODO: Implement real logic
-    return {}
+    # Determine the list of players from the provided object
+    if isinstance(team, list):
+        players = team
+    else:
+        players = getattr(team, "roster", None)
+        if players is None:
+            players = getattr(team, "players", [])
+
+    # Only include healthy players
+    players = get_healthy_players(players)
+
+    depth_chart: Dict[str, List[Any]] = {}
+    for player in players:
+        pos = getattr(player, "position", None)
+        if not pos:
+            continue
+        depth_chart.setdefault(pos, []).append(player)
+
+    # Sort players at each position by overall rating
+    for pos in depth_chart:
+        depth_chart[pos].sort(key=lambda p: getattr(p, "overall", 0), reverse=True)
+
+    return depth_chart
 
 # When generating a depth chart or active lineup:
 # Example team object for demonstration; replace with your actual team object as needed.
