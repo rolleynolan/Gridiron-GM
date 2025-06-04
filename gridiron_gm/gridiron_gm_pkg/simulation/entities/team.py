@@ -1,6 +1,7 @@
 import uuid
 from typing import List, Dict, Optional
 from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.depth_chart import generate_depth_chart
 
 class Team:
     """
@@ -74,14 +75,7 @@ class Team:
         """
         Rebuilds the depth chart by grouping and sorting players by position and overall.
         """
-        self.depth_chart = {}
-        for player in self.players:
-            position = player.position
-            if position not in self.depth_chart:
-                self.depth_chart[position] = []
-            self.depth_chart[position].append(player)
-        for pos in self.depth_chart:
-            self.depth_chart[pos].sort(key=lambda p: getattr(p, "overall", 0), reverse=True)
+        self.depth_chart = generate_depth_chart(self)
 
     def get_starters(self) -> Dict[str, Player]:
         """

@@ -142,11 +142,7 @@ def fill_team_rosters_with_dummy_players(teams):
         team.roster = team.players
 
         # 4. Build depth_chart for all required positions
-        if not hasattr(team, "depth_chart") or team.depth_chart is None:
-            team.depth_chart = {}
-        for pos in min_positions:
-            players_for_pos = [p for p in team.players if getattr(p, "position", None) == pos]
-            team.depth_chart[pos] = players_for_pos
+        team.generate_depth_chart()
 
         # 5. Final debug output
         print(f"[ROSTER FILL] {abbr} roster filled with {len(team.roster)} players.")
