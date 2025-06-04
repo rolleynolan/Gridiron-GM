@@ -90,6 +90,7 @@ def test_run_drive_returns_log_and_score():
     result = game_engine.sim_drive(team, defense, DummySubManager(), fatigue_log, context)
     assert "log" in result
     assert "score" in result
+    assert "drive_seconds" in result
 
 def test_simulate_game_runs_without_error():
     team_a = make_real_team("A")
