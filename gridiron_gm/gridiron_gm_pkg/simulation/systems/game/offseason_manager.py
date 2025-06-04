@@ -173,7 +173,7 @@ class OffseasonManager:
         Triggers the draft using DraftManager.
         """
         from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
-        from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.transacion_manager import TransactionManager
+        from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.transaction_manager import TransactionManager
 
         # Ensure transaction manager is available
         transaction_manager = TransactionManager(self.league_manager)
