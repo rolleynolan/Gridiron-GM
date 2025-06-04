@@ -151,12 +151,22 @@ def simulate_pass_play(qb: Any, wr_list: List[Any], depth: str, context: Dict[st
             qb_name: {"pass_attempts": 1, "completions": 1, "pass_yards": yards, "player_obj": qb},
             wr_name: {"receptions": 1, "rec_yards": yards, "player_obj": receiver}
         }
-        time = random.randint(23, 38)
+        from .play_time_model import estimate_play_seconds
+        avg_speed = (
+            getattr(qb, "speed", getattr(qb, "overall", 85)) +
+            getattr(receiver, "speed", getattr(receiver, "overall", 85))
+        ) / 2
+        time = estimate_play_seconds("pass", yards, completed=True, player_speed=avg_speed)
     else:
         yards = 0
         log = f"{sub_log + ' ' if sub_log else ''}{qb_name} attempted a {depth} pass to {wr_name} — incomplete"
         stats = {qb_name: {"pass_attempts": 1, "completions": 0, "player_obj": qb}}
-        time = random.randint(5, 10)
+        from .play_time_model import estimate_play_seconds
+        avg_speed = (
+            getattr(qb, "speed", getattr(qb, "overall", 85)) +
+            getattr(receiver, "speed", getattr(receiver, "overall", 85))
+        ) / 2
+        time = estimate_play_seconds("pass", 0, completed=False, player_speed=avg_speed)
 
     from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.injury_manager import create_injury
 
@@ -219,7 +229,9 @@ def simulate_run_play(runner: Any, gap: str, context: Dict[str, Any]) -> Dict[st
     sub_note = getattr(runner, "subbed_in", "")
     log = f"{sub_note} {name} ran {gap} for {yards} yards".strip()
     stats = {name: {"carries": 1, "rush_yards": yards, "player_obj": runner}}
-    time = random.randint(28, 42)
+    from .play_time_model import estimate_play_seconds
+    speed = getattr(runner, "speed", getattr(runner, "overall", 85))
+    time = estimate_play_seconds("run", yards, player_speed=speed)
     return {"yards": yards, "log": log, "player_stats": stats, "seconds_burned": time}
 
 # Rename run_play to sim_play
@@ -405,7 +417,7 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
 
     from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.substitution_manager import SubstitutionManagerV2
 
-    # For drive time simulation (optional: can be used for end-of-half/game logic)
+    # For drive time simulation accumulate actual seconds burned per play
     drive_seconds = 0
     max_drive_seconds = context.get("max_drive_seconds", 600)  # e.g., 10 minutes max for a drive (rarely reached)
 
@@ -697,7 +709,22 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
             break
 
         # End of half/game (optional: use drive_seconds if simulating clock)
-        drive_seconds += random.randint(20, 45)
+        from .play_time_model import estimate_play_seconds
+        if play_type == "run":
+            runner = next((p for p in offense_lineup if getattr(p, "position", "") == "RB"), None)
+            speed = getattr(runner, "speed", getattr(runner, "overall", 85)) if runner else 85
+            play_seconds = estimate_play_seconds("run", yards_gained, player_speed=speed)
+        else:
+            qb = next((p for p in offense_lineup if getattr(p, "position", "") == "QB"), None)
+            wr = next((p for p in offense_lineup if getattr(p, "position", "") == "WR"), None)
+            if qb or wr:
+                avg_speed = ((getattr(qb, "speed", getattr(qb, "overall", 85)) if qb else 85) +
+                             (getattr(wr, "speed", getattr(wr, "overall", 85)) if wr else 85)) / 2
+            else:
+                avg_speed = 85
+            completed = yards_gained > 0 and "Incomplete" not in play_desc
+            play_seconds = estimate_play_seconds("pass", yards_gained, completed=completed, player_speed=avg_speed)
+        drive_seconds += play_seconds
         if drive_seconds >= max_drive_seconds:
             drive_log.append("End of half/game: drive stopped by clock.")
             break
@@ -726,7 +753,8 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
         "explosive_plays": explosive_plays,
         "def_td": defensive_tds,
         "ret_td": special_tds,
-        "plays": plays
+        "plays": plays,
+        "drive_seconds": drive_seconds
     }
 
 def simulate_game(home_team, away_team, week=1, context=None):
@@ -821,8 +849,8 @@ def simulate_game(home_team, away_team, week=1, context=None):
         current_stats["safety"] += drive_result.get("safety", 0)
         current_stats["log"].extend(drive_result.get("log", []))
 
-        # Advance clock (estimate: 40 sec per play, or use drive_seconds if available)
-        drive_seconds = drive_result.get("plays", 0) * 40
+        # Advance clock by the seconds actually burned during the drive
+        drive_seconds = drive_result.get("drive_seconds", drive_result.get("plays", 0) * 40)
         clock -= drive_seconds
         if clock < 0:
             clock = 0
