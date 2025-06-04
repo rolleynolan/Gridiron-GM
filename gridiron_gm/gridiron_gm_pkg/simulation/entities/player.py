@@ -87,27 +87,19 @@ class Player:
         base *= (100 - self.stamina) / 100
         
     def fatigue_threshold(self):
-        # Base threshold for fatigue varies by position:
-        # - RB, WR, DL: These positions are more physically demanding, so the threshold is lower (0.6).
-        # - QB, OL, K, P: These positions are less physically demanding, so the threshold is higher (0.9).
-        # - Other positions default to 0.7.
-        base = 0.7
-        if self.position in ["RB", "WR", "DL"]:
-            base = 0.6
-        elif self.position in ["QB", "OL", "K", "P"]:
-            base = 0.9
-        
-        # Adjust the base threshold slightly based on stamina.
-        base += (self.stamina - 80) * 0.002
-        return base
-        return base
+        """Return the fatigue level at which the player is considered tired."""
 
-    def fatigue_threshold(self):
+        # Base threshold for fatigue varies by position:
+        # - RB, WR, DL: More demanding positions have a lower threshold (0.6).
+        # - QB, OL, K, P: Less demanding positions have a higher threshold (0.9).
+        # - Others default to 0.7.
         base = 0.7
         if self.position in ["RB", "WR", "DL"]:
             base = 0.6
         elif self.position in ["QB", "OL", "K", "P"]:
             base = 0.9
+
+        # Adjust the base threshold slightly based on stamina.
         base += (self.stamina - 80) * 0.002
         return base
 
