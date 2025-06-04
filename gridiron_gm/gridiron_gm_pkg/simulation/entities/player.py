@@ -40,6 +40,7 @@ class Player:
         self.fatigue = 0.0
         self.stamina = 80
         self.snaps = 0
+        self.sub_cooldown = 0
 
         self.current_team = None
         self.rookie_year = None
