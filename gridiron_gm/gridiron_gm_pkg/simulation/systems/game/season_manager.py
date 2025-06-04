@@ -15,6 +15,7 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.data_loader import (
 )
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.serialization_utils import league_to_dict
 from gridiron_gm.gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
 
 VERBOSE_SIM_OUTPUT = False
 
@@ -57,6 +58,9 @@ class SeasonManager:
             )
             for week, games in self.schedule_by_week.items()
         }
+
+        # Manager that runs daily non-game operations
+        self.daily_manager = DailyOperationsManager(self)
 
         for team in self.league.teams:
             abbr = getattr(team, "abbreviation", None)
@@ -237,49 +241,31 @@ class SeasonManager:
         self.save_results()
 
     def advance_day(self):
-        prev_week = self.calendar.current_week
-        self.calendar.advance_day()
-
-        # Reset team records and standings when preseason ends
-        self._reset_standings_for_regular_season()
-
-        self.simulate_games_for_today()
-        if self.calendar.current_week != prev_week:
-            self.handle_week_end(prev_week)
-        # Trigger playoffs if regular season is over and not already generated
-        if self.calendar.is_regular_season_over() and not self.playoffs_generated:
-            print("[DEBUG] Regular season over, generating playoff bracket...")
-            self.generate_playoff_bracket_if_ready()
-            print(f"[DEBUG] Playoff bracket: {self.playoff_bracket}")
-        self.standings_manager.save_standings()
+        """Advance the simulation through a single day."""
+        self.start_day()
+        self.end_day()
 
     def start_day(self):
-        """
-        Advance the calendar to the next day and prepare schedule info.
-        Does NOT simulate games. Use end_day() to simulate games after the day is shown to the user.
-        """
-        prev_week = self.calendar.current_week
-        self.calendar.advance_day()
-        # (You may want to reset current_time_str here if needed)
+        """Prepare the current day for simulation."""
+        # Reset the in-day clock
         self.calendar.current_time_str = "00:00"
-        # Handle week transitions, playoff bracket, etc. but do NOT simulate games yet
-        if self.calendar.current_week != prev_week:
-            self.handle_week_end(prev_week)
-        if self.calendar.is_regular_season_over() and not self.playoffs_generated:
-            print("[DEBUG] Regular season over, generating playoff bracket...")
-            self.generate_playoff_bracket_if_ready()
-            print(f"[DEBUG] Playoff bracket: {self.playoff_bracket}")
-        # Reset standings at start of regular season (after preseason)
-        self._reset_standings_for_regular_season()
-        # Persist standings after each day
-        self.standings_manager.save_standings()
 
     def end_day(self):
         """
         Simulate all games for the current day and update standings/results.
         Should be called after start_day() and after the user has viewed the day's schedule.
         """
-        self.simulate_games_for_today()
+        self.daily_manager.process_end_of_day()
+
+        prev_week = self.calendar.current_week
+        self.calendar.advance_day()
+        self.calendar.current_time_str = "00:00"
+        if self.calendar.current_week != prev_week:
+            self.handle_week_end(prev_week)
+            if self.calendar.is_regular_season_over() and not self.playoffs_generated:
+                self.generate_playoff_bracket_if_ready()
+
+        self._reset_standings_for_regular_season()
         self.standings_manager.save_standings()
 
     def handle_week_end(self, just_ended_week):
