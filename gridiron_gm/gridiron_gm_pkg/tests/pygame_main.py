@@ -13,7 +13,7 @@ from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player  # adj
 from gridiron_gm.gridiron_gm_pkg.simulation.utils.college_player_generator import generate_freshman_class
 from gridiron_gm.gridiron_gm_pkg.simulation.utils.draft_class_generator import generate_draft_class
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.transacion_manager import TransactionManager
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.transaction_manager import TransactionManager
 
 save_name = "test_league"
 calendar = Calendar()
