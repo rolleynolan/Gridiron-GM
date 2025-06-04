@@ -1,0 +1,2865 @@
+{
+  "1": [
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "away_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Saturday",
+      "week": 1,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    }
+  ],
+  "2": [
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Saturday",
+      "week": 2,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    }
+  ],
+  "3": [
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "away_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Saturday",
+      "week": 3,
+      "kickoff": "12:00 PM",
+      "preseason": true
+    }
+  ],
+  "4": [],
+  "5": [
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 4,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "6": [
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 5,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "7": [
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 6,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "8": [
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 7,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "9": [
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 8,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "10": [
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 9,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Bye Week",
+      "week": 9,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Bye Week",
+      "week": 9,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Bye Week",
+      "week": 9,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Bye Week",
+      "week": 9,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "11": [
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 10,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Bye Week",
+      "week": 10,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Bye Week",
+      "week": 10,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Bye Week",
+      "week": 10,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "12": [
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 11,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Bye Week",
+      "week": 11,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Bye Week",
+      "week": 11,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Bye Week",
+      "week": 11,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Bye Week",
+      "week": 11,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "13": [
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 12,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Bye Week",
+      "week": 12,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Bye Week",
+      "week": 12,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Bye Week",
+      "week": 12,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "14": [
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 13,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Bye Week",
+      "week": 13,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Bye Week",
+      "week": 13,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Bye Week",
+      "week": 13,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "15": [
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 14,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Bye Week",
+      "week": 14,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Bye Week",
+      "week": 14,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Bye Week",
+      "week": 14,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "16": [
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 15,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Bye Week",
+      "week": 15,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Bye Week",
+      "week": 15,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Bye Week",
+      "week": 15,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "17": [
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 16,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Bye Week",
+      "week": 16,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Bye Week",
+      "week": 16,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "day": "Bye Week",
+      "week": 16,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "18": [
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 17,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "day": "Bye Week",
+      "week": 17,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Bye Week",
+      "week": 17,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Bye Week",
+      "week": 17,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "19": [
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "day": "Sunday",
+      "week": 18,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": null,
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Bye Week",
+      "week": 18,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Bye Week",
+      "week": 18,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    },
+    {
+      "home_id": null,
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Bye Week",
+      "week": 18,
+      "kickoff": null,
+      "preseason": false,
+      "bye": true
+    }
+  ],
+  "20": [
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "away_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "day": "Sunday",
+      "week": 19,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "21": [
+    {
+      "home_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "away_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "away_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "away_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "away_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 20,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "22": [
+    {
+      "home_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "away_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "away_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "away_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "away_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "away_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "away_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "away_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "away_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "away_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "away_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "away_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "away_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "away_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "away_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "away_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    },
+    {
+      "home_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "away_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "day": "Sunday",
+      "week": 21,
+      "kickoff": "1:00 PM",
+      "preseason": false
+    }
+  ],
+  "23": [],
+  "24": [],
+  "25": [],
+  "26": []
+}

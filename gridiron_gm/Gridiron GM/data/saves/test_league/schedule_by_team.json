@@ -1,0 +1,5378 @@
+{
+  "9071ee2a-2258-4b3f-bec0-0c75a45723e1": [
+    {
+      "week": "1",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "13",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "a9bc86bd-0db5-4882-8826-d2ec6551eac3": [
+    {
+      "week": "1",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "11",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "55934342-594b-4d88-8299-db566a66f6f1": [
+    {
+      "week": "1",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "18",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875": [
+    {
+      "week": "1",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "20",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "474950c7-b7e1-473c-a467-8e37fd336371": [
+    {
+      "week": "1",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "16",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "4e97f344-7859-4aba-9852-38de4c83887f": [
+    {
+      "week": "1",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "19",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "101b4487-5311-40fa-978a-fc3a9f2fc03f": [
+    {
+      "week": "1",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "14",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86": [
+    {
+      "week": "1",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "12",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "6d779fed-4c90-42f9-a643-905e8e6b1719": [
+    {
+      "week": "1",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "15",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1": [
+    {
+      "week": "1",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "17",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef": [
+    {
+      "week": "1",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "13",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "4614751f-dc06-489d-be80-ed58d150d7fa": [
+    {
+      "week": "1",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "11",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "2729a97c-b678-48ea-b8f6-cc2566cd3826": [
+    {
+      "week": "1",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "18",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "5b4be9bd-30f0-48e9-9b17-233435ba345f": [
+    {
+      "week": "1",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "20",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "7d730ed7-9f76-4846-9436-49a6dd076aa3": [
+    {
+      "week": "1",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "16",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "f5751460-a399-4728-a6a4-89a5f658d627": [
+    {
+      "week": "1",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "19",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "db673179-be24-43a8-93ad-957bf1f24b18": [
+    {
+      "week": "1",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "14",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9": [
+    {
+      "week": "1",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "12",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "426200e4-c6c3-44c8-a1de-34f79e167a67": [
+    {
+      "week": "1",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "15",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "ddc60877-cdca-493e-87ef-46073803a295": [
+    {
+      "week": "1",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "17",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5": [
+    {
+      "week": "1",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "13",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "92461428-7eb1-40fb-b791-20a09625f27a": [
+    {
+      "week": "1",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "11",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "1f836933-fcc8-4cb1-a6e9-6030699dc9ef": [
+    {
+      "week": "1",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "18",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33": [
+    {
+      "week": "1",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "20",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "f0ccb571-86cc-4d58-b0af-fb7716c60c26": [
+    {
+      "week": "1",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "16",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "3ff0460e-26f2-4f90-ae9e-2d70f6538f16": [
+    {
+      "week": "1",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "2729a97c-b678-48ea-b8f6-cc2566cd3826",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "19",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb": [
+    {
+      "week": "1",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "14",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "426200e4-c6c3-44c8-a1de-34f79e167a67",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "968bf32f-58d8-4fe6-bf62-29be7ba7b10d": [
+    {
+      "week": "1",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "12",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "6b1ccb24-7e4a-42b6-b95d-8f2803fffa86",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "ea5515b9-83c1-4fe6-a0cf-76fd99b4d7c9",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "1419ff70-56fb-43ea-8b0f-eb1a3c242141": [
+    {
+      "week": "1",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "49b6b218-53ba-47a8-a9d5-d5df3bf9aa33",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "15",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "4e97f344-7859-4aba-9852-38de4c83887f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "781724f7-d149-4ecb-9a78-bcd5084ca060": [
+    {
+      "week": "1",
+      "opponent_id": "db673179-be24-43a8-93ad-957bf1f24b18",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "1f836933-fcc8-4cb1-a6e9-6030699dc9ef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "17",
+      "opponent_id": "6d779fed-4c90-42f9-a643-905e8e6b1719",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "6f7379e4-1f4f-46c0-a4a2-7a09d546925f": [
+    {
+      "week": "1",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "ddc60877-cdca-493e-87ef-46073803a295",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": "f0ccb571-86cc-4d58-b0af-fb7716c60c26",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "11",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "13",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "0244d3f2-1b3a-4eab-9c63-1c0cec6b3875",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "a18e27a6-2d37-4f5d-a6fd-4f6bc590cacb",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "f5751460-a399-4728-a6a4-89a5f658d627",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "968bf32f-58d8-4fe6-bf62-29be7ba7b10d",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "1419ff70-56fb-43ea-8b0f-eb1a3c242141",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ],
+  "227cb37b-9cd6-4b0b-aad9-32beeae4c1a0": [
+    {
+      "week": "1",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "2",
+      "opponent_id": "3ff0460e-26f2-4f90-ae9e-2d70f6538f16",
+      "home": true,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "3",
+      "opponent_id": "6f7379e4-1f4f-46c0-a4a2-7a09d546925f",
+      "home": false,
+      "day": "Saturday",
+      "kickoff": "12:00 PM",
+      "label": "Preseason"
+    },
+    {
+      "week": "5",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "6",
+      "opponent_id": "55934342-594b-4d88-8299-db566a66f6f1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "7",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "8",
+      "opponent_id": "474950c7-b7e1-473c-a467-8e37fd336371",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "9",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "10",
+      "opponent_id": null,
+      "home": false,
+      "day": "Bye Week",
+      "kickoff": null,
+      "label": "Bye Week"
+    },
+    {
+      "week": "11",
+      "opponent_id": "7d730ed7-9f76-4846-9436-49a6dd076aa3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "12",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "13",
+      "opponent_id": "3a378a1d-4b6d-4a6b-8bfb-13a64d97cec1",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "14",
+      "opponent_id": "781724f7-d149-4ecb-9a78-bcd5084ca060",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "15",
+      "opponent_id": "9071ee2a-2258-4b3f-bec0-0c75a45723e1",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "16",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "17",
+      "opponent_id": "1b070eab-c8da-44ad-88a8-6ffe5aa1bfef",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "18",
+      "opponent_id": "5b4be9bd-30f0-48e9-9b17-233435ba345f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "19",
+      "opponent_id": "101b4487-5311-40fa-978a-fc3a9f2fc03f",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "20",
+      "opponent_id": "92461428-7eb1-40fb-b791-20a09625f27a",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "21",
+      "opponent_id": "4614751f-dc06-489d-be80-ed58d150d7fa",
+      "home": false,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    },
+    {
+      "week": "22",
+      "opponent_id": "a9bc86bd-0db5-4882-8826-d2ec6551eac3",
+      "home": true,
+      "day": "Sunday",
+      "kickoff": "1:00 PM",
+      "label": "Regular Season"
+    }
+  ]
+}
