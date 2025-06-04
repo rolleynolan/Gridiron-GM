@@ -16,6 +16,35 @@ class InjuryEngine:
     def __init__(self):
         self.injury_catalog = INJURY_CATALOG
 
+    def _apply_injury(self, player, injury_name, injury_data, weeks_out, message):
+        """Helper to apply an injury object to the player and log it."""
+        career_ending = injury_data.get("career_ending", False)
+        if career_ending and "career_ending_chance" in injury_data:
+            if random.random() > injury_data["career_ending_chance"]:
+                career_ending = False
+
+        new_injury = Injury(
+            injury_name,
+            weeks_out,
+            injury_data["severity"],
+            long_term=injury_data.get("long_term", []),
+            career_ending=career_ending,
+        )
+        if hasattr(player, "add_injury"):
+            player.add_injury(new_injury)
+        else:
+            if not hasattr(player, "injuries"):
+                player.injuries = []
+            player.injuries.append(new_injury)
+
+        player.weeks_out = weeks_out
+        player.is_injured = True
+
+        self.apply_long_term_effects(player, injury_data.get("long_term", []))
+
+        print(f"{getattr(player, 'name', 'Player')} {message}: {new_injury}")
+        return new_injury
+
     def check_for_injury(self, player, num_plays, context="game"):
         base_chance = 0.04 if context == "game" else 0.01
         per_play_chance = base_chance / max(1, num_plays)
@@ -57,33 +86,13 @@ class InjuryEngine:
                 if "Quick Recovery" in traits.get("physical", []):
                     weeks_out = max(1, int(weeks_out * 0.90))
 
-                # Career-ending logic
-                career_ending = injury_data.get("career_ending", False)
-                if career_ending and "career_ending_chance" in injury_data:
-                    if random.random() > injury_data["career_ending_chance"]:
-                        career_ending = False
-
-                # Create and assign Injury object
-                new_injury = Injury(
+                return self._apply_injury(
+                    player,
                     injury_name,
+                    injury_data,
                     weeks_out,
-                    injury_data["severity"],
-                    long_term=injury_data.get("long_term", []),
-                    career_ending=career_ending
+                    "suffered an injury",
                 )
-                if hasattr(player, "add_injury"):
-                    player.add_injury(new_injury)
-                else:
-                    if not hasattr(player, "injuries"):
-                        player.injuries = []
-                    player.injuries.append(new_injury)
-                player.weeks_out = weeks_out
-                player.is_injured = True
-
-                self.apply_long_term_effects(player, injury_data.get("long_term", []))
-
-                print(f"{getattr(player, 'name', 'Player')} suffered an injury: {new_injury}")
-                return new_injury
 
         return None  # No injury occurred
 
@@ -182,31 +191,13 @@ class InjuryEngine:
             injury_data = self.injury_catalog[injury_name]
 
         weeks_out = random.randint(*injury_data["weeks"])
-        career_ending = injury_data.get("career_ending", False)
-        if career_ending and "career_ending_chance" in injury_data:
-            if random.random() > injury_data["career_ending_chance"]:
-                career_ending = False
-
-        new_injury = Injury(
+        return self._apply_injury(
+            player,
             injury_name,
+            injury_data,
             weeks_out,
-            injury_data["severity"],
-            long_term=injury_data.get("long_term", []),
-            career_ending=career_ending
+            "assigned injury",
         )
-        if hasattr(player, "add_injury"):
-            player.add_injury(new_injury)
-        else:
-            if not hasattr(player, "injuries"):
-                player.injuries = []
-            player.injuries.append(new_injury)
-        player.weeks_out = weeks_out
-        player.is_injured = True
-
-        self.apply_long_term_effects(player, injury_data.get("long_term", []))
-
-        print(f"{getattr(player, 'name', 'Player')} assigned injury: {new_injury}")
-        return new_injury
 
 class InjurySystem:
     """

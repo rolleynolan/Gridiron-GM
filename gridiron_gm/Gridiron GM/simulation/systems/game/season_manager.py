@@ -68,6 +68,16 @@ class SeasonManager:
             conf = getattr(team, "conference", None)
             print(f"  {team.id} ({abbr}) - Conference: {conf}")
 
+    def _reset_standings_for_regular_season(self):
+        """Reset standings when transitioning from preseason to regular season."""
+        if self.calendar.current_week == 4 and not self.standings_reset:
+            for team in self.league.teams:
+                team.team_record = {"wins": 0, "losses": 0, "ties": 0, "PF": 0, "PA": 0}
+            if hasattr(self.standings_manager, "reset"):
+                self.standings_manager.reset()
+            self.standings_manager.save_standings()
+            self.standings_reset = True
+
     def load_schedule_files(self, save_name):
         base_path = os.path.join("data", "saves", save_name)
         schedule_path = os.path.join(base_path, "schedule_by_week.json")
@@ -228,14 +238,8 @@ class SeasonManager:
         prev_week = self.calendar.current_week
         self.calendar.advance_day()
 
-        # Reset team records and standings at start of regular season (after preseason)
-        if self.calendar.current_week == 4 and not self.standings_reset:
-            for team in self.league.teams:
-                team.team_record = {"wins": 0, "losses": 0, "ties": 0, "PF": 0, "PA": 0}
-            if hasattr(self.standings_manager, "reset"):
-                self.standings_manager.reset()
-            self.standings_manager.save_standings()
-            self.standings_reset = True
+        # Reset team records and standings when preseason ends
+        self._reset_standings_for_regular_season()
 
         self.simulate_games_for_today()
         if self.calendar.current_week != prev_week:
@@ -264,13 +268,7 @@ class SeasonManager:
             self.generate_playoff_bracket_if_ready()
             print(f"[DEBUG] Playoff bracket: {self.playoff_bracket}")
         # Reset standings at start of regular season (after preseason)
-        if self.calendar.current_week == 4 and not self.standings_reset:
-            for team in self.league.teams:
-                team.team_record = {"wins": 0, "losses": 0, "ties": 0, "PF": 0, "PA": 0}
-            if hasattr(self.standings_manager, "reset"):
-                self.standings_manager.reset()
-            self.standings_manager.save_standings()
-            self.standings_reset = True
+        self._reset_standings_for_regular_season()
         # Persist standings after each day
         self.standings_manager.save_standings()
 
