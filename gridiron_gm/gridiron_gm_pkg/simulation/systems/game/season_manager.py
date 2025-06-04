@@ -2,6 +2,7 @@ import os
 import json
 import sys
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
 import gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine as game_engine
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import accumulate_season_fatigue_for_team
 from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
@@ -40,6 +41,7 @@ class SeasonManager:
         self.id_to_team = {team.id: team for team in self.league.teams}
         self.id_to_abbr = {team.id: team.abbreviation for team in self.league.teams}
         self.abbr_to_id = {team.abbreviation: team.id for team in self.league.teams}
+        self.abbr_to_team = {team.abbreviation: team for team in self.league.teams}
 
         self.team_map = self.id_to_team  # For compatibility, but always use team.id as key
 
@@ -395,272 +397,83 @@ class SeasonManager:
                 print(f"[VALIDATION OK] {team_name}: Roster and depth chart complete.")
 
     def generate_playoff_bracket(self):
-        """
-        Generate the playoff bracket using full NFL seeding and tiebreaker logic.
-        """
+        """Create the playoff bracket using tiebreakers from ``tiebreakers.py``."""
         print("=== DEBUG: Generating playoff bracket ===")
 
-        # Helper: get all teams in a conference
-        def get_conference_teams(conference):
-            return [team for team in self.league.teams if getattr(team, "conference", None) == conference]
-
-        # Helper: get all teams in a division
-        def get_division_teams(conference, division):
-            return [team for team in self.league.teams if getattr(team, "conference", None) == conference and getattr(team, "division", None) == division]
-
-        # Helper: get all divisions in a conference
-        def get_divisions(conference):
-            return sorted(set(getattr(team, "division", None) for team in self.league.teams if getattr(team, "conference", None) == conference))
-
-        # --- Tiebreaker helpers ---
-        def win_pct(team):
-            rec = getattr(team, "team_record", {})
-            wins = rec.get("wins", 0)
-            losses = rec.get("losses", 0)
-            ties = rec.get("ties", 0)
-            games = wins + losses + ties
-            return (wins + 0.5 * ties) / games if games > 0 else 0.0
-
-        def head_to_head(teams):
-            # Only applies if all teams played each other
-            if len(teams) < 2:
-                return teams
-            played = all(
-                all(
-                    any(
-                        (result.get("home") == t1.id and result.get("away") == t2.id) or
-                        (result.get("home") == t2.id and result.get("away") == t1.id)
-                        for week in self.results_by_week.values() for result in week
-                    )
-                    for t2 in teams if t2 != t1
-                )
-                for t1 in teams
-            )
-            if not played:
-                return teams
-            # Sort by head-to-head win pct among tied teams
-            def h2h_pct(team):
-                wins = ties = games = 0
-                for t2 in teams:
-                    if t2 == team:
-                        continue
-                    for week in self.results_by_week.values():
-                        for result in week:
-                            if (result.get("home") == team.id and result.get("away") == t2.id):
-                                if result.get("home_score", 0) > result.get("away_score", 0):
-                                    wins += 1
-                                elif result.get("home_score", 0) == result.get("away_score", 0):
-                                    ties += 1
-                                games += 1
-                            elif (result.get("away") == team.id and result.get("home") == t2.id):
-                                if result.get("away_score", 0) > result.get("home_score", 0):
-                                    wins += 1
-                                elif result.get("away_score", 0) == result.get("home_score", 0):
-                                    ties += 1
-                                games += 1
-                return (wins + 0.5 * ties) / games if games > 0 else 0.0
-            return sorted(teams, key=h2h_pct, reverse=True)
-
-        def div_win_pct(team):
-            rec = getattr(team, "div_record", {})
-            wins = rec.get("wins", 0)
-            losses = rec.get("losses", 0)
-            ties = rec.get("ties", 0)
-            games = wins + losses + ties
-            return (wins + 0.5 * ties) / games if games > 0 else 0.0
-
-        def conf_win_pct(team):
-            rec = getattr(team, "conf_record", {})
-            wins = rec.get("wins", 0)
-            losses = rec.get("losses", 0)
-            ties = rec.get("ties", 0)
-            games = wins + losses + ties
-            return (wins + 0.5 * ties) / games if games > 0 else 0.0
-
-        def common_games_win_pct(team, tied_teams):
-            # Find all common opponents
-            common = set.intersection(*(set(getattr(t, "opponents", [])) for t in tied_teams)) if tied_teams else set()
-            if not common:
-                return 0.0
-            wins = losses = ties = 0
-            for opp_id in common:
-                for result in self.results_by_week.values():
-                    for game in result:
-                        if (game.get("home") == team.id and game.get("away") == opp_id):
-                            if game.get("home_score", 0) > game.get("away_score", 0):
-                                wins += 1
-                            elif game.get("home_score", 0) < game.get("away_score", 0):
-                                losses += 1
-                            else:
-                                ties += 1
-                        elif (game.get("away") == team.id and game.get("home") == opp_id):
-                            if game.get("away_score", 0) > game.get("home_score", 0):
-                                wins += 1
-                            elif game.get("away_score", 0) < game.get("home_score", 0):
-                                losses += 1
-                            else:
-                                ties += 1
-            games = wins + losses + ties
-            return (wins + 0.5 * ties) / games if games > 0 else 0.0
-
-        def strength_of_victory(team):
-            victories = getattr(team, "victories", [])
-            if not victories:
-                return 0.0
-            total = 0.0
-            for opp_id in victories:
-                opp = self.id_to_team.get(opp_id)
-                if opp:
-                    total += win_pct(opp)
-            return total / len(victories) if victories else 0.0
-
-        def strength_of_schedule(team):
-            opponents = getattr(team, "opponents", [])
-            if not opponents:
-                return 0.0
-            total = 0.0
-            for opp_id in opponents:
-                opp = self.id_to_team.get(opp_id)
-                if opp:
-                    total += win_pct(opp)
-            return total / len(opponents) if opponents else 0.0
-
-        def combined_conf_rank(team):
-            # Lower is better
-            conf_teams = [t for t in self.league.teams if getattr(t, "conference", None) == getattr(team, "conference", None)]
-            pf_rank = sorted(conf_teams, key=lambda t: getattr(t, "team_record", {}).get("PF", 0), reverse=True).index(team) + 1
-            pa_rank = sorted(conf_teams, key=lambda t: getattr(t, "team_record", {}).get("PA", 0)).index(team) + 1
-            return pf_rank + pa_rank
-
-        def combined_all_rank(team):
-            # Lower is better
-            all_teams = self.league.teams
-            pf_rank = sorted(all_teams, key=lambda t: getattr(t, "team_record", {}).get("PF", 0), reverse=True).index(team) + 1
-            pa_rank = sorted(all_teams, key=lambda t: getattr(t, "team_record", {}).get("PA", 0)).index(team) + 1
-            return pf_rank + pa_rank
-
-        def net_points_common(team, tied_teams):
-            common = set.intersection(*(set(getattr(t, "opponents", [])) for t in tied_teams)) if tied_teams else set()
-            if not common:
-                return 0
-            net = 0
-            for opp_id in common:
-                for result in self.results_by_week.values():
-                    for game in result:
-                        if (game.get("home") == team.id and game.get("away") == opp_id):
-                            net += game.get("home_score", 0) - game.get("away_score", 0)
-                        elif (game.get("away") == team.id and game.get("home") == opp_id):
-                            net += game.get("away_score", 0) - game.get("home_score", 0)
-            return net
-
-        def net_points_all(team):
-            rec = getattr(team, "team_record", {})
-            return rec.get("PF", 0) - rec.get("PA", 0)
-
-        def net_td_all(team):
-            return getattr(team, "net_touchdowns", 0)
-
-        # --- Division tiebreakers (for division title and wild card elimination) ---
-        def division_tiebreaker(teams):
-            tiebreakers = [
-                win_pct,
-                lambda t: head_to_head(teams).index(t),
-                div_win_pct,
-                lambda t: common_games_win_pct(t, teams),
-                conf_win_pct,
-                strength_of_victory,
-                strength_of_schedule,
-                combined_conf_rank,
-                combined_all_rank,
-                lambda t: net_points_common(t, teams),
-                net_points_all,
-                net_td_all
+        def build_tb_manager():
+            league_data = [
+                {
+                    "abbreviation": t.abbreviation,
+                    "conference": getattr(t, "conference", "Unknown"),
+                    "division": getattr(t, "division", "Unknown"),
+                }
+                for t in self.league.teams
             ]
-            sorted_teams = teams[:]
-            for tb in tiebreakers:
-                sorted_teams = sorted(sorted_teams, key=tb, reverse=True)
-                # Check for ties
-                groups = []
-                i = 0
-                while i < len(sorted_teams):
-                    group = [sorted_teams[i]]
-                    while i + 1 < len(sorted_teams) and abs(tb(sorted_teams[i]) - tb(sorted_teams[i+1])) < 1e-6:
-                        group.append(sorted_teams[i+1])
-                        i += 1
-                    groups.append(group)
-                    i += 1
-                sorted_teams = []
-                for group in groups:
-                    if len(group) > 1:
-                        # If still tied, continue to next tiebreaker
-                        continue
-                    sorted_teams.extend(group)
-                if len(sorted_teams) == len(teams):
-                    break
-            return sorted_teams
+            tb = TiebreakerManager(self.calendar, league_data, self.save_name, self.results_by_week)
+            tb.standings = {}
+            for tid, rec in self.standings_manager.standings.items():
+                abbr = self.id_to_abbr.get(tid, tid)
+                tb.standings[abbr] = {
+                    "W": rec.get("W", 0),
+                    "L": rec.get("L", 0),
+                    "T": rec.get("T", 0),
+                    "PF": rec.get("PF", 0),
+                    "PA": rec.get("PA", 0),
+                    "conference": rec.get("conference", "Unknown"),
+                    "division": rec.get("division", "Unknown"),
+                    "opponents": {},
+                }
+            for week in self.results_by_week.values():
+                for res in week:
+                    h = res["home"]
+                    a = res["away"]
+                    hs = res["home_score"]
+                    as_ = res["away_score"]
+                    h_abbr = self.id_to_abbr.get(h, h)
+                    a_abbr = self.id_to_abbr.get(a, a)
+                    for t_abbr, o_abbr, ts, os in [
+                        (h_abbr, a_abbr, hs, as_),
+                        (a_abbr, h_abbr, as_, hs),
+                    ]:
+                        if t_abbr not in tb.standings:
+                            continue
+                        opps = tb.standings[t_abbr].setdefault("opponents", {})
+                        opps.setdefault(o_abbr, {"W": 0, "L": 0, "T": 0})
+                        if ts > os:
+                            opps[o_abbr]["W"] += 1
+                        elif ts < os:
+                            opps[o_abbr]["L"] += 1
+                        else:
+                            opps[o_abbr]["T"] += 1
+            return tb
 
-        # --- Wild card tiebreakers (for teams from different divisions) ---
-        def wildcard_tiebreaker(teams):
-            tiebreakers = [
-                win_pct,
-                lambda t: head_to_head(teams).index(t),
-                conf_win_pct,
-                lambda t: common_games_win_pct(t, teams),
-                strength_of_victory,
-                strength_of_schedule,
-                combined_conf_rank,
-                combined_all_rank,
-                lambda t: net_points_all(t),
-                net_td_all
-            ]
-            sorted_teams = teams[:]
-            for tb in tiebreakers:
-                sorted_teams = sorted(sorted_teams, key=tb, reverse=True)
-                groups = []
-                i = 0
-                while i < len(sorted_teams):
-                    group = [sorted_teams[i]]
-                    while i + 1 < len(sorted_teams) and abs(tb(sorted_teams[i]) - tb(sorted_teams[i+1])) < 1e-6:
-                        group.append(sorted_teams[i+1])
-                        i += 1
-                    groups.append(group)
-                    i += 1
-                sorted_teams = []
-                for group in groups:
-                    if len(group) > 1:
-                        continue
-                    sorted_teams.extend(group)
-                if len(sorted_teams) == len(teams):
-                    break
-            return sorted_teams
+        tb_manager = build_tb_manager()
 
-        # --- Seeding ---
+        def rank(team_list):
+            abbrs = [t.abbreviation for t in team_list]
+            ranked_abbrs = tb_manager.break_ties(abbrs)
+            return [self.abbr_to_team[a] for a in ranked_abbrs if a in self.abbr_to_team]
+
+        def get_conference_teams(conf):
+            return [t for t in self.league.teams if getattr(t, "conference", None) == conf]
+
+        def get_division_teams(conf, div):
+            return [t for t in self.league.teams if getattr(t, "conference", None) == conf and getattr(t, "division", None) == div]
+
+        def get_divisions(conf):
+            return sorted(set(getattr(t, "division", None) for t in self.league.teams if getattr(t, "conference", None) == conf))
+
         playoff_bracket = {}
-        for conference in ["Nova", "Atlas"]:
-            # 1. Find all divisions in this conference
-            divisions = get_divisions(conference)
-            division_champs = []
-            for division in divisions:
-                div_teams = get_division_teams(conference, division)
-                champ = division_tiebreaker(div_teams)[0]
-                division_champs.append(champ)
-            # 2. Seed division champs 1-4 by overall record (tiebreakers)
-            division_champs = division_tiebreaker(division_champs)
-            # 3. Find all non-division-champ teams for wild card
-            all_conf_teams = get_conference_teams(conference)
-            wild_card_candidates = [t for t in all_conf_teams if t not in division_champs]
-            # 4. Pick top 3 wild cards using wild card tiebreakers
-            wild_cards = []
-            remaining = wild_card_candidates[:]
-            for _ in range(3):
-                if not remaining:
-                    break
-                wc = wildcard_tiebreaker(remaining)[0]
-                wild_cards.append(wc)
-                remaining.remove(wc)
-            # 5. Final seeding: 1-4 division champs, 5-7 wild cards
-            seeds = division_champs + wild_cards
-            playoff_bracket[conference] = [t.id for t in seeds]
+        for conf in ["Nova", "Atlas"]:
+            divisions = get_divisions(conf)
+            champs = []
+            for div in divisions:
+                champs.append(rank(get_division_teams(conf, div))[0])
+            champs = rank(champs)
+            all_conf = get_conference_teams(conf)
+            wild_cards = [t for t in rank([t for t in all_conf if t not in champs])[:3]]
+            seeds = champs + wild_cards
+            playoff_bracket[conf] = [t.id for t in seeds]
 
         self.playoff_bracket = playoff_bracket
         self.save_playoff_bracket()
