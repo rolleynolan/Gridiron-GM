@@ -52,7 +52,8 @@ def load_or_build_team(abbr, team_name=None, city=None, conference=None):
         team_name=team_name or abbr,
         abbreviation=abbr,
         city=city or f"{abbr} City",
-        conference=conference or "Test Conference"
+        conference=conference or "Test Conference",
+        division="Test Division",
     )
     team.roster = roster
 
