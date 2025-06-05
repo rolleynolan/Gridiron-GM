@@ -101,6 +101,21 @@ def start_new_game():
         "season_year": 2025,
         "team_name": team_name,
         "teams": [],
+        "league_records": {
+            "players": {
+                "single_game": {},
+                "single_season": {},
+                "career": {}
+            },
+            "teams": {
+                "single_game": {},
+                "single_season": {},
+                "career": {}
+            },
+            "leaderboards": {
+                "current_season": {}
+            }
+        },
         "schedule": {},
         "calendar": {
             "current_date": "2025-08-01",
