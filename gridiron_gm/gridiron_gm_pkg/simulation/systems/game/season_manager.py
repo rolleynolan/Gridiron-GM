@@ -1,4 +1,3 @@
-9fsjc9-codex/run-season-simulation-to-test-systems
 """Season management including regular season, playoffs, and offseason."""
 
 import os
@@ -10,13 +9,6 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.playoff_manager import 
     PlayoffManager,
     update_playoff_schedule,
 )
-=======
-import os
-import json
-import sys
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
-main
 import gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine as game_engine
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import accumulate_season_fatigue_for_team
 from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
@@ -199,15 +191,15 @@ class SeasonManager:
             if home_team is None or away_team is None:
                 print(f"ERROR: Could not find team object for {game.get('home_id')} or {game.get('away_id')}. Skipping.")
                 continue
-            sim_home, sim_away = simulate_game(
+            sim_result = simulate_game(
                 home_team,
                 away_team,
                 week=self.calendar.current_week,
                 context={"weather": None}
             )
-            if sim_home is not None and sim_away is not None:
-                home_score = sim_home.get("points", sim_home.get("score", 0))
-                away_score = sim_away.get("points", sim_away.get("score", 0))
+            if sim_result is not None:
+                home_score = sim_result.get("home_score", sim_result.get("points", sim_result.get("score", 0)))
+                away_score = sim_result.get("away_score", sim_result.get("points", sim_result.get("score", 0)))
                 # Ensure team_record exists and initialize fields
                 for team_obj in [home_team, away_team]:
                     if not hasattr(team_obj, "team_record"):
@@ -336,37 +328,6 @@ class SeasonManager:
         self.playoffs_generated = True
         print("[DEBUG] Playoff schedule generated and saved.")
 
-    def sim_to(self, target_year, target_week, target_day_index, max_steps=10000):
-        """
-        Advance the simulation day-by-day until the calendar reaches the target year, week, and day index.
-        Prevents infinite loops by limiting the number of steps.
-        """
-        steps = 0
-        while not (
-            self.calendar.current_year == target_year and
-            self.calendar.current_week == target_week and
-            self.calendar.current_day_index == target_day_index
-        ):
-            self.advance_day()
-            steps += 1
-            if steps >= max_steps:
-                print(f"[WARNING] sim_to: Exceeded {max_steps} steps without reaching the target. Stopping simulation to prevent infinite loop.")
-                break
-
-    def save_league_state(self):
-        """
-        Saves the entire league dictionary (teams + future keys) to JSON.
-        """
-        base_path = os.path.join("data", "saves", self.save_name)
-        os.makedirs(base_path, exist_ok=True)
-        league_path = os.path.join(base_path, "league.json")
-
-        with open(league_path, "w") as f:
-            if hasattr(self.league, "to_dict"):
-                json.dump(self.league.to_dict(), f, indent=2)
-            else:
-                json.dump(self.league, f, indent=2)
-
     def validate_team_rosters_and_depth_charts(self):
         """
         Ensures all teams have a complete roster and fully populated depth charts before the season starts.
@@ -477,11 +438,7 @@ class SeasonManager:
             playoff_bracket[conf] = [t.id for t in seeds]
 
         self.playoff_bracket = playoff_bracket
-9fsjc9-codex/run-season-simulation-to-test-systems
-        save_playoff_bracket(self.playoff_bracket, self.save_name)
-=======
         self.save_playoff_bracket()
-main
         print("\n=== FINAL PLAYOFF BRACKET ===")
         for conf, ids in self.playoff_bracket.items():
             abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
