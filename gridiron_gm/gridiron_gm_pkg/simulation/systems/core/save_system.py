@@ -39,7 +39,28 @@ class SaveSystem:
         return save_data.get("game_world", None)
 
     def start_new_game(self, template=None):
-        return template if template else {"year": 2025, "teams": [], "players": []}
+        if template:
+            return template
+        return {
+            "year": 2025,
+            "teams": [],
+            "players": [],
+            "league_records": {
+                "players": {
+                    "single_game": {},
+                    "single_season": {},
+                    "career": {}
+                },
+                "teams": {
+                    "single_game": {},
+                    "single_season": {},
+                    "career": {}
+                },
+                "leaderboards": {
+                    "current_season": {}
+                }
+            }
+        }
 
     # Save and Load GM Profile
     def save_gm_profile(self, gm_profile):
