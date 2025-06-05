@@ -69,6 +69,16 @@ Inspect CLI/debug outputs after each season for bugs, crashes, or oddities.
 
 Use run_full_season_cycle() or similar functions to simulate seasons and review summaries.
 
+### Sim Today
+To progress a single day at a time call:
+
+```python
+season_manager.start_day()  # resets time to 00:00
+season_manager.end_day()    # simulates the day and advances to the next morning
+```
+
+Daily operations such as training updates, fatigue recovery and free-agency logic run when `end_day()` is invoked and the calendar is moved forward.
+
 If debugging is needed, add print statements or simple logs—avoid UI changes unless for visual debugging.
 
 Contributing / Collaboration
