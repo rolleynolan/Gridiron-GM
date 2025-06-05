@@ -147,7 +147,7 @@ class Team:
             abbreviation=data.get("abbreviation", "UNK"),
             conference=conference,
             division=data.get("division", "Unknown"),
-            id=data.get("id")
+            id=data.get("id"),
         )
         team.players = [Player.from_dict(p) for p in data.get("players", [])]
         team.generate_depth_chart()

@@ -1,4 +1,7 @@
-def scouting_menu(rookie_class, scouts, scouting_system):
+from gridiron_gm.gridiron_gm_pkg.players.player import get_rookie_view
+
+
+def scouting_menu(rookie_class, scouts, scouting_system, team=None):
     favorites_only = False
     current_filter = None
     current_sort = "name"
@@ -67,8 +70,13 @@ def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key
 
     for idx, player in enumerate(players, start=1):
         progress = f"{player.scouting_progress}%"
-        projected_ovr = f"{player.projected_overall}" if player.scouted else "???"
-        projected_pot = f"{player.projected_potential}" if player.scouted else "???"
+        if player.scouted:
+            view = get_rookie_view(player, getattr(player, "assigned_scout", None))
+            projected_ovr = f"{view.get('overall')}"
+            projected_pot = f"{view.get('potential')}"
+        else:
+            projected_ovr = f"{player.projected_overall}" if player.scouted else "???"
+            projected_pot = f"{player.projected_potential}" if player.scouted else "???"
         fav_mark = "*" if player.favorite else " "
 
         print(f"{fav_mark:<3} {player.name:<25} {player.position:<5} {player.college:<15} {progress:<10} {projected_ovr:<10} {projected_pot:<10}")
@@ -116,6 +124,7 @@ def assign_scout_to_player(rookie_class, scouts, scouting_system):
         return
 
     scouting_system.assign_task(scout, "player", player)
+    setattr(player, "assigned_scout", scout)
     print(f"\nAssigned {scout.name} to scout {player.name}.")
 
 def choose_sort_option():

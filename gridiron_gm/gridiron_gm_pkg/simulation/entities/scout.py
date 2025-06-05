@@ -25,12 +25,15 @@ POSITION_CLUSTERS = {
 }
 
 class Scout:
-    def __init__(self, name, role, region=None):
+    def __init__(self, name, role, region=None, scouting_accuracy=None):
         self.name = name
         self.role = role
         self.region = region
         self.age = random.randint(30, 65)
         self.accuracy = random.randint(40, 100)
+        self.scouting_accuracy = (
+            scouting_accuracy if scouting_accuracy is not None else self.accuracy / 100.0
+        )
         self.speed = random.randint(5, 20)
         self.position_skills = self.generate_position_skills()
         self.personality = random.choice(["Risk Averse", "Upside Seeker", "Old School", "Analytics Oriented"])
