@@ -3,6 +3,7 @@
 import os
 import json
 import sys
+from pathlib import Path
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import (
     StandingsManager,
     update_team_records,
@@ -94,9 +95,9 @@ class SeasonManager:
             self.standings_reset = True
 
     def load_schedule_files(self, save_name):
-        base_path = os.path.join("data", "saves", save_name)
-        schedule_path = os.path.join(base_path, "schedule_by_week.json")
-        results_path = os.path.join(base_path, "results_by_week.json")
+        base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / save_name
+        schedule_path = base_path / "schedule_by_week.json"
+        results_path = base_path / "results_by_week.json"
         if os.path.exists(schedule_path):
             with open(schedule_path, "r") as f:
                 schedule_by_week = json.load(f)
@@ -110,8 +111,8 @@ class SeasonManager:
         return schedule_by_week, results_by_week
 
     def save_results(self):
-        results_path = os.path.join("data", "saves", self.save_name, "results_by_week.json")
-        os.makedirs(os.path.dirname(results_path), exist_ok=True)
+        results_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name / "results_by_week.json"
+        os.makedirs(results_path.parent, exist_ok=True)
         with open(results_path, "w") as f:
             json.dump(self.results_by_week, f, indent=2)
 
@@ -331,8 +332,8 @@ class SeasonManager:
         }
 
         # Optionally, save the updated schedule
-        base_path = os.path.join("data", "saves", self.save_name)
-        schedule_path = os.path.join(base_path, "schedule_by_week.json")
+        base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name
+        schedule_path = base_path / "schedule_by_week.json"
         with open(schedule_path, "w") as f:
             json.dump(self.schedule_by_week, f, indent=2)
 
@@ -479,9 +480,9 @@ class SeasonManager:
         """
         Saves the entire league dictionary (teams + future keys) to JSON.
         """
-        base_path = os.path.join("data", "saves", self.save_name)
+        base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name
         os.makedirs(base_path, exist_ok=True)
-        league_path = os.path.join(base_path, "league.json")
+        league_path = base_path / "league.json"
 
         with open(league_path, "w") as f:
             if hasattr(self.league, "to_dict"):
