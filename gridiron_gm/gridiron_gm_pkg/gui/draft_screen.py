@@ -1,6 +1,7 @@
 import random
+from gridiron_gm.gridiron_gm_pkg.players.player import get_rookie_view
 
-def draft_screen(game_world):
+def draft_screen(game_world, user_team=None):
     current_phase = game_world["calendar"]["season_phase"]
 
     print("\n=== Rookie Draft Hub ===")
@@ -18,16 +19,16 @@ def draft_screen(game_world):
         choice = input("Select an option (1-3): ").strip()
 
         if choice == "1":
-            start_draft(game_world)
+            start_draft(game_world, user_team)
             break
         elif choice == "2":
-            view_top_prospects(game_world)
+            view_top_prospects(game_world, user_team)
         elif choice == "3":
             break
         else:
             print("Invalid choice. Try again.")
 
-def start_draft(game_world):
+def start_draft(game_world, user_team=None):
     rookie_class = game_world.get("rookie_class", [])
     teams = game_world.get("teams", [])
     draft_order = list(teams)
@@ -60,7 +61,7 @@ def start_draft(game_world):
                 maybe_trade_up(team, idx, draft_order, available_players, gm_personalities, current_round)
 
             if getattr(team, "user_controlled", False):
-                pick_player_user(team, available_players, drafted_players)
+                pick_player_user(team, available_players, drafted_players, team)
             else:
                 pick_player_cpu(team, available_players, drafted_players)
 
@@ -68,14 +69,19 @@ def start_draft(game_world):
     game_world["calendar"]["season_phase"] = "Post-Draft"
     print("\nSeason Phase has advanced to Post-Draft.")
 
-def view_top_prospects(game_world):
+def view_top_prospects(game_world, team=None):
     rookie_class = game_world.get("rookie_class", [])
     print("\n--- Top Prospects ---")
     for idx, player in enumerate(
         sorted(rookie_class, key=lambda p: p.projected_overall if p.scouted else p.overall, reverse=True)[:10],
         start=1
     ):
-        print(f"{idx}. {player.name} ({player.position}) - {player.college} - Projected: {player.projected_overall if player.scouted else '??'} OVR")
+        if player.scouted and team is not None:
+            view = get_rookie_view(player, team)
+            rating = view.get("overall")
+        else:
+            rating = player.projected_overall if player.scouted else "??"
+        print(f"{idx}. {player.name} ({player.position}) - {player.college} - Projected: {rating} OVR")
 
 def maybe_trade_up(team, current_idx, draft_order, available_players, gm_personalities, current_round):
     if current_idx == 0:
@@ -120,11 +126,16 @@ def maybe_trade_up(team, current_idx, draft_order, available_players, gm_persona
             else:
                 print(f"{team.city} {team.name} traded {pick_current} to {team_ahead.city} {team_ahead.name} for {pick_swap}.")
 
-def pick_player_user(team, available_players, drafted_players):
+def pick_player_user(team, available_players, drafted_players, view_team):
     print(f"\n{team.city} {team.name} is on the clock!")
     print("\nTop Available Prospects:")
     for idx, player in enumerate(available_players[:10], start=1):
-        print(f"{idx}. {player.name} ({player.position}) from {player.college} - {player.projected_overall if player.scouted else '??'} OVR")
+        if player.scouted:
+            view = get_rookie_view(player, view_team)
+            rating = view.get("overall")
+        else:
+            rating = "??"
+        print(f"{idx}. {player.name} ({player.position}) from {player.college} - {rating} OVR")
 
     try:
         choice = int(input("\nSelect a player number to draft: ").strip()) - 1
