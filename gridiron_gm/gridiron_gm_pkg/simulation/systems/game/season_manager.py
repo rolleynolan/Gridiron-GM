@@ -1,24 +1,23 @@
-9fsjc9-codex/run-season-simulation-to-test-systems
 """Season management including regular season, playoffs, and offseason."""
 
 import os
 import json
 import sys
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import (
+    StandingsManager,
+    update_team_records,
+)
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import (
+    StandingsManager as TiebreakerManager,
+)
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.playoff_manager import (
     PlayoffManager,
     update_playoff_schedule,
 )
-=======
-import os
-import json
-import sys
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
-main
 import gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine as game_engine
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import accumulate_season_fatigue_for_team
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import (
+    accumulate_season_fatigue_for_team,
+)
 from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
 
 # NEW: Import from team_data
@@ -76,17 +75,15 @@ class SeasonManager:
         # Manager that runs daily non-game operations
         self.daily_manager = DailyOperationsManager(self)
 
-        for team in self.league.teams:
-            abbr = getattr(team, "abbreviation", None)
-            conf = getattr(team, "conference", None)
-            print(f"  {team.id} ({abbr}) - Conference: {conf}")
+        if VERBOSE_SIM_OUTPUT:
+            for team in self.league.teams:
+                abbr = getattr(team, "abbreviation", None)
+                conf = getattr(team, "conference", None)
+                print(f"  {team.id} ({abbr}) - Conference: {conf}")
 
-        self.standings_manager = StandingsManager(self.calendar, self.league, self.save_name, self.results_by_week)
-
-        for team in self.league.teams:
-            abbr = getattr(team, "abbreviation", None)
-            conf = getattr(team, "conference", None)
-            print(f"  {team.id} ({abbr}) - Conference: {conf}")
+        self.standings_manager = StandingsManager(
+            self.calendar, self.league, self.save_name, self.results_by_week
+        )
 
     def _reset_standings_for_regular_season(self):
         """Reset standings when transitioning from preseason to regular season."""
@@ -199,15 +196,15 @@ class SeasonManager:
             if home_team is None or away_team is None:
                 print(f"ERROR: Could not find team object for {game.get('home_id')} or {game.get('away_id')}. Skipping.")
                 continue
-            sim_home, sim_away = simulate_game(
+            sim_result = simulate_game(
                 home_team,
                 away_team,
                 week=self.calendar.current_week,
-                context={"weather": None}
+                weather=None
             )
-            if sim_home is not None and sim_away is not None:
-                home_score = sim_home.get("points", sim_home.get("score", 0))
-                away_score = sim_away.get("points", sim_away.get("score", 0))
+            if sim_result is not None:
+                home_score = sim_result["home_score"]
+                away_score = sim_result["away_score"]
                 # Ensure team_record exists and initialize fields
                 for team_obj in [home_team, away_team]:
                     if not hasattr(team_obj, "team_record"):
@@ -477,11 +474,7 @@ class SeasonManager:
             playoff_bracket[conf] = [t.id for t in seeds]
 
         self.playoff_bracket = playoff_bracket
-9fsjc9-codex/run-season-simulation-to-test-systems
         save_playoff_bracket(self.playoff_bracket, self.save_name)
-=======
-        self.save_playoff_bracket()
-main
         print("\n=== FINAL PLAYOFF BRACKET ===")
         for conf, ids in self.playoff_bracket.items():
             abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
