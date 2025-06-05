@@ -3,8 +3,13 @@
 import os
 import json
 import sys
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import (
+    StandingsManager,
+    update_team_records,
+)
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import (
+    StandingsManager as TiebreakerManager,
+)
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.playoff_manager import (
     PlayoffManager,
     update_playoff_schedule,
@@ -68,17 +73,15 @@ class SeasonManager:
         # Manager that runs daily non-game operations
         self.daily_manager = DailyOperationsManager(self)
 
-        for team in self.league.teams:
-            abbr = getattr(team, "abbreviation", None)
-            conf = getattr(team, "conference", None)
-            print(f"  {team.id} ({abbr}) - Conference: {conf}")
+        if VERBOSE_SIM_OUTPUT:
+            for team in self.league.teams:
+                abbr = getattr(team, "abbreviation", None)
+                conf = getattr(team, "conference", None)
+                print(f"  {team.id} ({abbr}) - Conference: {conf}")
 
-        self.standings_manager = StandingsManager(self.calendar, self.league, self.save_name, self.results_by_week)
-
-        for team in self.league.teams:
-            abbr = getattr(team, "abbreviation", None)
-            conf = getattr(team, "conference", None)
-            print(f"  {team.id} ({abbr}) - Conference: {conf}")
+        self.standings_manager = StandingsManager(
+            self.calendar, self.league, self.save_name, self.results_by_week
+        )
 
     def _reset_standings_for_regular_season(self):
         """Reset standings when transitioning from preseason to regular season."""
@@ -191,15 +194,17 @@ class SeasonManager:
             if home_team is None or away_team is None:
                 print(f"ERROR: Could not find team object for {game.get('home_id')} or {game.get('away_id')}. Skipping.")
                 continue
-            sim_result = simulate_game(
-                home_team,
-                away_team,
-                week=self.calendar.current_week,
-                context={"weather": None}
-            )
-            if sim_result is not None:
-                home_score = sim_result.get("home_score", sim_result.get("points", sim_result.get("score", 0)))
-                away_score = sim_result.get("away_score", sim_result.get("points", sim_result.get("score", 0)))
+           sim_result = simulate_game(
+    home_team,
+    away_team,
+    week=self.calendar.current_week,
+    context={"weather": None}
+)
+if sim_result is not None:
+    home_score = sim_result.get("home_score", sim_result.get("points", sim_result.get("score", 0)))
+    away_score = sim_result.get("away_score", sim_result.get("points", sim_result.get("score", 0)))
+    # ...rest of your logic for updating team records...
+
                 # Ensure team_record exists and initialize fields
                 for team_obj in [home_team, away_team]:
                     if not hasattr(team_obj, "team_record"):
@@ -437,13 +442,13 @@ class SeasonManager:
             seeds = champs + wild_cards
             playoff_bracket[conf] = [t.id for t in seeds]
 
-        self.playoff_bracket = playoff_bracket
-        self.save_playoff_bracket()
-        print("\n=== FINAL PLAYOFF BRACKET ===")
-        for conf, ids in self.playoff_bracket.items():
-            abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
-            print(f"{conf}: {abbrs}")
-        return self.playoff_bracket
+    self.playoff_bracket = playoff_bracket
+save_playoff_bracket(self.playoff_bracket, self.save_name)
+print("\n=== FINAL PLAYOFF BRACKET ===")
+for conf, ids in self.playoff_bracket.items():
+    abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
+    print(f"{conf}: {abbrs}")
+return self.playoff_bracket
 
     def sim_to(self, target_year, target_week, target_day_index, max_steps=10000):
         """
