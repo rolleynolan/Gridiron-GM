@@ -194,16 +194,22 @@ class SeasonManager:
             if home_team is None or away_team is None:
                 print(f"ERROR: Could not find team object for {game.get('home_id')} or {game.get('away_id')}. Skipping.")
                 continue
-           sim_result = simulate_game(
-    home_team,
-    away_team,
-    week=self.calendar.current_week,
-    context={"weather": None}
-)
-if sim_result is not None:
-    home_score = sim_result.get("home_score", sim_result.get("points", sim_result.get("score", 0)))
-    away_score = sim_result.get("away_score", sim_result.get("points", sim_result.get("score", 0)))
-    # ...rest of your logic for updating team records...
+            sim_result = simulate_game(
+                home_team,
+                away_team,
+                week=self.calendar.current_week,
+                context={"weather": None},
+            )
+            if sim_result is not None:
+                home_score = sim_result.get(
+                    "home_score",
+                    sim_result.get("points", sim_result.get("score", 0)),
+                )
+                away_score = sim_result.get(
+                    "away_score",
+                    sim_result.get("points", sim_result.get("score", 0)),
+                )
+                # ...rest of your logic for updating team records...
 
                 # Ensure team_record exists and initialize fields
                 for team_obj in [home_team, away_team]:
@@ -442,13 +448,13 @@ if sim_result is not None:
             seeds = champs + wild_cards
             playoff_bracket[conf] = [t.id for t in seeds]
 
-    self.playoff_bracket = playoff_bracket
-save_playoff_bracket(self.playoff_bracket, self.save_name)
-print("\n=== FINAL PLAYOFF BRACKET ===")
-for conf, ids in self.playoff_bracket.items():
-    abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
-    print(f"{conf}: {abbrs}")
-return self.playoff_bracket
+        self.playoff_bracket = playoff_bracket
+        save_playoff_bracket(self.playoff_bracket, self.save_name)
+        print("\n=== FINAL PLAYOFF BRACKET ===")
+        for conf, ids in self.playoff_bracket.items():
+            abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
+            print(f"{conf}: {abbrs}")
+        return self.playoff_bracket
 
     def sim_to(self, target_year, target_week, target_day_index, max_steps=10000):
         """
