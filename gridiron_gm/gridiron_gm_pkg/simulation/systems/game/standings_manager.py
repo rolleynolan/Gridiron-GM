@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 
 def update_team_records(home_team, away_team, home_score, away_score):
     """
@@ -108,7 +109,8 @@ class StandingsManager:
 
     def get_standings_path(self):
         year = self.calendar.current_year
-        return f"data/saves/{self.save_name}/standings_{year}.json"
+        base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name
+        return str(base_path / f"standings_{year}.json")
 
     def load_standings(self):
         path = self.get_standings_path()
@@ -339,7 +341,8 @@ class StandingsManager:
         return grouped
 
     def load_playoff_seed_map(self, year, save_name="test_league"):
-        bracket_path = f"data/saves/{save_name}/playoffs/playoff_bracket_{year}.json"
+        base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / save_name / "playoffs"
+        bracket_path = base_path / f"playoff_bracket_{year}.json"
         if not os.path.exists(bracket_path):
             self.seed_alias_map = {}
             return
