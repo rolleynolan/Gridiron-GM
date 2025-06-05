@@ -23,7 +23,7 @@ def scouting_menu(rookie_class, scouts, scouting_system, team=None):
         choice = input("Select an option (1-7): ").strip()
 
         if choice == "1":
-            view_scouted_players(rookie_class, favorites_only, current_filter, current_sort, team)
+            view_scouted_players(rookie_class, favorites_only, current_filter, current_sort)
         elif choice == "2":
             assign_scout_to_player(rookie_class, scouts, scouting_system)
         elif choice == "3":
@@ -41,7 +41,7 @@ def scouting_menu(rookie_class, scouts, scouting_system, team=None):
         else:
             print("Invalid choice. Try again.")
 
-def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key, team=None):
+def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key):
     players = rookie_class
 
     # Apply Favorites Filter
@@ -70,8 +70,8 @@ def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key
 
     for idx, player in enumerate(players, start=1):
         progress = f"{player.scouting_progress}%"
-        if player.scouted and team is not None:
-            view = get_rookie_view(player, team)
+        if player.scouted:
+            view = get_rookie_view(player, getattr(player, "assigned_scout", None))
             projected_ovr = f"{view.get('overall')}"
             projected_pot = f"{view.get('potential')}"
         else:
@@ -124,6 +124,7 @@ def assign_scout_to_player(rookie_class, scouts, scouting_system):
         return
 
     scouting_system.assign_task(scout, "player", player)
+    setattr(player, "assigned_scout", scout)
     print(f"\nAssigned {scout.name} to scout {player.name}.")
 
 def choose_sort_option():

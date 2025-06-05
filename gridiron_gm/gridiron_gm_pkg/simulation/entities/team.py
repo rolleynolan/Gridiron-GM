@@ -151,7 +151,6 @@ class Team:
             conference=conference,
             division=data.get("division", "Unknown"),
             id=data.get("id"),
-            scouting_accuracy=data.get("scouting_accuracy", 1.0),
         )
         team.players = [Player.from_dict(p) for p in data.get("players", [])]
         team.generate_depth_chart()

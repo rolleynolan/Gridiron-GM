@@ -3,15 +3,15 @@ from typing import Any, Dict
 
 
 def get_scouted_rating(true_rating: int, accuracy: float) -> int:
-    """Return a biased rating based on scouting accuracy."""
+    """Return a biased rating based on scouting accuracy using Gaussian noise."""
     accuracy = max(0.0, min(1.0, accuracy))
-    deviation = int((1.0 - accuracy) * 40)
-    estimate = true_rating + random.randint(-deviation, deviation)
-    return max(40, min(99, estimate))
+    std_dev = max(1.0, (1.0 - accuracy) * 20)
+    estimate = int(random.gauss(true_rating, std_dev))
+    return max(0, min(99, estimate))
 
 
-def get_rookie_view(player: Any, team: Any) -> Dict[str, Any]:
-    """Return a dict representation of a rookie adjusted for the team's scouting accuracy."""
+def get_rookie_view(player: Any, scout: Any | None) -> Dict[str, Any]:
+    """Return a dict representation of a rookie adjusted for the scout's accuracy."""
     if hasattr(player, "to_dict"):
         data = player.to_dict()
     else:
@@ -21,9 +21,9 @@ def get_rookie_view(player: Any, team: Any) -> Dict[str, Any]:
     if not is_prospect:
         return data
 
-    accuracy = getattr(team, "scouting_accuracy", 1.0)
-    data["overall"] = get_scouted_rating(getattr(player, "overall", 0), accuracy)
-    if data.get("potential") is not None:
-        data["potential"] = get_scouted_rating(getattr(player, "potential", 0), accuracy)
+    accuracy = getattr(scout, "scouting_accuracy", 1.0) if scout is not None else 1.0
+    for key in ("overall", "potential"):
+        if key in data and data[key] is not None:
+            data[key] = get_scouted_rating(data[key], accuracy)
 
     return data

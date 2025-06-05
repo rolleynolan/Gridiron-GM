@@ -76,8 +76,8 @@ def view_top_prospects(game_world, team=None):
         sorted(rookie_class, key=lambda p: p.projected_overall if p.scouted else p.overall, reverse=True)[:10],
         start=1
     ):
-        if player.scouted and team is not None:
-            view = get_rookie_view(player, team)
+        if player.scouted:
+            view = get_rookie_view(player, getattr(player, "assigned_scout", None))
             rating = view.get("overall")
         else:
             rating = player.projected_overall if player.scouted else "??"
@@ -126,12 +126,13 @@ def maybe_trade_up(team, current_idx, draft_order, available_players, gm_persona
             else:
                 print(f"{team.city} {team.name} traded {pick_current} to {team_ahead.city} {team_ahead.name} for {pick_swap}.")
 
-def pick_player_user(team, available_players, drafted_players, view_team):
+
+def pick_player_user(team, available_players, drafted_players, user_team=None):
     print(f"\n{team.city} {team.name} is on the clock!")
     print("\nTop Available Prospects:")
     for idx, player in enumerate(available_players[:10], start=1):
         if player.scouted:
-            view = get_rookie_view(player, view_team)
+            view = get_rookie_view(player, getattr(player, "assigned_scout", None))
             rating = view.get("overall")
         else:
             rating = "??"
