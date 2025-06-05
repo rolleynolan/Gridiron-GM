@@ -72,6 +72,16 @@ class Player:
         self.career_stats = {}
         self.stats_by_year = {}
 
+        # --- Scouting related fields
+        # hidden_caps: the true ceiling for each attribute (not visible to the user)
+        # scouted_potential: what scouts currently believe the ceiling to be
+        # last_attribute_values: last recorded attribute values for year-over-year comparison
+        # no_growth_years: consecutive years with no growth for an attribute
+        self.hidden_caps = {}
+        self.scouted_potential = {}
+        self.last_attribute_values = {}
+        self.no_growth_years = {}
+
     def add_trait(self, category, trait):
         if category in self.traits:
             self.traits[category].append(trait)
@@ -173,7 +183,11 @@ class Player:
             "rookie_year": self.rookie_year,
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
-            "draft_pick": self.draft_pick
+            "draft_pick": self.draft_pick,
+            "hidden_caps": self.hidden_caps,
+            "scouted_potential": self.scouted_potential,
+            "last_attribute_values": self.last_attribute_values,
+            "no_growth_years": self.no_growth_years
         }
 
     @staticmethod
@@ -204,6 +218,10 @@ class Player:
         player.career_stats = data.get("career_stats", {})
         player.on_injured_reserve = data.get("on_injured_reserve", False)
         player.is_injured = data.get("is_injured", False)
+        player.hidden_caps = data.get("hidden_caps", {})
+        player.scouted_potential = data.get("scouted_potential", {})
+        player.last_attribute_values = data.get("last_attribute_values", {})
+        player.no_growth_years = data.get("no_growth_years", {})
         return player
 
 def ensure_player_objects(team):
