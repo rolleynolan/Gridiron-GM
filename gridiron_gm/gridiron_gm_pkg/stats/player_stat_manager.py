@@ -50,3 +50,25 @@ def update_player_stats(player: Any, week: int, year: int | str, stat_dict: Dict
     if snap_counts:
         game_log["snaps"] = snap_counts.copy()
     season_data.setdefault("game_logs", {})[int(week)] = game_log
+
+
+def update_career_stats(player: Any, season_totals: Dict[str, Any]) -> None:
+    """Add a season's totals into the player's career statistics."""
+    if not hasattr(player, "career_stats") or player.career_stats is None:
+        player.career_stats = {}
+
+    for stat, val in season_totals.items():
+        if stat == "snap_counts" and isinstance(val, dict):
+            snap_totals = player.career_stats.setdefault(
+                "snap_counts", {"offense": 0, "defense": 0, "special": 0}
+            )
+            for phase, cnt in val.items():
+                snap_totals[phase] = snap_totals.get(phase, 0) + cnt
+            continue
+
+        if not isinstance(val, (int, float)):
+            continue
+
+        player.career_stats[stat] = player.career_stats.get(stat, 0) + val
+
+
