@@ -20,6 +20,7 @@ from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_g
 
 # NEW: Import from team_data
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.team_data import load_teams_from_json, fill_team_rosters_with_dummy_players
+from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.data_loader import (
     load_schedule_files, save_results, save_league_state, save_playoff_bracket, save_playoff_results
@@ -28,7 +29,6 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.serialization_utils imp
 from gridiron_gm.gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
 
-VERBOSE_SIM_OUTPUT = False
 
 try:
     from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
@@ -337,7 +337,8 @@ class SeasonManager:
             json.dump(self.schedule_by_week, f, indent=2)
 
         self.playoffs_generated = True
-        print("[DEBUG] Playoff schedule generated and saved.")
+        if VERBOSE_SIM_OUTPUT:
+            print("[DEBUG] Playoff schedule generated and saved.")
 
     def validate_team_rosters_and_depth_charts(self):
         """
@@ -362,16 +363,17 @@ class SeasonManager:
             for pos in required_positions:
                 if pos not in depth_chart or not depth_chart[pos]:
                     issues.append(f"Depth chart missing or empty for {pos}")
-            if issues:
-                team_name = getattr(team, "team_name", getattr(team, "name", "UNKNOWN"))
-                print(f"[VALIDATION WARNING] {team_name}: " + "; ".join(issues))
-            else:
-                team_name = getattr(team, "team_name", getattr(team, "name", "UNKNOWN"))
-                print(f"[VALIDATION OK] {team_name}: Roster and depth chart complete.")
+            team_name = getattr(team, "team_name", getattr(team, "name", "UNKNOWN"))
+            if VERBOSE_SIM_OUTPUT:
+                if issues:
+                    print(f"[VALIDATION WARNING] {team_name}: " + "; ".join(issues))
+                else:
+                    print(f"[VALIDATION OK] {team_name}: Roster and depth chart complete.")
 
     def generate_playoff_bracket(self):
         """Create the playoff bracket using tiebreakers from ``tiebreakers.py``."""
-        print("=== DEBUG: Generating playoff bracket ===")
+        if VERBOSE_SIM_OUTPUT:
+            print("=== DEBUG: Generating playoff bracket ===")
 
         def build_tb_manager():
             league_data = [

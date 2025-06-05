@@ -1,5 +1,6 @@
 import json
 import random
+from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 try:
     from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
@@ -35,13 +36,15 @@ def load_teams_from_json(json_path):
             conference=team_kwargs["conference"],
             division=team_kwargs.get("division", "Unknown"),
         )
-        print(f"[DEBUG] After conversion: {team.abbreviation} conference={team.conference}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] After conversion: {team.abbreviation} conference={team.conference}")
         teams.append(team)
-    print("Teams loaded from JSON and their conferences:")
-    for team in teams:
-        abbr = getattr(team, "abbreviation", None)
-        conf = getattr(team, "conference", None)
-        print(f"{team.id} ({abbr}) - Conference: {conf}")
+    if VERBOSE_SIM_OUTPUT:
+        print("Teams loaded from JSON and their conferences:")
+        for team in teams:
+            abbr = getattr(team, "abbreviation", None)
+            conf = getattr(team, "conference", None)
+            print(f"{team.id} ({abbr}) - Conference: {conf}")
     return teams
 
 def fill_team_rosters_with_dummy_players(teams):
@@ -82,7 +85,8 @@ def fill_team_rosters_with_dummy_players(teams):
 
     for team in teams:
         abbr = getattr(team, 'abbreviation', 'UNK')
-        print(f"[DEBUG] Starting roster fill for {abbr}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Starting roster fill for {abbr}")
 
         # Always start with an empty roster for deterministic fill
         if hasattr(team, "players"):
@@ -92,7 +96,8 @@ def fill_team_rosters_with_dummy_players(teams):
         # team.roster will be synced at the end
 
         # 1. Add minimum required players for each position
-        print(f"[DEBUG] Filling minimum required players for each position for {abbr}...")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Filling minimum required players for each position for {abbr}...")
         player_count = 0
         for pos, min_count in min_positions.items():
             for i in range(min_count):
@@ -110,10 +115,12 @@ def fill_team_rosters_with_dummy_players(teams):
                 player.discipline_rating = discipline_rating
                 team.add_player(player)  # Only use add_player
                 player_count += 1
-        print(f"[DEBUG] Finished minimums for {abbr}. Current roster size: {len(team.players)}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Finished minimums for {abbr}. Current roster size: {len(team.players)}")
 
         # 2. Fill the rest of the roster with random positions
-        print(f"[DEBUG] Filling remaining roster spots for {abbr} with random positions...")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Filling remaining roster spots for {abbr} with random positions...")
         fill_attempts = 0
         max_attempts = 1000  # Prevent infinite loop
         while len(team.players) < roster_size and fill_attempts < max_attempts:
@@ -135,7 +142,8 @@ def fill_team_rosters_with_dummy_players(teams):
             player_count += 1
             fill_attempts += 1
             if len(team.players) % 5 == 0 or len(team.players) == roster_size:
-                print(f"[DEBUG] {abbr} roster length: {len(team.players)}")
+                if VERBOSE_SIM_OUTPUT:
+                    print(f"[DEBUG] {abbr} roster length: {len(team.players)}")
         if fill_attempts >= max_attempts:
             print(f"[ERROR] Roster fill for {abbr} hit max attempts! Current size: {len(team.players)}")
 

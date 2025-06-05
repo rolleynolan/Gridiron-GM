@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
 from typing import List, Dict, Optional
 import json
+from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 DEFAULT_FIRST_NAMES = ["Jalen", "Michael", "Tyrone", "Devon"]
 DEFAULT_LAST_NAMES = ["Johnson", "Williams", "Brown", "Taylor"]
@@ -22,7 +23,8 @@ def load_data_file(file_path: str, fallback: List[str]) -> List[str]:
         return data
     except Exception as e:
         print(f"[ERROR] Failed loading file {file_path}: {e}")
-        print(f"[DEBUG] Falling back to default data for {file_path}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Falling back to default data for {file_path}")
         return fallback
 
 def load_enriched_cities(file_path: str, fallback: List[str]) -> List[str]:
@@ -35,7 +37,8 @@ def load_enriched_cities(file_path: str, fallback: List[str]) -> List[str]:
         return list(set(cities))
     except Exception as e:
         print(f"[ERROR] Failed loading enriched cities file {file_path}: {e}")
-        print(f"[DEBUG] Falling back to default cities for {file_path}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Falling back to default cities for {file_path}")
         return fallback
 
 def generate_valid_jersey_number(position):

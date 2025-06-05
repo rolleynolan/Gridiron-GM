@@ -2,6 +2,7 @@
 
 from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.data_loader import save_playoff_results
+from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 
 def update_playoff_schedule(schedule_by_week, playoff_results, round_name, next_round_name, conference):
@@ -16,7 +17,8 @@ def update_playoff_schedule(schedule_by_week, playoff_results, round_name, next_
             winners.append(game["away_id"])
 
     if not winners:
-        print(f"[DEBUG] No winners found for {round_name} ({conference})")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] No winners found for {round_name} ({conference})")
         return
 
     if next_round_name == "Divisional":
@@ -29,7 +31,8 @@ def update_playoff_schedule(schedule_by_week, playoff_results, round_name, next_
             winners.remove(one_seed_id)
         winners_sorted = sorted(winners)
         if len(winners_sorted) < 3:
-            print(f"[DEBUG] Not enough winners for Divisional ({conference}): {winners_sorted}")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG] Not enough winners for Divisional ({conference}): {winners_sorted}")
             return
         for g in schedule_by_week.values():
             for game in g:
@@ -45,7 +48,8 @@ def update_playoff_schedule(schedule_by_week, playoff_results, round_name, next_
     elif next_round_name == "Conference Championship":
         winners_sorted = sorted(winners)
         if len(winners_sorted) < 2:
-            print(f"[DEBUG] Not enough winners for Conference Championship ({conference}): {winners_sorted}")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG] Not enough winners for Conference Championship ({conference}): {winners_sorted}")
             return
         for g in schedule_by_week.values():
             for game in g:
@@ -57,7 +61,8 @@ def update_playoff_schedule(schedule_by_week, playoff_results, round_name, next_
     elif next_round_name == "Gridiron Bowl":
         winners_sorted = sorted(winners)
         if len(winners_sorted) < 2:
-            print(f"[DEBUG] Not enough winners for Gridiron Bowl: {winners_sorted}")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG] Not enough winners for Gridiron Bowl: {winners_sorted}")
             return
         for g in schedule_by_week.values():
             for game in g:

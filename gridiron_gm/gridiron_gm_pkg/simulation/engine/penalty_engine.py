@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import random
 from typing import List
+from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 @dataclass
 class Player:
@@ -55,7 +56,8 @@ def simulate_penalty(player: Player, discipline_modifier: float = 0.0) -> str | 
         final_chance = max(base_chance + trait_modifier + discipline_penalty + discipline_modifier, MIN_PENALTY_CHANCE)
         roll = random.random()
         if roll < final_chance:
-            print(f"[DEBUG]     PENALTY TRIGGERED: {penalty} for {player.name} (chance={final_chance:.3f}, roll={roll:.3f})")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG]     PENALTY TRIGGERED: {penalty} for {player.name} (chance={final_chance:.3f}, roll={roll:.3f})")
             return penalty
     
     return None
@@ -101,7 +103,8 @@ def simulate_play(
                 auto_first_down = False
 
             team = "offense" if getattr(player, "name", None) in offense_players else "defense"
-            print(f"[DEBUG] Penalty result: {penalty}, team={team}, yards={yards}, auto_first_down={auto_first_down}, replay_down={replay_down}")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG] Penalty result: {penalty}, team={team}, yards={yards}, auto_first_down={auto_first_down}, replay_down={replay_down}")
 
             results.append({
                 "type": penalty,
@@ -113,7 +116,8 @@ def simulate_play(
             })
         else:
             pass
-    print(f"[DEBUG] simulate_play: Results: {results}")
+    if VERBOSE_SIM_OUTPUT:
+        print(f"[DEBUG] simulate_play: Results: {results}")
     return results
 
 @dataclass
@@ -124,14 +128,16 @@ class DriveState:
     result: str = "In Progress"
 
 def simulate_drive(players: List[Player], discipline_modifier: float = 0.0, max_plays: int = 8) -> dict:
-    print(f"[DEBUG] simulate_drive: Starting drive with {len(players)} players")
+    if VERBOSE_SIM_OUTPUT:
+        print(f"[DEBUG] simulate_drive: Starting drive with {len(players)} players")
     state = DriveState()
     penalty_log = []
     total_penalties = 0
     total_penalty_yards = 0
 
     for play_num in range(1, max_plays + 1):
-        print(f"[DEBUG] Play {play_num} -------------------")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Play {play_num} -------------------")
         penalties = simulate_play(players, discipline_modifier)
         for penalty in penalties:
             penalty_log.append(f"Play {play_num}: {penalty}")
@@ -146,7 +152,8 @@ def simulate_drive(players: List[Player], discipline_modifier: float = 0.0, max_
                 state.yards_to_go = 10
 
         gain = random.randint(5, 15)
-        print(f"[DEBUG] Play {play_num} gain: {gain}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Play {play_num} gain: {gain}")
         state.yard_line += gain
         state.yards_to_go -= gain
 
@@ -158,21 +165,25 @@ def simulate_drive(players: List[Player], discipline_modifier: float = 0.0, max_
 
         if state.down > 4:
             state.result = "Punt"
-            print(f"[DEBUG] Drive ends: Punt")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG] Drive ends: Punt")
             break
 
         if state.yard_line >= 100:
             state.result = "Touchdown"
-            print(f"[DEBUG] Drive ends: Touchdown")
+            if VERBOSE_SIM_OUTPUT:
+                print(f"[DEBUG] Drive ends: Touchdown")
             break
 
     if state.result == "In Progress":
         state.result = "Field Goal Attempt" if state.yard_line >= 70 else "Punt"
-        print(f"[DEBUG] Drive ends: {state.result}")
+        if VERBOSE_SIM_OUTPUT:
+            print(f"[DEBUG] Drive ends: {state.result}")
 
-    print(f"[DEBUG] Final drive state: {state}")
-    print(f"[DEBUG] Penalty log: {penalty_log}")
-    print(f"[DEBUG] Total penalties: {total_penalties}, Total penalty yards: {total_penalty_yards}")
+    if VERBOSE_SIM_OUTPUT:
+        print(f"[DEBUG] Final drive state: {state}")
+        print(f"[DEBUG] Penalty log: {penalty_log}")
+        print(f"[DEBUG] Total penalties: {total_penalties}, Total penalty yards: {total_penalty_yards}")
     return {
         "Result": state.result,
         "Final Yard Line": state.yard_line,
