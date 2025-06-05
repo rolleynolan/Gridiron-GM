@@ -1,3 +1,5 @@
+"""Season management including regular season, playoffs, and offseason."""
+
 import os
 import json
 import sys
