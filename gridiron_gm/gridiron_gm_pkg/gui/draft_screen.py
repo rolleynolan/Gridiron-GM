@@ -61,7 +61,7 @@ def start_draft(game_world, user_team=None):
                 maybe_trade_up(team, idx, draft_order, available_players, gm_personalities, current_round)
 
             if getattr(team, "user_controlled", False):
-                pick_player_user(team, available_players, drafted_players, user_team)
+                pick_player_user(team, available_players, drafted_players, team)
             else:
                 pick_player_cpu(team, available_players, drafted_players)
 
@@ -125,6 +125,7 @@ def maybe_trade_up(team, current_idx, draft_order, available_players, gm_persona
                 print(f"{team.city} {team.name} traded {pick_current} and {extra_pick} to {team_ahead.city} {team_ahead.name} for {pick_swap}.")
             else:
                 print(f"{team.city} {team.name} traded {pick_current} to {team_ahead.city} {team_ahead.name} for {pick_swap}.")
+
 
 def pick_player_user(team, available_players, drafted_players, user_team=None):
     print(f"\n{team.city} {team.name} is on the clock!")
