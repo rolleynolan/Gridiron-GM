@@ -504,7 +504,18 @@ class SeasonManager:
         """Apply performance-based attribute changes to all players."""
         for team in self.league.teams:
             for player in getattr(team, "roster", []):
-                season_stats = getattr(player, "season_stats", {})
+                raw_stats = getattr(player, "season_stats", {})
+                year_key = str(self.calendar.current_year)
+                if isinstance(raw_stats, dict) and year_key in raw_stats:
+                    year_data = raw_stats[year_key]
+                    season_stats = year_data.get("season_totals", {})
+                    if not year_data.get("career_added"):
+                        from gridiron_gm.gridiron_gm_pkg.stats.player_stat_manager import update_career_stats
+                        update_career_stats(player, season_stats)
+                        year_data["career_added"] = True
+                else:
+                    season_stats = raw_stats
+
                 snap_counts = getattr(player, "snap_counts", {})
 
                 deltas = evaluate_player_season_progression(player, season_stats, snap_counts)
