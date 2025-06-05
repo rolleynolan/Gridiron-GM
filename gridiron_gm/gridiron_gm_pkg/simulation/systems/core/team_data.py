@@ -32,7 +32,8 @@ def load_teams_from_json(json_path):
             team_name=team_kwargs["team_name"],
             city=team_kwargs["city"],
             abbreviation=team_kwargs["abbreviation"],
-            conference=team_kwargs["conference"]
+            conference=team_kwargs["conference"],
+            division=team_kwargs.get("division", "Unknown"),
         )
         print(f"[DEBUG] After conversion: {team.abbreviation} conference={team.conference}")
         teams.append(team)
