@@ -24,7 +24,9 @@ for template in team_templates:
     team = Team(
         team_name=template["name"],
         city=template["city"],
-        abbreviation=template["abbreviation"]
+        abbreviation=template["abbreviation"],
+        conference=template.get("conference", "Test"),
+        division=template.get("division", "Test"),
     )
 
     for i in range(53):

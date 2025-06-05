@@ -18,7 +18,8 @@ def make_real_team(abbreviation="TST"):
         team_name=abbreviation,
         abbreviation=abbreviation,
         city="Test City",
-        conference="Test Conference"
+        conference="Test Conference",
+        division="Test Division",
     )
     fill_team_rosters_with_dummy_players([team])  # <-- FIXED: pass as a list
     return team

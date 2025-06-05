@@ -254,7 +254,8 @@ def simulate_day():
                 print(f"\n{round_name}:")
                 for matchup in matchups:
                     print(f"  {matchup['home']} vs {matchup['away']}")
-            season_manager.simulate_playoffs()
+            from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.playoff_manager import PlayoffManager
+            PlayoffManager(season_manager).run_playoffs()
             # After simulation, print results
             playoff_results = getattr(season_manager, "playoff_results", {})
             for round_name, games in playoff_results.items():

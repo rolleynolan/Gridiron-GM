@@ -18,12 +18,21 @@ class Team:
         rebuild_mode (bool): Whether the team is in rebuild mode.
     """
 
-    def __init__(self, team_name: str, city: str, abbreviation: str, conference: str, id: str = None) -> None:
+    def __init__(
+        self,
+        team_name: str,
+        city: str,
+        abbreviation: str,
+        conference: str = "Unknown",
+        division: str = "Unknown",
+        id: str | None = None,
+    ) -> None:
         self.id: str = id if id is not None else str(uuid.uuid4())
         self.team_name: str = team_name
         self.city: str = city
         self.abbreviation: str = abbreviation
-        self.conference: str = conference  # Always set from input, never default to 'Unknown'
+        self.conference: str = conference
+        self.division: str = division
 
         self.players: List[Player] = []
         self.depth_chart: Dict[str, List[Player]] = {}
@@ -114,6 +123,7 @@ class Team:
             "city": self.city,
             "abbreviation": self.abbreviation,
             "conference": self.conference,
+            "division": self.division,
             "players": [player.to_dict() for player in self.players],
             "depth_chart": {pos: [p.name for p in players] for pos, players in self.depth_chart.items()},
             "team_record": self.team_record,
@@ -136,7 +146,8 @@ class Team:
             city=data.get("city", "Unknown City"),
             abbreviation=data.get("abbreviation", "UNK"),
             conference=conference,
-            id=data.get("id")  # Always use the 'id' field from the input dict if present
+            division=data.get("division", "Unknown"),
+            id=data.get("id")
         )
         team.players = [Player.from_dict(p) for p in data.get("players", [])]
         team.generate_depth_chart()
