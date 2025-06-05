@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from gridiron_gm.gridiron_gm_pkg.engine.core.standings_manager import StandingsManager
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
