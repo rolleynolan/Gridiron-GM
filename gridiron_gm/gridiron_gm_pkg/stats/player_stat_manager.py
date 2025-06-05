@@ -71,3 +71,4 @@ def update_career_stats(player: Any, season_totals: Dict[str, Any]) -> None:
 
         player.career_stats[stat] = player.career_stats.get(stat, 0) + val
 
+

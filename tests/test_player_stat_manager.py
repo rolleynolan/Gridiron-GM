@@ -10,11 +10,13 @@ from gridiron_gm.gridiron_gm_pkg.stats.player_stat_manager import (
 )
 
 
+
 class DummyPlayer:
     def __init__(self):
         self.season_stats = {}
         self.snap_counts = {}
         self.career_stats = {}
+
 
 
 def test_update_player_stats_accumulates():
@@ -34,7 +36,6 @@ def test_update_player_stats_accumulates():
     assert totals["snap_counts"]["offense"] == 82
     assert year_stats["game_logs"][1]["targets"] == 5
     assert year_stats["game_logs"][2]["snaps"]["offense"] == 42
-
 
 def test_update_career_stats():
     player = DummyPlayer()
