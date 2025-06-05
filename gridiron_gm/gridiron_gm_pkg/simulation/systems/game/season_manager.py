@@ -504,7 +504,13 @@ class SeasonManager:
         """Apply performance-based attribute changes to all players."""
         for team in self.league.teams:
             for player in getattr(team, "roster", []):
-                season_stats = getattr(player, "season_stats", {})
+                raw_stats = getattr(player, "season_stats", {})
+                year_key = str(self.calendar.current_year)
+                if isinstance(raw_stats, dict) and year_key in raw_stats:
+                    season_stats = raw_stats[year_key].get("season_totals", {})
+                else:
+                    season_stats = raw_stats
+
                 snap_counts = getattr(player, "snap_counts", {})
 
                 deltas = evaluate_player_season_progression(player, season_stats, snap_counts)
