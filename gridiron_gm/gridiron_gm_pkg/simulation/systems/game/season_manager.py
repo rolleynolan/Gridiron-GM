@@ -1,8 +1,22 @@
+9fsjc9-codex/run-season-simulation-to-test-systems
+"""Season management including regular season, playoffs, and offseason."""
+
 import os
 import json
 import sys
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.playoff_manager import (
+    PlayoffManager,
+    update_playoff_schedule,
+)
+=======
+import os
+import json
+import sys
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager, update_team_records
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import StandingsManager as TiebreakerManager
+main
 import gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine as game_engine
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import accumulate_season_fatigue_for_team
 from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
@@ -185,15 +199,15 @@ class SeasonManager:
             if home_team is None or away_team is None:
                 print(f"ERROR: Could not find team object for {game.get('home_id')} or {game.get('away_id')}. Skipping.")
                 continue
-            sim_result = simulate_game(
+            sim_home, sim_away = simulate_game(
                 home_team,
                 away_team,
                 week=self.calendar.current_week,
-                weather=None
+                context={"weather": None}
             )
-            if sim_result is not None:
-                home_score = sim_result["home_score"]
-                away_score = sim_result["away_score"]
+            if sim_home is not None and sim_away is not None:
+                home_score = sim_home.get("points", sim_home.get("score", 0))
+                away_score = sim_away.get("points", sim_away.get("score", 0))
                 # Ensure team_record exists and initialize fields
                 for team_obj in [home_team, away_team]:
                     if not hasattr(team_obj, "team_record"):
@@ -218,14 +232,15 @@ class SeasonManager:
                 away_team.team_record["PF"] += away_score
                 away_team.team_record["PA"] += home_score
 
-                self.results_by_week[week].append({
+                game_result = {
                     "home": get_team_id(home_team),
                     "away": get_team_id(away_team),
                     "home_score": home_score,
                     "away_score": away_score,
                     "day": today_str
-                })
-                self.standings_manager.update_from_result(sim_result)
+                }
+                self.results_by_week[week].append(game_result)
+                self.standings_manager.update_from_result(game_result)
                 self.standings_manager.results_by_week = self.results_by_week
 
                 # Print result and updated records immediately (wrap in VERBOSE_SIM_OUTPUT)
@@ -462,7 +477,11 @@ class SeasonManager:
             playoff_bracket[conf] = [t.id for t in seeds]
 
         self.playoff_bracket = playoff_bracket
+9fsjc9-codex/run-season-simulation-to-test-systems
+        save_playoff_bracket(self.playoff_bracket, self.save_name)
+=======
         self.save_playoff_bracket()
+main
         print("\n=== FINAL PLAYOFF BRACKET ===")
         for conf, ids in self.playoff_bracket.items():
             abbrs = [f"{tid} ({self.id_to_abbr.get(tid, '?')})" for tid in ids]
@@ -564,7 +583,8 @@ class SeasonManager:
 
         # --- Playoffs ---
         print("=== Playoffs Begin ===")
-        playoff_results = self.simulate_playoffs()
+        playoff_mgr = PlayoffManager(self)
+        playoff_results = playoff_mgr.run_playoffs()
         print("\n=== PLAYOFF RESULTS BY ROUND ===")
         for conf in ["Nova", "Atlas"]:
             print(f"\n{conf} Playoff Games:")
@@ -600,105 +620,3 @@ class SeasonManager:
         print("=== New Season Setup ===")
         self.start_new_season()
         print(f"=== Ready for next season: Year {self.calendar.current_year}! ===")
-        
-def to_dict(self):
-    team_dicts = []
-    for team in self.teams:
-        if hasattr(team, "to_dict"):
-            t = team.to_dict()
-            t["conference"] = getattr(team, "conference", t.get("conference", None))
-            t["team_name"] = getattr(team, "team_name", t.get("team_name", None))
-            team_dicts.append(t)
-        elif isinstance(team, dict):
-            t = dict(team)
-            t["conference"] = t.get("conference", None)
-            t["team_name"] = t.get("team_name", None)
-            team_dicts.append(t)
-        else:
-            t = dict(team.__dict__)
-            t["conference"] = getattr(team, "conference", t.get("conference", None))
-            t["team_name"] = getattr(team, "team_name", t.get("team_name", None))
-            team_dicts.append(t)
-    return {
-        "teams": team_dicts,
-        "free_agents": [player.to_dict() for player in self.free_agents],
-        "calendar": self.calendar.serialize(),
-        "standings": self.standings,
-        "schedule": self.schedule
-    }
-
-def update_playoff_schedule(schedule_by_week, playoff_results, round_name, next_round_name, conference):
-    """
-    Replace 'TBD' placeholders in the next round with actual winners from the current round.
-    playoff_results: dict of round_name -> list of game dicts with 'home_id', 'away_id', 'home_score', 'away_score'
-    round_name: e.g. "Wild Card"
-    next_round_name: e.g. "Divisional"
-    conference: "Nova" or "Atlas" or "Both"
-    """
-    # Find winners from this round
-    winners = []
-    for game in playoff_results.get(round_name, []):
-        if conference != "Both" and game.get("conference") != conference:
-            continue
-        if game["home_score"] > game["away_score"]:
-            winners.append(game["home_id"])
-        else:
-            winners.append(game["away_id"])
-
-    if not winners:
-        print(f"[DEBUG] No winners found for {round_name} ({conference})")
-        return
-
-    # For Divisional: 1 seed hosts lowest remaining, other two play each other
-    if next_round_name == "Divisional":
-        one_seed_id = None
-        for g in schedule_by_week.values():
-            for game in g:
-                if game.get("round") == "Divisional" and game.get("conference") == conference and "TBD_LowestSeedWinner" in str(game.get("away_id")):
-                    one_seed_id = game.get("home_id")
-        if one_seed_id in winners:
-            winners.remove(one_seed_id)
-        winners_sorted = sorted(winners)
-        if len(winners_sorted) < 3:
-            print(f"[DEBUG] Not enough winners for Divisional ({conference}): {winners_sorted}")
-            return
-        for g in schedule_by_week.values():
-            for game in g:
-                if game.get("round") == "Divisional" and game.get("conference") == conference:
-                    if "TBD_LowestSeedWinner" in str(game.get("away_id")):
-                        game["away_id"] = winners_sorted[0]
-                        game["away_abbr"] = None
-                    elif "TBD_HighSeedHost" in str(game.get("home_id")):
-                        game["home_id"] = winners_sorted[1]
-                        game["away_id"] = winners_sorted[2]
-                        game["home_abbr"] = None
-                        game["away_abbr"] = None
-
-    elif next_round_name == "Conference Championship":
-        winners_sorted = sorted(winners)
-        if len(winners_sorted) < 2:
-            print(f"[DEBUG] Not enough winners for Conference Championship ({conference}): {winners_sorted}")
-            return
-        for g in schedule_by_week.values():
-            for game in g:
-                if game.get("round") == "Conference Championship" and game.get("conference") == conference:
-                    game["home_id"] = winners_sorted[0]
-                    game["away_id"] = winners_sorted[1]
-                    game["home_abbr"] = None
-                    game["away_abbr"] = None
-
-    elif next_round_name == "Gridiron Bowl":
-        winners_sorted = sorted(winners)
-        if len(winners_sorted) < 2:
-            print(f"[DEBUG] Not enough winners for Gridiron Bowl: {winners_sorted}")
-            return
-        for g in schedule_by_week.values():
-            for game in g:
-                if game.get("round") == "Gridiron Bowl":
-                    game["home_id"] = winners_sorted[0]
-                    game["away_id"] = winners_sorted[1]
-                    game["home_abbr"] = None
-                    game["away_abbr"] = None
-
-
-
