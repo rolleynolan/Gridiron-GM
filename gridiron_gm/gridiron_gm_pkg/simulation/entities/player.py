@@ -71,6 +71,8 @@ class Player:
 
         self.career_stats = {}
         self.stats_by_year = {}
+        self.season_stats = {}
+        self.snap_counts = {}
 
         # --- Scouting related fields
         # hidden_caps: the true ceiling for each attribute (not visible to the user)
@@ -177,9 +179,11 @@ class Player:
             "morale": self.morale,
             "playtime_history": self.playtime_history,
             "career_stats": self.career_stats,
+            "season_stats": self.season_stats,
             "on_injured_reserve": self.on_injured_reserve,
             "is_injured": self.is_injured,
             "snaps": self.snaps,
+            "snap_counts": self.snap_counts,
             "rookie_year": self.rookie_year,
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
@@ -216,8 +220,10 @@ class Player:
         player.morale = data.get("morale", 100)
         player.playtime_history = data.get("playtime_history", [])
         player.career_stats = data.get("career_stats", {})
+        player.season_stats = data.get("season_stats", {})
         player.on_injured_reserve = data.get("on_injured_reserve", False)
         player.is_injured = data.get("is_injured", False)
+        player.snap_counts = data.get("snap_counts", {})
         player.hidden_caps = data.get("hidden_caps", {})
         player.scouted_potential = data.get("scouted_potential", {})
         player.last_attribute_values = data.get("last_attribute_values", {})
