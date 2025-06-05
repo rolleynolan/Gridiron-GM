@@ -1,4 +1,7 @@
-def scouting_menu(rookie_class, scouts, scouting_system):
+from gridiron_gm.gridiron_gm_pkg.players.player import get_rookie_view
+
+
+def scouting_menu(rookie_class, scouts, scouting_system, team=None):
     favorites_only = False
     current_filter = None
     current_sort = "name"
@@ -20,7 +23,7 @@ def scouting_menu(rookie_class, scouts, scouting_system):
         choice = input("Select an option (1-7): ").strip()
 
         if choice == "1":
-            view_scouted_players(rookie_class, favorites_only, current_filter, current_sort)
+            view_scouted_players(rookie_class, favorites_only, current_filter, current_sort, team)
         elif choice == "2":
             assign_scout_to_player(rookie_class, scouts, scouting_system)
         elif choice == "3":
@@ -38,7 +41,7 @@ def scouting_menu(rookie_class, scouts, scouting_system):
         else:
             print("Invalid choice. Try again.")
 
-def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key):
+def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key, team=None):
     players = rookie_class
 
     # Apply Favorites Filter
@@ -67,8 +70,13 @@ def view_scouted_players(rookie_class, favorites_only, position_filter, sort_key
 
     for idx, player in enumerate(players, start=1):
         progress = f"{player.scouting_progress}%"
-        projected_ovr = f"{player.projected_overall}" if player.scouted else "???"
-        projected_pot = f"{player.projected_potential}" if player.scouted else "???"
+        if player.scouted and team is not None:
+            view = get_rookie_view(player, team)
+            projected_ovr = f"{view.get('overall')}"
+            projected_pot = f"{view.get('potential')}"
+        else:
+            projected_ovr = f"{player.projected_overall}" if player.scouted else "???"
+            projected_pot = f"{player.projected_potential}" if player.scouted else "???"
         fav_mark = "*" if player.favorite else " "
 
         print(f"{fav_mark:<3} {player.name:<25} {player.position:<5} {player.college:<15} {progress:<10} {projected_ovr:<10} {projected_pot:<10}")

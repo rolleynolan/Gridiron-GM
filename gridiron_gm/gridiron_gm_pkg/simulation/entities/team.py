@@ -26,6 +26,7 @@ class Team:
         conference: str = "Unknown",
         division: str = "Unknown",
         id: str | None = None,
+        scouting_accuracy: float = 1.0,
     ) -> None:
         self.id: str = id if id is not None else str(uuid.uuid4())
         self.team_name: str = team_name
@@ -33,6 +34,7 @@ class Team:
         self.abbreviation: str = abbreviation
         self.conference: str = conference
         self.division: str = division
+        self.scouting_accuracy: float = scouting_accuracy
 
         self.players: List[Player] = []
         self.depth_chart: Dict[str, List[Player]] = {}
@@ -124,6 +126,7 @@ class Team:
             "abbreviation": self.abbreviation,
             "conference": self.conference,
             "division": self.division,
+            "scouting_accuracy": self.scouting_accuracy,
             "players": [player.to_dict() for player in self.players],
             "depth_chart": {pos: [p.name for p in players] for pos, players in self.depth_chart.items()},
             "team_record": self.team_record,
@@ -147,7 +150,8 @@ class Team:
             abbreviation=data.get("abbreviation", "UNK"),
             conference=conference,
             division=data.get("division", "Unknown"),
-            id=data.get("id")
+            id=data.get("id"),
+            scouting_accuracy=data.get("scouting_accuracy", 1.0),
         )
         team.players = [Player.from_dict(p) for p in data.get("players", [])]
         team.generate_depth_chart()
