@@ -29,6 +29,9 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.data_loader import (
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.serialization_utils import league_to_dict
 from gridiron_gm.gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
+    evaluate_player_season_progression,
+)
 
 
 try:
@@ -497,6 +500,40 @@ class SeasonManager:
         else:
             print("No champion was crowned this season.")
 
+    def apply_season_progression(self):
+        """Apply performance-based attribute changes to all players."""
+        for team in self.league.teams:
+            for player in getattr(team, "roster", []):
+                season_stats = getattr(player, "season_stats", {})
+                snap_counts = getattr(player, "snap_counts", {})
+
+                deltas = evaluate_player_season_progression(player, season_stats, snap_counts)
+                if not deltas:
+                    continue
+
+                print(f"[PROGRESSION] {getattr(player, 'name', 'Unknown')} ({getattr(player, 'position', '')})")
+
+                attr_container = getattr(player, "attributes", None)
+                if not attr_container:
+                    continue
+
+                core = getattr(attr_container, "core", {})
+                pos = getattr(attr_container, "position_specific", {})
+                hidden_caps = getattr(player, "hidden_caps", {})
+
+                for attr, change in deltas.items():
+                    if attr in core:
+                        old_val = core.get(attr, 0)
+                        cap = hidden_caps.get(attr, 99)
+                        new_val = max(1, min(old_val + change, cap))
+                        core[attr] = new_val
+                    else:
+                        old_val = pos.get(attr, 0)
+                        cap = hidden_caps.get(attr, 99)
+                        new_val = max(1, min(old_val + change, cap))
+                        pos[attr] = new_val
+                    print(f"  {attr}: {old_val} -> {new_val}")
+
     def handle_offseason(self):
         print("=== Offseason: Healing injuries, aging players, resetting league ===")
         for team in self.league.teams:
@@ -573,7 +610,10 @@ class SeasonManager:
         print(f"\n=== CHAMPION: {self.champion} ===")
         print(f"Runner-up: {self.runner_up}")
 
-        # Save league history with champion
+        # Apply end-of-season progression before saving the league
+        self.apply_season_progression()
+
+        # Save league history with champion and updated ratings
         self.save_league_state()
 
         # --- Pause for user review (console) ---
