@@ -36,3 +36,16 @@ def test_raw_prospect():
     stats = {"passing_yards": 500}
     attrs = {"awareness": 60, "accuracy": 60}
     assert evaluate_archetype(player, stats, attrs) == "Raw Prospect"
+
+
+def test_wr_archetype_variation():
+    player = DummyPlayer("WR")
+    stats = {"receiving_yards": 1200, "touchdowns": 9, "receptions": 85}
+    attrs = {"route_running": 88, "catching": 85, "speed": 92}
+    arch = evaluate_archetype(player, stats, attrs)
+    assert arch in ("Feature WR", "Slot Technician")
+
+    stats_alt = {"receiving_yards": 200, "touchdowns": 1, "receptions": 10}
+    attrs_alt = {"route_running": 40, "catching": 50, "speed": 70, "awareness": 40}
+    arch_alt = evaluate_archetype(player, stats_alt, attrs_alt)
+    assert arch != arch_alt
