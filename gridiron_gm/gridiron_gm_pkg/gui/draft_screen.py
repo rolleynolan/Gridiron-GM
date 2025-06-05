@@ -19,16 +19,16 @@ def draft_screen(game_world, user_team=None):
         choice = input("Select an option (1-3): ").strip()
 
         if choice == "1":
-            start_draft(game_world)
+            start_draft(game_world, user_team)
             break
         elif choice == "2":
-            view_top_prospects(game_world)
+            view_top_prospects(game_world, user_team)
         elif choice == "3":
             break
         else:
             print("Invalid choice. Try again.")
 
-def start_draft(game_world):
+def start_draft(game_world, user_team=None):
     rookie_class = game_world.get("rookie_class", [])
     teams = game_world.get("teams", [])
     draft_order = list(teams)
@@ -61,7 +61,7 @@ def start_draft(game_world):
                 maybe_trade_up(team, idx, draft_order, available_players, gm_personalities, current_round)
 
             if getattr(team, "user_controlled", False):
-                pick_player_user(team, available_players, drafted_players)
+                pick_player_user(team, available_players, drafted_players, user_team)
             else:
                 pick_player_cpu(team, available_players, drafted_players)
 
@@ -69,7 +69,7 @@ def start_draft(game_world):
     game_world["calendar"]["season_phase"] = "Post-Draft"
     print("\nSeason Phase has advanced to Post-Draft.")
 
-def view_top_prospects(game_world):
+def view_top_prospects(game_world, team=None):
     rookie_class = game_world.get("rookie_class", [])
     print("\n--- Top Prospects ---")
     for idx, player in enumerate(
@@ -126,7 +126,7 @@ def maybe_trade_up(team, current_idx, draft_order, available_players, gm_persona
             else:
                 print(f"{team.city} {team.name} traded {pick_current} to {team_ahead.city} {team_ahead.name} for {pick_swap}.")
 
-def pick_player_user(team, available_players, drafted_players):
+def pick_player_user(team, available_players, drafted_players, user_team=None):
     print(f"\n{team.city} {team.name} is on the clock!")
     print("\nTop Available Prospects:")
     for idx, player in enumerate(available_players[:10], start=1):
