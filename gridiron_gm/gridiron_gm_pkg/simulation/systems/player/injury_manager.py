@@ -41,6 +41,20 @@ class InjuryEngine:
         player.weeks_out = weeks_out
         player.is_injured = True
 
+        # Dynamic attribute effects based on position importance
+        effects = injury_data.get("effects", {})
+        if effects:
+            if not hasattr(player, "active_injury_effects"):
+                player.active_injury_effects = {}
+            pos_map = POSITION_IMPORTANCE.get(player.position.upper(), {})
+            for attr, sev in effects.items():
+                if attr not in pos_map:
+                    continue
+                impact = sev * pos_map[attr]
+                player.active_injury_effects[attr] = (
+                    player.active_injury_effects.get(attr, 0) - impact
+                )
+
         self.apply_long_term_effects(player, injury_data.get("long_term", []))
 
         # Apply short-term attribute penalties
@@ -154,6 +168,7 @@ class InjuryEngine:
                     for effect in getattr(player, "temporary_effects", []):
                         if effect["type"] == "attribute" and effect["duration"] != "permanent":
                             attr = effect["target"]
+
                             dict_type = effect.get("dict", "core")
                             attr_dict = player.attributes.core if dict_type == "core" else player.attributes.position_specific
                             # Restore original value if tracked

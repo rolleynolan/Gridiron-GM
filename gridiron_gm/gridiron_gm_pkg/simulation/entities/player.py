@@ -239,6 +239,18 @@ class Player:
                 self.injuries.clear()
                 self.is_injured = False
 
+    def get_effective_attribute(self, attr: str):
+        """Return attribute value adjusted for any active injury effects."""
+        base = None
+        if attr in self.position_specific:
+            base = self.position_specific.get(attr)
+        elif hasattr(self, attr):
+            base = getattr(self, attr)
+        impact = self.active_injury_effects.get(attr, 0)
+        if base is None:
+            return None
+        return base + impact
+
     def update_career_stats_from_season(self, year, game_world=None) -> List[str]:
         """Aggregate a season's totals into ``career_stats`` and check milestones.
 
@@ -379,6 +391,7 @@ class Player:
             "passion": self.passion,
             "resilience": self.resilience,
             "position_specific": self.position_specific,
+            "active_injury_effects": self.active_injury_effects,
             "rookie_year": self.rookie_year,
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
@@ -439,6 +452,7 @@ class Player:
         player.passion = data.get("passion")
         player.resilience = data.get("resilience")
         player.position_specific = data.get("position_specific", player.position_specific)
+        player.active_injury_effects = data.get("active_injury_effects", {})
         player.hidden_caps = data.get("hidden_caps", {})
         player.scouted_potential = data.get("scouted_potential", {})
         player.last_attribute_values = data.get("last_attribute_values", {})
