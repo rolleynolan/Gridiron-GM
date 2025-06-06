@@ -1,11 +1,12 @@
 
-# engine/trade/cpu_trade_offers.py
+"""AI utilities for generating CPU-initiated trade offers."""
 
 from gridiron_gm.gridiron_gm_pkg.engine.trade.trade_value import evaluate_player_value, calculate_pick_value
 from gridiron_gm.gridiron_gm_pkg.engine.trade.trade_decision import compute_total_trade_value, should_accept_trade
 import random
 
 def generate_cpu_trade_offers(teams, week_number):
+    """Generate trade offers between CPU-controlled teams."""
     trade_offers = []
 
     for seller in teams:
@@ -31,7 +32,6 @@ def generate_cpu_trade_offers(teams, week_number):
         buyer = buyer_candidates[0]
         pick_round = pick_round_for_value(player_value)
         pick_label = format_pick_round(pick_round)
-        buyer_pick_value = calculate_pick_value(pick_round, buyer, is_future=False)
 
         offer = {
             "from_team": seller.team_name,
@@ -59,6 +59,7 @@ def generate_cpu_trade_offers(teams, week_number):
     return trade_offers
 
 def format_pick_round(round_num):
+    """Return a human-readable string for a draft pick round."""
     if round_num == 1:
         return "1st Round Pick"
     elif round_num == 2:
@@ -69,6 +70,7 @@ def format_pick_round(round_num):
         return f"{round_num}th Round Pick"
 
 def find_best_trade_partners(player, seller, all_teams):
+    """Return potential trade partners sorted by positional need."""
     buyers = [
         t for t in all_teams if t != seller and not getattr(t, "rebuild_mode", True)
     ]
@@ -83,6 +85,7 @@ def find_best_trade_partners(player, seller, all_teams):
     return [entry[0] for entry in scored_buyers]
 
 def evaluate_team_need(team, position):
+    """Simple heuristic to rank how badly a team needs a position."""
     position_players = [p for p in team.players if p.position == position]
     if not position_players:
         return 10
@@ -93,6 +96,7 @@ def evaluate_team_need(team, position):
     return 0
 
 def pick_round_for_value(value):
+    """Determine draft round compensation based on a player's value."""
     if value >= 1000:
         return 1
     elif value >= 400:

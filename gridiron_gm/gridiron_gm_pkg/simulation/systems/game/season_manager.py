@@ -61,7 +61,7 @@ class SeasonManager:
 
         self.team_map = self.id_to_team  # For compatibility, but always use team.id as key
 
-        self.schedule_by_week, self.results_by_week = self.load_schedule_files(save_name)
+        self.schedule_by_week, self.results_by_week = load_schedule_files(save_name)
         self.last_scheduled_day_for_week = {
             str(week): (
                 max(
@@ -97,27 +97,6 @@ class SeasonManager:
             self.standings_manager.save_standings()
             self.standings_reset = True
 
-    def load_schedule_files(self, save_name):
-        base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / save_name
-        schedule_path = base_path / "schedule_by_week.json"
-        results_path = base_path / "results_by_week.json"
-        if os.path.exists(schedule_path):
-            with open(schedule_path, "r") as f:
-                schedule_by_week = json.load(f)
-        else:
-            schedule_by_week = {}
-        if os.path.exists(results_path):
-            with open(results_path, "r") as f:
-                results_by_week = json.load(f)
-        else:
-            results_by_week = {}
-        return schedule_by_week, results_by_week
-
-    def save_results(self):
-        results_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name / "results_by_week.json"
-        os.makedirs(results_path.parent, exist_ok=True)
-        with open(results_path, "w") as f:
-            json.dump(self.results_by_week, f, indent=2)
 
     def ensure_valid_depth_charts(self):
         for team in self.league.teams:
@@ -260,7 +239,7 @@ class SeasonManager:
 
         # End of day: set time to 23:59
         self.calendar.current_time_str = "23:59"
-        self.save_results()
+        save_results(self.results_by_week, self.save_name)
 
     def advance_day(self):
         """Advance the simulation through a single day."""
@@ -566,7 +545,7 @@ class SeasonManager:
         self.playoff_bracket = {}
         self.champion = None
         self.runner_up = None
-        self.schedule_by_week, self.results_by_week = self.load_schedule_files(self.save_name)
+        self.schedule_by_week, self.results_by_week = load_schedule_files(self.save_name)
         self.standings_manager.results_by_week = self.results_by_week
 
     def start_new_season(self):
@@ -577,7 +556,7 @@ class SeasonManager:
         # Validate rosters and depth charts before loading schedule
         self.validate_team_rosters_and_depth_charts()
         # Generate new schedule, reset standings, etc.
-        self.schedule_by_week, self.results_by_week = self.load_schedule_files(self.save_name)
+        self.schedule_by_week, self.results_by_week = load_schedule_files(self.save_name)
         self.standings_manager.results_by_week = self.results_by_week
         self.standings_manager.save_standings()
 

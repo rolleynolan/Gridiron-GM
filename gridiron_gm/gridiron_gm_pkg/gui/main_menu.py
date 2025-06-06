@@ -12,16 +12,9 @@ from gridiron_gm.gridiron_gm_pkg.simulation.utils.roster_generator import Roster
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-TEAM_LIST = [
-    "Chicago Cyclones", "Dallas Outlaws", "Miami Tritons", "New York Empire",
-    "San Francisco Surge", "Tennessee Renegades", "Las Vegas Vipers", "Atlanta Flight",
-    "Boston Redcoats", "Houston Stampede", "Los Angeles Paladins", "Philadelphia Liberty",
-    "Phoenix Inferno", "Detroit Mechanics", "Seattle Eclipse", "Denver Bighorns",
-    "Cleveland Vanguards", "Orlando Stingrays", "Minnesota Mammoths", "Baltimore Knights",
-    "New Orleans Specters", "Indianapolis Racers", "Cincinnati Sabers", "Kansas City Kings",
-    "Charlotte Stingers", "Tampa Bay Sharks", "Pittsburgh Ironmen", "Washington Generals",
-    "Green Bay Lumberjacks", "Buffalo Blizzard", "San Diego Armada", "Portland Pioneers"
-]
+TEAM_LIST_PATH = os.path.join(BASE_DIR, "..", "config", "teams.json")
+with open(TEAM_LIST_PATH, "r") as f:
+    TEAM_LIST = json.load(f)
 
 def main_menu():
     while True:
@@ -68,14 +61,14 @@ def start_new_game():
 
     print("\nSelect Your Team:")
     for idx, team in enumerate(TEAM_LIST, 1):
-        print(f"[{idx}] {team}")
+        print(f"[{idx}] {team['city']} {team['name']}")
 
     while True:
         try:
             team_choice = int(input("Enter team number (1-32): "))
             if 1 <= team_choice <= len(TEAM_LIST):
                 team_entry = TEAM_LIST[team_choice - 1]
-                team_name = team_entry["team_name"]
+                team_name = team_entry["name"]
                 team_city = team_entry["city"]
 
                 break

@@ -1,7 +1,5 @@
 # ui/in_game_menu.py
 
-from gridiron_gm.gridiron_gm_pkg.engine.phase_manager import advance_game_day, advance_game_week, phase_manager
-from gridiron_gm.gridiron_gm_pkg.engine.core.game_simulator import simulate_week
 from gridiron_gm.gridiron_gm_pkg.gui.roster_screen import roster_screen
 
 def in_game_menu(game_world, gm_profile):
@@ -105,3 +103,18 @@ def view_gm_profile(gm_profile):
     print(f"Hair Color: {appearance.get('hair_color', 'Unknown')}")
     print(f"Skin Tone: {appearance.get('skin_tone', 'Unknown')}")
     print(f"Height: {appearance.get('height', 'Unknown')} inches")
+
+# --- Simulation Stubs ---
+def advance_game_week(game_world):
+    """Placeholder for advancing a week in the game calendar."""
+    print("\nAdvancing one week... (Not implemented)")
+
+
+def advance_game_day(game_world):
+    """Placeholder for advancing a single day."""
+    print("\nAdvancing one day... (Not implemented)")
+
+
+def phase_manager(game_world):
+    """Placeholder for updating game phase."""
+    print("\nUpdating game phase... (Not implemented)")
