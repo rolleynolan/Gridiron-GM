@@ -6,6 +6,11 @@ import random
 from typing import Any, Dict, Iterable
 
 from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.injury_manager import (
+    InjuryEngine,
+)
+
+_injury_engine = InjuryEngine()
 
 # Attributes considered physical for slower capped growth
 PHYSICAL_ATTRIBUTES = {
@@ -70,6 +75,8 @@ def apply_training_plan(team: Any, plan: Dict[str, Any], week: int) -> None:
     else:
         players = [p for p in getattr(team, "roster", [])]
 
+    plan_intensity = float(plan.get("intensity", 1.0))
+
     for player in players:
         if player is None or getattr(player, "is_injured", False):
             continue
@@ -100,6 +107,11 @@ def apply_training_plan(team: Any, plan: Dict[str, Any], week: int) -> None:
 
             container[attr] = round(container.get(attr, 0) + gain, 2)
             player.training_log.setdefault(week, {})[attr] = round(gain, 3)
+
+        # Injury risk from training
+        injury_chance = drill.get("injury_chance", 0.0) * plan_intensity
+        if injury_chance > 0 and random.random() < injury_chance:
+            _injury_engine.assign_injury(player)
 
 
 def assign_training(team: Any, week: int) -> None:
@@ -133,7 +145,12 @@ def assign_training(team: Any, week: int) -> None:
     if drill_name is None:
         drill_name = next(iter(TRAINING_CATALOG))
 
-    team.training_plan[week] = {"type": "position", "position": weakest, "drill": drill_name}
+    team.training_plan[week] = {
+        "type": "position",
+        "position": weakest,
+        "drill": drill_name,
+        "intensity": 1.0,
+    }
 
 
 def _get_attr_container(player: Any, attr: str) -> tuple[Dict[str, float], str] | tuple[None, None]:

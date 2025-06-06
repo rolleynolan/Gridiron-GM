@@ -1,7 +1,14 @@
 import sys
 from pathlib import Path
+import random
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+random.seed(0)
+
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import (
+    apply_training_plan,
+)
+from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
 
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import (
     apply_training_plan,
@@ -73,3 +80,26 @@ def test_ineligible_players_skipped():
     apply_training_plan(team, plan, 1)
     assert "throw_accuracy_short" in qb.training_log[1]
     assert 1 not in injured_qb.training_log
+
+def test_team_vs_position_drill():
+    qb = DummyPlayer("QB")
+    wr = DummyPlayer("WR")
+    team = DummyTeam([qb, wr])
+    team_plan = {"type": "team", "drill": "Strength Circuit"}
+    apply_training_plan(team, team_plan, 1)
+    assert round(qb.attributes.core["strength"], 2) == 50 + round(0.2 * 1.0 * 1.0 * 0.5, 2)
+    wr_strength_after = wr.attributes.core["strength"]
+
+def test_training_injury_triggered():
+    player = DummyPlayer("QB")
+    team = DummyTeam([player])
+    plan = {
+        "type": "player",
+        "player": player,
+        "drill": "Strength Circuit",
+        "intensity": 1000,
+    }
+
+    apply_training_plan(team, plan, 1)
+
+    assert player.is_injured

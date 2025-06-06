@@ -6,6 +6,7 @@ TRAINING_CATALOG = {
             "throw_power": 0.5,
             "awareness": 0.3,
         },
+        "injury_chance": 0.003,
     },
     "WR Footwork": {
         "positions": ["WR"],
@@ -14,6 +15,7 @@ TRAINING_CATALOG = {
             "agility": 0.8,
             "awareness": 0.2,
         },
+        "injury_chance": 0.004,
     },
     "Strength Circuit": {
         "positions": "ALL",
@@ -21,11 +23,13 @@ TRAINING_CATALOG = {
             "strength": 1.0,
             "stamina": 0.5,
         },
+        "injury_chance": 0.01,
     },
     "Film Study": {
         "positions": "ALL",
         "attribute_weights": {
             "awareness": 1.0,
         },
+        "injury_chance": 0.0,
     },
 }
