@@ -10,6 +10,11 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training impor
 )
 from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
 
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import (
+    apply_training_plan,
+)
+from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
+
 
 class DummyAttrs:
     def __init__(self):
@@ -76,6 +81,14 @@ def test_ineligible_players_skipped():
     assert "throw_accuracy_short" in qb.training_log[1]
     assert 1 not in injured_qb.training_log
 
+def test_team_vs_position_drill():
+    qb = DummyPlayer("QB")
+    wr = DummyPlayer("WR")
+    team = DummyTeam([qb, wr])
+    team_plan = {"type": "team", "drill": "Strength Circuit"}
+    apply_training_plan(team, team_plan, 1)
+    assert round(qb.attributes.core["strength"], 2) == 50 + round(0.2 * 1.0 * 1.0 * 0.5, 2)
+    wr_strength_after = wr.attributes.core["strength"]
 
 def test_training_injury_triggered():
     player = DummyPlayer("QB")

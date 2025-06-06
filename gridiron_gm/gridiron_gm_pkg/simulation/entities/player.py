@@ -78,7 +78,8 @@ class Player:
         self.retired = False
         self.on_injured_reserve = False
         self.is_injured = False
-        self.active_injury_effects = {}
+        # Track active temporary penalties from injuries
+        self.active_injury_effects = []
 
         self.traits = {
             "training": [],
@@ -322,6 +323,25 @@ class Player:
         # Ensure overall remains within valid bounds
         self.overall = max(0, min(self.overall, 100))
 
+    def get_effective_attribute(self, attr: str):
+        """Return the attribute value factoring in active injury penalties."""
+        if attr in self.attributes.core:
+            base = self.attributes.core.get(attr)
+        elif attr in self.attributes.position_specific:
+            base = self.attributes.position_specific.get(attr)
+        else:
+            base = getattr(self, attr, None)
+
+        if base is None:
+            return None
+
+        penalty = 0
+        for eff in getattr(self, "active_injury_effects", []):
+            if eff.get("attribute") == attr:
+                penalty += eff.get("change", 0)
+
+        return base + penalty
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -413,6 +433,7 @@ class Player:
         player.is_injured = data.get("is_injured", False)
         player.snap_counts = data.get("snap_counts", {})
         player.milestones_hit = set(data.get("milestones_hit", []))
+        player.active_injury_effects = data.get("active_injury_effects", [])
         player.speed = data.get("speed")
         player.acceleration = data.get("acceleration")
         player.agility = data.get("agility")
