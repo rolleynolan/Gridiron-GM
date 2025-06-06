@@ -181,7 +181,8 @@ INJURY_CATALOG = {
             {"type": "recurrence", "target": "shoulder", "change": 20, "duration": "career", "notes": "Shoulder instability"}
         ],
         "career_ending": False,
-        "injury_context": "on_field"
+        "injury_context": "on_field",
+        "effects": {"throw_power": 0.6, "throw_accuracy_short": 0.4, "agility": 0.1}
     },
     "Labrum Tear": {
         "severity": "Moderate",
@@ -235,7 +236,8 @@ INJURY_CATALOG = {
             {"type": "attribute", "target": "catching", "change": -2, "duration": "season", "notes": "Reduced wrist strength for catching"}
         ],
         "career_ending": False,
-        "injury_context": "on_field"
+        "injury_context": "on_field",
+        "effects": {"catching": 0.6, "throw_power": 0.3}
     },
     "Broken Arm": {
         "severity": "Moderate",
@@ -480,7 +482,8 @@ INJURY_CATALOG = {
         "weeks": (0, 1),
         "long_term": [],
         "career_ending": False,
-        "injury_context": "on_field"
+        "injury_context": "on_field",
+        "effects": {"agility": 0.5, "acceleration": 0.4, "balance": 0.2}
     },
     "Thigh Contusion": {
         "severity": "Minor",

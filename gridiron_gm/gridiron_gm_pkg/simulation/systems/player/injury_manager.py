@@ -1,6 +1,20 @@
 import random
 from gridiron_gm.gridiron_gm_pkg.config.injury_catalog import INJURY_CATALOG
 
+# How important each attribute is to a position (0-1 scale). This allows
+# the same injury to impact positions differently based on which attributes
+# they rely on most.
+POSITION_IMPORTANCE = {
+    "WR": {"speed": 1.0, "agility": 0.9, "acceleration": 0.8, "balance": 0.6},
+    "QB": {
+        "throw_power": 1.0,
+        "throw_accuracy_short": 1.0,
+        "agility": 0.2,
+        "speed": 0.3,
+    },
+    "RB": {"acceleration": 1.0, "agility": 0.9, "carry_security": 0.8},
+}
+
 class Injury:
     def __init__(self, name, weeks_out, severity, long_term=None, career_ending=False):
         self.name = name
@@ -39,6 +53,20 @@ class InjuryEngine:
 
         player.weeks_out = weeks_out
         player.is_injured = True
+
+        # Dynamic attribute effects based on position importance
+        effects = injury_data.get("effects", {})
+        if effects:
+            if not hasattr(player, "active_injury_effects"):
+                player.active_injury_effects = {}
+            pos_map = POSITION_IMPORTANCE.get(player.position.upper(), {})
+            for attr, sev in effects.items():
+                if attr not in pos_map:
+                    continue
+                impact = sev * pos_map[attr]
+                player.active_injury_effects[attr] = (
+                    player.active_injury_effects.get(attr, 0) - impact
+                )
 
         self.apply_long_term_effects(player, injury_data.get("long_term", []))
 
@@ -128,6 +156,8 @@ class InjuryEngine:
                             if hasattr(player, "original_attributes") and attr in player.original_attributes:
                                 attr_dict[attr] = player.original_attributes[attr]
                     player.temporary_effects = []
+                    if hasattr(player, "active_injury_effects"):
+                        player.active_injury_effects.clear()
                     if getattr(player, "on_injured_reserve", False):
                         team.remove_player_from_ir(player)
                         print(f"{getattr(player, 'name', 'Player')} has recovered and been activated from IR!")
