@@ -18,6 +18,7 @@ def _ensure_structure(game_world: Dict[str, Any]) -> Dict[str, Any]:
 
     leaderboards = league_records.setdefault("leaderboards", {})
     leaderboards.setdefault("current_season", {})
+    leaderboards.setdefault("career", {})
     return league_records
 
 
@@ -47,6 +48,22 @@ def update_career_record(game_world: Dict[str, Any], player_id: str, stat_name: 
 
 def update_leaderboard(game_world: Dict[str, Any], stat_name: str, player_id: str, value: int | float, limit: int = 10) -> None:
     boards = _ensure_structure(game_world)["leaderboards"]["current_season"]
+    board: List[Tuple[str, int | float]] = boards.setdefault(stat_name, [])
+
+    for i, (pid, val) in enumerate(board):
+        if pid == player_id:
+            if value > val:
+                board[i] = (player_id, value)
+            break
+    else:
+        board.append((player_id, value))
+
+    board.sort(key=lambda x: x[1], reverse=True)
+    del board[limit:]
+
+
+def update_career_leaderboard(game_world: Dict[str, Any], stat_name: str, player_id: str, value: int | float, limit: int = 10) -> None:
+    boards = _ensure_structure(game_world)["leaderboards"]["career"]
     board: List[Tuple[str, int | float]] = boards.setdefault(stat_name, [])
 
     for i, (pid, val) in enumerate(board):

@@ -8,4 +8,5 @@ from .record_book import (
     update_team_single_season_record,
     update_team_career_record,
 )
+from .milestone_definitions import MILESTONES
 
