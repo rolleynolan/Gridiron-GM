@@ -8,7 +8,7 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.player_weekly_growth 
 class DummyAttributes:
     def __init__(self):
         self.core = {"awareness": 70}
-        self.position_specific = {"route_running": 72}
+        self.position_specific = {"route_running_short": 72}
 
 class DummyPlayer:
     def __init__(self):
@@ -29,6 +29,6 @@ def test_apply_weekly_growth_small_deltas(monkeypatch):
 
     deltas = apply_weekly_growth(player, context)
 
-    assert set(deltas.keys()) == {"awareness", "route_running"}
+    assert set(deltas.keys()) == {"awareness", "route_running_short"}
     assert all(isinstance(v, float) for v in deltas.values())
     assert all(0 < v <= 0.25 for v in deltas.values())
