@@ -3,74 +3,73 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import (
+    apply_training_plan,
+)
+from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
+
 
 class DummyAttrs:
     def __init__(self):
-        self.core = {"throw_accuracy_short": 60, "throw_power": 60, "awareness": 50, "speed": 80}
+        self.core = {
+            "throw_accuracy_short": 60,
+            "throw_power": 60,
+            "strength": 50,
+            "agility": 70,
+            "awareness": 50,
+        }
         self.position_specific = {"route_running_short": 65}
 
+
 class DummyPlayer:
-    def __init__(self):
+    def __init__(self, position="QB"):
+        self.position = position
         self.attributes = DummyAttrs()
-        self.training_focus = "throwing"
         self.is_injured = False
+        self.training_log = {}
+        self._season_physical_growth = {}
+
 
 class DummyTeam:
-    def __init__(self, player, quality=1.0):
-        self.roster = [player]
-        self.practice_squad = []
+    def __init__(self, players, quality=1.0):
+        self.roster = players
         self.coach_quality = quality
-        self.current_week = 1
+        self.training_plan = {}
 
 
-def test_training_applies_growth(monkeypatch):
-    player = DummyPlayer()
-    team = DummyTeam(player, quality=1.1)
+def test_weighted_growth_player_drill():
+    player = DummyPlayer("QB")
+    team = DummyTeam([player])
+    plan = {"type": "player", "player": player, "drill": "QB Accuracy"}
 
-    monkeypatch.setattr("random.uniform", lambda a, b: b)
+    apply_training_plan(team, plan, 1)
 
-    apply_weekly_training(player, team)
-
-    # Accuracy (mental) should grow more than throw_power (physical)
-    assert player.attributes.core["throw_accuracy_short"] > 60
-    assert player.attributes.core["throw_power"] > 60
-    assert player.attributes.core["throw_accuracy_short"] - 60 > player.attributes.core["throw_power"] - 60
+    assert round(player.attributes.core["throw_accuracy_short"], 2) == 60 + round(0.2 * 1.0 * 1.2, 2)
+    assert round(player.attributes.core["throw_power"], 2) == 60 + round(0.2 * 0.5 * 1.2, 2)
+    assert 1 in player.training_log
 
 
-def test_injured_or_no_focus_no_growth(monkeypatch):
-    player = DummyPlayer()
-    team = DummyTeam(player)
-    player.training_focus = None
+def test_team_vs_position_drill():
+    qb = DummyPlayer("QB")
+    wr = DummyPlayer("WR")
+    team = DummyTeam([qb, wr])
+    team_plan = {"type": "team", "drill": "Strength Circuit"}
+    apply_training_plan(team, team_plan, 1)
+    assert round(qb.attributes.core["strength"], 2) == 50 + round(0.2 * 1.0 * 1.0 * 0.5, 2)
+    wr_strength_after = wr.attributes.core["strength"]
 
-    monkeypatch.setattr("random.uniform", lambda a, b: b)
-    apply_weekly_training(player, team)
-    assert player.attributes.core["throw_accuracy_short"] == 60
-
-    player.training_focus = "throwing"
-    player.is_injured = True
-    apply_weekly_training(player, team)
-    assert player.attributes.core["throw_accuracy_short"] == 60
-
-
-def test_physical_growth_cap(monkeypatch):
-    player = DummyPlayer()
-    player.training_focus = "speed"
-    team = DummyTeam(player)
-
-    monkeypatch.setattr("random.uniform", lambda a, b: b)
-    for _ in range(20):
-        apply_weekly_training(player, team)
-    # cap at +2 total
-    assert round(player.attributes.core["speed"] - 80, 3) <= 2.0
+    pos_plan = {"type": "position", "position": "WR", "drill": "WR Footwork"}
+    apply_training_plan(team, pos_plan, 2)
+    assert round(wr.attributes.position_specific["route_running_short"], 2) == 65 + round(0.2 * 1.0 * 1.0, 2)
+    assert wr.attributes.core["strength"] == wr_strength_after
 
 
-def test_coach_multiplier(monkeypatch):
-    player = DummyPlayer()
-    team = DummyTeam(player, quality=1.2)
-
-    monkeypatch.setattr("random.uniform", lambda a, b: b)
-    apply_weekly_training(player, team)
-
-    # mental attribute gain should reflect multiplier 1.2
-    assert round(player.attributes.core["throw_accuracy_short"] - 60, 2) == round(0.5 * 1.2, 2)
+def test_ineligible_players_skipped():
+    qb = DummyPlayer("QB")
+    injured_qb = DummyPlayer("QB")
+    injured_qb.is_injured = True
+    team = DummyTeam([qb, injured_qb])
+    plan = {"type": "position", "position": "QB", "drill": "QB Accuracy"}
+    apply_training_plan(team, plan, 1)
+    assert "throw_accuracy_short" in qb.training_log[1]
+    assert 1 not in injured_qb.training_log
