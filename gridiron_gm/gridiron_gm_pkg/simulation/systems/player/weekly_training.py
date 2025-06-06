@@ -17,8 +17,18 @@ PHYSICAL_ATTRIBUTES = {
 
 # Map of valid training focus keywords to attributes that should grow
 FOCUS_MAP = {
-    "throwing": ["throw_power", "accuracy"],
-    "route running": ["route_running", "awareness"],
+    "throwing": [
+        "throw_power",
+        "throw_accuracy_short",
+        "throw_accuracy_mid",
+        "throw_accuracy_deep",
+    ],
+    "route running": [
+        "route_running_short",
+        "route_running_mid",
+        "route_running_deep",
+        "awareness",
+    ],
     "awareness": ["awareness"],
     "strength": ["strength"],
     "speed": ["speed"],

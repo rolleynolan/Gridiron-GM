@@ -241,7 +241,7 @@ INJURY_CATALOG = {
         "severity": "Moderate",
         "weeks": (4, 10),
         "long_term": [
-            {"type": "attribute", "target": "tackling", "change": -2, "duration": "season", "notes": "Arm not fully strong for tackles"}
+            {"type": "attribute", "target": "tackle_lb", "change": -2, "duration": "season", "notes": "Arm not fully strong for tackles"}
         ],
         "career_ending": False,
         "injury_context": "on_field"
@@ -268,7 +268,7 @@ INJURY_CATALOG = {
         "severity": "Moderate",
         "weeks": (6, 10),
         "long_term": [
-            {"type": "attribute", "target": "blocking", "change": -3, "duration": "season", "notes": "Reduced upper body strength"}
+            {"type": "attribute", "target": "run_block", "change": -3, "duration": "season", "notes": "Reduced upper body strength"}
         ],
         "career_ending": False,
         "injury_context": "on_field"

@@ -18,16 +18,16 @@ class DummyPlayer:
     def __init__(self, position):
         self.position = position
         self.attributes = DummyAttributes(
-            core={"agility": 80, "tackling": 70, "play_recognition": 70},
-            pos={"catching": 75, "break_tackle": 70, "coverage": 72},
+            core={"agility": 80, "tackle_lb": 70, "play_recognition_lb": 70},
+            pos={"catching": 75, "separation": 70, "route_running_short": 72},
         )
         self.hidden_caps = {
             "catching": 90,
             "agility": 90,
-            "break_tackle": 80,
-            "tackling": 90,
-            "play_recognition": 90,
-            "coverage": 95,
+            "separation": 80,
+            "tackle_lb": 90,
+            "play_recognition_lb": 90,
+            "route_running_short": 95,
         }
 
 
@@ -40,7 +40,7 @@ def test_wr_progression_positive():
 
     assert delta["catching"] > 0
     assert delta["agility"] > 0
-    assert delta["break_tackle"] > 0
+    assert delta["separation"] > 0
 
 
 def test_lb_regression():
@@ -50,5 +50,5 @@ def test_lb_regression():
 
     delta = evaluate_player_season_progression(player, stats, snaps)
 
-    assert delta["tackling"] < 0
-    assert delta["play_recognition"] < 0
+    assert delta["tackle_lb"] < 0
+    assert delta["play_recognition_lb"] < 0

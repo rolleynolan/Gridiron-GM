@@ -43,11 +43,11 @@ def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str,
     awareness = attr("awareness")
     speed = attr("speed")
     strength = attr("strength")
-    accuracy = attr("accuracy")  # used for QB
+    accuracy = attr("throw_accuracy_short")  # used for QB
     throw_power = attr("throw_power")
     catching = attr("catching")
-    route_running = attr("route_running")
-    tackling = attr("tackling")
+    route_running = attr("route_running_short")
+    tackling = attr("tackle_lb")
 
     # Read some basic stats
     rushing_yards = int(stats.get("rushing_yards", 0))
