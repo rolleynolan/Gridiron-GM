@@ -142,6 +142,42 @@ class Player:
                 self.injuries.clear()
                 self.is_injured = False
 
+    def update_career_stats_from_season(self, year, game_world=None):
+        """Aggregate a season's totals into ``career_stats``.
+
+        Parameters
+        ----------
+        year : int | str
+            The season year to aggregate.
+        game_world : dict | None
+            Optional game world to update career record tracking.
+        """
+        year_key = str(year)
+        data = self.season_stats.get(year_key)
+        if not data or data.get("career_added"):
+            return
+
+        from gridiron_gm.gridiron_gm_pkg.stats.player_stat_manager import (
+            update_career_stats,
+        )
+
+        totals = data.get("season_totals", {})
+        update_career_stats(self, totals)
+        data["career_added"] = True
+
+        if game_world is not None:
+            from gridiron_gm.gridiron_gm_pkg.stats.record_book import (
+                update_career_record,
+                update_career_leaderboard,
+            )
+
+            for stat, val in totals.items():
+                if stat == "snap_counts" or not isinstance(val, (int, float)):
+                    continue
+                current = self.career_stats.get(stat, 0)
+                update_career_record(game_world, self.id, stat, current)
+                update_career_leaderboard(game_world, stat, self.id, current)
+
     def update_player_stats(self, stat_type, value):
         if stat_type in self.career_stats:
             self.career_stats[stat_type] += value
