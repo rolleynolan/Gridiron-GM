@@ -284,17 +284,15 @@ class SeasonManager:
                         if hasattr(player, "injuries"):
                             player.injuries.clear()
 
-                # Weekly practice training gains
-                apply_weekly_training(
-                    player,
-                    {
-                        "team": team,
-                        "roster": getattr(team, "roster", []),
-                        "practice_squad": getattr(team, "practice_squad", None),
-                        "coach_quality": getattr(team, "coach_quality", getattr(team, "training_quality", 1.0)),
-                        "week_number": just_ended_week,
-                    },
-                )
+                # No longer run per-player focus training here
+
+            # Team training plan using weighted drills
+            from ..player.weekly_training import assign_training, apply_training_plan
+
+            assign_training(team, just_ended_week)
+            plan = getattr(getattr(team, "training_plan", {}), "get", lambda w: None)(just_ended_week)
+            if plan:
+                apply_training_plan(team, plan, just_ended_week)
 
             # Call fatigue accumulation hook (empty list for heavy_usage_players for now)
             accumulate_season_fatigue_for_team(team, [])
