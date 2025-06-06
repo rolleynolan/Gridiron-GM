@@ -6,6 +6,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "soft_tissue", "change": 15, "duration": "season", "notes": "Slightly increased chance of similar injury"}
         ],
+        "short_term": [{"type": "attribute", "target": "speed", "change": -2}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -25,6 +26,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "groin", "change": 12, "duration": "season", "notes": "Re-injury risk for remainder of season"}
         ],
+        "short_term": [{"type": "attribute", "target": "agility", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -44,6 +46,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "calf", "change": 10, "duration": "season", "notes": "Slight chance of re-injury"}
         ],
+        "short_term": [{"type": "attribute", "target": "speed", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -51,6 +54,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "acceleration", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -67,6 +71,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -74,6 +79,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "balance", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -83,6 +89,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "back", "change": 10, "duration": "season", "notes": "Recurring minor back pain"}
         ],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -2}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -161,6 +168,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "achilles", "change": 25, "duration": "season", "notes": "Chronic pain/recurrence risk"}
         ],
+        "short_term": [{"type": "attribute", "target": "acceleration", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -180,6 +188,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "shoulder", "change": 20, "duration": "career", "notes": "Shoulder instability"}
         ],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -2}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -225,6 +234,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 3),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "catching", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -279,6 +289,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "shoulder", "change": 25, "duration": "career", "notes": "Major instability risk"}
         ],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -2}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -286,6 +297,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "catching", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -304,6 +316,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "agility", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -341,6 +354,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "foot", "change": 15, "duration": "season", "notes": "Recurring foot pain risk"}
         ],
+        "short_term": [{"type": "attribute", "target": "speed", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -348,6 +362,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "speed", "change": -1}],
         "career_ending": False,
         "injury_context": "either"
     },
@@ -355,6 +370,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "acceleration", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -385,6 +401,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "awareness", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -394,6 +411,7 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "nerve", "change": 10, "duration": "season", "notes": "Minor risk of repeat nerve injury"}
         ],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -413,6 +431,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "stamina", "change": -2}],
         "career_ending": False,
         "injury_context": "either"
     },
@@ -420,6 +439,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "stamina", "change": -2}],
         "career_ending": False,
         "injury_context": "either"
     },
@@ -436,6 +456,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -2}],
         "career_ending": False,
         "injury_context": "off_field"
     },
@@ -454,6 +475,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "awareness", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -470,6 +492,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (1, 2),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "awareness", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -479,6 +502,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -486,6 +510,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "speed", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -493,6 +518,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -500,6 +526,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -507,6 +534,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "strength", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -516,6 +544,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "stamina", "change": -1}],
         "career_ending": False,
         "injury_context": "either"
     },
@@ -523,6 +552,7 @@ INJURY_CATALOG = {
         "severity": "Minor",
         "weeks": (0, 1),
         "long_term": [],
+        "short_term": [{"type": "attribute", "target": "speed", "change": -1}],
         "career_ending": False,
         "injury_context": "on_field"
     }

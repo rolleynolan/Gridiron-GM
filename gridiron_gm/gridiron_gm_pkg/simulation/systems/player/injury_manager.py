@@ -1,5 +1,6 @@
 import random
 from gridiron_gm.gridiron_gm_pkg.config.injury_catalog import INJURY_CATALOG
+from gridiron_gm.gridiron_gm_pkg.config.position_importance import POSITION_IMPORTANCE
 
 class Injury:
     def __init__(self, name, weeks_out, severity, long_term=None, career_ending=False):
@@ -41,6 +42,37 @@ class InjuryEngine:
         player.is_injured = True
 
         self.apply_long_term_effects(player, injury_data.get("long_term", []))
+
+        # Apply short-term attribute penalties
+        if not hasattr(player, "active_injury_effects"):
+            player.active_injury_effects = []
+        attr_effects = []
+        for eff in injury_data.get("long_term", []):
+            if eff.get("type") == "attribute":
+                attr_effects.append((eff["target"], eff["change"]))
+        for eff in injury_data.get("short_term", []):
+            if eff.get("type") == "attribute":
+                attr_effects.append((eff["target"], eff["change"]))
+        # if no attribute effects defined, give a small default penalty for minor injuries
+        if not attr_effects and injury_data.get("severity", "").lower() == "minor":
+            attr_effects.append(("agility", -1))
+        for attr, change in attr_effects:
+            pos = getattr(player, "position", "").upper()
+            pos_key = pos
+            if pos in {"LT", "LG", "C", "RG", "RT"}:
+                pos_key = "OL"
+            elif pos in {"DE", "EDGE", "DT"}:
+                pos_key = "DL"
+            elif pos in {"OLB", "MLB", "LB"}:
+                pos_key = "LB"
+            elif pos in {"FS", "SS", "S"}:
+                pos_key = "S"
+            weight = POSITION_IMPORTANCE.get(pos_key, {}).get(attr, 1.0)
+            player.active_injury_effects.append({
+                "attribute": attr,
+                "change": change * weight,
+                "injury": injury_name,
+            })
 
         print(f"{getattr(player, 'name', 'Player')} {message}: {new_injury}")
         return new_injury
@@ -128,6 +160,8 @@ class InjuryEngine:
                             if hasattr(player, "original_attributes") and attr in player.original_attributes:
                                 attr_dict[attr] = player.original_attributes[attr]
                     player.temporary_effects = []
+                    # Clear active injury penalties
+                    player.active_injury_effects = []
                     if getattr(player, "on_injured_reserve", False):
                         team.remove_player_from_ir(player)
                         print(f"{getattr(player, 'name', 'Player')} has recovered and been activated from IR!")
