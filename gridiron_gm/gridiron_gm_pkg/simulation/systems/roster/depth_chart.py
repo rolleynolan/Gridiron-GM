@@ -89,9 +89,3 @@ def generate_depth_chart(team: Any) -> Dict[str, List[Any]]:
 
     return depth_chart
 
-# When generating a depth chart or active lineup:
-# Example team object for demonstration; replace with your actual team object as needed.
-team = {"roster": []}  # Replace with actual team data
-healthy_roster = get_healthy_players(team.get("roster", []))
-depth_chart = generate_depth_chart(healthy_roster)
-# Or, if your sub_manager uses the full roster, pass only healthy players
