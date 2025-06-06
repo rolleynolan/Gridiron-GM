@@ -117,7 +117,8 @@ class Player:
         if position in ["QB"]:
             attrs = [
                 "throw_power", "throw_accuracy_short", "throw_accuracy_mid", "throw_accuracy_deep",
-                "throw_on_run", "pocket_presence", "release_time", "read_progression", "scramble_tendency"
+                "throw_on_run", "pocket_presence", "release_time", "read_progression", "scramble_tendency", "throwing_footwork",
+                "throw_under_pressure"
             ]
         elif position in ["RB"]:
             attrs = [
