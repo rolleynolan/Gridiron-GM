@@ -7,13 +7,49 @@ from typing import Any, Dict, Iterable
 
 # Basic mapping of position to attributes that can be boosted on a breakout
 POSITION_ATTRIBUTES = {
-    "WR": ["catching", "route_running", "release", "agility", "break_tackle"],
-    "RB": ["speed", "agility", "break_tackle", "carrying", "vision"],
-    "QB": ["accuracy", "throw_power", "awareness"],
-    "TE": ["catching", "route_running", "strength"],
-    "DL": ["power_moves", "finesse_moves", "strength"],
-    "LB": ["tackling", "play_recognition", "block_shed"],
-    "CB": ["coverage", "agility", "awareness"],
+    "WR": [
+        "catching",
+        "route_running_short",
+        "route_running_mid",
+        "route_running_deep",
+        "separation",
+    ],
+    "RB": [
+        "speed",
+        "elusiveness",
+        "break_tackle",
+        "carry_security",
+        "ball_carrier_vision",
+    ],
+    "QB": [
+        "throw_power",
+        "throw_accuracy_short",
+        "throw_accuracy_mid",
+        "throw_accuracy_deep",
+        "awareness",
+    ],
+    "TE": [
+        "catching",
+        "route_running_short",
+        "route_running_mid",
+        "route_running_deep",
+        "strength",
+    ],
+    "DL": [
+        "pass_rush_power",
+        "pass_rush_finesse",
+        "strength",
+    ],
+    "LB": [
+        "tackle_lb",
+        "play_recognition_lb",
+        "block_shedding",
+    ],
+    "CB": [
+        "man_coverage",
+        "zone_coverage",
+        "awareness",
+    ],
 }
 
 
