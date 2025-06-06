@@ -152,20 +152,26 @@ def simulate_pass_play(qb: Any, wr_list: List[Any], depth: str, context: Dict[st
             wr_name: {"receptions": 1, "rec_yards": yards, "player_obj": receiver}
         }
         from .play_time_model import estimate_play_seconds
-        avg_speed = (
-            getattr(qb, "speed", getattr(qb, "overall", 85)) +
-            getattr(receiver, "speed", getattr(receiver, "overall", 85))
-        ) / 2
+        qb_speed = getattr(qb, "get_effective_attribute", None)
+        qb_speed = qb_speed("speed") if qb_speed else getattr(qb, "speed", None)
+        qb_speed = qb_speed or getattr(qb, "overall", 85)
+        rec_speed = getattr(receiver, "get_effective_attribute", None)
+        rec_speed = rec_speed("speed") if rec_speed else getattr(receiver, "speed", None)
+        rec_speed = rec_speed or getattr(receiver, "overall", 85)
+        avg_speed = (qb_speed + rec_speed) / 2
         time = estimate_play_seconds("pass", yards, completed=True, player_speed=avg_speed)
     else:
         yards = 0
         log = f"{sub_log + ' ' if sub_log else ''}{qb_name} attempted a {depth} pass to {wr_name} — incomplete"
         stats = {qb_name: {"pass_attempts": 1, "completions": 0, "player_obj": qb}}
         from .play_time_model import estimate_play_seconds
-        avg_speed = (
-            getattr(qb, "speed", getattr(qb, "overall", 85)) +
-            getattr(receiver, "speed", getattr(receiver, "overall", 85))
-        ) / 2
+        qb_speed = getattr(qb, "get_effective_attribute", None)
+        qb_speed = qb_speed("speed") if qb_speed else getattr(qb, "speed", None)
+        qb_speed = qb_speed or getattr(qb, "overall", 85)
+        rec_speed = getattr(receiver, "get_effective_attribute", None)
+        rec_speed = rec_speed("speed") if rec_speed else getattr(receiver, "speed", None)
+        rec_speed = rec_speed or getattr(receiver, "overall", 85)
+        avg_speed = (qb_speed + rec_speed) / 2
         time = estimate_play_seconds("pass", 0, completed=False, player_speed=avg_speed)
 
     from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.injury_manager import create_injury
@@ -230,7 +236,9 @@ def simulate_run_play(runner: Any, gap: str, context: Dict[str, Any]) -> Dict[st
     log = f"{sub_note} {name} ran {gap} for {yards} yards".strip()
     stats = {name: {"carries": 1, "rush_yards": yards, "player_obj": runner}}
     from .play_time_model import estimate_play_seconds
-    speed = getattr(runner, "speed", getattr(runner, "overall", 85))
+    speed_method = getattr(runner, "get_effective_attribute", None)
+    speed = speed_method("speed") if speed_method else getattr(runner, "speed", None)
+    speed = speed or getattr(runner, "overall", 85)
     time = estimate_play_seconds("run", yards, player_speed=speed)
     return {"yards": yards, "log": log, "player_stats": stats, "seconds_burned": time}
 
@@ -712,14 +720,30 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
         from .play_time_model import estimate_play_seconds
         if play_type == "run":
             runner = next((p for p in offense_lineup if getattr(p, "position", "") == "RB"), None)
-            speed = getattr(runner, "speed", getattr(runner, "overall", 85)) if runner else 85
+            if runner:
+                speed_method = getattr(runner, "get_effective_attribute", None)
+                speed = speed_method("speed") if speed_method else getattr(runner, "speed", None)
+                speed = speed or getattr(runner, "overall", 85)
+            else:
+                speed = 85
             play_seconds = estimate_play_seconds("run", yards_gained, player_speed=speed)
         else:
             qb = next((p for p in offense_lineup if getattr(p, "position", "") == "QB"), None)
             wr = next((p for p in offense_lineup if getattr(p, "position", "") == "WR"), None)
             if qb or wr:
-                avg_speed = ((getattr(qb, "speed", getattr(qb, "overall", 85)) if qb else 85) +
-                             (getattr(wr, "speed", getattr(wr, "overall", 85)) if wr else 85)) / 2
+                if qb:
+                    q_m = getattr(qb, "get_effective_attribute", None)
+                    qb_speed = q_m("speed") if q_m else getattr(qb, "speed", None)
+                    qb_speed = qb_speed or getattr(qb, "overall", 85)
+                else:
+                    qb_speed = 85
+                if wr:
+                    w_m = getattr(wr, "get_effective_attribute", None)
+                    wr_speed = w_m("speed") if w_m else getattr(wr, "speed", None)
+                    wr_speed = wr_speed or getattr(wr, "overall", 85)
+                else:
+                    wr_speed = 85
+                avg_speed = (qb_speed + wr_speed) / 2
             else:
                 avg_speed = 85
             completed = yards_gained > 0 and "Incomplete" not in play_desc

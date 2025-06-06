@@ -22,13 +22,13 @@ class MockPlayer:
         self.position = "WR"
         self.attributes = MockAttributes(
             core={"agility": 88},
-            pos={"catching": 85, "break_tackle": 82},
+            pos={"catching": 85, "separation": 82},
         )
-        self.hidden_caps = {"catching": 95, "agility": 90, "break_tackle": 90}
+        self.hidden_caps = {"catching": 95, "agility": 90, "separation": 90}
         self.scouted_potential = {
             "catching": 92,
             "agility": 89,
-            "break_tackle": 85,
+            "separation": 85,
         }
 
 
@@ -55,13 +55,13 @@ def test_wr_season_progression_integration():
     print("Updated attributes:", player.attributes.core, player.attributes.position_specific)
 
     # Assertions
-    expected_keys = {"catching", "agility", "break_tackle"}
+    expected_keys = {"catching", "agility", "separation"}
     assert set(deltas.keys()) == expected_keys
 
     assert player.attributes.position_specific["catching"] >= 86
     assert player.attributes.core["agility"] >= 89
-    assert player.attributes.position_specific["break_tackle"] >= 83
+    assert player.attributes.position_specific["separation"] >= 83
 
     assert player.attributes.position_specific["catching"] <= player.hidden_caps["catching"]
     assert player.attributes.core["agility"] <= player.hidden_caps["agility"]
-    assert player.attributes.position_specific["break_tackle"] <= player.hidden_caps["break_tackle"]
+    assert player.attributes.position_specific["separation"] <= player.hidden_caps["separation"]

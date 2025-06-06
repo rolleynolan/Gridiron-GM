@@ -20,7 +20,7 @@ def make_league_context(year=2025):
 
 def test_backup_wr_breakout():
     p = Player("Breakout WR", "WR", 24, "2001-01-01", "U", "USA", 11, 72)
-    p.attributes.position_specific = {"catching": 70, "route_running": 70}
+    p.attributes.position_specific = {"catching": 70, "route_running_short": 70}
 
     update_player_stats(p, 1, 2025, {"receiving_yards": 10}, {"offense": 10})
     update_player_stats(
@@ -42,6 +42,8 @@ def test_backup_wr_breakout():
     for attr, inc in boosts.items():
         if attr in p.attributes.position_specific:
             assert p.attributes.position_specific[attr] >= 70 + inc
+        elif attr in p.attributes.core:
+            assert p.attributes.core[attr] >= inc
 
 
 def test_star_wr_no_breakout():
@@ -67,7 +69,12 @@ def test_star_wr_no_breakout():
 
 def test_low_usage_rb_breakout():
     p = Player("Backup RB", "RB", 23, "2002-01-01", "U", "USA", 22, 68)
-    p.attributes.position_specific = {"speed": 80, "agility": 78}
+    p.attributes.core["speed"] = 80
+    p.attributes.core["agility"] = 78
+    p.attributes.position_specific["break_tackle"] = 70
+    p.attributes.position_specific["elusiveness"] = 70
+    p.attributes.position_specific["carry_security"] = 70
+    p.attributes.position_specific["ball_carrier_vision"] = 70
 
     update_player_stats(p, 1, 2025, {"rushing_yards": 30, "rush_attempts": 10}, {"offense": 20})
     update_player_stats(
@@ -89,5 +96,7 @@ def test_low_usage_rb_breakout():
     assert boosts
     for attr, inc in boosts.items():
         if attr in p.attributes.position_specific:
-            assert p.attributes.position_specific[attr] >= 80 - 2 + inc or p.attributes.position_specific[attr] >= 78 + inc
+            assert p.attributes.position_specific[attr] >= inc
+        elif attr in p.attributes.core:
+            assert p.attributes.core[attr] >= inc
 
