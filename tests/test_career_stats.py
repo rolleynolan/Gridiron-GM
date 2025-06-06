@@ -38,7 +38,6 @@ def test_career_stats_aggregation_and_records():
     lb = gw["league_records"]["leaderboards"]["career"]["passing_yards"]
     assert lb[0][0] == p.id and lb[0][1] == 7500
 
-
 def test_career_milestones_once():
     p = Player("Milestone QB", "QB", 30, "1995-01-01", "U", "USA", 2, 80)
     p.season_stats = {
