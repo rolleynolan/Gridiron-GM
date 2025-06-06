@@ -32,6 +32,7 @@ from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.daily_manager import Da
 from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
     evaluate_player_season_progression,
 )
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
 
 
 try:
@@ -282,6 +283,19 @@ class SeasonManager:
                         # Optionally clear injury list or log recovery
                         if hasattr(player, "injuries"):
                             player.injuries.clear()
+
+                # Weekly practice training gains
+                apply_weekly_training(
+                    player,
+                    {
+                        "team": team,
+                        "roster": getattr(team, "roster", []),
+                        "practice_squad": getattr(team, "practice_squad", None),
+                        "coach_quality": getattr(team, "coach_quality", getattr(team, "training_quality", 1.0)),
+                        "week_number": just_ended_week,
+                    },
+                )
+
             # Call fatigue accumulation hook (empty list for heavy_usage_players for now)
             accumulate_season_fatigue_for_team(team, [])
         # Persist standings at the end of the week as well
