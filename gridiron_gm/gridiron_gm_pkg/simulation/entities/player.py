@@ -33,12 +33,35 @@ class Player:
         self.overall = overall
         self.potential = None
 
-        self.attributes = AttributeSet()
+        # --- Universal on-field attributes
+        self.speed = None
+        self.acceleration = None
+        self.agility = None
+        self.strength = None
+        self.awareness = None
+        self.iq = None
+        self.stamina = 80
+        self.toughness = None
+        self.balance = None
+        self.discipline = None
+        self.consistency = None
+
+        # --- Off-field attributes
+        self.motivation = None
+        self.loyalty = None
+        self.ambition = None
+        self.greed = None
+        self.passion = None
+        self.resilience = None
+
+        # Initialize position-specific attributes dictionary
+        self.position_specific = self.init_position_attributes()
+
+        self.attributes = AttributeSet(position_specific=self.position_specific)
         self.dev_arc = DevArc("standard", 0.0)
         self.contract = None
         self.morale = 100
         self.fatigue = 0.0
-        self.stamina = 80
         self.snaps = 0
         self.sub_cooldown = 0
 
@@ -84,6 +107,77 @@ class Player:
         self.scouted_potential = {}
         self.last_attribute_values = {}
         self.no_growth_years = {}
+
+    def init_position_attributes(self):
+        position = self.position.upper()
+        attrs = []
+
+        if position in ["QB"]:
+            attrs = [
+                "throw_power", "throw_accuracy_short", "throw_accuracy_mid", "throw_accuracy_deep",
+                "throw_on_run", "pocket_presence", "release_time", "read_progression", "scramble_tendency"
+            ]
+        elif position in ["RB"]:
+            attrs = [
+                "ball_carrier_vision", "elusiveness", "break_tackle", "trucking", "carry_security",
+                "pass_block", "route_running", "catching"
+            ]
+        elif position in ["WR"]:
+            attrs = [
+                "catching", "catch_in_traffic", "spectacular_catch", "release",
+                "route_running_short", "route_running_mid", "route_running_deep",
+                "separation", "run_blocking"
+            ]
+        elif position in ["TE"]:
+            attrs = [
+                "catching", "catch_in_traffic", "release", "route_running_short",
+                "route_running_mid", "route_running_deep", "separation",
+                "run_blocking", "pass_block", "lead_blocking"
+            ]
+        elif position in ["LT", "LG", "C", "RG", "RT", "OL"]:
+            attrs = [
+                "pass_block", "run_block", "impact_blocking", "block_shed_resistance",
+                "footwork_ol", "lead_blocking"
+            ]
+        elif position in ["EDGE", "DE"]:
+            attrs = [
+                "pass_rush_power", "pass_rush_finesse", "block_shedding", "run_defense",
+                "pursuit_dl", "tackle_dl", "play_recognition", "hands",
+                "hit_power", "strip_ball"
+            ]
+        elif position in ["DT"]:
+            attrs = [
+                "block_shedding", "run_defense", "pass_rush_power", "pass_rush_finesse",
+                "tackle_dl", "pursuit_dl", "play_recognition", "hands",
+                "hit_power", "strip_ball"
+            ]
+        elif position in ["MLB", "OLB", "LB"]:
+            attrs = [
+                "tackle_lb", "block_shedding", "zone_coverage_lb", "man_coverage_lb",
+                "pass_rush_lb", "pursuit_lb", "play_recognition_lb",
+                "catching", "hit_power", "strip_ball"
+            ]
+        elif position in ["CB"]:
+            attrs = [
+                "man_coverage", "zone_coverage", "press", "play_recognition_cb",
+                "catching_cb", "tackle_cb", "pursuit_cb",
+                "hit_power", "strip_ball"
+            ]
+        elif position in ["FS", "SS", "S"]:
+            attrs = [
+                "zone_coverage_s", "man_coverage_s", "tackle_s", "hit_power",
+                "catching_s", "run_support", "play_recognition_s", "strip_ball"
+            ]
+        elif position in ["K"]:
+            attrs = [
+                "kick_power", "kick_accuracy", "kick_consistency", "kick_clutch", "onside_kick_skill"
+            ]
+        elif position in ["P"]:
+            attrs = [
+                "kick_power", "kick_accuracy", "hang_time", "kick_consistency"
+            ]
+
+        return {attr: None for attr in attrs}
 
     def add_trait(self, category, trait):
         if category in self.traits:
@@ -246,6 +340,24 @@ class Player:
             "snaps": self.snaps,
             "snap_counts": self.snap_counts,
             "milestones_hit": list(self.milestones_hit),
+            "speed": self.speed,
+            "acceleration": self.acceleration,
+            "agility": self.agility,
+            "strength": self.strength,
+            "awareness": self.awareness,
+            "iq": self.iq,
+            "stamina": self.stamina,
+            "toughness": self.toughness,
+            "balance": self.balance,
+            "discipline": self.discipline,
+            "consistency": self.consistency,
+            "motivation": self.motivation,
+            "loyalty": self.loyalty,
+            "ambition": self.ambition,
+            "greed": self.greed,
+            "passion": self.passion,
+            "resilience": self.resilience,
+            "position_specific": self.position_specific,
             "rookie_year": self.rookie_year,
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
@@ -287,6 +399,24 @@ class Player:
         player.is_injured = data.get("is_injured", False)
         player.snap_counts = data.get("snap_counts", {})
         player.milestones_hit = set(data.get("milestones_hit", []))
+        player.speed = data.get("speed")
+        player.acceleration = data.get("acceleration")
+        player.agility = data.get("agility")
+        player.strength = data.get("strength")
+        player.awareness = data.get("awareness")
+        player.iq = data.get("iq")
+        player.stamina = data.get("stamina", player.stamina)
+        player.toughness = data.get("toughness")
+        player.balance = data.get("balance")
+        player.discipline = data.get("discipline")
+        player.consistency = data.get("consistency")
+        player.motivation = data.get("motivation")
+        player.loyalty = data.get("loyalty")
+        player.ambition = data.get("ambition")
+        player.greed = data.get("greed")
+        player.passion = data.get("passion")
+        player.resilience = data.get("resilience")
+        player.position_specific = data.get("position_specific", player.position_specific)
         player.hidden_caps = data.get("hidden_caps", {})
         player.scouted_potential = data.get("scouted_potential", {})
         player.last_attribute_values = data.get("last_attribute_values", {})
