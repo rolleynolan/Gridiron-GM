@@ -69,10 +69,10 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
         yac_per = yac / receptions if receptions else 0.0
         if yac_per >= 6:
             _apply("agility", 1)
-            _apply("break_tackle", 1)
+            _apply("separation", 1)
         elif yac_per < 2:
             _apply("agility", -1)
-            _apply("break_tackle", -1)
+            _apply("separation", -1)
 
     # --- Quarterback metrics
     elif position == "QB":
@@ -91,9 +91,9 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
 
         sack_rate = sacks_taken / pass_snaps if pass_snaps else 0
         if sack_rate <= 0.05:
-            _apply("pocket_awareness", 1)
+            _apply("pocket_presence", 1)
         elif sack_rate > 0.10:
-            _apply("pocket_awareness", -1)
+            _apply("pocket_presence", -1)
 
     # --- Running Back metrics
     elif position == "RB":
@@ -113,9 +113,9 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
         touches = attempts + receptions
         fumble_rate = fumbles / touches if touches else 0
         if fumble_rate <= 0.01 and touches >= 50:
-            _apply("carrying", 1)
+            _apply("carry_security", 1)
         elif fumble_rate > 0.03:
-            _apply("carrying", -1)
+            _apply("carry_security", -1)
 
     # --- Offensive Line metrics
     elif position in {"LT", "LG", "C", "RG", "RT", "OL"}:
@@ -133,11 +133,11 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
         snaps = snap_counts.get("pass_rush", snap_counts.get("defense", 0))
         rate = pressures / snaps if snaps else 0
         if rate >= 0.12:
-            _apply("finesse_moves", 1)
-            _apply("power_moves", 1)
+            _apply("pass_rush_finesse", 1)
+            _apply("pass_rush_power", 1)
         elif rate < 0.05 and snaps > 100:
-            _apply("finesse_moves", -1)
-            _apply("power_moves", -1)
+            _apply("pass_rush_finesse", -1)
+            _apply("pass_rush_power", -1)
 
     # --- Linebacker metrics
     elif position in {"LB", "ILB", "OLB"}:
@@ -145,11 +145,11 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
         snaps = snap_counts.get("defense", 0)
         rate = missed / snaps if snaps else 0
         if rate <= 0.05:
-            _apply("tackling", 1)
-            _apply("play_recognition", 1)
+            _apply("tackle_lb", 1)
+            _apply("play_recognition_lb", 1)
         elif rate > 0.15:
-            _apply("tackling", -1)
-            _apply("play_recognition", -1)
+            _apply("tackle_lb", -1)
+            _apply("play_recognition_lb", -1)
 
     # --- Defensive Back metrics
     elif position in {"CB", "S", "DB"}:
@@ -164,9 +164,19 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
             success = 0
             comp_rate = 0
         if success >= 0.25:
-            _apply("coverage", 1)
+            if position == "CB":
+                _apply("man_coverage", 1)
+                _apply("zone_coverage", 1)
+            else:
+                _apply("man_coverage_s", 1)
+                _apply("zone_coverage_s", 1)
         elif comp_rate > 0.75 and targets > 30:
-            _apply("coverage", -1)
+            if position == "CB":
+                _apply("man_coverage", -1)
+                _apply("zone_coverage", -1)
+            else:
+                _apply("man_coverage_s", -1)
+                _apply("zone_coverage_s", -1)
 
     # --- Special Teams metrics
     elif position in {"K", "P", "LS"}:
@@ -181,8 +191,8 @@ def evaluate_player_season_progression(player: Any, season_stats: Dict[str, int]
         elif position == "P":
             avg = season_stats.get("punt_net_avg", season_stats.get("punt_avg", 0))
             if avg >= 45:
-                _apply("punt_power", 1)
+                _apply("kick_power", 1)
             elif avg < 40 and snap_counts.get("special_teams", 0) > 40:
-                _apply("punt_power", -1)
+                _apply("kick_power", -1)
 
     return deltas
