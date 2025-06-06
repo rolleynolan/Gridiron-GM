@@ -488,7 +488,9 @@ class SeasonManager:
                 if isinstance(raw_stats, dict) and year_key in raw_stats:
                     year_data = raw_stats[year_key]
                     season_stats = year_data.get("season_totals", {})
-                    if not year_data.get("career_added"):
+                    if hasattr(player, "update_career_stats_from_season"):
+                        player.update_career_stats_from_season(year_key, getattr(self, "game_world", None))
+                    elif not year_data.get("career_added"):
                         from gridiron_gm.gridiron_gm_pkg.stats.player_stat_manager import update_career_stats
                         update_career_stats(player, season_stats)
                         year_data["career_added"] = True
