@@ -79,7 +79,7 @@ class Player:
         self.on_injured_reserve = False
         self.is_injured = False
         # Track active temporary penalties from injuries
-        self.active_injury_effects = []
+        self.active_injury_effects = {}
 
         self.traits = {
             "training": [],
@@ -109,6 +109,8 @@ class Player:
         self.scouted_potential = {}
         self.last_attribute_values = {}
         self.no_growth_years = {}
+        # Track periodic snapshots of attributes
+        self.progress_history = {}
 
     def init_position_attributes(self):
         position = self.position.upper()
@@ -336,10 +338,14 @@ class Player:
         if base is None:
             return None
 
+        effects = getattr(self, "active_injury_effects", {})
         penalty = 0
-        for eff in getattr(self, "active_injury_effects", []):
-            if eff.get("attribute") == attr:
-                penalty += eff.get("change", 0)
+        if isinstance(effects, dict):
+            penalty = effects.get(attr, 0)
+        else:
+            for eff in effects:
+                if isinstance(eff, dict) and eff.get("attribute") == attr:
+                    penalty += eff.get("change", 0)
 
         return base + penalty
 
@@ -400,7 +406,8 @@ class Player:
             "hidden_caps": self.hidden_caps,
             "scouted_potential": self.scouted_potential,
             "last_attribute_values": self.last_attribute_values,
-            "no_growth_years": self.no_growth_years
+            "no_growth_years": self.no_growth_years,
+            "progress_history": self.progress_history
         }
 
     @staticmethod
@@ -458,6 +465,7 @@ class Player:
         player.scouted_potential = data.get("scouted_potential", {})
         player.last_attribute_values = data.get("last_attribute_values", {})
         player.no_growth_years = data.get("no_growth_years", {})
+        player.progress_history = data.get("progress_history", {})
         return player
 
 def ensure_player_objects(team):
@@ -469,3 +477,4 @@ def ensure_player_objects(team):
         else:
             new_roster.append(p)
     team.roster = new_roster
+

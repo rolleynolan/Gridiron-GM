@@ -9,6 +9,14 @@ TRAINING_CATALOG = {
         },
         "injury_chance": 0.002,
     },
+    "QB Accuracy": {
+        "positions": ["QB"],
+        "attribute_weights": {
+            "throw_accuracy_short": 1.0,
+            "throw_power": 0.5,
+        },
+        "injury_chance": 0.002,
+    },
     "QB Scramble Drill": {
         "positions": ["QB"],
         "attribute_weights": {
@@ -547,6 +555,11 @@ TRAINING_CATALOG = {
             "agility": 1.0,
             "balance": 0.5,
         },
+        "injury_chance": 0.005,
+    },
+    "Strength Circuit": {
+        "positions": "ALL",
+        "attribute_weights": {"strength": 1.0},
         "injury_chance": 0.005,
     },
     "Walkthrough Practice": {
