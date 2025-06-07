@@ -300,30 +300,46 @@ TRAINING_CATALOG = {
     "DL Hand Combat": {
         "positions": ["DL"],
         "attribute_weights": {
-            "strength": 0.9,
-            "discipline": 0.5,
+            "hands": 0.9,
+            "block_shedding": 0.5,
         },
         "injury_chance": 0.005,
     },
-    "DL Burst Drill": {
+    "DL Tackling Practice": {
         "positions": ["DL"],
         "attribute_weights": {
-            "acceleration": 1.0,
-            "agility": 0.5,
+            "tackle_dl": 1.0,
+            "hit_power": 0.5,
         },
         "injury_chance": 0.006,
     },
     "DL Gap Control": {
         "positions": ["DL"],
         "attribute_weights": {
-            "awareness": 0.6,
-            "discipline": 0.5,
+            "block_shedding": 0.5,
+            "play_recognition": 0.5,
+        },
+        "injury_chance": 0.004,
+    },
+    "DL Pass Rush Moves": {
+        "positions": ["DL"],
+        "attribute_weights": {
+            "pass_rush_power": 0.5,
+            "pass_rush_finesse": 0.5,
+        },
+        "injury_chance": 0.005,
+    },
+    "DL Chase & Pursuit": {
+        "positions": ["DL"],
+        "attribute_weights": {
+            "pursuit": 0.7,
+            "acceleration": 0.5,
         },
         "injury_chance": 0.004,
     },
 
     # === Linebacker ===
-    "LB Tackle Fit": {
+    "LB Tackle Drill": {
         "positions": ["LB"],
         "attribute_weights": {
             "tackle_lb": 1.0,
@@ -334,26 +350,60 @@ TRAINING_CATALOG = {
     "LB Coverage Drops": {
         "positions": ["LB"],
         "attribute_weights": {
-            "coverage_zone": 1.0,
-            "awareness": 0.5,
+            "zone_coverage_lb": 1.0,
+            "catching": 0.5,
+            "awareness": 0.4,
         },
         "injury_chance": 0.003,
     },
     "LB Blitz Timing": {
         "positions": ["LB"],
         "attribute_weights": {
-            "acceleration": 1.0,
-            "discipline": 0.4,
+            "acceleration": 0.8,
+            "block_shedding": 0.4,
         },
         "injury_chance": 0.005,
     },
+    "LB Gap Assignment": {
+        "positions": ["LB"],
+        "attribute_weights": {
+            "play_recognition": 0.6,
+            "awareness": 0.4,
+        },
+        "injury_chance": 0.004,
+    },
+    "LB Coverage Technique": {
+        "positions": ["LB"],
+        "attribute_weights": {
+            "zone_coverage_lb": 0.5,
+            "man_coverage_lb": 0.5,
+        },
+        "injury_chance": 0.003,
+    },
+    "LB Pass Rush Technique": {
+        "positions": ["LB"],
+        "attribute_weights": {
+            "pass_rush_lb": 1.0,
+            "pursuit": 0.5,
+        },
+        "injury_chance": 0.005,
+    },
+    "LB Hit Technique": {
+        "positions": ["LB"],
+        "attribute_weights": {
+            "hit_power": 0.8,
+            "tackle_lb": 0.5,
+        },
+        "injury_chance": 0.006,
+    },
+    
 
     # === Defensive Back ===
     "DB Press Jam": {
         "positions": ["CB", "S"],
         "attribute_weights": {
-            "strength": 0.8,
-            "coverage_man": 1.0,
+            "press": 0.7,
+            "coverage_man": 0.5,
         },
         "injury_chance": 0.004,
     },
@@ -373,21 +423,93 @@ TRAINING_CATALOG = {
         },
         "injury_chance": 0.002,
     },
+    "DB Zone Assignment": {
+        "positions": ["CB", "S"],
+        "attribute_weights": {
+            "zone_coverage_db": 0.8,
+            "awareness": 0.5,
+        },
+        "injury_chance": 0.003,
+    },
+    "DB Interception Drills": {
+        "positions": ["CB", "S"],
+        "attribute_weights": {
+            "catching": 0.8,
+            "zone_coverage": 0.2,
+            "man_coverage": 0.2,
+        },
+        "injury_chance": 0.002,
+    },
+    "DB Man Coverage Technique": {
+        "positions": ["CB", "S"],
+        "attribute_weights": { 
+            "man_coverage_db": 1.0,
+            "play_recognition": 0.4,
+        },
+        "injury_chance": 0.003,
+    },
+    "DB Tackling Technique": {
+        "positions": ["CB", "S"],
+        "attribute_weights": {
+            "tackle_db": 0.8,
+            "hit_power": 0.4,
+        },
+        "injury_chance": 0.005,
+    },
+    "DB Hard Hitting Drills": {
+        "positions": ["CB", "S"],
+        "attribute_weights": {
+            "hit_power": 0.8,
+            "tackle_db": 0.4,
+        },
+        "injury_chance": 0.006,
+    },
 
     # === Specialists ===
     "K Accuracy Drill": {
         "positions": ["K"],
         "attribute_weights": {
-            "discipline": 0.7,
-            "awareness": 0.4,
+            "kick_accuracy": 1.0,
+            "kick_consistency": 0.5,
+        },
+        "injury_chance": 0.001,
+    },
+    "K Long Field Goal Drill": {
+        "positions": ["K"],
+        "attribute_weights": {
+            "kick_power": 0.8,
+            "kick_accuracy": 0.5,
+        },
+        "injury_chance": 0.002,
+    },
+    "K Onside Kickoff Technique": {
+        "positions": ["K"],
+        "attribute_weights": {
+            "onside_kick_accuracy": 1.0,
         },
         "injury_chance": 0.001,
     },
     "P Directional Kick": {
         "positions": ["P"],
         "attribute_weights": {
-            "discipline": 0.6,
-            "awareness": 0.5,
+            "kick_accuracy": 0.8,
+            "hang_time": 0.5,
+        },
+        "injury_chance": 0.001,
+    },
+    "P Hang Time Drill": {
+        "positions": ["P"],
+        "attribute_weights": {
+            "hang_time": 1.0,
+            "kick_power": 0.5,
+        },
+        "injury_chance": 0.001,
+    },
+    "P Target Punting": {
+        "positions": ["P"],
+        "attribute_weights": {
+            "kick_accuracy": 0.6,
+            "kick_consistency": 0.6,
         },
         "injury_chance": 0.001,
     },
@@ -407,6 +529,7 @@ TRAINING_CATALOG = {
         "attribute_weights": {
             "iq": 1.0,
             "awareness": 0.5,
+            "play_recognition": 0.5,
         },
         "injury_chance": 0.0,
     },
