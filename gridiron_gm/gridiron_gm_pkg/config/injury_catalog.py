@@ -89,7 +89,10 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "back", "change": 10, "duration": "season", "notes": "Recurring minor back pain"}
         ],
-        "short_term": [{"type": "attribute", "target": "strength", "change": -2}],
+        "short_term": [
+            {"type": "attribute", "target": "strength", "change": -2},
+            {"type": "attribute", "target": "throw_power", "change": -2}
+        ],
         "career_ending": False,
         "injury_context": "on_field"
     },
@@ -188,7 +191,10 @@ INJURY_CATALOG = {
         "long_term": [
             {"type": "recurrence", "target": "shoulder", "change": 20, "duration": "career", "notes": "Shoulder instability"}
         ],
-        "short_term": [{"type": "attribute", "target": "strength", "change": -2}],
+        "short_term": [
+            {"type": "attribute", "target": "strength", "change": -2},
+            {"type": "attribute", "target": "throw_power", "change": -2}
+        ],
         "career_ending": False,
         "injury_context": "on_field"
     },
