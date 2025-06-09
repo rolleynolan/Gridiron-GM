@@ -114,10 +114,8 @@ class Player:
         self.progress_history = {}
 
         # --- Procedural DNA profile ---
-        self.dna = PlayerDNA()
-        self.hidden_caps = self.dna.apply_mutation_effects(self.dna.attribute_caps)
-        for trait in self.dna.traits:
-            self.traits.setdefault("mental", []).append(trait)
+        self.dna = PlayerDNA.generate_random_dna(self.position)
+        self.hidden_caps = self.dna.max_attribute_caps.copy()
 
     def init_position_attributes(self):
         position = self.position.upper()
@@ -479,9 +477,9 @@ class Player:
         if dna_data:
             player.dna = PlayerDNA.from_dict(dna_data)
         else:
-            player.dna = PlayerDNA()
+            player.dna = PlayerDNA.generate_random_dna(player.position)
         if not player.hidden_caps:
-            player.hidden_caps = player.dna.apply_mutation_effects(player.dna.attribute_caps)
+            player.hidden_caps = player.dna.max_attribute_caps.copy()
         return player
 
 def ensure_player_objects(team):

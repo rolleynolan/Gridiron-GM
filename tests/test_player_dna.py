@@ -1,4 +1,3 @@
-import random
 from pathlib import Path
 import sys
 
@@ -15,41 +14,12 @@ def test_player_has_dna_on_creation():
 
 
 def test_mutation_application():
-    dna = PlayerDNA()
-    dna.mutation = "Physical Freak"
-    caps = {"speed": 90, "strength": 80}
-    boosted = dna.apply_mutation_effects(caps)
-    assert boosted["speed"] >= 90
-    assert boosted["strength"] >= 80
-
-
-def _generate_growth_curve(dna: PlayerDNA, years: int = 15) -> list[tuple[int, float]]:
-    """Return age-rating pairs for a simple growth curve based on dna.growth_type."""
-    rating = 50.0
-    curve = []
-    for year in range(years):
-        age = 20 + year
-        if dna.growth_type == "early_peak":
-            if year < 4:
-                rating += dna.dev_speed * 3
-            elif year < 8:
-                rating += dna.dev_speed
-            else:
-                rating -= dna.dev_speed * 1.5
-        elif dna.growth_type == "late_bloomer":
-            if year < 6:
-                rating += dna.dev_speed
-            elif year < 10:
-                rating += dna.dev_speed * 3
-            else:
-                rating -= dna.dev_speed * 1.5
-        elif dna.growth_type == "rollercoaster":
-            rating += random.choice([-2, 2]) * dna.dev_speed
-        else:  # flatline
-            rating += dna.dev_speed
-        rating = max(40.0, min(99.0, rating))
-        curve.append((age, rating))
-    return curve
+    dna = PlayerDNA.generate_random_dna("QB")
+    dna.mutations = ["Physical Freak"]
+    dna.max_attribute_caps = {"speed": 90, "strength": 80}
+    dna.apply_mutation_effects()
+    assert dna.max_attribute_caps["speed"] >= 90
+    assert dna.max_attribute_caps["strength"] >= 80
 
 
 def test_generate_player_growth_tables(tmp_path):
@@ -61,21 +31,21 @@ def test_generate_player_growth_tables(tmp_path):
 
     table_rows = []
     for p in players:
-        curve = _generate_growth_curve(p.dna)
-        df = pd.DataFrame(curve, columns=["Age", "Rating"])
+        df = pd.DataFrame(sorted(p.dna.growth_curve.items()), columns=["Age", "Multiplier"])
         df.to_csv(tmp_path / f"{p.id}_growth.csv", index=False)
-        plt.plot(df["Age"], df["Rating"], label=p.name)
+        plt.plot(df["Age"], df["Multiplier"], label=p.name)
         table_rows.append({
             "Name": p.name,
-            "Mutation": p.dna.mutation or "None",
-            "Growth Type": p.dna.growth_type,
-            "Caps": p.dna.attribute_caps,
+            "Mutation": ",".join(p.dna.mutations) if p.dna.mutations else "None",
+            "DevSpeed": p.dna.development_speed,
+            "Regression": p.dna.regression_rate,
+            "PeakAge": p.dna.peak_age,
         })
 
     plt.legend()
     plt.xlabel("Age")
-    plt.ylabel("Rating")
-    plt.title("Player Growth Curves")
+    plt.ylabel("Growth Multiplier")
+    plt.title("Player DNA Curves")
     plt.tight_layout()
     plt.savefig(tmp_path / "growth_curves.png")
 
