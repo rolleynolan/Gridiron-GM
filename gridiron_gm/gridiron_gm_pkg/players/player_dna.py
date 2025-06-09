@@ -36,12 +36,13 @@ DNA_MUTATIONS: Dict[str, Dict] = {
     },
 }
 
+from typing import Iterable, Optional, Dict
 # === Growth Curve Generation ===
 def generate_growth_curve(
     min_age: int = 20,
     max_age: int = 40,
-    peak_age: int | None = None,
-    peak_duration: int | None = None,
+    peak_age: Optional[int] = None,
+    peak_duration: Optional[int] = None,
 ) -> Dict[int, float]:
     """Return a per-age growth multiplier curve."""
     if max_age <= min_age:
