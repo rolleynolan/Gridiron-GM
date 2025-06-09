@@ -75,3 +75,108 @@ def test_growth_curve_has_peak_and_decline():
 
     assert ascending and descending
 
+
+def test_career_progression_simulation(tmp_path):
+    """Simulate career progression for environment groups A/B/C."""
+    import copy
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    groups = {
+        "A": {"xp_factor": 1.5},
+        "B": {"xp_factor": 1.0},
+        "C": {"xp_factor": 0.5},
+    }
+
+    # Create base DNA for each group and shallow clone to players
+    for g in groups:
+        groups[g]["dna"] = PlayerDNA.generate_random_dna("QB")
+        groups[g]["players"] = []
+        for i in range(5):
+            p = Player(f"{g}_QB_{i}", "QB", 20, "2005-01-01", "U", "USA", i, 50)
+            p.dna = copy.copy(groups[g]["dna"])
+            p.speed = 50
+            p.throw_power = 50
+            p.awareness = 50
+            groups[g]["players"].append(p)
+
+    log_rows = []
+    for age in range(20, 36):
+        for g, info in groups.items():
+            xp = 100 * info["xp_factor"]
+            for p in info["players"]:
+                growth = p.dna.growth_curve.get(age, 1.0)
+                mult = growth * p.dna.development_speed
+                gain = (xp * mult) / 100.0
+                if growth < 1.0:
+                    gain -= p.dna.regression_rate
+
+                for attr in ["speed", "throw_power", "awareness"]:
+                    cap = p.dna.max_attribute_caps.get(attr, 99)
+                    val = getattr(p, attr) + gain
+                    setattr(p, attr, min(cap, val))
+
+                ovr = round((p.speed + p.throw_power + p.awareness) / 3, 2)
+                log_rows.append(
+                    {
+                        "player_id": p.id,
+                        "group": g,
+                        "age": age,
+                        "ovr": ovr,
+                        "speed": p.speed,
+                        "throw_power": p.throw_power,
+                        "awareness": p.awareness,
+                        "growth_multiplier": round(mult, 3),
+                        "net_gain": round(gain, 3),
+                    }
+                )
+
+    df = pd.DataFrame(log_rows)
+    df.to_csv(tmp_path / "career_log.csv", index=False)
+
+    # OVR progression per group
+    plt.figure()
+    for g in groups:
+        avg_ovr = df[df["group"] == g].groupby("age")["ovr"].mean()
+        plt.plot(avg_ovr.index, avg_ovr.values, label=f"Group {g}")
+    plt.xlabel("Age")
+    plt.ylabel("OVR")
+    plt.legend()
+    plt.title("OVR Progression by Group")
+    plt.tight_layout()
+    plt.savefig(tmp_path / "ovr_by_age.png")
+    plt.close()
+
+    # Attribute growth comparison
+    plt.figure()
+    final_attrs = (
+        df[df["age"] == 35]
+        .groupby("group")[["speed", "throw_power", "awareness"]]
+        .mean()
+    )
+    final_attrs.plot(kind="bar")
+    plt.ylabel("Rating")
+    plt.title("Final Attribute Ratings by Group")
+    plt.tight_layout()
+    plt.savefig(tmp_path / "attr_growth.png")
+    plt.close()
+
+    # DNA growth curves
+    plt.figure()
+    for g, info in groups.items():
+        ages = sorted(info["dna"].growth_curve)
+        vals = [info["dna"].growth_curve[a] for a in ages]
+        plt.plot(ages, vals, label=f"Group {g}")
+    plt.xlabel("Age")
+    plt.ylabel("Multiplier")
+    plt.legend()
+    plt.title("DNA Growth Curves")
+    plt.tight_layout()
+    plt.savefig(tmp_path / "growth_curves_groups.png")
+    plt.close()
+
+    # Basic checks
+    assert len(df) == 240
+    for fn in ["career_log.csv", "ovr_by_age.png", "attr_growth.png", "growth_curves_groups.png"]:
+        assert (tmp_path / fn).exists()
+
