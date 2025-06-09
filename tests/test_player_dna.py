@@ -57,3 +57,21 @@ def test_generate_player_growth_tables(tmp_path):
     for p in players:
         assert (tmp_path / f"{p.id}_growth.csv").exists()
 
+
+def test_growth_curve_has_peak_and_decline():
+    dna = PlayerDNA.generate_random_dna("QB")
+    curve = dna.growth_curve
+    ages = sorted(curve)
+    peak = dna.peak_age
+
+    # Ascending portion up to the peak
+    ascending = all(
+        curve[a] <= curve[min(peak, a + 1)] + 0.05 for a in ages if a < peak
+    )
+    # Descending portion after the peak
+    descending = all(
+        curve[a] >= curve[min(ages[-1], a + 1)] - 0.05 for a in ages if a >= peak
+    )
+
+    assert ascending and descending
+

@@ -1,46 +1,68 @@
+"""DNA-driven weekly player progression system."""
+
+from __future__ import annotations
+
+import random
+from typing import Dict
+
 from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import (
+    PHYSICAL_ATTRIBUTES,
+)
 
-# Growth curve by age: multiplier for growth/regression
-GROWTH_CURVE = {
-    20: 1.2, 21: 1.2, 22: 1.1, 23: 1.1, 24: 1.0, 25: 0.9,
-    26: 0.8, 27: 0.7, 28: 0.6, 29: 0.5,
-    30: 0.0, 31: -0.2, 32: -0.3, 33: -0.5, 34: -0.7, 35: -1.0,
-}
-def get_growth_multiplier(age):
-    return GROWTH_CURVE.get(age, -1.0 if age > 35 else 1.0)
+# === Tunable parameters ===
+BASE_XP = 0.1  # default weekly XP if none supplied
+PHYSICAL_MULTIPLIER = 1.2  # faster change for physical attributes
+MENTAL_TECH_MULTIPLIER = 0.5  # slower change for mental/technical attributes
+NOISE_RANGE = (-0.02, 0.02)  # random variation added to each gain
 
-def progress_player(player: Player, performance_stats: dict, context="season"):
+
+def _clamp(value: float, low: float = 40.0, high: float = 99.0) -> float:
+    """Clamp ``value`` within ``low``..``high``."""
+
+    return max(low, min(high, value))
+
+
+def progress_player(player: Player, xp_gains: Dict[str, float] | None = None) -> Player:
+    """Update a player's attributes using their DNA growth curve.
+
+    Parameters
+    ----------
+    player:
+        Player instance with ``dna`` and ``attributes`` fields.
+    xp_gains:
+        Optional mapping of attribute names to weekly XP earned from
+        training or in-game performance.
+
+    Returns
+    -------
+    Player
+        The mutated player object.
     """
-    Progress a player based on their growth curve, potential, and performance.
-    """
-    # --- Growth Curve
+
+    xp_gains = xp_gains or {}
+    attrs = getattr(player, "attributes", None)
+    dna = getattr(player, "dna", None)
+    if attrs is None or dna is None:
+        return player
+
+    dev_speed = getattr(dna, "development_speed", 1.0)
     age = getattr(player, "age", 25)
-    growth_mult = get_growth_multiplier(age)
-    
-    # --- Potential Ceiling
-    potential = getattr(player, "potential", 80)
-    current_ovr = player.overall
+    age_mult = dna.growth_curve.get(age, 1.0)
+    if age_mult < 0:
+        age_mult *= getattr(dna, "regression_rate", 1.0)
 
-    # --- Performance Impact
-    td = performance_stats.get("touchdowns", 0)
-    yards = performance_stats.get("yards", 0)
-    stat_growth = 0
-    if td >= 10:
-        stat_growth += 1
-    if yards >= 1000:
-        stat_growth += 1
+    def _apply(container: Dict[str, float]) -> None:
+        for attr, value in container.items():
+            base_gain = xp_gains.get(attr, BASE_XP)
+            net = base_gain * age_mult * dev_speed
+            if attr in PHYSICAL_ATTRIBUTES:
+                net *= PHYSICAL_MULTIPLIER
+            else:
+                net *= MENTAL_TECH_MULTIPLIER
+            net *= random.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
+            container[attr] = round(_clamp(value + net), 2)
 
-    # --- Actual Growth Calculation
-    # If aging, negative multiplier; if young, positive. Stats and potential modulate.
-    projected_growth = int(stat_growth * growth_mult)
-    if current_ovr + projected_growth > potential:
-        projected_growth = potential - current_ovr
-    elif current_ovr + projected_growth < 40:
-        projected_growth = 40 - current_ovr
-
-    # --- Apply Growth
-    player.overall = min(max(current_ovr + projected_growth, 40), 99)
-
-    # Optionally add morale, trait, injury, or training influences here
-
+    _apply(getattr(attrs, "core", {}))
+    _apply(getattr(attrs, "position_specific", {}))
     return player

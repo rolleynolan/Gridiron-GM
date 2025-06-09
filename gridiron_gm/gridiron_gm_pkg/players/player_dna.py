@@ -37,22 +37,7 @@ DNA_MUTATIONS: Dict[str, Dict] = {
 }
 
 from typing import Iterable, Optional, Dict
-# === Growth Curve Generation ===
-def generate_growth_curve(
-    min_age: int = 20,
-    max_age: int = 40,
-    peak_age: Optional[int] = None,
-    peak_duration: Optional[int] = None,
-) -> Dict[int, float]:
-    """Return a per-age growth multiplier curve."""
-    if max_age <= min_age:
-        raise ValueError("max_age must be greater than min_age")
 
-    peak_age = peak_age or int(max(min(random.gauss(27, 2), 32), 22))
-    plateau_years = peak_duration or random.randint(1, 4)
-
-    growth_speed = random.choice([0.8, 1.0, 1.2])
-    
 # === PLAYER TRAITS ===
 PLAYER_TRAITS = [
     "Leader",
@@ -155,7 +140,12 @@ class PlayerDNA:
         return obj
 
 
-def generate_growth_curve(min_age: int = 20, max_age: int = 34) -> Dict[int, float]:
+def generate_growth_curve(
+    min_age: int = 20,
+    max_age: int = 34,
+    peak_age: Optional[int] = None,
+    peak_duration: Optional[int] = None,
+) -> Dict[int, float]:
     """Return a growth multiplier curve keyed by age.
 
     The curve has an ascension phase leading into a short prime plateau followed
@@ -168,8 +158,8 @@ def generate_growth_curve(min_age: int = 20, max_age: int = 34) -> Dict[int, flo
         raise ValueError("max_age must be greater than min_age")
 
     # --- Key parameters
-    peak_age = int(max(min(random.gauss(27, 2), 32), 22))
-    plateau_years = random.randint(1, 4)
+    peak_age = peak_age or int(max(min(random.gauss(27, 2), 32), 22))
+    plateau_years = peak_duration or random.randint(1, 4)
 
     growth_speed = random.choice([0.8, 1.0, 1.2])  # slow/med/fast
     decline_speed = random.choice([0.8, 1.0, 1.2, 1.4])
