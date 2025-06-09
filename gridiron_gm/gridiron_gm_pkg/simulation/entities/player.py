@@ -2,6 +2,7 @@ import datetime
 from uuid import uuid4
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
+from gridiron_gm.gridiron_gm_pkg.players.player_dna import PlayerDNA
 
 @dataclass
 class DevArc:
@@ -111,6 +112,10 @@ class Player:
         self.no_growth_years = {}
         # Track periodic snapshots of attributes
         self.progress_history = {}
+
+        # --- Procedural DNA profile ---
+        self.dna = PlayerDNA.generate_random_dna(self.position)
+        self.hidden_caps = self.dna.max_attribute_caps.copy()
 
     def init_position_attributes(self):
         position = self.position.upper()
@@ -407,7 +412,8 @@ class Player:
             "scouted_potential": self.scouted_potential,
             "last_attribute_values": self.last_attribute_values,
             "no_growth_years": self.no_growth_years,
-            "progress_history": self.progress_history
+            "progress_history": self.progress_history,
+            "dna": self.dna.to_dict() if hasattr(self, "dna") else None,
         }
 
     @staticmethod
@@ -466,6 +472,14 @@ class Player:
         player.last_attribute_values = data.get("last_attribute_values", {})
         player.no_growth_years = data.get("no_growth_years", {})
         player.progress_history = data.get("progress_history", {})
+
+        dna_data = data.get("dna")
+        if dna_data:
+            player.dna = PlayerDNA.from_dict(dna_data)
+        else:
+            player.dna = PlayerDNA.generate_random_dna(player.position)
+        if not player.hidden_caps:
+            player.hidden_caps = player.dna.max_attribute_caps.copy()
         return player
 
 def ensure_player_objects(team):
