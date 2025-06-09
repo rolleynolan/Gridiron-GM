@@ -52,6 +52,7 @@ def generate_growth_curve(
     plateau_years = peak_duration or random.randint(1, 4)
 
     growth_speed = random.choice([0.8, 1.0, 1.2])
+    
 # === PLAYER TRAITS ===
 PLAYER_TRAITS = [
     "Leader",
