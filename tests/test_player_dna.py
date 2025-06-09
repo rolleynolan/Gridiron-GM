@@ -22,8 +22,6 @@ def test_mutation_application():
     assert dna.max_attribute_caps["strength"] >= 80
 
 
-
-
 def test_generate_player_growth_tables(tmp_path):
     """Generate sample players and output growth and attribute tables."""
     import pandas as pd
