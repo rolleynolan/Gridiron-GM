@@ -4,16 +4,34 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 from gridiron_gm.gridiron_gm_pkg.players.player_dna import PlayerDNA
 
+# Generic attributes shared by all players
+CORE_ATTRIBUTES = [
+    "speed",
+    "acceleration",
+    "agility",
+    "strength",
+    "awareness",
+    "iq",
+    "stamina",
+    "toughness",
+    "balance",
+    "discipline",
+    "consistency",
+]
+
+
 @dataclass
 class DevArc:
     type: str
     current_progress: float
     milestones: List[str] = field(default_factory=list)
 
+
 @dataclass
 class AttributeSet:
     core: Dict[str, int] = field(default_factory=dict)
     position_specific: Dict[str, int] = field(default_factory=dict)
+
 
 @dataclass
 class Contract:
@@ -21,8 +39,20 @@ class Contract:
     salary_per_year: int
     bonuses: Dict[str, int] = field(default_factory=dict)
 
+
 class Player:
-    def __init__(self, name, position, age, dob, college, birth_location, jersey_number, overall, potential=None):
+    def __init__(
+        self,
+        name,
+        position,
+        age,
+        dob,
+        college,
+        birth_location,
+        jersey_number,
+        overall,
+        potential=None,
+    ):
         self.id = str(uuid4())
         self.name = name
         self.position = position
@@ -55,10 +85,12 @@ class Player:
         self.passion = None
         self.resilience = None
 
-        # Initialize position-specific attributes dictionary
-        self.position_specific = self.init_position_attributes()
+        # Initialize attribute containers
+        core_attrs = self.init_core_attributes()
+        pos_attrs = self.init_position_attributes()
 
-        self.attributes = AttributeSet(position_specific=self.position_specific)
+        self.position_specific = pos_attrs
+        self.attributes = AttributeSet(core=core_attrs, position_specific=pos_attrs)
         self.dev_arc = DevArc("standard", 0.0)
         self.contract = None
         self.morale = 100
@@ -87,7 +119,7 @@ class Player:
             "gameday": [],
             "physical": [],
             "mental": [],
-            "media": []
+            "media": [],
         }
 
         self.skills = {}
@@ -115,7 +147,16 @@ class Player:
 
         # --- Procedural DNA profile ---
         self.dna = PlayerDNA.generate_random_dna(self.position)
-        self.hidden_caps = self.dna.max_attribute_caps.copy()
+        self.hidden_caps = {
+            k: v["hard_cap"] for k, v in self.dna.attribute_caps.items()
+        }
+        self.scouted_potential = self.dna.scouted_caps.copy()
+
+    def init_core_attributes(self):
+        """Return baseline attribute mapping common to all players."""
+        core = {attr: None for attr in CORE_ATTRIBUTES}
+        core["stamina"] = self.stamina
+        return core
 
     def init_position_attributes(self):
         position = self.position.upper()
@@ -123,69 +164,135 @@ class Player:
 
         if position in ["QB"]:
             attrs = [
-                "throw_power", "throw_accuracy_short", "throw_accuracy_mid", "throw_accuracy_deep",
-                "throw_on_run", "pocket_presence", "release_time", "read_progression", "scramble_tendency", "throwing_footwork",
-                "throw_under_pressure"
+                "throw_power",
+                "throw_accuracy_short",
+                "throw_accuracy_mid",
+                "throw_accuracy_deep",
+                "throw_on_run",
+                "pocket_presence",
+                "release_time",
+                "read_progression",
+                "scramble_tendency",
+                "throwing_footwork",
+                "throw_under_pressure",
             ]
         elif position in ["RB"]:
             attrs = [
-                "ball_carrier_vision", "elusiveness", "break_tackle", "trucking", "carry_security",
-                "pass_block", "route_running", "catching"
+                "ball_carrier_vision",
+                "elusiveness",
+                "break_tackle",
+                "trucking",
+                "carry_security",
+                "pass_block",
+                "route_running",
+                "catching",
             ]
         elif position in ["WR"]:
             attrs = [
-                "catching", "catch_in_traffic", "spectacular_catch", "release",
-                "route_running_short", "route_running_mid", "route_running_deep",
-                "separation", "run_blocking"
+                "catching",
+                "catch_in_traffic",
+                "spectacular_catch",
+                "release",
+                "route_running_short",
+                "route_running_mid",
+                "route_running_deep",
+                "separation",
+                "run_blocking",
             ]
         elif position in ["TE"]:
             attrs = [
-                "catching", "catch_in_traffic", "release", "route_running_short",
-                "route_running_mid", "route_running_deep", "separation",
-                "run_blocking", "pass_block", "lead_blocking"
+                "catching",
+                "catch_in_traffic",
+                "release",
+                "route_running_short",
+                "route_running_mid",
+                "route_running_deep",
+                "separation",
+                "run_blocking",
+                "pass_block",
+                "lead_blocking",
             ]
         elif position in ["LT", "LG", "C", "RG", "RT", "OL"]:
             attrs = [
-                "pass_block", "run_block", "impact_blocking", "block_shed_resistance",
-                "footwork_ol", "lead_blocking"
+                "pass_block",
+                "run_block",
+                "impact_blocking",
+                "block_shed_resistance",
+                "footwork_ol",
+                "lead_blocking",
             ]
         elif position in ["EDGE", "DE"]:
             attrs = [
-                "pass_rush_power", "pass_rush_finesse", "block_shedding", "run_defense",
-                "pursuit_dl", "tackle_dl", "play_recognition", "hands",
-                "hit_power", "strip_ball"
+                "pass_rush_power",
+                "pass_rush_finesse",
+                "block_shedding",
+                "run_defense",
+                "pursuit_dl",
+                "tackle_dl",
+                "play_recognition",
+                "hands",
+                "hit_power",
+                "strip_ball",
             ]
         elif position in ["DT"]:
             attrs = [
-                "block_shedding", "run_defense", "pass_rush_power", "pass_rush_finesse",
-                "tackle_dl", "pursuit_dl", "play_recognition", "hands",
-                "hit_power", "strip_ball"
+                "block_shedding",
+                "run_defense",
+                "pass_rush_power",
+                "pass_rush_finesse",
+                "tackle_dl",
+                "pursuit_dl",
+                "play_recognition",
+                "hands",
+                "hit_power",
+                "strip_ball",
             ]
         elif position in ["MLB", "OLB", "LB"]:
             attrs = [
-                "tackle_lb", "block_shedding", "zone_coverage_lb", "man_coverage_lb",
-                "pass_rush_lb", "pursuit_lb", "play_recognition_lb",
-                "catching", "hit_power", "strip_ball"
+                "tackle_lb",
+                "block_shedding",
+                "zone_coverage_lb",
+                "man_coverage_lb",
+                "pass_rush_lb",
+                "pursuit_lb",
+                "play_recognition_lb",
+                "catching",
+                "hit_power",
+                "strip_ball",
             ]
         elif position in ["CB"]:
             attrs = [
-                "man_coverage", "zone_coverage", "press", "play_recognition_cb",
-                "catching_cb", "tackle_cb", "pursuit_cb",
-                "hit_power", "strip_ball"
+                "man_coverage",
+                "zone_coverage",
+                "press",
+                "play_recognition_cb",
+                "catching_cb",
+                "tackle_cb",
+                "pursuit_cb",
+                "hit_power",
+                "strip_ball",
             ]
         elif position in ["FS", "SS", "S"]:
             attrs = [
-                "zone_coverage_s", "man_coverage_s", "tackle_s", "hit_power",
-                "catching_s", "run_support", "play_recognition_s", "strip_ball"
+                "zone_coverage_s",
+                "man_coverage_s",
+                "tackle_s",
+                "hit_power",
+                "catching_s",
+                "run_support",
+                "play_recognition_s",
+                "strip_ball",
             ]
         elif position in ["K"]:
             attrs = [
-                "kick_power", "kick_accuracy", "kick_consistency", "kick_clutch", "onside_kick_skill"
+                "kick_power",
+                "kick_accuracy",
+                "kick_consistency",
+                "kick_clutch",
+                "onside_kick_skill",
             ]
         elif position in ["P"]:
-            attrs = [
-                "kick_power", "kick_accuracy", "hang_time", "kick_consistency"
-            ]
+            attrs = ["kick_power", "kick_accuracy", "hang_time", "kick_consistency"]
 
         return {attr: None for attr in attrs}
 
@@ -196,14 +303,14 @@ class Player:
     def get_fatigue_rate(self):
         # Base fatigue rate for all players
         base = 0.1
-        
+
         # Increase fatigue rate for positions requiring high physical exertion
         if self.position in ["WR", "CB", "RB", "LB"]:
             base += 0.05
-        
+
         # Adjust fatigue rate based on stamina (lower stamina increases fatigue)
         base *= (100 - self.stamina) / 100
-        
+
     def fatigue_threshold(self):
         """Return the fatigue level at which the player is considered tired."""
 
@@ -360,7 +467,7 @@ class Player:
             "name": self.name,
             "position": self.position,
             "age": self.age,
-            "dob": self.dob.isoformat() if hasattr(self.dob, 'isoformat') else self.dob,
+            "dob": self.dob.isoformat() if hasattr(self.dob, "isoformat") else self.dob,
             "college": self.college,
             "birth_location": self.birth_location,
             "jersey_number": self.jersey_number,
@@ -403,6 +510,10 @@ class Player:
             "passion": self.passion,
             "resilience": self.resilience,
             "position_specific": self.position_specific,
+            "attributes": {
+                "core": self.attributes.core,
+                "position_specific": self.attributes.position_specific,
+            },
             "active_injury_effects": self.active_injury_effects,
             "rookie_year": self.rookie_year,
             "drafted_by": self.drafted_by,
@@ -422,16 +533,22 @@ class Player:
             name=data["name"],
             position=data["position"],
             age=data.get("age", 22),
-            dob=datetime.datetime.fromisoformat(data["dob"]) if isinstance(data["dob"], str) else data["dob"],
+            dob=(
+                datetime.datetime.fromisoformat(data["dob"])
+                if isinstance(data["dob"], str)
+                else data["dob"]
+            ),
             college=data["college"],
             birth_location=data["birth_location"],
             jersey_number=data["jersey_number"],
             overall=data["overall"],
-            potential=data.get("potential")
+            potential=data.get("potential"),
         )
         player.fatigue = data.get("fatigue", 0)
         player.skills = data.get("skills", {})
-        player.traits = data.get("traits", {"training": [], "mental": [], "gameday": [], "media": []})
+        player.traits = data.get(
+            "traits", {"training": [], "mental": [], "gameday": [], "media": []}
+        )
         player.notes = data.get("notes", [])
         player.contract = data.get("contract", None)
         player.experience = data.get("experience", 0)
@@ -465,13 +582,35 @@ class Player:
         player.greed = data.get("greed")
         player.passion = data.get("passion")
         player.resilience = data.get("resilience")
-        player.position_specific = data.get("position_specific", player.position_specific)
+        player.position_specific = data.get(
+            "position_specific", player.position_specific
+        )
         player.active_injury_effects = data.get("active_injury_effects", {})
         player.hidden_caps = data.get("hidden_caps", {})
         player.scouted_potential = data.get("scouted_potential", {})
         player.last_attribute_values = data.get("last_attribute_values", {})
         player.no_growth_years = data.get("no_growth_years", {})
         player.progress_history = data.get("progress_history", {})
+        attrs_data = data.get("attributes")
+        if attrs_data:
+            core = attrs_data.get("core", {})
+            pos = attrs_data.get("position_specific", {})
+            player.attributes = AttributeSet(core=core, position_specific=pos)
+            player.position_specific = pos
+        else:
+            player.position_specific = data.get(
+                "position_specific", player.position_specific
+            )
+            player.attributes = AttributeSet(
+                core=player.init_core_attributes(),
+                position_specific=player.position_specific,
+            )
+
+        # Sync core attribute values if present in save data
+        for attr in CORE_ATTRIBUTES:
+            val = data.get(attr)
+            if val is not None:
+                player.attributes.core[attr] = val
 
         dna_data = data.get("dna")
         if dna_data:
@@ -479,11 +618,19 @@ class Player:
         else:
             player.dna = PlayerDNA.generate_random_dna(player.position)
         if not player.hidden_caps:
-            player.hidden_caps = player.dna.max_attribute_caps.copy()
+            player.hidden_caps = {
+                k: v["hard_cap"] for k, v in player.dna.attribute_caps.items()
+            }
+        if not player.scouted_potential:
+            player.scouted_potential = player.dna.scouted_caps.copy()
         return player
 
+
 def ensure_player_objects(team):
-    from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player  # adjust import as needed
+    from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import (
+        Player,
+    )  # adjust import as needed
+
     new_roster = []
     for p in team.roster:
         if isinstance(p, dict):
@@ -491,4 +638,3 @@ def ensure_player_objects(team):
         else:
             new_roster.append(p)
     team.roster = new_roster
-
