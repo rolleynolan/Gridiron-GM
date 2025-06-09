@@ -132,3 +132,46 @@ class PlayerDNA:
         obj.mutation = data.get("mutation")
         obj.traits = data.get("traits", [])
         return obj
+
+
+def generate_growth_curve(min_age: int = 20, max_age: int = 34) -> Dict[int, float]:
+    """Return a growth multiplier curve keyed by age.
+
+    The curve has an ascension phase leading into a short prime plateau followed
+    by decline. Each player receives a unique curve based on randomised peak
+    age, plateau length and slope parameters. Values are clamped between 0.6 and
+    1.05 and include a small amount of per-age noise.
+    """
+
+    if max_age <= min_age:
+        raise ValueError("max_age must be greater than min_age")
+
+    # --- Key parameters
+    peak_age = int(max(min(random.gauss(27, 2), 32), 22))
+    plateau_years = random.randint(1, 4)
+
+    growth_speed = random.choice([0.8, 1.0, 1.2])  # slow/med/fast
+    decline_speed = random.choice([0.8, 1.0, 1.2, 1.4])
+
+    start_value = random.uniform(0.72, 0.82)
+    years_to_peak = max(1, peak_age - min_age)
+    base_slope = (1.0 - start_value) / years_to_peak
+    growth_slope = base_slope * growth_speed
+    decline_slope = base_slope * decline_speed
+
+    curve: Dict[int, float] = {}
+    value = start_value
+
+    for age in range(min_age, max_age + 1):
+        if age < peak_age:
+            value += growth_slope
+        elif age < peak_age + plateau_years:
+            value = value
+        else:
+            value -= decline_slope
+
+        noise = random.uniform(-0.02, 0.02)
+        final = max(0.6, min(1.05, value + noise))
+        curve[age] = round(final, 3)
+
+    return curve
