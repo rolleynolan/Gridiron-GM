@@ -4,6 +4,7 @@ import os
 import json
 import sys
 from pathlib import Path
+import datetime
 from gridiron_gm_pkg.simulation.systems.game.standings_manager import (
     StandingsManager,
     update_team_records,
@@ -261,6 +262,7 @@ class SeasonManager:
         self.daily_manager.process_end_of_day()
 
         prev_week = self.calendar.current_week
+        self._apply_daily_birthdays()
         self.calendar.advance_day()
         self.calendar.current_time_str = "00:00"
         if self.calendar.current_week != prev_week:
@@ -270,6 +272,35 @@ class SeasonManager:
 
         self._reset_standings_for_regular_season()
         self.standings_manager.save_standings()
+
+    def _apply_daily_birthdays(self):
+        """Increment age for players whose birthday matches today's date."""
+        today = self.calendar.current_date
+        players = []
+        for team in self.league.teams:
+            team_players = getattr(team, "roster", None)
+            if team_players is None:
+                team_players = getattr(team, "players", [])
+            players.extend(team_players)
+        players.extend(getattr(self.league, "free_agents", []))
+
+        for player in players:
+            dob = getattr(player, "dob", None)
+            if not dob:
+                continue
+            if isinstance(dob, str):
+                try:
+                    dob_dt = datetime.date.fromisoformat(dob)
+                except ValueError:
+                    continue
+            elif isinstance(dob, datetime.datetime):
+                dob_dt = dob.date()
+            else:
+                dob_dt = dob
+
+            if dob_dt.month == today.month and dob_dt.day == today.day:
+                player.age += 1
+                apply_regression(player)
 
     def handle_week_end(self, just_ended_week):
         # Weekly hooks: injuries, morale, awards, etc.
@@ -540,7 +571,7 @@ class SeasonManager:
                     print(f"  {attr}: {old_val} -> {new_val}")
 
     def handle_offseason(self):
-        print("=== Offseason: Healing injuries, aging players, resetting league ===")
+        print("=== Offseason: Healing injuries and resetting league ===")
         for team in self.league.teams:
             for player in getattr(team, "roster", []):
                 # Heal all injuries
@@ -549,10 +580,6 @@ class SeasonManager:
                 player.games_remaining = 0
                 if hasattr(player, "injuries"):
                     player.injuries.clear()
-                # Age up
-                if hasattr(player, "age"):
-                    player.age += 1
-                    apply_regression(player)
                 # Optional: retire old/severely injured players
                 if hasattr(player, "age") and player.age >= 38:
                     player.retired = True
