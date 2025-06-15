@@ -255,6 +255,7 @@ class Player:
         if position in ["QB"]:
             attrs = [
                 "throw_power",
+                "throw_velocity",
                 "throw_accuracy_short",
                 "throw_accuracy_mid",
                 "throw_accuracy_deep",
