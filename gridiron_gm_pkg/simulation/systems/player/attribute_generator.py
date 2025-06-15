@@ -20,6 +20,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "awareness": "medium",
         "catching": "low",
         "tackling": "low",
+        "return_skill": "very_low",
     },
     "RB": {
         "speed": "high",
@@ -34,6 +35,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "iq": "medium",
         "awareness": "medium",
         "tackling": "low",
+        "return_skill": "medium",
     },
     "WR": {
         "speed": "high",
@@ -45,6 +47,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "iq": "medium",
         "awareness": "medium",
         "tackling": "low",
+        "return_skill": "medium",
     },
     "TE": {
         "catching": "high",
@@ -56,6 +59,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "iq": "medium",
         "awareness": "medium",
         "tackling": "low",
+        "return_skill": "very_low",
     },
     "OL": {
         "blocking": "high",
@@ -66,6 +70,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "speed": "low",
         "catching": "low",
         "tackling": "low",
+        "return_skill": "very_low",
     },
     "EDGE": {
         "pass_rush": "high",
@@ -76,6 +81,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "iq": "medium",
         "awareness": "medium",
         "catching": "low",
+        "return_skill": "very_low",
     },
     "DL": {
         "strength": "high",
@@ -87,6 +93,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "awareness": "medium",
         "catching": "low",
         "tackling": "high",
+        "return_skill": "very_low",
     },
     "LB": {
         "tackling": "high",
@@ -98,6 +105,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "iq": "high",
         "awareness": "high",
         "catching": "medium",
+        "return_skill": "low",
     },
     "CB": {
         "speed": "high",
@@ -108,6 +116,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "pass_rush": "low",
         "iq": "medium",
         "awareness": "high",
+        "return_skill": "medium",
     },
     "S": {
         "coverage": "high",
@@ -116,6 +125,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "catching": "medium",
         "iq": "medium",
         "awareness": "high",
+        "return_skill": "low",
     },
     "K": {
         "kick_power": "high",
@@ -124,6 +134,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "awareness": "medium",
         "catching": "low",
         "tackling": "low",
+        "return_skill": "very_low",
     },
     "P": {
         "punt_power": "high",
@@ -132,6 +143,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "awareness": "medium",
         "catching": "low",
         "tackling": "low",
+        "return_skill": "very_low",
     },
 }
 
@@ -140,6 +152,7 @@ RELEVANCE_CAP_RANGES: Dict[str, Tuple[int, int]] = {
     "high": (80, 99),
     "medium": (60, 85),
     "low": (20, 45),
+    "very_low": (20, 40),
 }
 
 # Starting attribute values based on relevance
@@ -147,6 +160,7 @@ RELEVANCE_GEN_RANGES: Dict[str, Tuple[int, int]] = {
     "high": (70, 90),
     "medium": (55, 75),
     "low": (15, 40),
+    "very_low": (10, 35),
 }
 
 def bell_curve_sample(mean: float, std_dev: float, min_val: int, max_val: int) -> int:
