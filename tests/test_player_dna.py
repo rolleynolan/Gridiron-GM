@@ -6,7 +6,10 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, MutationType
-from gridiron_gm_pkg.simulation.systems.player.player_regression import apply_regression
+from gridiron_gm_pkg.simulation.systems.player.player_regression import (
+    apply_regression,
+    valid_attributes_by_position,
+)
 from gridiron_gm_pkg.simulation.entities.player import Player
 
 
@@ -76,54 +79,84 @@ def test_apply_regression_decreases_values():
     assert player.attributes.core["acceleration"] < 80
 
 
+def _simulate_full_career(player_id: str, position: str, years: int = 15):
+    """Return season-by-season attribute log for a player."""
+
+    dna = PlayerDNA.generate_random_dna(position)
+    data = dna.to_dict()
+    clone = PlayerDNA.from_dict(data)
+    assert [m.name for m in clone.mutations] == [m.name for m in dna.mutations]
+
+    attrs = {
+        attr: random.randint(65, 75)
+        for attr in valid_attributes_by_position[position]
+    }
+    caps = {
+        attr: min(attrs[attr] + random.randint(10, 25), 100)
+        for attr in attrs
+    }
+
+    class AttrSet:
+        def __init__(self, core: dict):
+            self.core = core
+            self.position_specific = {}
+
+    class DummyPlayer:
+        pass
+
+    player = DummyPlayer()
+    player.position = position
+    player.dna = dna
+    player.attributes = AttrSet(attrs)
+
+    log = []
+    for year in range(1, years + 1):
+        age = 23 + year - 1
+        player.age = age
+        for attr, val in list(attrs.items()):
+            gain = 1.0 * dna.dev_speed
+            gain = dna._apply_mutation_boost(attr, gain)
+            attrs[attr] = min(caps[attr], round(val + gain, 2))
+            player.attributes.core[attr] = attrs[attr]
+        apply_regression(player)
+        log.append(
+            {
+                "player": player_id,
+                "position": position,
+                "year": year,
+                "age": age,
+                "dev_speed": dna.dev_speed,
+                "mutations": ",".join(m.name for m in dna.mutations),
+                **attrs,
+                **{f"{k}_cap": v for k, v in caps.items()},
+            }
+        )
+    return log
+
+
 def test_dna_long_term_progression(tmp_path):
-    """Simulate long term DNA growth and write results to csv."""
+    """Simulate full career growth/regression and export to CSV."""
     random.seed(42)
 
     out_dir = Path("dna_output")
     out_dir.mkdir(exist_ok=True)
     csv_file = out_dir / "dna_long_term_progression.csv"
 
-    positions = ["QB", "RB", "WR"]
-    players = []
-    for pos in positions:
+    logs = []
+    for pos in ["QB", "RB", "WR"]:
         for i in range(2):
-            players.append(
-                Player(f"{pos}_{i+1}", pos, 22, "2000-01-01", "U", "USA", 10 + i, 70)
-            )
+            logs.extend(_simulate_full_career(f"{pos}_{i+1}", pos))
 
-    coaching = {p.name: round(random.uniform(0.8, 1.2), 2) for p in players}
+    fieldnames = []
+    for row in logs:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
 
-    records = []
-    week_counter = 0
-    for year in range(15):
-        for p in players:
-            for _ in range(17):
-                p.dna.apply_weekly_growth(coaching_quality=coaching[p.name])
-                for attr in p.dna.attribute_caps:
-                    p.dna.check_breakout(
-                        attr, production_metric=True, snap_share=0.8, week=week_counter
-                    )
-                week_counter += 1
-            p.age += 1
-            row = {
-                "player": p.name,
-                "position": p.position,
-                "year": year + 1,
-                "age": p.age,
-                "coaching_quality": coaching[p.name],
-                "dev_speed": p.dna.dev_speed,
-                "mutations": ",".join(m.name for m in p.dna.mutations),
-            }
-            for attr, caps in p.dna.attribute_caps.items():
-                row[attr] = round(caps["current"], 2)
-                row[f"{attr}_cap"] = caps["hard_cap"]
-            records.append(row)
-
-    fieldnames = list(records[0].keys())
     with open(csv_file, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(records)
+        for row in logs:
+            writer.writerow(row)
 
-    assert csv_file.exists()
+    assert csv_file.exists() and csv_file.stat().st_size > 0
