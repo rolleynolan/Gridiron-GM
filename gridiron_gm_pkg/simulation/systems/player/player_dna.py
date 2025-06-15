@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import numpy as np
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, List, Optional
@@ -120,7 +121,13 @@ def generate_attribute_caps(dev_focus: Dict[str, float]) -> Dict[str, Dict]:
 class PlayerDNA:
     """Container for a player's long-term development profile."""
 
-    growth_arc: str = field(init=False)
+    rise_duration: int = field(init=False)
+    prime_duration: int = field(init=False)
+    fall_duration: int = field(init=False)
+    peak_value: float = field(init=False)
+    stability: float = field(init=False)
+    career_arc: List[float] = field(init=False)
+
     regression_profile: Dict[str, any] = field(init=False)
     attribute_decay_type: Dict[str, str] = field(init=False)
     dev_speed: float = field(init=False)
@@ -131,7 +138,13 @@ class PlayerDNA:
     scouted_caps: Dict[str, int] = field(init=False)
 
     def __post_init__(self) -> None:
-        self.growth_arc = random.choice(["early", "late", "balanced", "rollercoaster"])
+        self.rise_duration = random.randint(1, 6)
+        self.prime_duration = random.randint(2, 8)
+        self.fall_duration = max(2, 20 - (self.rise_duration + self.prime_duration))
+        self.peak_value = round(random.uniform(0.85, 1.0), 2)
+        self.stability = round(random.uniform(0.01, 0.05), 3)
+        self.career_arc = self.generate_procedural_arc()
+
         self.regression_profile = DEFAULT_REGRESSION_PROFILE.copy()
         self.attribute_decay_type = ATTRIBUTE_DECAY_TYPE
         self.dev_speed = generate_dev_speed()
@@ -140,6 +153,18 @@ class PlayerDNA:
         self.mutations = assign_mutations()
         self.attribute_caps = generate_attribute_caps(self.dev_focus)
         self.scouted_caps = self._generate_scouted_caps()
+
+    def generate_procedural_arc(self, total_years: int = 20) -> List[float]:
+        """Return an annual multiplier curve representing the player's career trajectory."""
+        rise = np.power(np.linspace(0, 1, self.rise_duration), 1.5) * self.peak_value
+        prime_noise = np.random.normal(0, self.stability, self.prime_duration)
+        prime = np.clip(np.full(self.prime_duration, self.peak_value) + prime_noise, 0, 1.05)
+        fall_x = np.linspace(1, 0, self.fall_duration)
+        fall = np.power(fall_x, 0.7) * self.peak_value
+        fall_noise = np.random.normal(0, self.stability, self.fall_duration)
+        fall = np.clip(fall + fall_noise, 0, 1.05)
+        arc = np.concatenate((rise, prime, fall))
+        return arc[:total_years].tolist()
 
     # --- Helper generators -------------------------------------------------
     def _generate_dev_focus_weights(self) -> Dict[str, float]:
@@ -224,10 +249,9 @@ class PlayerDNA:
 
     # --- Regression ---------------------------------------------------------
     def regress_player(self, age: int, is_injured: bool = False) -> None:
-        age_trigger = {"early": 27, "balanced": 30, "late": 32, "rollercoaster": 29}
+        age_trigger = self.regression_profile.get("start_age", 30)
         drop = 0.5 if self.regression_profile == "gradual" else 1.0
-        trigger = age_trigger.get(self.growth_arc, 29)
-        if age >= trigger:
+        if age >= age_trigger:
             for attr, caps in self.attribute_caps.items():
                 drop_mod = 1.5 if attr in ["speed", "agility"] else 1.0
                 caps["current"] = max(0, caps["current"] - drop * drop_mod)
@@ -235,7 +259,12 @@ class PlayerDNA:
     # --- Serialization ------------------------------------------------------
     def to_dict(self) -> Dict:
         return {
-            "growth_arc": self.growth_arc,
+            "rise_duration": self.rise_duration,
+            "prime_duration": self.prime_duration,
+            "fall_duration": self.fall_duration,
+            "peak_value": self.peak_value,
+            "stability": self.stability,
+            "career_arc": self.career_arc,
             "regression_profile": self.regression_profile,
             "attribute_decay_type": self.attribute_decay_type,
             "dev_speed": self.dev_speed,
@@ -250,7 +279,12 @@ class PlayerDNA:
     def from_dict(cls, data: Dict) -> "PlayerDNA":
         obj = cls.__new__(cls)
         for field_name in [
-            "growth_arc",
+            "rise_duration",
+            "prime_duration",
+            "fall_duration",
+            "peak_value",
+            "stability",
+            "career_arc",
             "regression_profile",
             "attribute_decay_type",
             "dev_speed",
