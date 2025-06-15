@@ -3,6 +3,10 @@ import csv
 import random
 import sys
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, MutationType
@@ -134,7 +138,7 @@ def test_apply_regression_decreases_values():
 
 
 def _simulate_full_career(player_id: str, position: str, years: int = 15):
-    """Return season-by-season attribute log for a player."""
+    """Return season-by-season attribute log and arc for a player."""
 
     dna = PlayerDNA.generate_random_dna(position)
     data = dna.to_dict()
@@ -177,7 +181,7 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
         log.append(
             export_player_log(player_id, dna, position, age, attrs, caps, arc_val)
         )
-    return log
+    return log, arc
 
 
 def test_dna_long_term_progression(tmp_path):
@@ -189,9 +193,12 @@ def test_dna_long_term_progression(tmp_path):
     csv_file = out_dir / "dna_long_term_progression.csv"
 
     logs = []
+    arcs = []
     for pos in ["QB", "RB", "WR"]:
-        for i in range(2):
-            logs.extend(_simulate_full_career(f"{pos}_{i+1}", pos))
+        for i in range(5):
+            log, arc = _simulate_full_career(f"{pos}_{i+1}", pos)
+            logs.extend(log)
+            arcs.append((f"{pos}_{i+1}", arc))
 
     fieldnames = []
     for row in logs:
@@ -205,4 +212,17 @@ def test_dna_long_term_progression(tmp_path):
         for row in logs:
             writer.writerow(row)
 
+    plt.figure(figsize=(8, 4))
+    for label, arc in arcs:
+        plt.plot(range(1, len(arc) + 1), arc, label=label, alpha=0.7)
+    plt.xlabel("Year")
+    plt.ylabel("Arc Value")
+    plt.title("Career Arcs")
+    plt.legend(fontsize="small")
+    graph_file = out_dir / "career_arcs.png"
+    plt.tight_layout()
+    plt.savefig(graph_file)
+    plt.close()
+
     assert csv_file.exists() and csv_file.stat().st_size > 0
+    assert graph_file.exists() and graph_file.stat().st_size > 0
