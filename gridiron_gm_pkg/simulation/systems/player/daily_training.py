@@ -125,10 +125,13 @@ def log_season_progress_checkpoint(date: Any, all_players: Iterable[Any], checkp
     for player in all_players:
         hist = getattr(player, "progress_history", {})
         snapshot: Dict[str, Any] = {}
-        attrs = getattr(player, "attributes", None)
-        if attrs is not None:
-            snapshot.update(getattr(attrs, "core", {}))
-            snapshot.update(getattr(attrs, "position_specific", {}))
+        if hasattr(player, "get_all_attributes"):
+            snapshot.update(player.get_all_attributes())
+        else:
+            attrs = getattr(player, "attributes", None)
+            if attrs is not None:
+                snapshot.update(getattr(attrs, "core", {}))
+                snapshot.update(getattr(attrs, "position_specific", {}))
         for field, val in player.__dict__.items():
             if field.startswith("_"):
                 continue

@@ -41,6 +41,106 @@ class Contract:
 
 
 class Player:
+    """Represents a football player."""
+
+    # ------------------------------------------------------------------
+    # Core attribute property helpers
+    def _get_core_attr(self, name: str) -> Optional[int]:
+        return getattr(self, "attributes", AttributeSet()).core.get(name)
+
+    def _set_core_attr(self, name: str, value: int) -> None:
+        if not hasattr(self, "attributes"):
+            self.attributes = AttributeSet(core={}, position_specific={})
+        self.attributes.core[name] = value
+
+    # Dynamically expose common core attributes for backward compatibility
+    @property
+    def speed(self) -> Optional[int]:
+        return self._get_core_attr("speed")
+
+    @speed.setter
+    def speed(self, value: int) -> None:
+        self._set_core_attr("speed", value)
+
+    @property
+    def acceleration(self) -> Optional[int]:
+        return self._get_core_attr("acceleration")
+
+    @acceleration.setter
+    def acceleration(self, value: int) -> None:
+        self._set_core_attr("acceleration", value)
+
+    @property
+    def agility(self) -> Optional[int]:
+        return self._get_core_attr("agility")
+
+    @agility.setter
+    def agility(self, value: int) -> None:
+        self._set_core_attr("agility", value)
+
+    @property
+    def strength(self) -> Optional[int]:
+        return self._get_core_attr("strength")
+
+    @strength.setter
+    def strength(self, value: int) -> None:
+        self._set_core_attr("strength", value)
+
+    @property
+    def awareness(self) -> Optional[int]:
+        return self._get_core_attr("awareness")
+
+    @awareness.setter
+    def awareness(self, value: int) -> None:
+        self._set_core_attr("awareness", value)
+
+    @property
+    def iq(self) -> Optional[int]:
+        return self._get_core_attr("iq")
+
+    @iq.setter
+    def iq(self, value: int) -> None:
+        self._set_core_attr("iq", value)
+
+    @property
+    def stamina(self) -> Optional[int]:
+        return self._get_core_attr("stamina")
+
+    @stamina.setter
+    def stamina(self, value: int) -> None:
+        self._set_core_attr("stamina", value)
+
+    @property
+    def toughness(self) -> Optional[int]:
+        return self._get_core_attr("toughness")
+
+    @toughness.setter
+    def toughness(self, value: int) -> None:
+        self._set_core_attr("toughness", value)
+
+    @property
+    def balance(self) -> Optional[int]:
+        return self._get_core_attr("balance")
+
+    @balance.setter
+    def balance(self, value: int) -> None:
+        self._set_core_attr("balance", value)
+
+    @property
+    def discipline(self) -> Optional[int]:
+        return self._get_core_attr("discipline")
+
+    @discipline.setter
+    def discipline(self, value: int) -> None:
+        self._set_core_attr("discipline", value)
+
+    @property
+    def consistency(self) -> Optional[int]:
+        return self._get_core_attr("consistency")
+
+    @consistency.setter
+    def consistency(self, value: int) -> None:
+        self._set_core_attr("consistency", value)
     def __init__(
         self,
         name,
@@ -64,18 +164,12 @@ class Player:
         self.overall = overall
         self.potential = None
 
-        # --- Universal on-field attributes
-        self.speed = None
-        self.acceleration = None
-        self.agility = None
-        self.strength = None
-        self.awareness = None
-        self.iq = None
-        self.stamina = 80
-        self.toughness = None
-        self.balance = None
-        self.discipline = None
-        self.consistency = None
+        # Initialize attribute containers
+        core_attrs = self.init_core_attributes()
+        pos_attrs = self.init_position_attributes()
+
+        self.position_specific = pos_attrs
+        self.attributes = AttributeSet(core=core_attrs, position_specific=pos_attrs)
 
         # --- Off-field attributes
         self.motivation = None
@@ -84,13 +178,6 @@ class Player:
         self.greed = None
         self.passion = None
         self.resilience = None
-
-        # Initialize attribute containers
-        core_attrs = self.init_core_attributes()
-        pos_attrs = self.init_position_attributes()
-
-        self.position_specific = pos_attrs
-        self.attributes = AttributeSet(core=core_attrs, position_specific=pos_attrs)
         self.dev_arc = DevArc("standard", 0.0)
         self.contract = None
         self.morale = 100
@@ -147,15 +234,29 @@ class Player:
 
         # --- Procedural DNA profile ---
         self.dna = PlayerDNA.generate_random_dna(self.position)
-        self.hidden_caps = {
-            k: v["hard_cap"] for k, v in self.dna.attribute_caps.items()
-        }
-        self.scouted_potential = self.dna.scouted_caps.copy()
+
+        relevant = self.get_relevant_attribute_names()
+        self.hidden_caps = {}
+        self.scouted_potential = {}
+        for attr in relevant:
+            cap_info = self.dna.attribute_caps.get(attr)
+            if cap_info:
+                cur = cap_info.get("current", 20)
+                hard_cap = cap_info.get("hard_cap", 20)
+            else:
+                cur = 20
+                hard_cap = 20
+            self.hidden_caps[attr] = hard_cap
+            self.scouted_potential[attr] = self.dna.scouted_caps.get(attr, hard_cap)
+            if attr in self.attributes.core:
+                self.attributes.core[attr] = cur
+            else:
+                self.attributes.position_specific[attr] = cur
 
     def init_core_attributes(self):
         """Return baseline attribute mapping common to all players."""
         core = {attr: None for attr in CORE_ATTRIBUTES}
-        core["stamina"] = self.stamina
+        core["stamina"] = 80
         return core
 
     def init_position_attributes(self):
@@ -295,6 +396,17 @@ class Player:
             attrs = ["kick_power", "kick_accuracy", "hang_time", "kick_consistency"]
 
         return {attr: None for attr in attrs}
+
+    def get_all_attributes(self) -> Dict[str, int]:
+        """Return combined core and position-specific attribute mapping."""
+        attrs = {}
+        attrs.update(self.attributes.core)
+        attrs.update(self.attributes.position_specific)
+        return attrs
+
+    def get_relevant_attribute_names(self) -> List[str]:
+        """Return list of all attribute names used for this player."""
+        return list(self.get_all_attributes().keys())
 
     def add_trait(self, category, trait):
         if category in self.traits:
@@ -492,17 +604,6 @@ class Player:
             "snaps": self.snaps,
             "snap_counts": self.snap_counts,
             "milestones_hit": list(self.milestones_hit),
-            "speed": self.speed,
-            "acceleration": self.acceleration,
-            "agility": self.agility,
-            "strength": self.strength,
-            "awareness": self.awareness,
-            "iq": self.iq,
-            "stamina": self.stamina,
-            "toughness": self.toughness,
-            "balance": self.balance,
-            "discipline": self.discipline,
-            "consistency": self.consistency,
             "motivation": self.motivation,
             "loyalty": self.loyalty,
             "ambition": self.ambition,
@@ -565,17 +666,10 @@ class Player:
         player.snap_counts = data.get("snap_counts", {})
         player.milestones_hit = set(data.get("milestones_hit", []))
         player.active_injury_effects = data.get("active_injury_effects", [])
-        player.speed = data.get("speed")
-        player.acceleration = data.get("acceleration")
-        player.agility = data.get("agility")
-        player.strength = data.get("strength")
-        player.awareness = data.get("awareness")
-        player.iq = data.get("iq")
-        player.stamina = data.get("stamina", player.stamina)
-        player.toughness = data.get("toughness")
-        player.balance = data.get("balance")
-        player.discipline = data.get("discipline")
-        player.consistency = data.get("consistency")
+        for attr in CORE_ATTRIBUTES:
+            val = data.get(attr)
+            if val is not None:
+                player.attributes.core[attr] = val
         player.motivation = data.get("motivation")
         player.loyalty = data.get("loyalty")
         player.ambition = data.get("ambition")
@@ -606,23 +700,24 @@ class Player:
                 position_specific=player.position_specific,
             )
 
-        # Sync core attribute values if present in save data
-        for attr in CORE_ATTRIBUTES:
-            val = data.get(attr)
-            if val is not None:
-                player.attributes.core[attr] = val
-
         dna_data = data.get("dna")
         if dna_data:
             player.dna = PlayerDNA.from_dict(dna_data)
         else:
             player.dna = PlayerDNA.generate_random_dna(player.position)
         if not player.hidden_caps:
-            player.hidden_caps = {
-                k: v["hard_cap"] for k, v in player.dna.attribute_caps.items()
-            }
+            player.hidden_caps = {}
+            for attr in player.get_relevant_attribute_names():
+                info = player.dna.attribute_caps.get(attr)
+                if info:
+                    player.hidden_caps[attr] = info.get("hard_cap", 20)
+                else:
+                    player.hidden_caps[attr] = 20
         if not player.scouted_potential:
-            player.scouted_potential = player.dna.scouted_caps.copy()
+            player.scouted_potential = {
+                attr: player.dna.scouted_caps.get(attr, player.hidden_caps.get(attr, 20))
+                for attr in player.get_relevant_attribute_names()
+            }
         return player
 
 
