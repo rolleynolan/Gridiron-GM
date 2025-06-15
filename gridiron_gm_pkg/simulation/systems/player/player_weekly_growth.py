@@ -15,6 +15,9 @@ import random
 def _get_training_attributes(player) -> Dict[str, int]:
     """Return combined mapping of attribute names to values for the player."""
 
+    if hasattr(player, "get_all_attributes"):
+        return dict(player.get_all_attributes())
+
     attrs = {}
     attr_container = getattr(player, "attributes", None)
     if attr_container is None:
