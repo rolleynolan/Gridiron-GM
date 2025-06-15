@@ -1,10 +1,10 @@
 import os
 import json
 import random
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
-from gridiron_gm.gridiron_gm_pkg.simulation.utils.calendar import Calendar  # Update if calendar is moved elsewhere
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.season_manager import SeasonManager  # Update if season_manager is moved elsewhere
+from gridiron_gm_pkg.simulation.entities.team import Team
+from gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.utils.calendar import Calendar  # Update if calendar is moved elsewhere
+from gridiron_gm_pkg.simulation.systems.game.season_manager import SeasonManager  # Update if season_manager is moved elsewhere
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 class LeagueManager:
@@ -262,7 +262,7 @@ def load_league_from_file(save_name):
             team = Team.from_dict(team_data)
             teams.append(team)
         # Fill rosters with dummy players if needed
-        from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.season_manager import fill_team_rosters_with_dummy_players
+        from gridiron_gm_pkg.simulation.systems.game.season_manager import fill_team_rosters_with_dummy_players
         fill_team_rosters_with_dummy_players(teams)
         # Now create the LeagueManager and assign teams
         league = LeagueManager()

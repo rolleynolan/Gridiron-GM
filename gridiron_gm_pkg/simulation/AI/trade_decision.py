@@ -1,5 +1,5 @@
 import re
-from gridiron_gm.gridiron_gm_pkg.engine.trade.trade_value import evaluate_player_value, calculate_pick_value
+from gridiron_gm_pkg.engine.trade.trade_value import evaluate_player_value, calculate_pick_value
 
 def calculate_asset_value(asset, team):
     if isinstance(asset, str) and "Pick" in asset:

@@ -1,7 +1,7 @@
 """Playoff management utilities"""
 
-from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.data_loader import save_playoff_results
+from gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
+from gridiron_gm_pkg.simulation.systems.core.data_loader import save_playoff_results
 from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 

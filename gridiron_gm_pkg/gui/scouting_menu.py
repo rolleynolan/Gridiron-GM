@@ -1,4 +1,4 @@
-from gridiron_gm.gridiron_gm_pkg.players.player import get_rookie_view
+from gridiron_gm_pkg.players.player import get_rookie_view
 
 
 def scouting_menu(rookie_class, scouts, scouting_system, team=None):

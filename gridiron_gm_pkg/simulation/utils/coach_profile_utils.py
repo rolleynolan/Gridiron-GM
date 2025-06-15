@@ -1,4 +1,4 @@
-from gridiron_gm.gridiron_gm_pkg.engine.core.coach import Coach
+from gridiron_gm_pkg.engine.core.coach import Coach
 
 def build_coach_profile(coach, role="Assistant Coach"):
     """Extracts clean display-ready profile data for a given coach."""

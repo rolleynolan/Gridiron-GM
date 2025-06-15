@@ -1,9 +1,9 @@
-from gridiron_gm.gridiron_gm_pkg.engine.core.save_game_manager import save_game, save_gm_profile, load_gm_profile
-from gridiron_gm.gridiron_gm_pkg.engine.core.load_game_manager import load_saved_game
-from gridiron_gm.gridiron_gm_pkg.engine.core.new_game_manager import start_new_game
-from gridiron_gm.gridiron_gm_pkg.gui.gm_creator import create_gm
-from gridiron_gm.gridiron_gm_pkg.gui.in_game_menu import in_game_menu
-from gridiron_gm.gridiron_gm_pkg.engine.draft.rookie_loader import rebuild_rookie_class  # ✅ ADD THIS!
+from gridiron_gm_pkg.engine.core.save_game_manager import save_game, save_gm_profile, load_gm_profile
+from gridiron_gm_pkg.engine.core.load_game_manager import load_saved_game
+from gridiron_gm_pkg.engine.core.new_game_manager import start_new_game
+from gridiron_gm_pkg.gui.gm_creator import create_gm
+from gridiron_gm_pkg.gui.in_game_menu import in_game_menu
+from gridiron_gm_pkg.engine.draft.rookie_loader import rebuild_rookie_class  # ✅ ADD THIS!
 
 def main_menu():
     game_world = None

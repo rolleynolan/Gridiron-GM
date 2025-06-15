@@ -2,10 +2,10 @@ import random
 import os
 from typing import Dict, Any, List, Optional
 from collections import defaultdict
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.depth_chart import generate_depth_chart
-from gridiron_gm.gridiron_gm_pkg.config.formations import FORMATION_SCHEMES
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import FatigueSystem
-from gridiron_gm.gridiron_gm_pkg.simulation.engine.stat_utils import merge_player_stats, get_top_performers
+from gridiron_gm_pkg.simulation.systems.roster.depth_chart import generate_depth_chart
+from gridiron_gm_pkg.config.formations import FORMATION_SCHEMES
+from gridiron_gm_pkg.simulation.systems.player.fatigue import FatigueSystem
+from gridiron_gm_pkg.simulation.engine.stat_utils import merge_player_stats, get_top_performers
 
 # ==== Simulation Factor Stubs ====
 # These functions are placeholders for more advanced simulation logic.
@@ -174,7 +174,7 @@ def simulate_pass_play(qb: Any, wr_list: List[Any], depth: str, context: Dict[st
         avg_speed = (qb_speed + rec_speed) / 2
         time = estimate_play_seconds("pass", 0, completed=False, player_speed=avg_speed)
 
-    from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.injury_manager import create_injury
+    from gridiron_gm_pkg.simulation.systems.player.injury_manager import create_injury
 
     # --- Injury logic for QB and WR ---
     for player in [qb, receiver]:
@@ -375,7 +375,7 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
     Drives end only on: touchdown, field goal (made/missed), punt, turnover (INT/fumble), turnover on downs, safety, or time expiration.
     There is no arbitrary play cap; drives can be as long or short as real NFL drives.
     """
-    from gridiron_gm.gridiron_gm_pkg.simulation.engine.penalty_engine import simulate_play as simulate_penalty_play
+    from gridiron_gm_pkg.simulation.engine.penalty_engine import simulate_play as simulate_penalty_play
 
     def to_penalty_player(player):
         # Map your player object to the penalty engine's expected Player dataclass
@@ -423,7 +423,7 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
         "ret_td": 0,
     }
 
-    from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.substitution_manager import SubstitutionManagerV2
+    from gridiron_gm_pkg.simulation.systems.roster.substitution_manager import SubstitutionManagerV2
 
     # For drive time simulation accumulate actual seconds burned per play
     drive_seconds = 0
@@ -788,7 +788,7 @@ def simulate_game(home_team, away_team, week=1, context=None):
     """
     if context is None:
         context = {}
-    from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.substitution_manager import SubstitutionManagerV2
+    from gridiron_gm_pkg.simulation.systems.roster.substitution_manager import SubstitutionManagerV2
 
     # Game parameters
     NUM_QUARTERS = 4

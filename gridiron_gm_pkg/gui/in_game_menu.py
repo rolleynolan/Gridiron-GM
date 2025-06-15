@@ -1,6 +1,6 @@
 # ui/in_game_menu.py
 
-from gridiron_gm.gridiron_gm_pkg.gui.roster_screen import roster_screen
+from gridiron_gm_pkg.gui.roster_screen import roster_screen
 
 def in_game_menu(game_world, gm_profile):
     save_slot = game_world.get("save_slot", None)

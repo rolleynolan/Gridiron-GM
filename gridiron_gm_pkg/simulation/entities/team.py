@@ -1,7 +1,7 @@
 import uuid
 from typing import List, Dict, Optional
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.depth_chart import generate_depth_chart
+from gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.systems.roster.depth_chart import generate_depth_chart
 
 class Team:
     """

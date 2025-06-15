@@ -1,6 +1,6 @@
 import random
-from gridiron_gm.gridiron_gm_pkg.config.injury_catalog import INJURY_CATALOG
-from gridiron_gm.gridiron_gm_pkg.config.position_importance import POSITION_IMPORTANCE
+from gridiron_gm_pkg.config.injury_catalog import INJURY_CATALOG
+from gridiron_gm_pkg.config.position_importance import POSITION_IMPORTANCE
 
 class Injury:
     def __init__(self, name, weeks_out, severity, long_term=None, career_ending=False):

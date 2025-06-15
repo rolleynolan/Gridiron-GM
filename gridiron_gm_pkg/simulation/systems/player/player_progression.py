@@ -5,8 +5,8 @@ from __future__ import annotations
 import random
 from typing import Dict
 
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import (
+from gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.systems.player.weekly_training import (
     PHYSICAL_ATTRIBUTES,
 )
 

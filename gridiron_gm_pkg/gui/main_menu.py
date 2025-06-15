@@ -2,13 +2,13 @@
 
 import os
 import json
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.save_system import (
+from gridiron_gm_pkg.simulation.systems.core.save_system import (
     choose_save_slot, choose_load_slot, save_game, load_game,
     save_gm_profile, load_gm_profile, choose_gm_profile, ensure_gm_profile_folder
 )
-from gridiron_gm.gridiron_gm_pkg.gui.in_game_menu import in_game_menu
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
-from gridiron_gm.gridiron_gm_pkg.simulation.utils.roster_generator import RosterGenerator, PlayerGenerator  # ✅ NEW import
+from gridiron_gm_pkg.gui.in_game_menu import in_game_menu
+from gridiron_gm_pkg.simulation.entities.team import Team
+from gridiron_gm_pkg.simulation.utils.roster_generator import RosterGenerator, PlayerGenerator  # ✅ NEW import
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

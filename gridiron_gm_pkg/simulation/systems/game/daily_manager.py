@@ -1,7 +1,7 @@
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.player_progression import progress_player
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import FatigueSystem
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.transactions.free_agency_manager import FreeAgencyManager
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.offseason_manager import OffseasonManager
+from gridiron_gm_pkg.simulation.systems.player.player_progression import progress_player
+from gridiron_gm_pkg.simulation.systems.player.fatigue import FatigueSystem
+from gridiron_gm_pkg.simulation.systems.transactions.free_agency_manager import FreeAgencyManager
+from gridiron_gm_pkg.simulation.systems.game.offseason_manager import OffseasonManager
 
 
 class DailyOperationsManager:

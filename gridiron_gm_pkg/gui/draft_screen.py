@@ -1,5 +1,5 @@
 import random
-from gridiron_gm.gridiron_gm_pkg.players.player import get_rookie_view
+from gridiron_gm_pkg.players.player import get_rookie_view
 
 def draft_screen(game_world, user_team=None):
     current_phase = game_world["calendar"]["season_phase"]

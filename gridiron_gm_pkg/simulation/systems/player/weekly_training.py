@@ -5,8 +5,8 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, Iterable
 
-from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.injury_manager import (
+from gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
+from gridiron_gm_pkg.simulation.systems.player.injury_manager import (
     InjuryEngine,
 )
 

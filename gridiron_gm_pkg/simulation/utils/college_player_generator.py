@@ -1,7 +1,7 @@
 import random
 import os
 from datetime import datetime, timedelta
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.entities.player import Player
 from typing import List, Dict, Optional
 import json
 from gridiron_gm import VERBOSE_SIM_OUTPUT

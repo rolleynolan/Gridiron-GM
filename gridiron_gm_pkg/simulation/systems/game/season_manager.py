@@ -4,39 +4,39 @@ import os
 import json
 import sys
 from pathlib import Path
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import (
+from gridiron_gm_pkg.simulation.systems.game.standings_manager import (
     StandingsManager,
     update_team_records,
 )
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.tiebreakers import (
+from gridiron_gm_pkg.simulation.systems.game.tiebreakers import (
     StandingsManager as TiebreakerManager,
 )
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.playoff_manager import (
+from gridiron_gm_pkg.simulation.systems.game.playoff_manager import (
     PlayoffManager,
     update_playoff_schedule,
 )
 import gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine as game_engine
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.fatigue import accumulate_season_fatigue_for_team
-from gridiron_gm.gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
+from gridiron_gm_pkg.simulation.systems.player.fatigue import accumulate_season_fatigue_for_team
+from gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
 
 # NEW: Import from team_data
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.team_data import load_teams_from_json, fill_team_rosters_with_dummy_players
+from gridiron_gm_pkg.simulation.systems.core.team_data import load_teams_from_json, fill_team_rosters_with_dummy_players
 from gridiron_gm import VERBOSE_SIM_OUTPUT
 
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.data_loader import (
+from gridiron_gm_pkg.simulation.systems.core.data_loader import (
     load_schedule_files, save_results, save_league_state, save_playoff_bracket, save_playoff_results
 )
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.core.serialization_utils import league_to_dict
-from gridiron_gm.gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
+from gridiron_gm_pkg.simulation.systems.core.serialization_utils import league_to_dict
+from gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
+from gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
+from gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
     evaluate_player_season_progression,
 )
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
+from gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
 
 
 try:
-    from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
+    from gridiron_gm_pkg.simulation.entities.team import Team
 except ImportError:
     Team = None
 
@@ -503,7 +503,7 @@ class SeasonManager:
                     if hasattr(player, "update_career_stats_from_season"):
                         player.update_career_stats_from_season(year_key, getattr(self, "game_world", None))
                     elif not year_data.get("career_added"):
-                        from gridiron_gm.gridiron_gm_pkg.stats.player_stat_manager import update_career_stats
+                        from gridiron_gm_pkg.stats.player_stat_manager import update_career_stats
                         update_career_stats(player, season_stats)
                         year_data["career_added"] = True
                 else:

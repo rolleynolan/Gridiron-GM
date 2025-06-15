@@ -1,4 +1,4 @@
-from gridiron_gm.gridiron_gm_pkg.simulation.engine.contract_engine import ContractEngine
+from gridiron_gm_pkg.simulation.engine.contract_engine import ContractEngine
 
 class DraftManager:
     """

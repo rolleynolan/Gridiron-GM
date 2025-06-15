@@ -1,6 +1,6 @@
 import random
 import datetime
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.entities.player import Player
 
 
 class RosterGenerator:

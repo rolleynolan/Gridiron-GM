@@ -1,4 +1,4 @@
-from gridiron_gm.gridiron_gm_pkg.engine.core.player import Player
+from gridiron_gm_pkg.engine.core.player import Player
 
 def build_player_profile(player, team_name="Unknown Team"):
     """Extracts clean display-ready profile data for a given player."""

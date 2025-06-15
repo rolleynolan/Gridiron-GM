@@ -1,12 +1,12 @@
 import os
 import json
 from pathlib import Path
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
-from gridiron_gm.gridiron_gm_pkg.simulation.utils.calendar import Calendar
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.season_manager import SeasonManager
-from gridiron_gm.gridiron_gm_pkg.simulation.utils.generate_schedule import generate_schedule
-from gridiron_gm.gridiron_gm_pkg.simulation.entities.league import LeagueManager
+from gridiron_gm_pkg.simulation.entities.team import Team
+from gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.utils.calendar import Calendar
+from gridiron_gm_pkg.simulation.systems.game.season_manager import SeasonManager
+from gridiron_gm_pkg.simulation.utils.generate_schedule import generate_schedule
+from gridiron_gm_pkg.simulation.entities.league import LeagueManager
 
 save_name = "test_league"
 calendar = Calendar()

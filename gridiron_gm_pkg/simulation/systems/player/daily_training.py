@@ -6,9 +6,9 @@ import random
 from datetime import date as date_type
 from typing import Dict, Any, Iterable
 
-from gridiron_gm.gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.injury_manager import InjuryEngine
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.player.weekly_training import _get_attr_container
+from gridiron_gm_pkg.config.training_catalog import TRAINING_CATALOG
+from gridiron_gm_pkg.simulation.systems.player.injury_manager import InjuryEngine
+from gridiron_gm_pkg.simulation.systems.player.weekly_training import _get_attr_container
 
 _DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 _injury_engine = InjuryEngine()

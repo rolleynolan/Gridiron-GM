@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 from datetime import timedelta
 import random
-from gridiron_gm.gridiron_gm_pkg.simulation.engine.contract_engine import ContractEngine  # Add this import at the top
+from gridiron_gm_pkg.simulation.engine.contract_engine import ContractEngine  # Add this import at the top
 
 class OffseasonManager:
     """
@@ -93,12 +93,12 @@ class OffseasonManager:
         league.college_db = [p for p in league.college_db if getattr(p, "year_in_college", 1) <= 4]
 
         # 3. Generate and add new freshman class
-        from gridiron_gm.gridiron_gm_pkg.simulation.utils.college_player_generator import generate_freshman_class
+        from gridiron_gm_pkg.simulation.utils.college_player_generator import generate_freshman_class
         new_freshmen = generate_freshman_class()
         league.college_db.extend(new_freshmen)
 
         # 4. Generate this year's draft class using DraftManager for realism
-        from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
+        from gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
         draft_manager = DraftManager(league, None)  # TransactionManager will be set later for run_draft
         year = getattr(self.calendar, "current_year", 1)
         draft_class = draft_manager.generate_draft_class(year, n_players=256)
@@ -172,8 +172,8 @@ class OffseasonManager:
         NFL Draft: Teams select rookies, update roster composition and depth charts.
         Triggers the draft using DraftManager.
         """
-        from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
-        from gridiron_gm.gridiron_gm_pkg.simulation.systems.roster.transaction_manager import TransactionManager
+        from gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
+        from gridiron_gm_pkg.simulation.systems.roster.transaction_manager import TransactionManager
 
         # Ensure transaction manager is available
         transaction_manager = TransactionManager(self.league_manager)

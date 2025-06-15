@@ -2,7 +2,7 @@ import json
 import os
 import random
 from datetime import datetime, timedelta
-from gridiron_gm.gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager
+from gridiron_gm_pkg.simulation.systems.game.standings_manager import StandingsManager
 
 # Config paths
 TEAMS_PATH = os.path.join("config", "teams.json")

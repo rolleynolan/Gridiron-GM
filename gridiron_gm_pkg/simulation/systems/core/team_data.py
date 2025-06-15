@@ -3,7 +3,7 @@ import random
 from gridiron_gm import VERBOSE_SIM_OUTPUT
 
 try:
-    from gridiron_gm.gridiron_gm_pkg.simulation.entities.team import Team
+    from gridiron_gm_pkg.simulation.entities.team import Team
 except ImportError:
     Team = None
 
@@ -51,7 +51,7 @@ def fill_team_rosters_with_dummy_players(teams):
     import random
 
     try:
-        from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
+        from gridiron_gm_pkg.simulation.entities.player import Player
     except ImportError:
         class Player:
             def __init__(self, name, position, overall, age=22, dob="2000-01-01", college="Dummy U", birth_location="Nowhere, USA", jersey_number=0, discipline_rating=70):

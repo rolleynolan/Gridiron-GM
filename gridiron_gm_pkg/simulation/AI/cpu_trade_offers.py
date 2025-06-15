@@ -1,8 +1,8 @@
 
 """AI utilities for generating CPU-initiated trade offers."""
 
-from gridiron_gm.gridiron_gm_pkg.engine.trade.trade_value import evaluate_player_value, calculate_pick_value
-from gridiron_gm.gridiron_gm_pkg.engine.trade.trade_decision import compute_total_trade_value, should_accept_trade
+from gridiron_gm_pkg.engine.trade.trade_value import evaluate_player_value, calculate_pick_value
+from gridiron_gm_pkg.engine.trade.trade_decision import compute_total_trade_value, should_accept_trade
 import random
 
 def generate_cpu_trade_offers(teams, week_number):

@@ -48,7 +48,7 @@ def load_league_from_file(save_name, league_class):
     league = league_class.from_dict(data)
     # Ensure draft prospects are loaded if present
     if "draft_prospects" in data:
-        from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
+        from gridiron_gm_pkg.simulation.entities.player import Player
         league.draft_prospects = [Player.from_dict(p) for p in data["draft_prospects"]]
     return league
 

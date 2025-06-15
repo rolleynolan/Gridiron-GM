@@ -1,5 +1,5 @@
-from gridiron_gm.gridiron_gm_pkg.engine.free_agency.free_agency_manager import FreeAgencyManager
-from gridiron_gm.gridiron_gm_pkg.engine.free_agency.contract_offer import ContractOffer
+from gridiron_gm_pkg.engine.free_agency.free_agency_manager import FreeAgencyManager
+from gridiron_gm_pkg.engine.free_agency.contract_offer import ContractOffer
 
 def free_agency_screen(game_world, user_team):
     fa_manager = FreeAgencyManager(game_world)

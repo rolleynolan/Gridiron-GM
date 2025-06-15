@@ -2,7 +2,7 @@ import datetime
 from uuid import uuid4
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
-from gridiron_gm.gridiron_gm_pkg.players.player_dna import PlayerDNA
+from gridiron_gm_pkg.players.player_dna import PlayerDNA
 
 # Generic attributes shared by all players
 CORE_ATTRIBUTES = [
@@ -381,7 +381,7 @@ class Player:
         if not data or data.get("career_added"):
             return []
 
-        from gridiron_gm.gridiron_gm_pkg.stats.player_stat_manager import (
+        from gridiron_gm_pkg.stats.player_stat_manager import (
             update_career_stats,
         )
 
@@ -390,7 +390,7 @@ class Player:
         data["career_added"] = True
 
         if game_world is not None:
-            from gridiron_gm.gridiron_gm_pkg.stats.record_book import (
+            from gridiron_gm_pkg.stats.record_book import (
                 update_career_record,
                 update_career_leaderboard,
             )
@@ -412,7 +412,7 @@ class Player:
         List[str]
             Milestone identifiers reached during this check.
         """
-        from gridiron_gm.gridiron_gm_pkg.stats.milestone_definitions import (
+        from gridiron_gm_pkg.stats.milestone_definitions import (
             MILESTONES,
         )
 
@@ -627,7 +627,7 @@ class Player:
 
 
 def ensure_player_objects(team):
-    from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import (
+    from gridiron_gm_pkg.simulation.entities.player import (
         Player,
     )  # adjust import as needed
 
