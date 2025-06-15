@@ -135,6 +135,39 @@ WR_ARCHETYPES: Dict[str, Dict[str, float]] = {
 }
 
 
+# -- TE Archetype definitions used by ``evaluate_te_archetype`` --
+TE_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Receiving TE": {
+        "catching": 1.0,
+        "catch_in_traffic": 0.9,
+        "route_running_short": 0.85,
+        "awareness": 0.8,
+        "release": 0.75,
+    },
+    "Blocking TE": {
+        "run_block": 1.0,
+        "lead_blocking": 0.9,
+        "strength": 0.9,
+        "impact_blocking": 0.85,
+        "awareness": 0.7,
+    },
+    "Vertical Threat": {
+        "speed": 1.0,
+        "acceleration": 0.9,
+        "catching": 0.85,
+        "route_running_deep": 0.85,
+        "release": 0.8,
+    },
+    "H-Back": {
+        "lead_blocking": 1.0,
+        "awareness": 0.9,
+        "route_running_short": 0.8,
+        "catching": 0.75,
+        "agility": 0.7,
+    },
+}
+
+
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
 
@@ -307,8 +340,42 @@ def evaluate_wr_archetype(attributes: Dict[str, int]) -> str:
 
     best_type = ""
     best_score = float("-inf")
-    
+
     for archetype, profile in WR_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_te_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely TE archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a tight end. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in TE_ARCHETYPES.items():
         score = 0.0
         for attr, weight in profile.items():
             if attr in attributes:
