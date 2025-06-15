@@ -49,6 +49,46 @@ QB_ARCHETYPES: Dict[str, Dict[str, float]] = {
 }
 
 
+# -- LB Archetype definitions used by ``evaluate_lb_archetype`` --
+LB_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Field General": {
+        "awareness": 1.0,
+        "play_recognition": 0.95,
+        "tackle_lb": 0.9,
+        "leadership": 0.85,
+        "discipline": 0.8,
+    },
+    "Coverage Backer": {
+        "coverage": 1.0,
+        "awareness": 0.95,
+        "speed": 0.9,
+        "agility": 0.85,
+        "tackle_lb": 0.75,
+    },
+    "Thumper": {
+        "tackle_lb": 1.0,
+        "hit_power": 0.95,
+        "strength": 0.9,
+        "toughness": 0.85,
+        "awareness": 0.75,
+    },
+    "Chase & Tackle": {
+        "pursuit_lb": 1.0,
+        "speed": 0.95,
+        "acceleration": 0.9,
+        "agility": 0.85,
+        "tackle_lb": 0.8,
+    },
+    "Box General": {
+        "block_shedding": 1.0,
+        "tackle_lb": 0.95,
+        "discipline": 0.9,
+        "awareness": 0.85,
+        "play_recognition": 0.8,
+    },
+}
+
+
 # -- RB Archetype definitions used by ``evaluate_rb_archetype`` --
 RB_ARCHETYPES: Dict[str, Dict[str, float]] = {
     "Power Back": {
@@ -549,4 +589,25 @@ def evaluate_idl_archetype(attributes: dict) -> str:
         ),
     }
     return max(weights, key=weights.get)
+
+
+def evaluate_lb_archetype(attributes: dict) -> str:
+    """Return the most likely linebacker archetype based on weighted attributes."""
+
+    def norm(val: int) -> float:
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in LB_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
 
