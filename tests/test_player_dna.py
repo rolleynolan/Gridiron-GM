@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from gridiron_gm_pkg.players.player_dna import PlayerDNA, MutationType
+from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, MutationType
 from gridiron_gm_pkg.simulation.entities.player import Player
 
 

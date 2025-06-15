@@ -2,7 +2,7 @@ import datetime
 from uuid import uuid4
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
-from gridiron_gm_pkg.players.player_dna import PlayerDNA
+from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA
 
 # Generic attributes shared by all players
 CORE_ATTRIBUTES = [
