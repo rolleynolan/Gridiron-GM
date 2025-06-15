@@ -34,6 +34,8 @@ def test_generator_returns_values(pos):
     for base_attr in ["iq", "awareness", "tackling", "catching"]:
         assert base_attr in attrs
         assert base_attr in caps
+    assert "return_skill" in attrs
+    assert "return_skill" in caps
     for attr, value in attrs.items():
         assert attr in caps
         assert value <= caps[attr]
