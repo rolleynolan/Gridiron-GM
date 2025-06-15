@@ -15,12 +15,13 @@ from gridiron_gm_pkg.simulation.systems.player.player_regression import (
 from gridiron_gm_pkg.simulation.entities.player import Player
 
 
-def export_player_log(player_id, dna, position, age, attributes, caps):
+def export_player_log(player_id, dna, position, age, attributes, caps, arc_val):
     """Return a dictionary row for CSV export."""
     return {
         "player": player_id,
         "position": position,
         "age": age,
+        "arc": round(arc_val, 3),
         "dev_speed": dna.dev_speed,
         "mutations": ", ".join(m.name for m in dna.mutations),
         **{attr: attributes.get(attr) for attr in caps},
@@ -162,16 +163,21 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
     player.dna = dna
     player.attributes = AttrSet(attrs)
 
+    base_attrs = attrs.copy()
+    arc = dna.career_arc[:years]
     log = []
     for year in range(1, years + 1):
         age = 23 + year - 1
         player.age = age
-        for attr, val in list(attrs.items()):
-            gain = apply_growth(attr, val, caps[attr], dna, age, position)
-            attrs[attr] = round(min(caps[attr], val + gain), 2)
+        arc_val = arc[year - 1] if year - 1 < len(arc) else arc[-1]
+        for attr in list(attrs.keys()):
+            baseline = base_attrs[attr]
+            target = baseline + (caps[attr] - baseline) * arc_val
+            attrs[attr] = round(min(caps[attr], max(baseline, target)), 2)
             player.attributes.core[attr] = attrs[attr]
-        apply_regression_local(player.attributes.core, caps, age, dna, position)
-        log.append(export_player_log(player_id, dna, position, age, attrs, caps))
+        log.append(
+            export_player_log(player_id, dna, position, age, attrs, caps, arc_val)
+        )
     return log
 
 
