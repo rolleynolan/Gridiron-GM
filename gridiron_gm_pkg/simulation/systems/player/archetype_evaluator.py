@@ -85,21 +85,53 @@ RB_ARCHETYPES: Dict[str, Dict[str, float]] = {
         "elusiveness": 0.8,
         "agility": 0.75,
     },
-    "Return Specialist": {
-        "return_skill": 1.0,
-        "speed": 0.9,
-        "agility": 0.8,
-    },
 }
+
 
 # -- WR Archetype definitions used by ``evaluate_wr_archetype`` --
 WR_ARCHETYPES: Dict[str, Dict[str, float]] = {
-    "Return Specialist": {"return_skill": 1.0, "speed": 0.9, "agility": 0.8},
-}
-
-# -- CB Archetype definitions used by ``evaluate_cb_archetype`` --
-CB_ARCHETYPES: Dict[str, Dict[str, float]] = {
-    "Return Specialist": {"return_skill": 1.0, "speed": 0.9, "agility": 0.8},
+    "Deep Threat": {
+        "speed": 1.0,
+        "acceleration": 0.9,
+        "route_running_deep": 0.9,
+        "catching": 0.7,
+        "release": 0.6,
+    },
+    "Possession Receiver": {
+        "catch_in_traffic": 1.0,
+        "route_running_short": 0.9,
+        "awareness": 0.8,
+        "catching": 0.8,
+    },
+    "Red Zone Threat": {
+        "spectacular_catch": 1.0,
+        "release": 0.9,
+        "catch_in_traffic": 0.9,
+        "jumping": 0.8,
+        "strength": 0.7,
+    },
+    "YAC Specialist": {
+        "elusiveness": 1.0,
+        "agility": 0.9,
+        "route_running_short": 0.8,
+        "acceleration": 0.8,
+        "carry_security": 0.6,
+    },
+    "Route Technician": {
+        "route_running_short": 1.0,
+        "route_running_mid": 0.95,
+        "release": 0.9,
+        "awareness": 0.8,
+        "iq": 0.7,
+    },
+    "Return Specialist": {
+        "return_skill": 1.0,
+        "speed": 0.95,
+        "acceleration": 0.9,
+        "agility": 0.85,
+        "elusiveness": 0.8,
+        "carry_security": 0.7,
+    },
 }
 
 
@@ -255,36 +287,28 @@ def evaluate_rb_archetype(attributes: Dict[str, int]) -> str:
 
 
 def evaluate_wr_archetype(attributes: Dict[str, int]) -> str:
-    """Return the most likely WR archetype based on weighted attributes."""
+    """Return the most likely WR archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a wide receiver. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
 
     def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
         return max(0.0, min((val - 20) / 79, 1.0))
 
     best_type = ""
     best_score = float("-inf")
-
+    
     for archetype, profile in WR_ARCHETYPES.items():
-        score = 0.0
-        for attr, weight in profile.items():
-            if attr in attributes:
-                score += norm(int(attributes[attr])) * weight
-        if score > best_score:
-            best_score = score
-            best_type = archetype
-
-    return best_type
-
-
-def evaluate_cb_archetype(attributes: Dict[str, int]) -> str:
-    """Return the most likely CB archetype based on weighted attributes."""
-
-    def norm(val: int) -> float:
-        return max(0.0, min((val - 20) / 79, 1.0))
-
-    best_type = ""
-    best_score = float("-inf")
-
-    for archetype, profile in CB_ARCHETYPES.items():
         score = 0.0
         for attr, weight in profile.items():
             if attr in attributes:
