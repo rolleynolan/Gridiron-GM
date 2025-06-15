@@ -145,12 +145,9 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
     clone = PlayerDNA.from_dict(data)
     assert [m.name for m in clone.mutations] == [m.name for m in dna.mutations]
 
-    tmp_player = Player("tmp", position, 22, "2000-01-01", "U", "USA", 0, 60)
-    attrs = {attr: random.randint(65, 75) for attr in tmp_player.get_relevant_attribute_names()}
-    caps = {
-        attr: min(attrs[attr] + random.randint(10, 25), 100)
-        for attr in attrs
-    }
+    from gridiron_gm_pkg.simulation.systems.player import attribute_generator
+
+    attrs, caps = attribute_generator.generate_attributes_for_position(position)
 
     class AttrSet:
         def __init__(self, core: dict):
@@ -164,7 +161,6 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
     player.position = position
     player.dna = dna
     player.attributes = AttrSet(attrs)
-    player.get_relevant_attribute_names = tmp_player.get_relevant_attribute_names
 
     base_attrs = attrs.copy()
     arc = dna.career_arc[:years]
