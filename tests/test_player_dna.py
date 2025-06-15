@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from gridiron_gm.gridiron_gm_pkg.players.player_dna import PlayerDNA
+from gridiron_gm.gridiron_gm_pkg.players.player_dna import PlayerDNA, MutationType
 from gridiron_gm.gridiron_gm_pkg.simulation.entities.player import Player
 
 
@@ -15,25 +15,29 @@ def test_player_has_dna_on_creation():
 
 
 def test_mutation_application():
-    dna = PlayerDNA.generate_random_dna()
-    dna.mutation = "Physical Freak"
+    dna = PlayerDNA()
+    dna.dev_speed = 0.5
     dna.attribute_caps = {
         "speed": {
             "current": 80,
             "soft_cap": 85,
-            "hard_cap": 90,
+            "hard_cap": 95,
             "breakout_history": [],
-        },
-        "strength": {
-            "current": 70,
-            "soft_cap": 80,
-            "hard_cap": 85,
-            "breakout_history": [],
-        },
+        }
     }
-    dna.apply_mutation_effects()
-    assert dna.attribute_caps["speed"]["hard_cap"] >= 90
-    assert dna.dev_speed <= 1.25
+    # Baseline growth
+    original = dna.attribute_caps["speed"]["current"]
+    dna.apply_weekly_growth()
+    base_growth = dna.attribute_caps["speed"]["current"] - original
+
+    # Reset and apply mutation
+    dna.attribute_caps["speed"]["current"] = original
+    dna.mutations = [MutationType.PhysicalFreak]
+    dna.apply_weekly_growth()
+    boosted_growth = dna.attribute_caps["speed"]["current"] - original
+
+    assert boosted_growth > base_growth
+    assert 0.3 <= dna.dev_speed <= 1.0
 
 
 def test_weekly_growth_and_breakout():
