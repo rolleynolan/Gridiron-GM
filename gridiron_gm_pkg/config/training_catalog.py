@@ -518,6 +518,11 @@ TRAINING_CATALOG = {
         },
         "injury_chance": 0.001,
     },
+    "Return Specialist Drill": {
+        "positions": ["WR", "RB", "CB", "S"],
+        "attribute_weights": {"return_skill": 1.0, "speed": 0.4},
+        "injury_chance": 0.003,
+    },
 
     # === General / Team-Wide ===
     "Weight Room": {
