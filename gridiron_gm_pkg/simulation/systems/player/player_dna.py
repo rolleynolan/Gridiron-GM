@@ -86,6 +86,7 @@ ATTRIBUTE_DECAY_TYPE = {
     "throw_power": "skill",
     "throw_accuracy": "skill",
     "lead_blocking": "skill",
+    "return_skill": "skill",
     # Mental
     "awareness": "mental",
     "iq": "mental",
@@ -104,6 +105,7 @@ def generate_attribute_caps(dev_focus: Dict[str, float]) -> Dict[str, Dict]:
         "tackle",
         "catching",
         "route_running_short",
+        "return_skill",
     ]:
         base = random.randint(70, 90)
         soft_cap = int(base + random.randint(2, 5))

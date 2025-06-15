@@ -19,6 +19,7 @@ CORE_ATTRIBUTES = [
     "consistency",
     "tackling",
     "catching",
+    "return_skill",
 ]
 
 
@@ -143,6 +144,14 @@ class Player:
     @consistency.setter
     def consistency(self, value: int) -> None:
         self._set_core_attr("consistency", value)
+
+    @property
+    def return_skill(self) -> Optional[int]:
+        return self._get_core_attr("return_skill")
+
+    @return_skill.setter
+    def return_skill(self, value: int) -> None:
+        self._set_core_attr("return_skill", value)
     def __init__(
         self,
         name,
@@ -246,6 +255,7 @@ class Player:
         core["stamina"] = 80
         core["tackling"] = 40
         core["catching"] = 40
+        core["return_skill"] = 20
         return core
 
     def init_position_attributes(self):

@@ -307,7 +307,7 @@ def evaluate_wr_archetype(attributes: Dict[str, int]) -> str:
 
     best_type = ""
     best_score = float("-inf")
-
+    
     for archetype, profile in WR_ARCHETYPES.items():
         score = 0.0
         for attr, weight in profile.items():
