@@ -167,6 +167,45 @@ TE_ARCHETYPES: Dict[str, Dict[str, float]] = {
     },
 }
 
+# -- OL Archetype definitions used by ``evaluate_ol_archetype`` --
+OL_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Pass Protector": {
+        "pass_block": 1.0,
+        "footwork_ol": 0.95,
+        "awareness": 0.9,
+        "discipline": 0.85,
+        "impact_blocking": 0.75,
+    },
+    "Run Blocker": {
+        "run_block": 1.0,
+        "lead_blocking": 0.95,
+        "impact_blocking": 0.9,
+        "footwork_ol": 0.75,
+        "strength": 0.7,
+    },
+    "Pure Power": {
+        "strength": 1.0,
+        "impact_blocking": 0.95,
+        "block_shed_resistance": 0.9,
+        "run_block": 0.75,
+        "lead_blocking": 0.7,
+    },
+    "Technical Blocker": {
+        "footwork_ol": 1.0,
+        "discipline": 0.95,
+        "awareness": 0.9,
+        "pass_block": 0.85,
+        "run_block": 0.75,
+    },
+    "Anchor": {
+        "block_shed_resistance": 1.0,
+        "pass_block": 0.95,
+        "strength": 0.9,
+        "awareness": 0.8,
+        "discipline": 0.75,
+    },
+}
+
 
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
@@ -376,6 +415,40 @@ def evaluate_te_archetype(attributes: Dict[str, int]) -> str:
     best_score = float("-inf")
 
     for archetype, profile in TE_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_ol_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely OL archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for an offensive lineman. Values should
+        range from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in OL_ARCHETYPES.items():
         score = 0.0
         for attr, weight in profile.items():
             if attr in attributes:
