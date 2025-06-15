@@ -136,6 +136,8 @@ class PlayerDNA:
     mutations: List[MutationType] = field(init=False)
     attribute_caps: Dict[str, Dict] = field(init=False)
     scouted_caps: Dict[str, int] = field(init=False)
+    injury_multiplier: float = field(init=False)
+    recovery_speed_bonus: float = field(init=False)
 
     def __post_init__(self) -> None:
         self.rise_duration = random.randint(1, 6)
@@ -153,6 +155,8 @@ class PlayerDNA:
         self.mutations = assign_mutations()
         self.attribute_caps = generate_attribute_caps(self.dev_focus)
         self.scouted_caps = self._generate_scouted_caps()
+        self.injury_multiplier = 1.0
+        self.recovery_speed_bonus = 0.0
 
     def generate_procedural_arc(self, total_years: int = 25) -> List[float]:
         """Return an annual multiplier curve representing the player's career trajectory."""
@@ -273,6 +277,8 @@ class PlayerDNA:
             "mutations": [m.name for m in self.mutations],
             "attribute_caps": self.attribute_caps,
             "scouted_caps": self.scouted_caps,
+            "injury_multiplier": self.injury_multiplier,
+            "recovery_speed_bonus": self.recovery_speed_bonus,
         }
 
     @classmethod
@@ -292,6 +298,8 @@ class PlayerDNA:
             "traits",
             "attribute_caps",
             "scouted_caps",
+            "injury_multiplier",
+            "recovery_speed_bonus",
         ]:
             setattr(obj, field_name, data.get(field_name))
         obj.mutations = [MutationType[m] for m in data.get("mutations", [])]

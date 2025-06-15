@@ -236,6 +236,7 @@ class Player:
 
         # --- Procedural DNA profile ---
         self.dna = PlayerDNA.generate_random_dna(self.position)
+        self.mutations = [m.name.lower() for m in self.dna.mutations]
 
         self.generate_caps()
 
@@ -634,6 +635,7 @@ class Player:
             "no_growth_years": self.no_growth_years,
             "progress_history": self.progress_history,
             "dna": self.dna.to_dict() if hasattr(self, "dna") else None,
+            "mutations": self.mutations,
         }
 
     @staticmethod
@@ -713,6 +715,10 @@ class Player:
             player.dna = PlayerDNA.from_dict(dna_data)
         else:
             player.dna = PlayerDNA.generate_random_dna(player.position)
+        player.mutations = data.get(
+            "mutations",
+            [m.name.lower() for m in getattr(player.dna, "mutations", [])],
+        )
         if not player.hidden_caps or not player.scouted_potential:
             player.generate_caps()
         return player
