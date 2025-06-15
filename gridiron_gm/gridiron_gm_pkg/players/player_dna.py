@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from typing import Dict, List, Optional
 
 # === TRAITS (Behavioral Modifiers) ===
@@ -21,37 +22,35 @@ TRAIT_POOL = [
 ]
 
 # === MUTATIONS (Rare DNA Modifiers) ===
-DNA_MUTATIONS = {
-    "Generational Talent": {
-        "attribute_cap_boosts": {"physical": 0.1, "mental": 0.1, "technical": 0.1},
-        "dev_speed_multiplier": 1.25,
-    },
-    "Physical Freak": {
-        "attribute_cap_boosts": {"physical": 0.20},
-        "dev_speed_multiplier": 0.85,
-    },
-    "Football Savant": {
-        "attribute_cap_boosts": {"mental": 0.15},
-        "awareness_growth_multiplier": 2.0,
-    },
-    "Skill Machine": {
-        "attribute_cap_boosts": {"technical": 0.15},
-        "penalty_reduction": True,
-    },
-    "Late Unlocker": {
-        "delayed_cap_unlock": True,
-        "unlock_conditions": ["breakout_season", "coach_quality"],
-    },
-    "Battle-Hardened": {
-        "injury_regression_reduction": True,
-        "morale_loss_protection": True,
-    },
-    "Primetime Performer": {
-        "clutch_game_performance_boost": True,
-    },
-}
+class MutationType(Enum):
+    PhysicalFreak = auto()
+    EnduranceEngine = auto()
+    MentalProcessor = auto()
+    EliteVision = auto()
+    BuiltToLast = auto()
+    ExplosiveAthlete = auto()
+    NaturalLeader = auto()
+    TechnicalWizard = auto()
+    ClutchPerformer = auto()
+    FastLearner = auto()
 
 
+def assign_mutations() -> List[MutationType]:
+    """Randomly assign up to two rare mutations with weighted odds."""
+    roll = random.random()
+    if roll < 0.975:
+        return []
+    if roll < 0.995:
+        return [random.choice(list(MutationType))]
+    return random.sample(list(MutationType), 2)
+
+
+def generate_dev_speed() -> float:
+    """Generate development speed using a bell curve distribution."""
+    value = random.normalvariate(0.65, 0.1)
+    return max(0.3, min(1.0, round(value, 3)))
+
+# === Mutation utility functions ===
 # === ATTRIBUTE CAPS STRUCTURE ===
 def generate_attribute_caps(dev_focus: Dict[str, float]) -> Dict[str, Dict]:
     caps: Dict[str, Dict] = {}
@@ -85,7 +84,7 @@ class PlayerDNA:
     dev_speed: float = field(init=False)
     dev_focus: Dict[str, float] = field(init=False)
     traits: List[str] = field(init=False)
-    mutation: Optional[str] = field(init=False)
+    mutations: List[MutationType] = field(init=False)
     attribute_caps: Dict[str, Dict] = field(init=False)
     scouted_caps: Dict[str, int] = field(init=False)
 
@@ -94,13 +93,11 @@ class PlayerDNA:
         self.regression_profile = random.choice(
             ["early_decline", "late_decline", "injury_decline", "gradual"]
         )
-        self.dev_speed = round(random.uniform(0.75, 1.25), 2)
+        self.dev_speed = generate_dev_speed()
         self.dev_focus = self._generate_dev_focus_weights()
         self.traits = self._assign_traits()
-        self.mutation = self._assign_mutation()
+        self.mutations = assign_mutations()
         self.attribute_caps = generate_attribute_caps(self.dev_focus)
-        if self.mutation:
-            self.apply_mutation_effects()
         self.scouted_caps = self._generate_scouted_caps()
 
     # --- Helper generators -------------------------------------------------
@@ -117,13 +114,6 @@ class PlayerDNA:
         count = random.choices([0, 1, 2, 3], weights=[0.1, 0.4, 0.35, 0.15])[0]
         return random.sample(TRAIT_POOL, count)
 
-    def _assign_mutation(self) -> Optional[str]:
-        return (
-            random.choice(list(DNA_MUTATIONS.keys()))
-            if random.random() < 0.05
-            else None
-        )
-
     def _generate_scouted_caps(self) -> Dict[str, int]:
         offset = lambda cap: cap + random.randint(-5, 10)
         return {
@@ -131,20 +121,23 @@ class PlayerDNA:
         }
 
     # --- Mutation effects ---------------------------------------------------
-    def apply_mutation_effects(self) -> None:
-        if not self.mutation:
-            return
-        details = DNA_MUTATIONS[self.mutation]
-        boosts = details.get("attribute_cap_boosts", {})
-        for group, boost in boosts.items():
-            for attr, caps in self.attribute_caps.items():
-                if group in attr:
-                    caps["soft_cap"] = min(98, int(caps["soft_cap"] * (1 + boost)))
-                    caps["hard_cap"] = min(99, int(caps["hard_cap"] * (1 + boost)))
-
-        mult = details.get("dev_speed_multiplier")
-        if mult:
-            self.dev_speed = round(self.dev_speed * mult, 2)
+    def _apply_mutation_boost(self, attribute_name: str, base_growth: float) -> float:
+        """Apply growth bonuses based on DNA mutations."""
+        boost = 1.0
+        muts = self.mutations
+        if MutationType.FastLearner in muts:
+            boost *= 1.1
+        if MutationType.PhysicalFreak in muts and attribute_name in ["speed", "acceleration", "strength"]:
+            boost *= 1.1
+        if MutationType.ExplosiveAthlete in muts and attribute_name in ["agility", "acceleration", "jumping"]:
+            boost *= 1.1
+        if MutationType.TechnicalWizard in muts and attribute_name in ["tackle", "throw_accuracy", "route_running"]:
+            boost *= 1.15
+        if MutationType.MentalProcessor in muts and attribute_name in ["awareness", "iq", "play_recognition"]:
+            boost *= 1.1
+        if MutationType.EliteVision in muts and attribute_name in ["catching", "reaction_time", "ball_tracking"]:
+            boost *= 1.1
+        return base_growth * boost
 
     # --- Weekly progression -------------------------------------------------
     def apply_weekly_growth(
@@ -161,6 +154,7 @@ class PlayerDNA:
                 growth = base_gain
             else:
                 growth = base_gain * 0.25
+            growth = self._apply_mutation_boost(attr, growth)
             caps["current"] = min(hard_cap, cur + growth)
 
     def check_breakout(
@@ -194,10 +188,6 @@ class PlayerDNA:
         trigger = age_trigger.get(self.growth_arc, 29)
         if age >= trigger:
             for attr, caps in self.attribute_caps.items():
-                if is_injured and DNA_MUTATIONS.get(self.mutation, {}).get(
-                    "injury_regression_reduction"
-                ):
-                    continue
                 drop_mod = 1.5 if attr in ["speed", "agility"] else 1.0
                 caps["current"] = max(0, caps["current"] - drop * drop_mod)
 
@@ -209,7 +199,7 @@ class PlayerDNA:
             "dev_speed": self.dev_speed,
             "dev_focus": self.dev_focus,
             "traits": self.traits,
-            "mutation": self.mutation,
+            "mutations": [m.name for m in self.mutations],
             "attribute_caps": self.attribute_caps,
             "scouted_caps": self.scouted_caps,
         }
@@ -223,11 +213,11 @@ class PlayerDNA:
             "dev_speed",
             "dev_focus",
             "traits",
-            "mutation",
             "attribute_caps",
             "scouted_caps",
         ]:
             setattr(obj, field_name, data.get(field_name))
+        obj.mutations = [MutationType[m] for m in data.get("mutations", [])]
         return obj
 
     # Convenience factory used by Player for compatibility
