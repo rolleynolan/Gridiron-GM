@@ -49,6 +49,45 @@ QB_ARCHETYPES: Dict[str, Dict[str, float]] = {
 }
 
 
+# -- RB Archetype definitions used by ``evaluate_rb_archetype`` --
+RB_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Power Back": {
+        "trucking": 1.0,
+        "strength": 0.9,
+        "break_tackle": 0.9,
+        "carry_security": 0.8,
+        "speed": 0.5,
+    },
+    "Elusive Back": {
+        "elusiveness": 1.0,
+        "agility": 0.95,
+        "acceleration": 0.9,
+        "speed": 0.85,
+        "balance": 0.7,
+    },
+    "Receiving Back": {
+        "catching": 1.0,
+        "route_running": 0.9,
+        "acceleration": 0.8,
+        "elusiveness": 0.7,
+        "awareness": 0.6,
+    },
+    "Workhorse": {
+        "carry_security": 1.0,
+        "stamina": 0.9,
+        "toughness": 0.8,
+        "speed": 0.7,
+        "break_tackle": 0.6,
+    },
+    "Speed Back": {
+        "speed": 1.0,
+        "acceleration": 0.95,
+        "elusiveness": 0.8,
+        "agility": 0.75,
+    },
+}
+
+
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
 
@@ -155,6 +194,40 @@ def evaluate_qb_archetype(attributes: Dict[str, int]) -> str:
     best_score = float("-inf")
 
     for archetype, profile in QB_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_rb_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely RB archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a running back. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in RB_ARCHETYPES.items():
         score = 0.0
         for attr, weight in profile.items():
             if attr in attributes:
