@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, MutationType
+from gridiron_gm_pkg.simulation.systems.player.player_regression import apply_regression
 from gridiron_gm_pkg.simulation.entities.player import Player
 
 
@@ -56,6 +57,23 @@ def test_position_attribute_storage():
     assert "speed" in rb.attributes.core
     assert "break_tackle" in rb.attributes.position_specific
     assert "throw_power" not in rb.attributes.position_specific
+
+
+def test_regression_profile_defaults():
+    dna = PlayerDNA()
+    prof = dna.regression_profile
+    assert isinstance(prof, dict)
+    assert prof.get("start_age") >= 0
+    assert dna.attribute_decay_type.get("speed") == "physical"
+
+
+def test_apply_regression_decreases_values():
+    player = Player("Old", "RB", 31, "1990-01-01", "U", "USA", 22, 70)
+    player.attributes.core["speed"] = 80
+    player.attributes.core["acceleration"] = 80
+    apply_regression(player)
+    assert player.attributes.core["speed"] < 80
+    assert player.attributes.core["acceleration"] < 80
 
 
 def test_dna_long_term_progression(tmp_path):

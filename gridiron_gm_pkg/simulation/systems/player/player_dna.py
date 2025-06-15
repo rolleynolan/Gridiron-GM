@@ -50,6 +50,47 @@ def generate_dev_speed() -> float:
     value = random.normalvariate(0.65, 0.1)
     return max(0.3, min(1.0, round(value, 3)))
 
+# === Regression defaults ===
+DEFAULT_REGRESSION_PROFILE = {
+    "start_age": 30,
+    "rate": 0.04,  # 4% decline per year after start
+    "position_modifier": {
+        "RB": 1.3,
+        "QB": 0.8,
+        "WR": 1.0,
+        "LB": 1.2,
+        "OL": 1.1,
+        "DL": 1.1,
+        "DB": 1.2,
+        "TE": 1.0,
+        "K": 0.5,
+        "P": 0.5,
+    },
+}
+
+ATTRIBUTE_DECAY_TYPE = {
+    # Physical
+    "speed": "physical",
+    "acceleration": "physical",
+    "agility": "physical",
+    "jumping": "physical",
+    "strength": "physical",
+    "stamina": "physical",
+    "toughness": "physical",
+    # Skill
+    "catching": "skill",
+    "tackling": "skill",
+    "blocking": "skill",
+    "route_running": "skill",
+    "throw_power": "skill",
+    "throw_accuracy": "skill",
+    "lead_blocking": "skill",
+    # Mental
+    "awareness": "mental",
+    "iq": "mental",
+    "vision": "mental",
+    "play_recognition": "mental",
+}
 # === Mutation utility functions ===
 # === ATTRIBUTE CAPS STRUCTURE ===
 def generate_attribute_caps(dev_focus: Dict[str, float]) -> Dict[str, Dict]:
@@ -80,7 +121,8 @@ class PlayerDNA:
     """Container for a player's long-term development profile."""
 
     growth_arc: str = field(init=False)
-    regression_profile: str = field(init=False)
+    regression_profile: Dict[str, any] = field(init=False)
+    attribute_decay_type: Dict[str, str] = field(init=False)
     dev_speed: float = field(init=False)
     dev_focus: Dict[str, float] = field(init=False)
     traits: List[str] = field(init=False)
@@ -90,9 +132,8 @@ class PlayerDNA:
 
     def __post_init__(self) -> None:
         self.growth_arc = random.choice(["early", "late", "balanced", "rollercoaster"])
-        self.regression_profile = random.choice(
-            ["early_decline", "late_decline", "injury_decline", "gradual"]
-        )
+        self.regression_profile = DEFAULT_REGRESSION_PROFILE.copy()
+        self.attribute_decay_type = ATTRIBUTE_DECAY_TYPE
         self.dev_speed = generate_dev_speed()
         self.dev_focus = self._generate_dev_focus_weights()
         self.traits = self._assign_traits()
@@ -196,6 +237,7 @@ class PlayerDNA:
         return {
             "growth_arc": self.growth_arc,
             "regression_profile": self.regression_profile,
+            "attribute_decay_type": self.attribute_decay_type,
             "dev_speed": self.dev_speed,
             "dev_focus": self.dev_focus,
             "traits": self.traits,
@@ -210,6 +252,7 @@ class PlayerDNA:
         for field_name in [
             "growth_arc",
             "regression_profile",
+            "attribute_decay_type",
             "dev_speed",
             "dev_focus",
             "traits",

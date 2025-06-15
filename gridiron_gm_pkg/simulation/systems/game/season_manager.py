@@ -32,6 +32,7 @@ from gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperation
 from gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
     evaluate_player_season_progression,
 )
+from gridiron_gm_pkg.simulation.systems.player.player_regression import apply_regression
 from gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
 
 
@@ -551,6 +552,7 @@ class SeasonManager:
                 # Age up
                 if hasattr(player, "age"):
                     player.age += 1
+                    apply_regression(player)
                 # Optional: retire old/severely injured players
                 if hasattr(player, "age") and player.age >= 38:
                     player.retired = True
