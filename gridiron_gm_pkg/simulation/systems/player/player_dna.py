@@ -139,7 +139,7 @@ class PlayerDNA:
 
     def __post_init__(self) -> None:
         self.rise_duration = random.randint(1, 6)
-        self.prime_duration = random.randint(2, 8)
+        self.prime_duration = random.randint(1, 8)
         self.fall_duration = max(2, 20 - (self.rise_duration + self.prime_duration))
         self.peak_value = round(random.uniform(0.85, 1.0), 2)
         self.stability = round(random.uniform(0.01, 0.05), 3)
@@ -154,7 +154,7 @@ class PlayerDNA:
         self.attribute_caps = generate_attribute_caps(self.dev_focus)
         self.scouted_caps = self._generate_scouted_caps()
 
-    def generate_procedural_arc(self, total_years: int = 20) -> List[float]:
+    def generate_procedural_arc(self, total_years: int = 25) -> List[float]:
         """Return an annual multiplier curve representing the player's career trajectory."""
         rise = np.power(np.linspace(0, 1, self.rise_duration), 1.5) * self.peak_value
         prime_noise = np.random.normal(0, self.stability, self.prime_duration)
