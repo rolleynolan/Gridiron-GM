@@ -247,6 +247,80 @@ OL_ARCHETYPES: Dict[str, Dict[str, float]] = {
 }
 
 
+# -- DB Archetype definitions used by ``evaluate_db_archetype`` --
+CB_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Man Cover Corner": {
+        "man_coverage": 1.0,
+        "speed": 0.95,
+        "agility": 0.9,
+        "acceleration": 0.85,
+        "awareness": 0.75,
+    },
+    "Zone Corner": {
+        "zone_coverage": 1.0,
+        "awareness": 0.95,
+        "play_recognition": 0.9,
+        "catching": 0.75,
+        "tackling": 0.7,
+    },
+    "Ballhawk": {
+        "catching": 1.0,
+        "zone_coverage": 0.95,
+        "awareness": 0.9,
+        "discipline": 0.8,
+    },
+    "Press Technician": {
+        "press_coverage": 1.0,
+        "strength": 0.9,
+        "balance": 0.85,
+        "man_coverage": 0.8,
+        "awareness": 0.75,
+    },
+    "Slot Specialist": {
+        "agility": 1.0,
+        "acceleration": 0.95,
+        "man_coverage": 0.9,
+        "discipline": 0.85,
+        "zone_coverage": 0.7,
+    },
+}
+
+S_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Center Fielder": {
+        "zone_coverage": 1.0,
+        "speed": 0.95,
+        "awareness": 0.9,
+        "catching": 0.85,
+    },
+    "Box Safety": {
+        "tackling": 1.0,
+        "block_shedding": 0.95,
+        "awareness": 0.9,
+        "strength": 0.8,
+    },
+    "Hybrid Rover": {
+        "coverage": 1.0,
+        "tackling": 0.95,
+        "speed": 0.9,
+        "awareness": 0.85,
+        "versatility": 0.8,
+    },
+    "Ballhawk Safety": {
+        "catching": 1.0,
+        "zone_coverage": 0.95,
+        "awareness": 0.9,
+        "discipline": 0.85,
+    },
+    "Match Safety": {
+        "man_coverage": 1.0,
+        "agility": 0.95,
+        "speed": 0.9,
+        "awareness": 0.85,
+        "discipline": 0.8,
+    },
+}
+
+
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
 
@@ -601,6 +675,33 @@ def evaluate_lb_archetype(attributes: dict) -> str:
     best_score = float("-inf")
 
     for archetype, profile in LB_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_db_archetype(attributes: Dict[str, int], position: str) -> str:
+    """Return the best defensive back archetype for the given position."""
+
+    def norm(val: int) -> float:
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    pos_key = position.upper()
+    if pos_key == "CB":
+        archetypes = CB_ARCHETYPES
+    else:
+        archetypes = S_ARCHETYPES
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in archetypes.items():
         score = 0.0
         for attr, weight in profile.items():
             if attr in attributes:
