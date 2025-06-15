@@ -8,6 +8,205 @@ used by scouting screens or season wrap up reports.
 from typing import Any, Dict
 
 
+# -- QB Archetype definitions used by ``evaluate_qb_archetype`` --
+QB_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Pocket Passer": {
+        "throw_accuracy_short": 1.0,
+        "throw_accuracy_medium": 1.0,
+        "awareness": 0.9,
+        "iq": 0.8,
+        "speed": 0.2,
+        "toughness": 0.6,
+    },
+    "Scrambler": {
+        "speed": 1.0,
+        "acceleration": 0.9,
+        "agility": 0.8,
+        "throw_on_run": 0.6,
+        "throw_accuracy_short": 0.5,
+    },
+    "Gunslinger": {
+        "throw_power": 1.0,
+        "throw_accuracy_deep": 0.9,
+        "throw_on_run": 0.6,
+        "iq": 0.5,
+        "discipline": 0.3,
+    },
+    "Field General": {
+        "iq": 1.0,
+        "awareness": 1.0,
+        "throw_accuracy_short": 0.8,
+        "discipline": 0.7,
+        "toughness": 0.6,
+    },
+    "Dual-Threat": {
+        "speed": 0.8,
+        "throw_power": 0.8,
+        "throw_on_run": 0.8,
+        "acceleration": 0.7,
+        "throw_accuracy_deep": 0.7,
+    },
+}
+
+
+# -- RB Archetype definitions used by ``evaluate_rb_archetype`` --
+RB_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Power Back": {
+        "trucking": 1.0,
+        "strength": 0.9,
+        "break_tackle": 0.9,
+        "carry_security": 0.8,
+        "speed": 0.5,
+    },
+    "Elusive Back": {
+        "elusiveness": 1.0,
+        "agility": 0.95,
+        "acceleration": 0.9,
+        "speed": 0.85,
+        "balance": 0.7,
+    },
+    "Receiving Back": {
+        "catching": 1.0,
+        "route_running": 0.9,
+        "acceleration": 0.8,
+        "elusiveness": 0.7,
+        "awareness": 0.6,
+    },
+    "Workhorse": {
+        "carry_security": 1.0,
+        "stamina": 0.9,
+        "toughness": 0.8,
+        "speed": 0.7,
+        "break_tackle": 0.6,
+    },
+    "Speed Back": {
+        "speed": 1.0,
+        "acceleration": 0.95,
+        "elusiveness": 0.8,
+        "agility": 0.75,
+    },
+}
+
+
+# -- WR Archetype definitions used by ``evaluate_wr_archetype`` --
+WR_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Deep Threat": {
+        "speed": 1.0,
+        "acceleration": 0.9,
+        "route_running_deep": 0.9,
+        "catching": 0.7,
+        "release": 0.6,
+    },
+    "Possession Receiver": {
+        "catch_in_traffic": 1.0,
+        "route_running_short": 0.9,
+        "awareness": 0.8,
+        "catching": 0.8,
+    },
+    "Red Zone Threat": {
+        "spectacular_catch": 1.0,
+        "release": 0.9,
+        "catch_in_traffic": 0.9,
+        "jumping": 0.8,
+        "strength": 0.7,
+    },
+    "YAC Specialist": {
+        "elusiveness": 1.0,
+        "agility": 0.9,
+        "route_running_short": 0.8,
+        "acceleration": 0.8,
+        "carry_security": 0.6,
+    },
+    "Route Technician": {
+        "route_running_short": 1.0,
+        "route_running_mid": 0.95,
+        "release": 0.9,
+        "awareness": 0.8,
+        "iq": 0.7,
+    },
+    "Return Specialist": {
+        "return_skill": 1.0,
+        "speed": 0.95,
+        "acceleration": 0.9,
+        "agility": 0.85,
+        "elusiveness": 0.8,
+        "carry_security": 0.7,
+    },
+}
+
+
+# -- TE Archetype definitions used by ``evaluate_te_archetype`` --
+TE_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Receiving TE": {
+        "catching": 1.0,
+        "catch_in_traffic": 0.9,
+        "route_running_short": 0.85,
+        "awareness": 0.8,
+        "release": 0.75,
+    },
+    "Blocking TE": {
+        "run_block": 1.0,
+        "lead_blocking": 0.9,
+        "strength": 0.9,
+        "impact_blocking": 0.85,
+        "awareness": 0.7,
+    },
+    "Vertical Threat": {
+        "speed": 1.0,
+        "acceleration": 0.9,
+        "catching": 0.85,
+        "route_running_deep": 0.85,
+        "release": 0.8,
+    },
+    "H-Back": {
+        "lead_blocking": 1.0,
+        "awareness": 0.9,
+        "route_running_short": 0.8,
+        "catching": 0.75,
+        "agility": 0.7,
+    },
+}
+
+# -- OL Archetype definitions used by ``evaluate_ol_archetype`` --
+OL_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Pass Protector": {
+        "pass_block": 1.0,
+        "footwork_ol": 0.95,
+        "awareness": 0.9,
+        "discipline": 0.85,
+        "impact_blocking": 0.75,
+    },
+    "Run Blocker": {
+        "run_block": 1.0,
+        "lead_blocking": 0.95,
+        "impact_blocking": 0.9,
+        "footwork_ol": 0.75,
+        "strength": 0.7,
+    },
+    "Pure Power": {
+        "strength": 1.0,
+        "impact_blocking": 0.95,
+        "block_shed_resistance": 0.9,
+        "run_block": 0.75,
+        "lead_blocking": 0.7,
+    },
+    "Technical Blocker": {
+        "footwork_ol": 1.0,
+        "discipline": 0.95,
+        "awareness": 0.9,
+        "pass_block": 0.85,
+        "run_block": 0.75,
+    },
+    "Anchor": {
+        "block_shed_resistance": 1.0,
+        "pass_block": 0.95,
+        "strength": 0.9,
+        "awareness": 0.8,
+        "discipline": 0.75,
+    },
+}
+
+
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
 
@@ -89,3 +288,265 @@ def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str,
 
     # Fallback
     return "Raw Prospect"
+
+
+def evaluate_qb_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely QB archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a quarterback. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in QB_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_rb_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely RB archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a running back. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in RB_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_wr_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely WR archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a wide receiver. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in WR_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_te_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely TE archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for a tight end. Values should range
+        from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in TE_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_ol_archetype(attributes: Dict[str, int]) -> str:
+    """Return the most likely OL archetype based on weighted attributes.
+
+    Parameters
+    ----------
+    attributes:
+        Mapping of attribute ratings for an offensive lineman. Values should
+        range from 20 to 99.
+
+    Returns
+    -------
+    str
+        The archetype with the highest weighted score.
+    """
+
+    def norm(val: int) -> float:
+        # Clamp and normalize the attribute rating to ``0-1``.
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in OL_ARCHETYPES.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_edge_archetype(attributes: dict) -> str:
+    """Determine EDGE archetype (DE/OLB) based on key attributes."""
+    weights = {
+        "Speed Rusher": (
+            attributes.get("pass_rush_finesse", 0) * 1.0
+            + attributes.get("speed", 0) * 0.95
+            + attributes.get("acceleration", 0) * 0.9
+            + attributes.get("agility", 0) * 0.85
+            + attributes.get("pursuit_dl", 0) * 0.75
+        ),
+        "Power Rusher": (
+            attributes.get("pass_rush_power", 0) * 1.0
+            + attributes.get("strength", 0) * 0.95
+            + attributes.get("block_shedding", 0) * 0.9
+            + attributes.get("balance", 0) * 0.8
+            + attributes.get("toughness", 0) * 0.75
+        ),
+        "Hybrid Rusher": (
+            attributes.get("pass_rush_power", 0) * 0.85
+            + attributes.get("pass_rush_finesse", 0) * 0.85
+            + attributes.get("block_shedding", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.75
+            + attributes.get("pursuit_dl", 0) * 0.7
+        ),
+        "Edge Setter": (
+            attributes.get("run_defense", 0) * 1.0
+            + attributes.get("block_shedding", 0) * 0.95
+            + attributes.get("strength", 0) * 0.9
+            + attributes.get("tackle_dl", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.75
+        ),
+        "Pure Athlete": (
+            attributes.get("speed", 0) * 1.0
+            + attributes.get("acceleration", 0) * 0.95
+            + attributes.get("agility", 0) * 0.9
+            + attributes.get("pass_rush_power", 0) * 0.5
+            + attributes.get("awareness", 0) * 0.4
+        ),
+        "Technical Edge": (
+            attributes.get("hands", 0) * 1.0
+            + attributes.get("pass_rush_finesse", 0) * 0.95
+            + attributes.get("awareness", 0) * 0.9
+            + attributes.get("block_shedding", 0) * 0.85
+            + attributes.get("pursuit_dl", 0) * 0.75
+        ),
+    }
+    return max(weights, key=weights.get)
+
+
+def evaluate_idl_archetype(attributes: dict) -> str:
+    """Determine DT/IDL archetype based on key attributes."""
+    weights = {
+        "Run Stuffer": (
+            attributes.get("run_defense", 0) * 1.0
+            + attributes.get("block_shedding", 0) * 0.95
+            + attributes.get("strength", 0) * 0.9
+            + attributes.get("tackle_dl", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.8
+        ),
+        "Gap Penetrator": (
+            attributes.get("pass_rush_finesse", 0) * 1.0
+            + attributes.get("acceleration", 0) * 0.95
+            + attributes.get("agility", 0) * 0.9
+            + attributes.get("pursuit_dl", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.75
+        ),
+        "Nose Tackle": (
+            attributes.get("block_shedding", 0) * 1.0
+            + attributes.get("strength", 0) * 0.95
+            + attributes.get("toughness", 0) * 0.9
+            + attributes.get("balance", 0) * 0.85
+            + attributes.get("run_defense", 0) * 0.8
+        ),
+        "Power DT": (
+            attributes.get("pass_rush_power", 0) * 1.0
+            + attributes.get("strength", 0) * 0.95
+            + attributes.get("block_shedding", 0) * 0.9
+            + attributes.get("balance", 0) * 0.8
+            + attributes.get("toughness", 0) * 0.75
+        ),
+        "Technical DT": (
+            attributes.get("hands", 0) * 1.0
+            + attributes.get("pass_rush_finesse", 0) * 0.95
+            + attributes.get("awareness", 0) * 0.9
+            + attributes.get("block_shedding", 0) * 0.85
+            + attributes.get("pursuit_dl", 0) * 0.75
+        ),
+    }
+    return max(weights, key=weights.get)
+
