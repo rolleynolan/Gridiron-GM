@@ -5,17 +5,19 @@ from __future__ import annotations
 import numpy as np
 from typing import Dict, Tuple
 
-# Attribute relevance map per position
+# Attribute relevance map per position.  Each position includes universal
+# core attributes ``iq``, ``awareness``, ``tackling`` and ``catching`` so that
+# every player receives a full baseline attribute profile.
 POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
     "QB": {
         "throw_power": "high",
         "throw_accuracy_short": "high",
         "throw_accuracy_medium": "high",
         "throw_accuracy_deep": "high",
-        "iq": "high",
-        "awareness": "medium",
         "speed": "low",
         "agility": "low",
+        "iq": "high",
+        "awareness": "medium",
         "catching": "low",
         "tackling": "low",
     },
@@ -25,10 +27,12 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "agility": "high",
         "elusiveness": "high",
         "carry_security": "high",
-        "catching": "medium",
         "route_running": "medium",
+        "catching": "medium",
         "blocking": "low",
         "throw_power": "low",
+        "iq": "medium",
+        "awareness": "medium",
         "tackling": "low",
     },
     "WR": {
@@ -37,9 +41,63 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "catching": "high",
         "route_running_short": "high",
         "route_running_deep": "high",
-        "awareness": "medium",
         "blocking": "low",
+        "iq": "medium",
+        "awareness": "medium",
         "tackling": "low",
+    },
+    "TE": {
+        "catching": "high",
+        "route_running_short": "medium",
+        "route_running_deep": "medium",
+        "blocking": "high",
+        "strength": "high",
+        "speed": "medium",
+        "iq": "medium",
+        "awareness": "medium",
+        "tackling": "low",
+    },
+    "OL": {
+        "blocking": "high",
+        "strength": "high",
+        "agility": "medium",
+        "iq": "medium",
+        "awareness": "medium",
+        "speed": "low",
+        "catching": "low",
+        "tackling": "low",
+    },
+    "EDGE": {
+        "pass_rush": "high",
+        "block_shedding": "high",
+        "tackling": "high",
+        "speed": "medium",
+        "strength": "high",
+        "iq": "medium",
+        "awareness": "medium",
+        "catching": "low",
+    },
+    "DL": {
+        "strength": "high",
+        "block_shedding": "high",
+        "run_defense": "high",
+        "pass_rush": "medium",
+        "speed": "low",
+        "iq": "medium",
+        "awareness": "medium",
+        "catching": "low",
+        "tackling": "high",
+    },
+    "LB": {
+        "tackling": "high",
+        "coverage": "medium",
+        "speed": "medium",
+        "block_shedding": "medium",
+        "pass_rush": "medium",
+        "strength": "medium",
+        "iq": "high",
+        "awareness": "high",
+        "catching": "medium",
     },
     "CB": {
         "speed": "high",
@@ -48,22 +106,47 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
         "catching": "medium",
         "tackling": "medium",
         "pass_rush": "low",
+        "iq": "medium",
+        "awareness": "high",
     },
-    # Additional positions can be added here.
+    "S": {
+        "coverage": "high",
+        "speed": "high",
+        "tackling": "high",
+        "catching": "medium",
+        "iq": "medium",
+        "awareness": "high",
+    },
+    "K": {
+        "kick_power": "high",
+        "kick_accuracy": "high",
+        "iq": "medium",
+        "awareness": "medium",
+        "catching": "low",
+        "tackling": "low",
+    },
+    "P": {
+        "punt_power": "high",
+        "punt_accuracy": "high",
+        "iq": "medium",
+        "awareness": "medium",
+        "catching": "low",
+        "tackling": "low",
+    },
 }
 
 # Rating caps based on attribute relevance
-RELEVANCE_CAP_RANGES: Dict[str, Tuple[int, int]] = {
-    "high": (75, 99),
+RELEVANCE_CAP_RANGES: Dict[str, Tuple[int, int]] = {n
+    "high": (80, 99),
     "medium": (60, 85),
-    "low": (25, 50),
+    "low": (20, 45),
 }
 
 # Starting attribute values based on relevance
 RELEVANCE_GEN_RANGES: Dict[str, Tuple[int, int]] = {
-    "high": (65, 88),
-    "medium": (50, 70),
-    "low": (20, 40),
+    "high": (70, 90),
+    "medium": (55, 75),
+    "low": (15, 40),
 }
 
 def bell_curve_sample(mean: float, std_dev: float, min_val: int, max_val: int) -> int:

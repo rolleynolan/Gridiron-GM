@@ -7,11 +7,33 @@ import numpy as np
 from gridiron_gm_pkg.simulation.systems.player import attribute_generator
 
 
-def test_generator_returns_values():
-    attrs, caps = attribute_generator.generate_attributes_for_position("QB")
+import pytest
+
+
+@pytest.mark.parametrize(
+    "pos",
+    [
+        "QB",
+        "RB",
+        "WR",
+        "TE",
+        "OL",
+        "EDGE",
+        "DL",
+        "LB",
+        "CB",
+        "S",
+        "K",
+        "P",
+    ],
+)
+def test_generator_returns_values(pos):
+    attrs, caps = attribute_generator.generate_attributes_for_position(pos)
     assert isinstance(attrs, dict)
     assert isinstance(caps, dict)
-    # Each attribute should have corresponding cap
+    for base_attr in ["iq", "awareness", "tackling", "catching"]:
+        assert base_attr in attrs
+        assert base_attr in caps
     for attr, value in attrs.items():
         assert attr in caps
         assert value <= caps[attr]
