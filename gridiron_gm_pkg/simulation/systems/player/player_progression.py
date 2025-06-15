@@ -8,6 +8,7 @@ from typing import Dict
 from gridiron_gm_pkg.simulation.entities.player import Player
 from gridiron_gm_pkg.simulation.systems.player.weekly_training import (
     PHYSICAL_ATTRIBUTES,
+    _get_attr_container,
 )
 
 # === Tunable parameters ===
@@ -23,7 +24,11 @@ def _clamp(value: float, low: float = 40.0, high: float = 99.0) -> float:
     return max(low, min(high, value))
 
 
-def progress_player(player: Player, xp_gains: Dict[str, float] | None = None) -> Player:
+def progress_player(
+    player: Player,
+    xp_gains: Dict[str, float] | None = None,
+    coach_quality: float = 1.0,
+) -> Player:
     """Update a player's attributes using their DNA growth curve.
 
     Parameters
@@ -46,23 +51,33 @@ def progress_player(player: Player, xp_gains: Dict[str, float] | None = None) ->
     if attrs is None or dna is None:
         return player
 
-    dev_speed = getattr(dna, "development_speed", 1.0)
-    age = getattr(player, "age", 25)
-    age_mult = dna.growth_curve.get(age, 1.0)
-    if age_mult < 0:
-        age_mult *= getattr(dna, "regression_rate", 1.0)
+    try:
+        quality_mod = min(1.2, max(0.8, float(coach_quality)))
+    except (TypeError, ValueError):
+        quality_mod = 1.0
 
-    def _apply(container: Dict[str, float]) -> None:
-        for attr, value in container.items():
-            base_gain = xp_gains.get(attr, BASE_XP)
-            net = base_gain * age_mult * dev_speed
-            if attr in PHYSICAL_ATTRIBUTES:
-                net *= PHYSICAL_MULTIPLIER
-            else:
-                net *= MENTAL_TECH_MULTIPLIER
-            net *= random.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
-            container[attr] = round(_clamp(value + net), 2)
+    dev_speed = getattr(dna, "dev_speed", 1.0)
+    year = getattr(player, "experience", 0)
+    arc = dna.career_arc
+    arc_mult = arc[year] if year < len(arc) else arc[-1]
 
-    _apply(getattr(attrs, "core", {}))
-    _apply(getattr(attrs, "position_specific", {}))
+    hidden_caps = getattr(player, "hidden_caps", {})
+    attr_caps = dna.attribute_caps
+
+    for attr in player.get_relevant_attribute_names():
+        container, _ = _get_attr_container(player, attr)
+        if container is None:
+            continue
+        current = container.get(attr, 0)
+        hard_cap = hidden_caps.get(attr, attr_caps.get(attr, {}).get("hard_cap", 99))
+        soft_cap = attr_caps.get(attr, {}).get("soft_cap", hard_cap)
+        if current >= hard_cap:
+            continue
+        gain = xp_gains.get(attr, BASE_XP)
+        growth = gain * arc_mult * dev_speed * quality_mod
+        if current >= soft_cap:
+            growth *= 0.25
+        growth *= random.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
+        container[attr] = round(_clamp(current + growth), 2)
+
     return player

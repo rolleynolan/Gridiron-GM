@@ -141,10 +141,8 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
     clone = PlayerDNA.from_dict(data)
     assert [m.name for m in clone.mutations] == [m.name for m in dna.mutations]
 
-    attrs = {
-        attr: random.randint(65, 75)
-        for attr in valid_attributes_by_position[position]
-    }
+    tmp_player = Player("tmp", position, 22, "2000-01-01", "U", "USA", 0, 60)
+    attrs = {attr: random.randint(65, 75) for attr in tmp_player.get_relevant_attribute_names()}
     caps = {
         attr: min(attrs[attr] + random.randint(10, 25), 100)
         for attr in attrs
@@ -162,6 +160,7 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
     player.position = position
     player.dna = dna
     player.attributes = AttrSet(attrs)
+    player.get_relevant_attribute_names = tmp_player.get_relevant_attribute_names
 
     base_attrs = attrs.copy()
     arc = dna.career_arc[:years]

@@ -17,6 +17,8 @@ CORE_ATTRIBUTES = [
     "balance",
     "discipline",
     "consistency",
+    "tackling",
+    "catching",
 ]
 
 
@@ -235,28 +237,14 @@ class Player:
         # --- Procedural DNA profile ---
         self.dna = PlayerDNA.generate_random_dna(self.position)
 
-        relevant = self.get_relevant_attribute_names()
-        self.hidden_caps = {}
-        self.scouted_potential = {}
-        for attr in relevant:
-            cap_info = self.dna.attribute_caps.get(attr)
-            if cap_info:
-                cur = cap_info.get("current", 20)
-                hard_cap = cap_info.get("hard_cap", 20)
-            else:
-                cur = 20
-                hard_cap = 20
-            self.hidden_caps[attr] = hard_cap
-            self.scouted_potential[attr] = self.dna.scouted_caps.get(attr, hard_cap)
-            if attr in self.attributes.core:
-                self.attributes.core[attr] = cur
-            else:
-                self.attributes.position_specific[attr] = cur
+        self.generate_caps()
 
     def init_core_attributes(self):
         """Return baseline attribute mapping common to all players."""
         core = {attr: None for attr in CORE_ATTRIBUTES}
         core["stamina"] = 80
+        core["tackling"] = 40
+        core["catching"] = 40
         return core
 
     def init_position_attributes(self):
@@ -405,8 +393,28 @@ class Player:
         return attrs
 
     def get_relevant_attribute_names(self) -> List[str]:
-        """Return list of all attribute names used for this player."""
-        return list(self.get_all_attributes().keys())
+        """Return list of attribute names relevant to this player's position."""
+        names = list(self.attributes.core.keys()) + list(self.position_specific.keys())
+        for base in ["tackling", "catching"]:
+            if base not in names:
+                names.append(base)
+        return names
+
+    def generate_caps(self) -> None:
+        """Initialize hidden and scouted caps using the player's DNA."""
+        relevant = self.get_relevant_attribute_names()
+        self.hidden_caps = {}
+        self.scouted_potential = {}
+        for attr in relevant:
+            cap_info = self.dna.attribute_caps.get(attr, {}) if hasattr(self, "dna") else {}
+            cur = cap_info.get("current", 20)
+            hard_cap = cap_info.get("hard_cap", 20)
+            self.hidden_caps[attr] = hard_cap
+            self.scouted_potential[attr] = self.dna.scouted_caps.get(attr, hard_cap) if hasattr(self, "dna") else hard_cap
+            if attr in self.attributes.core:
+                self.attributes.core[attr] = cur
+            else:
+                self.attributes.position_specific[attr] = cur
 
     def add_trait(self, category, trait):
         if category in self.traits:
@@ -705,19 +713,8 @@ class Player:
             player.dna = PlayerDNA.from_dict(dna_data)
         else:
             player.dna = PlayerDNA.generate_random_dna(player.position)
-        if not player.hidden_caps:
-            player.hidden_caps = {}
-            for attr in player.get_relevant_attribute_names():
-                info = player.dna.attribute_caps.get(attr)
-                if info:
-                    player.hidden_caps[attr] = info.get("hard_cap", 20)
-                else:
-                    player.hidden_caps[attr] = 20
-        if not player.scouted_potential:
-            player.scouted_potential = {
-                attr: player.dna.scouted_caps.get(attr, player.hidden_caps.get(attr, 20))
-                for attr in player.get_relevant_attribute_names()
-            }
+        if not player.hidden_caps or not player.scouted_potential:
+            player.generate_caps()
         return player
 
 
