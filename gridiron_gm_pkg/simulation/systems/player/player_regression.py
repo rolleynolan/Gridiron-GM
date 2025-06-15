@@ -24,6 +24,7 @@ attribute_decay_type = {
     "throw_power": "skill",
     "throw_accuracy": "skill",
     "lead_blocking": "skill",
+    "return_skill": "skill",
     # Mental
     "awareness": "mental",
     "iq": "mental",
@@ -41,13 +42,13 @@ decay_multipliers = {
 # Attributes considered for each position
 valid_attributes_by_position: Dict[str, list[str]] = {
     "QB": ["throw_power", "throw_accuracy", "awareness", "iq", "agility", "acceleration", "vision"],
-    "RB": ["speed", "acceleration", "agility", "toughness", "awareness", "carrying", "elusiveness", "catching", "stamina"],
-    "WR": ["speed", "acceleration", "agility", "catching", "route_running", "awareness", "jumping", "release"],
+    "RB": ["speed", "acceleration", "agility", "toughness", "awareness", "carrying", "elusiveness", "catching", "stamina", "return_skill"],
+    "WR": ["speed", "acceleration", "agility", "catching", "route_running", "awareness", "jumping", "release", "return_skill"],
     "TE": ["strength", "blocking", "lead_blocking", "catching", "route_running", "awareness"],
     "OL": ["strength", "blocking", "lead_blocking", "awareness", "toughness", "footwork_ol"],
     "DL": ["strength", "tackling", "block_shedding", "awareness", "play_recognition", "pursuit_dl"],
     "LB": ["speed", "tackling", "awareness", "play_recognition", "strength", "coverage", "block_shedding"],
-    "DB": ["speed", "acceleration", "agility", "awareness", "catching", "coverage", "play_recognition", "jumping"],
+    "DB": ["speed", "acceleration", "agility", "awareness", "catching", "coverage", "play_recognition", "jumping", "return_skill"],
     "K": ["kick_power", "kick_accuracy", "awareness"],
     "P": ["punt_power", "punt_accuracy", "awareness"],
 }
