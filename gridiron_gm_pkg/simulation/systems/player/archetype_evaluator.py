@@ -458,3 +458,95 @@ def evaluate_ol_archetype(attributes: Dict[str, int]) -> str:
             best_type = archetype
 
     return best_type
+
+
+def evaluate_edge_archetype(attributes: dict) -> str:
+    """Determine EDGE archetype (DE/OLB) based on key attributes."""
+    weights = {
+        "Speed Rusher": (
+            attributes.get("pass_rush_finesse", 0) * 1.0
+            + attributes.get("speed", 0) * 0.95
+            + attributes.get("acceleration", 0) * 0.9
+            + attributes.get("agility", 0) * 0.85
+            + attributes.get("pursuit_dl", 0) * 0.75
+        ),
+        "Power Rusher": (
+            attributes.get("pass_rush_power", 0) * 1.0
+            + attributes.get("strength", 0) * 0.95
+            + attributes.get("block_shedding", 0) * 0.9
+            + attributes.get("balance", 0) * 0.8
+            + attributes.get("toughness", 0) * 0.75
+        ),
+        "Hybrid Rusher": (
+            attributes.get("pass_rush_power", 0) * 0.85
+            + attributes.get("pass_rush_finesse", 0) * 0.85
+            + attributes.get("block_shedding", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.75
+            + attributes.get("pursuit_dl", 0) * 0.7
+        ),
+        "Edge Setter": (
+            attributes.get("run_defense", 0) * 1.0
+            + attributes.get("block_shedding", 0) * 0.95
+            + attributes.get("strength", 0) * 0.9
+            + attributes.get("tackle_dl", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.75
+        ),
+        "Pure Athlete": (
+            attributes.get("speed", 0) * 1.0
+            + attributes.get("acceleration", 0) * 0.95
+            + attributes.get("agility", 0) * 0.9
+            + attributes.get("pass_rush_power", 0) * 0.5
+            + attributes.get("awareness", 0) * 0.4
+        ),
+        "Technical Edge": (
+            attributes.get("hands", 0) * 1.0
+            + attributes.get("pass_rush_finesse", 0) * 0.95
+            + attributes.get("awareness", 0) * 0.9
+            + attributes.get("block_shedding", 0) * 0.85
+            + attributes.get("pursuit_dl", 0) * 0.75
+        ),
+    }
+    return max(weights, key=weights.get)
+
+
+def evaluate_idl_archetype(attributes: dict) -> str:
+    """Determine DT/IDL archetype based on key attributes."""
+    weights = {
+        "Run Stuffer": (
+            attributes.get("run_defense", 0) * 1.0
+            + attributes.get("block_shedding", 0) * 0.95
+            + attributes.get("strength", 0) * 0.9
+            + attributes.get("tackle_dl", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.8
+        ),
+        "Gap Penetrator": (
+            attributes.get("pass_rush_finesse", 0) * 1.0
+            + attributes.get("acceleration", 0) * 0.95
+            + attributes.get("agility", 0) * 0.9
+            + attributes.get("pursuit_dl", 0) * 0.85
+            + attributes.get("awareness", 0) * 0.75
+        ),
+        "Nose Tackle": (
+            attributes.get("block_shedding", 0) * 1.0
+            + attributes.get("strength", 0) * 0.95
+            + attributes.get("toughness", 0) * 0.9
+            + attributes.get("balance", 0) * 0.85
+            + attributes.get("run_defense", 0) * 0.8
+        ),
+        "Power DT": (
+            attributes.get("pass_rush_power", 0) * 1.0
+            + attributes.get("strength", 0) * 0.95
+            + attributes.get("block_shedding", 0) * 0.9
+            + attributes.get("balance", 0) * 0.8
+            + attributes.get("toughness", 0) * 0.75
+        ),
+        "Technical DT": (
+            attributes.get("hands", 0) * 1.0
+            + attributes.get("pass_rush_finesse", 0) * 0.95
+            + attributes.get("awareness", 0) * 0.9
+            + attributes.get("block_shedding", 0) * 0.85
+            + attributes.get("pursuit_dl", 0) * 0.75
+        ),
+    }
+    return max(weights, key=weights.get)
+
