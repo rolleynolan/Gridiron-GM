@@ -1,4 +1,6 @@
 from pathlib import Path
+import csv
+import random
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -54,3 +56,56 @@ def test_position_attribute_storage():
     assert "speed" in rb.attributes.core
     assert "break_tackle" in rb.attributes.position_specific
     assert "throw_power" not in rb.attributes.position_specific
+
+
+def test_dna_long_term_progression(tmp_path):
+    """Simulate long term DNA growth and write results to csv."""
+    random.seed(42)
+
+    out_dir = Path("dna_output")
+    out_dir.mkdir(exist_ok=True)
+    csv_file = out_dir / "dna_long_term_progression.csv"
+
+    positions = ["QB", "RB", "WR"]
+    players = []
+    for pos in positions:
+        for i in range(2):
+            players.append(
+                Player(f"{pos}_{i+1}", pos, 22, "2000-01-01", "U", "USA", 10 + i, 70)
+            )
+
+    coaching = {p.name: round(random.uniform(0.8, 1.2), 2) for p in players}
+
+    records = []
+    week_counter = 0
+    for year in range(15):
+        for p in players:
+            for _ in range(17):
+                p.dna.apply_weekly_growth(coaching_quality=coaching[p.name])
+                for attr in p.dna.attribute_caps:
+                    p.dna.check_breakout(
+                        attr, production_metric=True, snap_share=0.8, week=week_counter
+                    )
+                week_counter += 1
+            p.age += 1
+            row = {
+                "player": p.name,
+                "position": p.position,
+                "year": year + 1,
+                "age": p.age,
+                "coaching_quality": coaching[p.name],
+                "dev_speed": p.dna.dev_speed,
+                "mutations": ",".join(m.name for m in p.dna.mutations),
+            }
+            for attr, caps in p.dna.attribute_caps.items():
+                row[attr] = round(caps["current"], 2)
+                row[f"{attr}_cap"] = caps["hard_cap"]
+            records.append(row)
+
+    fieldnames = list(records[0].keys())
+    with open(csv_file, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(records)
+
+    assert csv_file.exists()
