@@ -136,7 +136,7 @@ POSITION_RELEVANCE: Dict[str, Dict[str, str]] = {
 }
 
 # Rating caps based on attribute relevance
-RELEVANCE_CAP_RANGES: Dict[str, Tuple[int, int]] = {
+RELEVANCE_CAP_RANGES: Dict[str, Tuple[int, int]] = {n
     "high": (80, 99),
     "medium": (60, 85),
     "low": (20, 45),
