@@ -320,6 +320,59 @@ S_ARCHETYPES: Dict[str, Dict[str, float]] = {
     },
 }
 
+# -- Special Teams Archetype definitions used by ``evaluate_special_teams_archetype`` --
+KICKER_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Power Kicker": {
+        "kick_power": 1.0,
+        "strength": 0.8,
+        "kick_accuracy": 0.7,
+        "discipline": 0.6,
+    },
+    "Precision Kicker": {
+        "kick_accuracy": 1.0,
+        "discipline": 0.9,
+        "kick_power": 0.7,
+        "awareness": 0.6,
+    },
+}
+
+PUNTER_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Boomer": {
+        "punt_power": 1.0,
+        "kick_power": 0.9,
+        "discipline": 0.6,
+        "awareness": 0.6,
+    },
+    "Coffin Corner Specialist": {
+        "punt_accuracy": 1.0,
+        "awareness": 0.9,
+        "discipline": 0.8,
+        "kick_power": 0.6,
+    },
+}
+
+RETURNER_ARCHETYPES: Dict[str, Dict[str, float]] = {
+    "Explosive Returner": {
+        "return_skill": 1.0,
+        "speed": 0.95,
+        "acceleration": 0.9,
+        "elusiveness": 0.85,
+        "agility": 0.8,
+    },
+    "Reliable Returner": {
+        "return_skill": 1.0,
+        "catching": 0.9,
+        "discipline": 0.85,
+        "awareness": 0.8,
+    },
+    "Versatile Returner": {
+        "return_skill": 1.0,
+        "elusiveness": 0.9,
+        "vision": 0.85,
+        "agility": 0.8,
+    },
+}
+
 
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
@@ -697,6 +750,35 @@ def evaluate_db_archetype(attributes: Dict[str, int], position: str) -> str:
         archetypes = CB_ARCHETYPES
     else:
         archetypes = S_ARCHETYPES
+
+    best_type = ""
+    best_score = float("-inf")
+
+    for archetype, profile in archetypes.items():
+        score = 0.0
+        for attr, weight in profile.items():
+            if attr in attributes:
+                score += norm(int(attributes[attr])) * weight
+        if score > best_score:
+            best_score = score
+            best_type = archetype
+
+    return best_type
+
+
+def evaluate_special_teams_archetype(attributes: Dict[str, int], position: str) -> str:
+    """Return the best special teams archetype based on the player's position."""
+
+    def norm(val: int) -> float:
+        return max(0.0, min((val - 20) / 79, 1.0))
+
+    pos_key = position.upper()
+    if pos_key == "K":
+        archetypes = KICKER_ARCHETYPES
+    elif pos_key == "P":
+        archetypes = PUNTER_ARCHETYPES
+    else:
+        archetypes = RETURNER_ARCHETYPES
 
     best_type = ""
     best_score = float("-inf")
