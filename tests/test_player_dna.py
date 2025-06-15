@@ -6,11 +6,64 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, MutationType
+from gridiron_gm_pkg.simulation.systems.player import player_regression
 from gridiron_gm_pkg.simulation.systems.player.player_regression import (
-    apply_regression,
     valid_attributes_by_position,
+    attribute_decay_type,
+    decay_multipliers,
 )
 from gridiron_gm_pkg.simulation.entities.player import Player
+
+
+def export_player_log(player_id, dna, position, age, attributes, caps):
+    """Return a dictionary row for CSV export."""
+    return {
+        "player": player_id,
+        "position": position,
+        "age": age,
+        "dev_speed": dna.dev_speed,
+        "mutations": ", ".join(m.name for m in dna.mutations),
+        **{attr: attributes.get(attr) for attr in caps},
+        **{f"{attr}_cap": caps[attr] for attr in caps},
+    }
+
+
+def apply_growth(attr: str, current: float, cap: float, dna: PlayerDNA, age: int, position: str) -> float:
+    if attr not in valid_attributes_by_position[position]:
+        return 0.0
+
+    growth = 1.0 * dna.dev_speed
+    if "FastLearner" in [m.name for m in dna.mutations]:
+        growth *= 1.1
+    if (
+        "TechnicalWizard" in [m.name for m in dna.mutations]
+        and attr in ["throw_accuracy", "route_running", "catching"]
+    ):
+        growth *= 1.15
+
+    return max(0.0, min(growth, cap - current))
+
+
+def apply_regression_local(attributes: dict, caps: dict, age: int, dna: PlayerDNA, position: str) -> None:
+    profile = dna.regression_profile
+    if age < profile["start_age"]:
+        return
+
+    decay_base = profile["rate"]
+    position_mod = profile["position_modifier"].get(position, 1.0)
+
+    for attr in list(attributes.keys()):
+        if attr not in valid_attributes_by_position[position]:
+            continue
+
+        decay_type = attribute_decay_type.get(attr, "physical")
+        decay_mult = decay_multipliers.get(decay_type, 1.0)
+        total_decay = decay_base * position_mod * decay_mult
+
+        if "BuiltToLast" in [m.name for m in dna.mutations]:
+            total_decay *= 0.5
+
+        attributes[attr] = round(max(0, attributes[attr] * (1 - total_decay)), 2)
 
 
 def test_player_has_dna_on_creation():
@@ -74,7 +127,7 @@ def test_apply_regression_decreases_values():
     player = Player("Old", "RB", 31, "1990-01-01", "U", "USA", 22, 70)
     player.attributes.core["speed"] = 80
     player.attributes.core["acceleration"] = 80
-    apply_regression(player)
+    player_regression.apply_regression(player)
     assert player.attributes.core["speed"] < 80
     assert player.attributes.core["acceleration"] < 80
 
@@ -114,23 +167,11 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
         age = 23 + year - 1
         player.age = age
         for attr, val in list(attrs.items()):
-            gain = 1.0 * dna.dev_speed
-            gain = dna._apply_mutation_boost(attr, gain)
-            attrs[attr] = min(caps[attr], round(val + gain, 2))
+            gain = apply_growth(attr, val, caps[attr], dna, age, position)
+            attrs[attr] = round(min(caps[attr], val + gain), 2)
             player.attributes.core[attr] = attrs[attr]
-        apply_regression(player)
-        log.append(
-            {
-                "player": player_id,
-                "position": position,
-                "year": year,
-                "age": age,
-                "dev_speed": dna.dev_speed,
-                "mutations": ",".join(m.name for m in dna.mutations),
-                **attrs,
-                **{f"{k}_cap": v for k, v in caps.items()},
-            }
-        )
+        apply_regression_local(player.attributes.core, caps, age, dna, position)
+        log.append(export_player_log(player_id, dna, position, age, attrs, caps))
     return log
 
 
