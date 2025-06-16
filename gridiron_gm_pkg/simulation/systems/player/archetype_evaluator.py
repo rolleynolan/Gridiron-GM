@@ -211,7 +211,7 @@ TE_ARCHETYPES: Dict[str, Dict[str, float]] = {
 OL_ARCHETYPES: Dict[str, Dict[str, float]] = {
     "Pass Protector": {
         "pass_block": 1.0,
-        "footwork_ol": 0.95,
+        "block_footwork": 0.95,
         "awareness": 0.9,
         "discipline": 0.85,
         "impact_blocking": 0.75,
@@ -220,7 +220,7 @@ OL_ARCHETYPES: Dict[str, Dict[str, float]] = {
         "run_block": 1.0,
         "lead_blocking": 0.95,
         "impact_blocking": 0.9,
-        "footwork_ol": 0.75,
+        "block_footwork": 0.75,
         "strength": 0.7,
     },
     "Pure Power": {
@@ -231,7 +231,7 @@ OL_ARCHETYPES: Dict[str, Dict[str, float]] = {
         "lead_blocking": 0.7,
     },
     "Technical Blocker": {
-        "footwork_ol": 1.0,
+        "block_footwork": 1.0,
         "discipline": 0.95,
         "awareness": 0.9,
         "pass_block": 0.85,

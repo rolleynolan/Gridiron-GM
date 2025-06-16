@@ -325,7 +325,7 @@ class Player:
                 "run_block",
                 "impact_blocking",
                 "block_shed_resistance",
-                "footwork_ol",
+                "block_footwork",
                 "lead_blocking",
             ]
         elif position in ["EDGE", "DE"]:

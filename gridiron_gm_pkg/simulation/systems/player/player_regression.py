@@ -32,7 +32,7 @@ valid_attributes_by_position: Dict[str, list[str]] = {
     "RB": ["speed", "acceleration", "agility", "toughness", "awareness", "carrying", "elusiveness", "catching", "stamina", "return_skill"],
     "WR": ["speed", "acceleration", "agility", "catching", "route_running", "awareness", "jumping", "release", "return_skill"],
     "TE": ["strength", "blocking", "lead_blocking", "catching", "route_running", "awareness"],
-    "OL": ["strength", "blocking", "lead_blocking", "awareness", "toughness", "footwork_ol"],
+    "OL": ["strength", "blocking", "lead_blocking", "awareness", "toughness", "block_footwork"],
     "DL": ["strength", "tackling", "block_shedding", "awareness", "play_recognition", "pursuit_dl"],
     "LB": ["speed", "tackling", "awareness", "play_recognition", "strength", "coverage", "block_shedding"],
     "DB": ["speed", "acceleration", "agility", "awareness", "catching", "coverage", "play_recognition", "jumping", "return_skill"],

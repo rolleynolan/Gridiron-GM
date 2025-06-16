@@ -253,7 +253,7 @@ TRAINING_CATALOG = {
     "OL Pass Set Footwork": {
         "positions": ["OL"],
         "attribute_weights": {
-            "footwork_ol": 1.0,
+            "block_footwork": 1.0,
             "pass_block": 0.5,
         },
         "injury_chance": 0.004,
@@ -277,7 +277,7 @@ TRAINING_CATALOG = {
     "OL Mirror Step Drill": {
         "positions": ["OL"],
         "attribute_weights": {
-            "footwork_ol": 0.7,
+            "block_footwork": 0.7,
             "balance": 0.6,
         },
         "injury_chance": 0.004,
