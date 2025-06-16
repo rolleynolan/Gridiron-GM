@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, List, Optional
 
+from gridiron_gm_pkg.simulation.systems.player import attribute_generator
+
 # === Position-based peak age ranges ===
 # These ranges roughly correspond to when players at each position
 # typically reach their athletic prime. They are used to generate
@@ -369,4 +371,18 @@ class PlayerDNA:
     def generate_random_dna(position: str | None = None) -> "PlayerDNA":
         dna = PlayerDNA()
         dna.growth_arc = generate_growth_arc(position)
+        if position:
+            attrs, caps = attribute_generator.generate_attributes_for_position(position)
+            attr_caps: Dict[str, Dict] = {}
+            for attr, val in attrs.items():
+                hard_cap = caps.get(attr, val)
+                soft_cap = min(hard_cap, max(val + random.randint(2, 5), val))
+                attr_caps[attr] = {
+                    "current": val,
+                    "soft_cap": soft_cap,
+                    "hard_cap": hard_cap,
+                    "breakout_history": [],
+                }
+            dna.attribute_caps = attr_caps
+            dna.scouted_caps = dna._generate_scouted_caps()
         return dna
