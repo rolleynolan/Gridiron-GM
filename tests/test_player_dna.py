@@ -20,6 +20,47 @@ from gridiron_gm_pkg.simulation.entities.player import Player
 from gridiron_gm_pkg.simulation.systems.player.player_weekly_update import advance_player_week
 
 
+def plot_career_arcs(
+    arc_data: dict,
+    decline_ages: dict,
+    start_ages: dict,
+    highlight_player: str = "QB_4",
+    output_file: Path | None = None,
+):
+    """Plot career arcs with optional highlight and decline marker."""
+
+    plt.figure(figsize=(12, 6))
+
+    for player_label, arc in arc_data.items():
+        years = list(range(len(arc)))
+        if player_label == highlight_player:
+            plt.plot(
+                years,
+                arc,
+                label=player_label,
+                linewidth=3.5,
+                color="black",
+                linestyle="--",
+            )
+            decline_year = decline_ages[player_label] - start_ages[player_label]
+            plt.axvline(x=decline_year, color="red", linestyle=":", linewidth=2)
+        else:
+            plt.plot(years, arc, label=player_label, alpha=0.4)
+
+    plt.title("Career Arcs")
+    plt.xlabel("Year")
+    plt.ylabel("Arc Value")
+    plt.legend()
+    plt.grid(True)
+
+    if output_file:
+        plt.tight_layout()
+        plt.savefig(output_file)
+    else:
+        plt.show()
+    plt.close()
+
+
 def export_player_log(player_id, dna, position, age, attributes, caps, arc_val):
     """Return a dictionary row for CSV export."""
     return {
@@ -156,6 +197,9 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
 
     player = Player(player_id, position, 22, "2000-01-01", "U", "USA", 1, 70)
 
+    start_age = player.age
+    decline_age = player.dna.growth_arc.decline_start_age
+
     data = player.dna.to_dict()
     clone = PlayerDNA.from_dict(data)
     assert [m.name for m in clone.mutations] == [m.name for m in player.dna.mutations]
@@ -190,7 +234,7 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
         arc_vals.append(arc_val)
         player.age += 1
 
-    return logs, arc_vals
+    return logs, arc_vals, decline_age, start_age
 
 
 def test_dna_long_term_progression(tmp_path):
@@ -203,11 +247,16 @@ def test_dna_long_term_progression(tmp_path):
 
     logs = []
     arcs = []
+    decline_ages = {}
+    start_ages = {}
     for pos in ["QB", "RB", "WR"]:
         for i in range(5):
-            log, arc = _simulate_full_career(f"{pos}_{i+1}", pos)
+            player_label = f"{pos}_{i+1}"
+            log, arc, decline_age, start_age = _simulate_full_career(player_label, pos)
             logs.extend(log)
-            arcs.append((f"{pos}_{i+1}", arc))
+            arcs.append((player_label, arc))
+            decline_ages[player_label] = decline_age
+            start_ages[player_label] = start_age
 
     fieldnames = []
     for row in logs:
@@ -221,17 +270,15 @@ def test_dna_long_term_progression(tmp_path):
         for row in logs:
             writer.writerow(row)
 
-    plt.figure(figsize=(8, 4))
-    for label, arc in arcs:
-        plt.plot(range(1, len(arc) + 1), arc, label=label, alpha=0.7)
-    plt.xlabel("Year")
-    plt.ylabel("Arc Value")
-    plt.title("Career Arcs")
-    plt.legend(fontsize="small")
     graph_file = out_dir / "career_arcs.png"
-    plt.tight_layout()
-    plt.savefig(graph_file)
-    plt.close()
+    arc_dict = {label: arc for label, arc in arcs}
+    plot_career_arcs(
+        arc_dict,
+        decline_ages,
+        start_ages,
+        highlight_player="QB_4",
+        output_file=graph_file,
+    )
 
     assert csv_file.exists() and csv_file.stat().st_size > 0
     assert graph_file.exists() and graph_file.stat().st_size > 0
