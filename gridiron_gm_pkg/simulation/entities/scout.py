@@ -45,10 +45,20 @@ class Scout:
         self.task_type = "assigned_players"
         self.task_param = None
         self.history = []
+        self.exposure_map = {}
 
     def generate_position_skills(self):
         # Skill by cluster
         return {cluster: random.randint(40, 100) for cluster in POSITION_CLUSTERS.keys()}
+
+    def get_accuracy_for(self, attribute: str) -> float:
+        """Return accuracy modifier for a specific attribute."""
+        return self.scouting_accuracy
+
+    def add_exposure(self, player_id: str, amount: float = 0.1) -> None:
+        """Increase exposure value for a player."""
+        current = self.exposure_map.get(player_id, 0.0)
+        self.exposure_map[player_id] = min(1.0, current + amount)
 
     def get_position_skill(self, position):
         # Translate detailed position into its cluster and return skill
@@ -84,8 +94,16 @@ class Scout:
         player.scouted_rating[team_name] = scouted
         player.scouted_skills[team_name] = skill_ratings
 
+        # Track exposure for fog-of-war calculations
+        self.add_exposure(player.id)
+
         report = self.generate_scout_report(player, scouted, scouted_percent, projected_future, skill_ratings)
-        player.scout_reports[self.name] = report
+        from gridiron_gm_pkg.simulation.systems.scouting.fog_of_war import generate_scouting_report
+        fog_report = generate_scouting_report(player, self)
+        player.scout_reports[self.name] = {
+            "summary": report,
+            "fog_of_war": fog_report,
+        }
         self.history.append((player.name, player.true_overall, scouted, report))
         return scouted
     
