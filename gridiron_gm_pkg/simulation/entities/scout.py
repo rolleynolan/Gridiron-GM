@@ -1,162 +1,163 @@
+from __future__ import annotations
 
 import random
-import math
+from typing import Dict, List, Optional, Tuple
 
-# Define detailed football positions
-DETAILED_POSITIONS = [
-    "QB", "RB", "WR", "TE",
-    "LT", "LG", "C", "RG", "RT",
-    "DE", "DT", "OLB", "MLB",
-    "CB", "FS", "SS",
-    "K", "P"
-]
+from gridiron_gm_pkg.simulation.entities.player import Player
 
-# Map clusters to group-level skills for generalization
-POSITION_CLUSTERS = {
-    "OL": ["LT", "LG", "C", "RG", "RT"],
-    "DL": ["DE", "DT"],
-    "LB": ["OLB", "MLB"],
-    "DB": ["CB", "FS", "SS"],
-    "K/P": ["K", "P"],
-    "RB": ["RB"],
-    "WR": ["WR"],
-    "TE": ["TE"],
-    "QB": ["QB"]
+# Attribute groupings for bias handling
+ATTRIBUTE_GROUPS: Dict[str, List[str]] = {
+    "athleticism": [
+        "speed",
+        "acceleration",
+        "agility",
+        "strength",
+        "toughness",
+        "balance",
+    ],
+    "iq": ["awareness", "iq"],
 }
 
+
+def _describe_rating(attr: str, rating: float) -> str:
+    """Return a short textual description for an attribute rating."""
+    name = attr.replace("_", " ")
+    tier = (
+        "elite"
+        if rating >= 90
+        else "great"
+        if rating >= 80
+        else "solid"
+        if rating >= 70
+        else "adequate"
+        if rating >= 60
+        else "poor"
+    )
+    return f"{tier.title()} {name}"
+
+
 class Scout:
-    def __init__(self, name, role, region=None, scouting_accuracy=None):
+    """Represents a scout evaluating football players."""
+
+    def __init__(
+        self,
+        name: str,
+        evaluation_skill: float = 0.5,
+        bias_profile: Optional[Dict[str, float]] = None,
+        focus_position: Optional[str] = None,
+    ) -> None:
         self.name = name
-        self.role = role
-        self.region = region
-        self.age = random.randint(30, 65)
-        self.accuracy = random.randint(40, 100)
-        self.scouting_accuracy = (
-            scouting_accuracy if scouting_accuracy is not None else self.accuracy / 100.0
-        )
-        self.speed = random.randint(5, 20)
-        self.position_skills = self.generate_position_skills()
-        self.personality = random.choice(["Risk Averse", "Upside Seeker", "Old School", "Analytics Oriented"])
-        self.bias_region = random.choice([None, self.region])
-        self.auto_scouting_enabled = False if role != 'Head' else True
-        self.active_assignments = []
-        self.assignments = []
-        self.region_focus = False
-        self.task_type = "assigned_players"
-        self.task_param = None
-        self.history = []
-        self.exposure_map = {}
+        self.evaluation_skill = max(0.0, min(1.0, evaluation_skill))
+        self.scouting_accuracy = self.evaluation_skill  # compatibility for fog-of-war
+        self.bias_profile: Dict[str, float] = bias_profile or {}
+        self.focus_position = focus_position
 
-    def generate_position_skills(self):
-        # Skill by cluster
-        return {cluster: random.randint(40, 100) for cluster in POSITION_CLUSTERS.keys()}
+        # Track exposure for fog-of-war reports
+        self.exposure_map: Dict[str, float] = {}
+        # Per-player opinion modifiers from events
+        self._player_modifiers: Dict[str, float] = {}
 
+    # ------------------------------------------------------------------
     def get_accuracy_for(self, attribute: str) -> float:
         """Return accuracy modifier for a specific attribute."""
         return self.scouting_accuracy
 
+    # ------------------------------------------------------------------
     def add_exposure(self, player_id: str, amount: float = 0.1) -> None:
         """Increase exposure value for a player."""
         current = self.exposure_map.get(player_id, 0.0)
         self.exposure_map[player_id] = min(1.0, current + amount)
 
-    def get_position_skill(self, position):
-        # Translate detailed position into its cluster and return skill
-        for cluster, detailed in POSITION_CLUSTERS.items():
-            if position in detailed:
-                return self.position_skills.get(cluster, 70)
-        return 70  # default
+    # ------------------------------------------------------------------
+    def _apply_noise(self, true_value: float) -> float:
+        """Return a value with scouting noise applied."""
+        noise_range = (1.0 - self.evaluation_skill) * 10.0
+        return max(0.0, min(99.0, true_value + random.uniform(-noise_range, noise_range)))
 
-    def evaluate_player(self, player, team_name):
-        if self.role == "College" and getattr(player, "experience", 0) > 0:
-            return None
-        if self.role == "Pro" and getattr(player, "experience", 0) == 0:
-            return None
+    # ------------------------------------------------------------------
+    def _apply_bias(self, attr: str, value: float) -> float:
+        """Adjust an attribute based on the scout's bias profile."""
+        for bias_key, weight in self.bias_profile.items():
+            if attr in ATTRIBUTE_GROUPS.get(bias_key, []):
+                value += weight * 10.0
+        return max(0.0, min(99.0, value))
 
-        base = getattr(player, "true_overall", getattr(player, "overall", 60))
-        pos_bonus = self.get_position_skill(player.position)
-        region_bonus = 5 if self.bias_region and self.bias_region == getattr(player, "region", None) else 0
+    # ------------------------------------------------------------------
+    def evaluate_player(self, player: Player) -> Dict[str, object]:
+        """Return estimated attribute ranges and commentary for a player."""
+        skill_bonus = 0.05 if self.focus_position and player.position == self.focus_position else 0.0
+        accuracy = min(1.0, self.evaluation_skill + skill_bonus)
+        estimates: Dict[str, Tuple[int, int]] = {}
+        commentary: List[str] = []
 
-        accuracy_influence = math.log(101 - self.accuracy + 1) * 5
-        base_deviation = 1.25 if self.role == "College" else 1.0 if getattr(player, "experience", 0) < 2 else 0.75
-        deviation = int(accuracy_influence * base_deviation + (100 - pos_bonus) // 10)
-        scouted = base + random.randint(-deviation, deviation) + region_bonus
-        scouted = max(40, min(99, scouted))
+        for attr, true_val in player.get_all_attributes().items():
+            if true_val is None:
+                continue
+            biased = self._apply_bias(attr, float(true_val))
+            est_center = self._apply_noise(biased)
+            range_width = 4 + (1.0 - accuracy) * 12
+            low = int(max(40.0, est_center - range_width / 2))
+            high = int(min(99.0, est_center + range_width / 2))
+            estimates[attr] = (low, high)
+            if random.random() < 0.25 + accuracy * 0.5:
+                commentary.append(_describe_rating(attr, est_center))
 
-        scouted_percent = min(100, max(10, self.speed * 5))
-        projected_future = min(100, max(scouted + random.randint(0, 10), scouted))
-
-        skill_ratings = {
-            skill: max(40, min(100, rating + random.randint(-5, 5)))
-            for skill, rating in player.true_attributes.items()
-        }
-
-        player.scouted_rating[team_name] = scouted
-        player.scouted_skills[team_name] = skill_ratings
-
-        # Track exposure for fog-of-war calculations
+        # Exposure increases with each evaluation
         self.add_exposure(player.id)
 
-        report = self.generate_scout_report(player, scouted, scouted_percent, projected_future, skill_ratings)
-        from gridiron_gm_pkg.simulation.systems.scouting.fog_of_war import generate_scouting_report
-        fog_report = generate_scouting_report(player, self)
-        player.scout_reports[self.name] = {
-            "summary": report,
-            "fog_of_war": fog_report,
+        return {"estimates": estimates, "commentary": commentary}
+
+    # ------------------------------------------------------------------
+    def evaluate_potential(self, player: Player) -> Dict[str, str]:
+        """Estimate a player's potential ceiling."""
+        base = player.hidden_caps.get("overall", player.overall)
+        base = self._apply_bias("overall", float(base))
+        est_center = self._apply_noise(base)
+        range_width = 10 + (1.0 - self.evaluation_skill) * 20
+        low = int(max(60.0, est_center - range_width / 2))
+        high = int(min(99.0, est_center + range_width / 2))
+        confidence = (
+            "High" if self.evaluation_skill >= 0.8 else "Medium" if self.evaluation_skill >= 0.5 else "Low"
+        )
+        description = (
+            "Could develop into a top-tier {pos}".format(pos=player.position)
+            if high >= 90
+            else "Upside appears limited"
+        )
+        return {
+            "range": f"{low}\u2013{high}",
+            "confidence": confidence,
+            "description": description,
         }
-        self.history.append((player.name, player.true_overall, scouted, report))
-        return scouted
-    
-    def weekly_scout(self, team_name, prospects):
-        """Evaluate a batch of players based on task type and return (name, rating) tuples."""
-        results = []
-        if self.task_type == "assigned_players":
-            targets = self.task_param or []
-        elif self.task_type == "position":
-            targets = [p for p in prospects if p.position == self.task_param]
-        elif self.task_type == "region":
-            targets = [p for p in prospects if getattr(p, "region", None) == self.task_param]
-        else:
-            targets = prospects
 
-        for player in targets[:self.speed]:  # Limit based on scout speed
-            rating = self.evaluate_player(player, team_name)
-            if rating is not None:
-                results.append((player.name, rating))
+    # ------------------------------------------------------------------
+    def update_opinion_from_event(self, player: Player, event: Dict[str, object]) -> None:
+        """Update stored opinion of a player based on new information."""
+        if player.id not in self._player_modifiers:
+            self._player_modifiers[player.id] = 0.0
+        change = float(event.get("change", 0.0))
+        self._player_modifiers[player.id] += change
 
-        return results
+    # ------------------------------------------------------------------
+    def generate_report(self, player: Player) -> Dict[str, object]:
+        """Compile a full scouting report for a player."""
+        player_adjust = self._player_modifiers.get(player.id, 0.0)
+        eval_result = self.evaluate_player(player)
+        pot_result = self.evaluate_potential(player)
 
+        overall_true = player.overall + player_adjust
+        overall_est = self._apply_noise(self._apply_bias("overall", overall_true))
+        overall_low = int(max(40.0, overall_est - 5))
+        overall_high = int(min(99.0, overall_est + 5))
 
-    def generate_scout_report(self, player, scouted_rating, scouted_percent, future_rating, skill_ratings):
-        traits = [
-            "Elite physical tools", "Strong fundamentals", "Questionable decision making",
-            "Raw but talented", "High football IQ", "Great motor", "Inconsistent technique",
-            "Needs time to develop", "NFL ready", "Boom-or-bust prospect"
-        ]
-        skills_summary = "\n".join([f"- {skill}: {value}/100" for skill, value in skill_ratings.items()])
-        summary = [
-            f"Scouted {scouted_percent}%",
-            f"Current Ability: {scouted_rating}/100",
-            f"Projected Potential: {future_rating}/100",
-            f"Evaluation: {random.choice(traits)}",
-            f"- Positional fit appears appropriate for current scheme.",
-            f"- Shows flashes of development in key situations.",
-            f"- Expected role: {self.projected_role(future_rating)}",
-            "Skill Ratings:",
-            skills_summary
-        ]
-        return "\n" + "\n".join(summary)
+        strengths = [c for c in eval_result["commentary"] if c.startswith("Elite") or c.startswith("Great")]
+        weaknesses = [c for c in eval_result["commentary"] if c.startswith("poor") or c.startswith("Adequate")]
 
-    def projected_role(self, rating):
-        if rating >= 90:
-            return "Franchise Player"
-        elif rating >= 80:
-            return "Future Star"
-        elif rating >= 70:
-            return "Solid Starter"
-        elif rating >= 60:
-            return "Rotational Player"
-        elif rating >= 50:
-            return "Career Backup"
-        else:
-            return "Camp Body"
+        return {
+            "position_summary": player.position,
+            "strengths": strengths,
+            "weaknesses": weaknesses,
+            "estimated_overall_range": f"{overall_low}\u2013{overall_high}",
+            "estimated_potential_range": pot_result["range"],
+            "commentary": eval_result["commentary"],
+        }
