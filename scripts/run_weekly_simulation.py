@@ -185,7 +185,7 @@ def main() -> None:
     for i in range(0, len(teams), 2):
         home = teams[i]
         away = teams[i + 1]
-        context = {"weather": None, "game_injuries": []}
+        context = {"weather": None, "game_injuries": [], "week": week, "weekly_injuries": []}
         home_stats, away_stats = simulate_game(home, away, week=week, context=context)
 
         result = {
