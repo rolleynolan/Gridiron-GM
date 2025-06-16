@@ -141,6 +141,16 @@ def test_apply_regression_decreases_values():
     assert player.attributes.core["acceleration"] <= 80
 
 
+def test_regression_accumulates_over_weeks():
+    player = Player("Old", "RB", 31, "1990-01-01", "U", "USA", 22, 70)
+    player.attributes.core["speed"] = 80
+    player.dna.growth_arc.decline_start_age = 30
+    rng = random.Random(42)
+    for _ in range(20):
+        player_regression.apply_regression(player, age=31, rng=rng)
+    assert player.attributes.core["speed"] < 80
+
+
 def _simulate_full_career(player_id: str, position: str, years: int = 15):
     """Simulate weekly development/regression for a player's career."""
 
