@@ -59,6 +59,9 @@ class SeasonManager:
         self.playoff_bracket = {}
         self.playoff_bracket_by_round = {}
         self.season_history = {}
+        # Track current league phase (Preseason, Regular Season, Playoffs, Offseason)
+        self.current_phase = self.calendar.season_phase
+        self.offseason_active = False
 
         # --- Universal team ID mapping and abbreviation mapping ---
         self.id_to_team = {team.id: team for team in self.league.teams}
@@ -579,6 +582,23 @@ class SeasonManager:
                         pos[attr] = new_val
                     print(f"  {attr}: {old_val} -> {new_val}")
 
+    def enter_offseason_phase(self):
+        """Transition league into the offseason after the championship."""
+        if self.offseason_active:
+            return
+
+        offseason_start = self.calendar.phase_boundaries.get("Offseason", (27, 52))[0]
+        self.calendar.current_week = offseason_start
+        self.calendar.update_phase()
+        self.current_phase = "Offseason"
+        self.offseason_active = True
+        year_hist = self.season_history.setdefault(self.calendar.current_year, {})
+        year_hist["completed"] = True
+        print("=== Season complete. Offseason begins. ===")
+        # Initialize offseason systems
+        if hasattr(self.daily_manager, "offseason_manager"):
+            self.daily_manager.offseason_manager.refresh_college_and_draft_classes()
+
     def handle_offseason(self):
         print("=== Offseason: Healing injuries and resetting league ===")
         for team in self.league.teams:
@@ -677,6 +697,9 @@ class SeasonManager:
         year_hist["champion"] = self.champion
         year_hist["runner_up"] = self.runner_up
         year_hist["playoff_bracket"] = bracket
+
+        # Transition to offseason now that playoffs are complete
+        self.enter_offseason_phase()
 
         return bracket
 
