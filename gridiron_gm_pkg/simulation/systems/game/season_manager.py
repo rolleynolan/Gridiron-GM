@@ -34,6 +34,7 @@ from gridiron_gm_pkg.simulation.systems.player.player_season_progression import 
     evaluate_player_season_progression,
 )
 from gridiron_gm_pkg.simulation.systems.player.player_regression import apply_regression
+from gridiron_gm_pkg.simulation.systems.player.player_weekly_update import advance_player_week
 from gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
 
 
@@ -325,6 +326,11 @@ class SeasonManager:
             plan = getattr(getattr(team, "training_plan", {}), "get", lambda w: None)(just_ended_week)
             if plan:
                 apply_training_plan(team, plan, just_ended_week)
+
+            coach_quality = team.get_coach_quality() if hasattr(team, "get_coach_quality") else 1.0
+            for player in getattr(team, "roster", []):
+                xp_gains = getattr(getattr(player, "training_log", {}), "get", lambda w: {})(just_ended_week)
+                advance_player_week(player, xp_gains, coach_quality)
 
             # Call fatigue accumulation hook (empty list for heavy_usage_players for now)
             accumulate_season_fatigue_for_team(team, [])
