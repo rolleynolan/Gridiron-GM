@@ -12,6 +12,7 @@ class LeagueManager:
         self.teams = []
         self.free_agents = []
         self.draft_prospects = []  # <-- Add this line
+        self.retired_players: list[dict] = []
         self.calendar = Calendar()
         # Standings now keyed by team ID
         self.standings = {}
@@ -177,6 +178,7 @@ class LeagueManager:
             "teams": team_dicts,
             "free_agents": [player.to_dict() for player in self.free_agents],
             "draft_prospects": [player.to_dict() for player in self.draft_prospects],  # <-- Add this line
+            "retired_players": self.retired_players,
             "calendar": self.calendar.serialize(),
             "standings": self.standings,
             "schedule": self.schedule
@@ -206,9 +208,10 @@ class LeagueManager:
                 unknown_conference_found = True
         # Debug print: show each created Team object
         for team in league.teams:
-            league.free_agents = [Player.from_dict(p) for p in data.get("free_agents", [])]
-        # Add draft prospects
-        league.draft_prospects = [Player.from_dict(p) for p in data.get("draft_prospects", [])]  # <-- Add this line
+            pass
+        league.free_agents = [Player.from_dict(p) for p in data.get("free_agents", [])]
+        league.draft_prospects = [Player.from_dict(p) for p in data.get("draft_prospects", [])]
+        league.retired_players = data.get("retired_players", [])
         # Standings: convert any abbreviation keys to IDs (legacy support)
         standings = data.get("standings", {})
         new_standings = {}
@@ -270,6 +273,8 @@ def load_league_from_file(save_name):
         league._rebuild_team_maps()
         # Continue with the rest of the LeagueManager setup
         league.free_agents = [Player.from_dict(p) for p in data.get("free_agents", [])]
+        league.draft_prospects = [Player.from_dict(p) for p in data.get("draft_prospects", [])]
+        league.retired_players = data.get("retired_players", [])
         # Standings: convert any abbreviation keys to IDs (legacy support)
         standings = data.get("standings", {})
         new_standings = {}

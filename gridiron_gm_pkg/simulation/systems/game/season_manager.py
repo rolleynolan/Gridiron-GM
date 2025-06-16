@@ -599,6 +599,9 @@ class SeasonManager:
         if hasattr(self.daily_manager, "offseason_manager"):
             self.daily_manager.offseason_manager.refresh_college_and_draft_classes()
 
+        # Evaluate retirements at the very start of the offseason
+        self.process_player_retirements()
+
     def handle_offseason(self):
         print("=== Offseason: Healing injuries and resetting league ===")
         for team in self.league.teams:
@@ -630,6 +633,34 @@ class SeasonManager:
         # Generate new schedule, reset standings, etc.
         self.schedule_by_week, self.results_by_week = load_schedule_files(self.save_name)
         self.standings_manager.results_by_week = self.results_by_week
+
+    def process_player_retirements(self):
+        """Check all players for retirement and update rosters."""
+        from gridiron_gm_pkg.simulation.systems.player.player_retirement import (
+            evaluate_player_retirement,
+            retirement_log_entry,
+        )
+
+        retired_this_year = []
+        for team in self.league.teams:
+            remaining = []
+            for player in list(getattr(team, "roster", [])):
+                if evaluate_player_retirement(player):
+                    player.retired = True
+                    log = retirement_log_entry(player, team.abbreviation)
+                    retired_this_year.append(log)
+                    print(
+                        f"{player.position} {player.name} (AGE {player.age}, OVR {player.overall}) has announced his retirement after {player.experience} seasons."
+                    )
+                else:
+                    remaining.append(player)
+            team.players = remaining
+            team.generate_depth_chart()
+
+        if retired_this_year:
+            if not hasattr(self.league, "retired_players"):
+                self.league.retired_players = []
+            self.league.retired_players.extend(retired_this_year)
         self.standings_manager.save_standings()
 
     def run_playoffs(self):
