@@ -8,6 +8,32 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, List, Optional
 
+# === Position-based peak age ranges ===
+# These ranges roughly correspond to when players at each position
+# typically reach their athletic prime. They are used to generate
+# a growth arc tailored to the player's position.
+POSITION_PEAK_RANGES = {
+    "QB": (22, 32),
+    "RB": (22, 27),
+    "WR": (22, 28),
+    "TE": (22, 30),
+    "OL": (22, 32),
+    "DL": (22, 30),
+    "LB": (22, 31),
+    "DB": (22, 30),
+    "K": (22, 35),
+    "P": (22, 35),
+}
+
+
+@dataclass
+class GrowthArc:
+    """Age-based windows for a player's rise, peak and decline."""
+
+    peak_start_age: int
+    peak_end_age: int
+    decline_start_age: int
+
 # === TRAITS (Behavioral Modifiers) ===
 TRAIT_POOL = [
     "Leader",
@@ -44,6 +70,23 @@ def assign_mutations() -> List[MutationType]:
     if roll < 0.995:
         return [random.choice(list(MutationType))]
     return random.sample(list(MutationType), 2)
+
+
+def generate_growth_arc(position: str | None) -> GrowthArc:
+    """Create a positional growth arc describing rise, peak and decline ages."""
+    min_age, max_age = POSITION_PEAK_RANGES.get(position, (24, 30))
+    center = (min_age + max_age) / 2
+    base_peak_start = int(np.clip(random.normalvariate(center, 1.5), min_age, max_age))
+
+    peak_length = random.randint(3, 6)
+    peak_end = base_peak_start + peak_length
+    decline_start = peak_end + random.randint(1, 4)
+
+    return GrowthArc(
+        peak_start_age=base_peak_start,
+        peak_end_age=peak_end,
+        decline_start_age=decline_start,
+    )
 
 
 def generate_dev_speed() -> float:
@@ -129,6 +172,7 @@ class PlayerDNA:
     peak_value: float = field(init=False)
     stability: float = field(init=False)
     career_arc: List[float] = field(init=False)
+    growth_arc: GrowthArc = field(init=False)
 
     regression_profile: Dict[str, any] = field(init=False)
     attribute_decay_type: Dict[str, str] = field(init=False)
@@ -148,6 +192,7 @@ class PlayerDNA:
         self.peak_value = round(random.uniform(0.85, 1.0), 2)
         self.stability = round(random.uniform(0.01, 0.05), 3)
         self.career_arc = self.generate_procedural_arc()
+        self.growth_arc = generate_growth_arc(None)
 
         self.regression_profile = DEFAULT_REGRESSION_PROFILE.copy()
         self.attribute_decay_type = ATTRIBUTE_DECAY_TYPE
@@ -271,6 +316,11 @@ class PlayerDNA:
             "peak_value": self.peak_value,
             "stability": self.stability,
             "career_arc": self.career_arc,
+            "growth_arc": {
+                "peak_start_age": self.growth_arc.peak_start_age,
+                "peak_end_age": self.growth_arc.peak_end_age,
+                "decline_start_age": self.growth_arc.decline_start_age,
+            },
             "regression_profile": self.regression_profile,
             "attribute_decay_type": self.attribute_decay_type,
             "dev_speed": self.dev_speed,
@@ -293,6 +343,7 @@ class PlayerDNA:
             "peak_value",
             "stability",
             "career_arc",
+            "growth_arc",
             "regression_profile",
             "attribute_decay_type",
             "dev_speed",
@@ -305,10 +356,17 @@ class PlayerDNA:
         ]:
             setattr(obj, field_name, data.get(field_name))
         obj.mutations = [MutationType[m] for m in data.get("mutations", [])]
+        arc_data = data.get("growth_arc") or {}
+        obj.growth_arc = GrowthArc(
+            arc_data.get("peak_start_age", 0),
+            arc_data.get("peak_end_age", 0),
+            arc_data.get("decline_start_age", 0),
+        )
         return obj
 
     # Convenience factory used by Player for compatibility
     @staticmethod
     def generate_random_dna(position: str | None = None) -> "PlayerDNA":
-        _ = position  # position is unused but kept for API compatibility
-        return PlayerDNA()
+        dna = PlayerDNA()
+        dna.growth_arc = generate_growth_arc(position)
+        return dna
