@@ -58,5 +58,7 @@ class RosterGenerator:
         return {
             "years": years,
             "salary_per_year": round(base_salary, 2),
-            "rookie": False
+            "rookie": False,
+            "years_left": years,
+            "expiring": False,
         }

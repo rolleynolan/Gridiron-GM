@@ -608,10 +608,13 @@ class SeasonManager:
 
     def handle_offseason(self):
         print("=== Offseason: Healing injuries and resetting league ===")
+        from gridiron_gm_pkg.simulation.systems.roster.transaction_manager import TransactionManager
+
+        tm = TransactionManager(self.league)
         for team in self.league.teams:
             lost_phys = 0
             scout_changes = 0
-            for player in getattr(team, "roster", []):
+            for player in list(getattr(team, "roster", [])):
                 # Heal all injuries
                 player.is_injured = False
                 player.weeks_out = 0
@@ -621,6 +624,12 @@ class SeasonManager:
                 # Optional: retire old/severely injured players
                 if hasattr(player, "age") and player.age >= 38:
                     player.retired = True
+
+                player.decrement_contract_year()
+                if player.contract and player.contract.get("expiring"):
+                    if player in team.roster:
+                        team.roster.remove(player)
+                    tm.move_to_free_agents(player)
 
                 if apply_conditioning_regression(player):
                     lost_phys += 1

@@ -212,6 +212,17 @@ class Player:
         # Track active temporary penalties from injuries
         self.active_injury_effects = {}
 
+    def decrement_contract_year(self) -> None:
+        """Reduce remaining years on contract and flag expiration."""
+        if not self.contract:
+            return
+        years_left = self.contract.get("years_left")
+        if years_left is None:
+            years_left = self.contract.get("years", 0)
+        years_left = max(0, years_left - 1)
+        self.contract["years_left"] = years_left
+        self.contract["expiring"] = years_left == 0
+
         self.traits = {
             "training": [],
             "gameday": [],
@@ -679,6 +690,10 @@ class Player:
         )
         player.notes = data.get("notes", [])
         player.contract = data.get("contract", None)
+        if player.contract is not None:
+            if "years_left" not in player.contract:
+                player.contract["years_left"] = player.contract.get("years", 0)
+            player.contract.setdefault("expiring", player.contract.get("years_left", 0) == 0)
         player.experience = data.get("experience", 0)
         player.injuries = data.get("injuries", [])
         player.weeks_out = data.get("weeks_out", 0)
