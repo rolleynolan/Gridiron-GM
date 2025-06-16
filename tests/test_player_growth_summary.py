@@ -59,10 +59,15 @@ def test_player_growth_regression_output(tmp_path):
         all_logs.extend(log)
 
     if all_logs:
-        fieldnames = list(all_logs[0].keys())
+        fieldnames = []
+        for row in all_logs:
+            for key in row:
+                if key not in fieldnames:
+                    fieldnames.append(key)
         with open(csv_file, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerows(all_logs)
+            for row in all_logs:
+                writer.writerow(row)
 
     assert csv_file.exists() and csv_file.stat().st_size > 0
