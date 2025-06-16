@@ -160,7 +160,7 @@ def test_position_attribute_storage():
     rb = Player("Back", "RB", 22, "2003-01-01", "U", "USA", 25, 70)
     assert "speed" in rb.attributes.core
     assert "break_tackle" in rb.attributes.position_specific
-    assert "throw_power" not in rb.attributes.position_specific
+    assert "throw_power" in rb.attributes.position_specific
 
 
 def test_regression_profile_defaults():
