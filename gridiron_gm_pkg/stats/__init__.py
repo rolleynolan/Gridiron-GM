@@ -9,4 +9,5 @@ from .record_book import (
     update_team_career_record,
 )
 from .milestone_definitions import MILESTONES
+from .attribute_histograms import generate_position_attribute_histograms
 
