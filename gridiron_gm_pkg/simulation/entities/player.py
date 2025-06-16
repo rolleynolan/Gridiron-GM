@@ -22,6 +22,194 @@ CORE_ATTRIBUTES = [
     "return_skill",
 ]
 
+# Comprehensive list of every skill/attribute tracked for players. This ensures
+# each player object always has a value for every attribute regardless of
+# position. Ratings for out-of-position skills will be low by default so players
+# still specialize realistically.
+ALL_ATTRIBUTES = [
+    "speed",
+    "acceleration",
+    "agility",
+    "strength",
+    "awareness",
+    "iq",
+    "stamina",
+    "toughness",
+    "balance",
+    "discipline",
+    "consistency",
+    "throw_power",
+    "throw_velocity",
+    "throw_accuracy_short",
+    "throw_accuracy_mid",
+    "throw_accuracy_deep",
+    "throw_on_run",
+    "pocket_presence",
+    "release_time",
+    "read_progression",
+    "scramble_tendency",
+    "throwing_footwork",
+    "throw_under_pressure",
+    "ball_carrier_vision",
+    "elusiveness",
+    "break_tackle",
+    "trucking",
+    "carry_security",
+    "juke_move",
+    "hurdle",
+    "spin_move",
+    "catching",
+    "catch_in_traffic",
+    "spectacular_catch",
+    "release",
+    "separation",
+    "route_running_short",
+    "route_running_mid",
+    "route_running_deep",
+    "run_block",
+    "pass_block",
+    "impact_blocking",
+    "lead_blocking",
+    "block_shed_resistance",
+    "footwork_ol",
+    "bull_rush",
+    "swim_move",
+    "spin_rush",
+    "speed_rush",
+    "club_move",
+    "rip_move",
+    "block_shedding",
+    "run_defense",
+    "tackle",
+    "pursuit",
+    "play_recognition",
+    "hands",
+    "zone_coverage",
+    "man_coverage",
+    "press",
+    "run_support",
+    "hit_power",
+    "strip_ball",
+    "kick_power",
+    "kick_accuracy",
+    "kick_consistency",
+    "kick_clutch",
+    "hang_time",
+    "onside_kick_skill",
+    "return_skill",
+]
+
+
+def init_all_player_attributes() -> Dict[str, Optional[int]]:
+    """Return mapping of all attributes initialised to ``None``."""
+    return {attr: None for attr in ALL_ATTRIBUTES}
+
+
+# Optional helper map for attribute subsets per position. Only a portion of
+# attributes are heavily weighted for each position, but all remain available on
+# the player object.
+POSITION_ATTRIBUTE_MAP = {
+    "QB": [
+        "throw_power",
+        "throw_velocity",
+        "throw_accuracy_short",
+        "throw_accuracy_mid",
+        "throw_accuracy_deep",
+        "throw_on_run",
+        "pocket_presence",
+        "release_time",
+        "read_progression",
+        "scramble_tendency",
+        "throwing_footwork",
+        "throw_under_pressure",
+    ],
+    "RB": [
+        "ball_carrier_vision",
+        "elusiveness",
+        "break_tackle",
+        "trucking",
+        "carry_security",
+        "juke_move",
+        "hurdle",
+        "spin_move",
+    ],
+    "WR": [
+        "catching",
+        "catch_in_traffic",
+        "spectacular_catch",
+        "release",
+        "separation",
+        "route_running_short",
+        "route_running_mid",
+        "route_running_deep",
+    ],
+    "TE": [
+        "catching",
+        "catch_in_traffic",
+        "release",
+        "route_running_short",
+        "route_running_mid",
+        "route_running_deep",
+        "separation",
+        "run_block",
+        "pass_block",
+        "lead_blocking",
+    ],
+    "OL": [
+        "pass_block",
+        "run_block",
+        "impact_blocking",
+        "block_shed_resistance",
+        "footwork_ol",
+        "lead_blocking",
+    ],
+    "EDGE": [
+        "bull_rush",
+        "swim_move",
+        "spin_rush",
+        "speed_rush",
+        "club_move",
+        "rip_move",
+        "block_shedding",
+        "run_defense",
+    ],
+    "DT": [
+        "block_shedding",
+        "run_defense",
+        "bull_rush",
+        "swim_move",
+        "spin_rush",
+        "club_move",
+        "rip_move",
+    ],
+    "LB": [
+        "tackle",
+        "zone_coverage",
+        "man_coverage",
+        "pursuit",
+        "play_recognition",
+    ],
+    "CB": [
+        "man_coverage",
+        "zone_coverage",
+        "press",
+        "play_recognition",
+    ],
+    "S": [
+        "zone_coverage",
+        "man_coverage",
+        "run_support",
+        "play_recognition",
+    ],
+    "K": ["kick_power", "kick_accuracy", "kick_consistency", "kick_clutch"],
+    "P": ["kick_power", "kick_accuracy", "hang_time"],
+}
+
+
+def get_relevant_attributes(position: str) -> List[str]:
+    """Return the list of attributes most relevant for ``position``."""
+    return POSITION_ATTRIBUTE_MAP.get(position.upper(), [])
+
 
 @dataclass
 class DevArc:
@@ -176,8 +364,14 @@ class Player:
         self.potential = None
 
         # Initialize attribute containers
+        self.all_attributes = init_all_player_attributes()
         core_attrs = self.init_core_attributes()
         pos_attrs = self.init_position_attributes()
+
+        for k, v in core_attrs.items():
+            self.all_attributes[k] = v
+        for k, v in pos_attrs.items():
+            self.all_attributes[k] = v
 
         self.position_specific = pos_attrs
         self.attributes = AttributeSet(core=core_attrs, position_specific=pos_attrs)
@@ -398,35 +592,31 @@ class Player:
         return {attr: None for attr in attrs}
 
     def get_all_attributes(self) -> Dict[str, int]:
-        """Return combined core and position-specific attribute mapping."""
-        attrs = {}
-        attrs.update(self.attributes.core)
-        attrs.update(self.attributes.position_specific)
-        return attrs
+        """Return dictionary of all attribute values."""
+        return dict(self.all_attributes)
 
     def get_relevant_attribute_names(self) -> List[str]:
-        """Return list of attribute names relevant to this player's position."""
-        names = list(self.attributes.core.keys()) + list(self.position_specific.keys())
-        for base in ["tackling", "catching"]:
-            if base not in names:
-                names.append(base)
-        return names
+        """Return list of attribute names available on this player."""
+        return list(ALL_ATTRIBUTES)
 
     def generate_caps(self) -> None:
         """Initialize hidden and scouted caps using the player's DNA."""
-        relevant = self.get_relevant_attribute_names()
+        relevant = set(self.get_relevant_attribute_names())
         self.hidden_caps = {}
         self.scouted_potential = {}
-        for attr in relevant:
+        for attr in ALL_ATTRIBUTES:
             cap_info = self.dna.attribute_caps.get(attr, {}) if hasattr(self, "dna") else {}
             cur = cap_info.get("current", 20)
             hard_cap = cap_info.get("hard_cap", 20)
             self.hidden_caps[attr] = hard_cap
-            self.scouted_potential[attr] = self.dna.scouted_caps.get(attr, hard_cap) if hasattr(self, "dna") else hard_cap
-            if attr in self.attributes.core:
+            self.scouted_potential[attr] = (
+                self.dna.scouted_caps.get(attr, hard_cap) if hasattr(self, "dna") else hard_cap
+            )
+            if attr in CORE_ATTRIBUTES:
                 self.attributes.core[attr] = cur
             else:
                 self.attributes.position_specific[attr] = cur
+            self.all_attributes[attr] = cur
 
     def add_trait(self, category, trait):
         if category in self.traits:
