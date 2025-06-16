@@ -109,6 +109,7 @@ Progress Checklist
  Injury system polish
 
  Player development/regression
+ Age-based regression tuned using DNA growth arcs (May 30, 2025)
 
  Financials, contracts, free agency
 
