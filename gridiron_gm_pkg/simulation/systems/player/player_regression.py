@@ -90,6 +90,10 @@ def apply_regression(
 
     attr_map = ATTRIBUTE_DECAY_TYPE
 
+    if not hasattr(player, "_regression_buffer"):
+        from collections import defaultdict
+        player._regression_buffer = defaultdict(float)
+
     for attr in player.get_relevant_attribute_names():
         container, _ = _get_attr_container(player, attr)
         if container is None:
@@ -106,10 +110,14 @@ def apply_regression(
             "mental": 0.5,
         }.get(decay_type, 1.0)
 
-        regression_amount = current * effective_rate * type_modifier
+        weekly_regression = (current * effective_rate * type_modifier) / 52
         noise = rng.uniform(0.85, 1.15)
-        total_loss = int(regression_amount * noise)
+        regression_value = weekly_regression * noise
 
-        container[attr] = max(40, current - total_loss)
+        player._regression_buffer[attr] += regression_value
+        if player._regression_buffer[attr] >= 1.0:
+            loss = int(player._regression_buffer[attr])
+            container[attr] = max(40, container[attr] - loss)
+            player._regression_buffer[attr] %= 1.0
 
     return player
