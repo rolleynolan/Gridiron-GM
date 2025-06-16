@@ -63,9 +63,24 @@ def progress_player(
         quality_mod = 1.0
 
     dev_speed = getattr(dna, "dev_speed", 1.0)
-    year = getattr(player, "experience", 0)
-    arc = dna.career_arc
-    arc_mult = arc[year] if year < len(arc) else arc[-1]
+
+    # Determine where the player is on their growth arc using age rather than
+    # years of experience. This allows for more nuanced progression that accounts
+    # for early bloomers and late starters.
+    age = getattr(player, "age", 0)
+    growth_arc = dna.growth_arc
+
+    if age < growth_arc.peak_start_age:
+        arc_mult = 0.6  # Early development phase
+    elif growth_arc.peak_start_age <= age <= growth_arc.peak_end_age:
+        arc_mult = 1.0  # Prime growth window
+    elif age < growth_arc.decline_start_age:
+        arc_mult = 0.4  # Slowing post-peak
+    else:
+        arc_mult = 0.1  # Decline phase, growth mostly stalls
+
+    # Clamp multiplier to safe bounds just in case
+    arc_mult = max(0.0, min(arc_mult, 1.0))
 
     hidden_caps = getattr(player, "hidden_caps", {})
     attr_caps = dna.attribute_caps

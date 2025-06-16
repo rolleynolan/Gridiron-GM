@@ -1,6 +1,7 @@
 import random
 
 from gridiron_gm_pkg.simulation.systems.player.player_progression import progress_player
+from gridiron_gm_pkg.simulation.systems.player.player_dna import GrowthArc
 
 
 class DummyAttrs:
@@ -14,6 +15,7 @@ class DummyDNA:
         self.dev_speed = 1.0
         self.career_arc = [1.0]
         self.attribute_caps = {"speed": {"current": 50, "soft_cap": 60, "hard_cap": 90}}
+        self.growth_arc = GrowthArc(23, 27, 30)
 
 
 def make_player():
