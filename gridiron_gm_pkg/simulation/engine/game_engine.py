@@ -160,6 +160,35 @@ def get_injury_risk_modifier(player: Any) -> float:
     """
     return fatigue_system.injury_risk_modifier(player)
 
+# ---- Simple Injury Simulation ----
+def maybe_trigger_injury(players: List[Any], context: Dict[str, Any]) -> None:
+    """Randomly injure one of the given players at ~1% chance per play."""
+    if random.random() >= 0.01:
+        return
+
+    eligible = [p for p in players if getattr(p, "can_be_injured", True)]
+    if not eligible:
+        return
+
+    victim = random.choice(eligible)
+    from gridiron_gm_pkg.simulation.systems.player.injury_manager import create_injury
+
+    inj = create_injury(victim, context="game")
+    info = {
+        "player": getattr(victim, "name", "Unknown"),
+        "team": getattr(getattr(victim, "team", None), "abbreviation", None),
+        "position": getattr(victim, "position", "UNK"),
+        "injury_type": getattr(inj, "name", str(inj)),
+        "severity": getattr(inj, "severity", "unknown"),
+        "weeks_out": getattr(inj, "weeks_out", None),
+        "week": context.get("week"),
+    }
+    context.setdefault("game_injuries", []).append(info)
+    context.setdefault("weekly_injuries", []).append(info)
+    print(
+        f"Injury: {info['position']} {info['player']} ({info['team']}) out for {info['weeks_out']} weeks with {info['injury_type']}"
+    )
+
 # ---- Player Selection & Play Simulation ----
 
 def select_fresh_player(depth_chart_list, threshold: float = 0.7, last_used=None):
@@ -247,30 +276,8 @@ def simulate_pass_play(qb: Any, wr_list: List[Any], depth: str, context: Dict[st
         avg_speed = (qb_speed + rec_speed) / 2
         time = estimate_play_seconds("pass", 0, completed=False, player_speed=avg_speed)
 
-    from gridiron_gm_pkg.simulation.systems.player.injury_manager import create_injury
-
-    # --- Injury logic for QB and WR ---
-    for player in [qb, receiver]:
-        fatigue = getattr(player, "fatigue", 0.0)
-        risk_mod = get_injury_risk_modifier(player)
-        # Lower base injury chance, scale up for severe fatigue
-        base_injury_chance = 0.002
-        if fatigue > 0.95:
-            base_injury_chance *= 3  # triple risk if extremely fatigued
-        elif fatigue > 0.8:
-            base_injury_chance *= 2  # double risk if very fatigued
-        injury_chance = base_injury_chance * (1 + fatigue) * risk_mod
-
-        if random.random() < injury_chance:
-            injury_obj = create_injury(player, context="game", severity_roll=random.random())
-            if injury_obj and "game_injuries" in context:
-                context["game_injuries"].append({
-                    "player": getattr(player, "name", "Unknown"),
-                    "team": getattr(getattr(player, "team", None), "abbreviation", None),
-                    "injury_type": getattr(injury_obj, "name", str(injury_obj)),
-                    "severity": getattr(injury_obj, "severity", "unknown"),
-                    "weeks_out": getattr(injury_obj, "weeks_out", None)
-                })
+    # -- Injury check --
+    maybe_trigger_injury([qb, receiver], context)
 
     return {"yards": yards, "log": log.strip(), "player_stats": stats, "seconds_burned": time}
 
@@ -311,7 +318,8 @@ def simulate_run_play(runner: Any, gap: str, context: Dict[str, Any]) -> Dict[st
         if random.random() < power_chance:
             yards = max(yards, to_go + 1)  # Conversion
 
-    # ...injury logic unchanged...
+    # -- Injury check --
+    maybe_trigger_injury([runner], context)
 
     name = getattr(runner, "name", "Unknown")
     sub_note = getattr(runner, "subbed_in", "")
@@ -688,6 +696,9 @@ def sim_drive(offense, defense, sub_mgr, fatigue_log, context, start_field_pos=2
                 else:
                     play_desc = "Incomplete pass"
                     yards_gained = 0
+
+        # Injury check for all on-field players
+        maybe_trigger_injury(on_field_players, context)
 
         # Rare defensive/special teams TDs (1–2% of drives)
         if not td_type and not turnover and random.random() < 0.012:
