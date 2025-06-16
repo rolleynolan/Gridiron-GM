@@ -28,6 +28,7 @@ def progress_player(
     player: Player,
     xp_gains: Dict[str, float] | None = None,
     coach_quality: float = 1.0,
+    rng: random.Random | None = None,
 ) -> Player:
     """Update a player's attributes using their DNA growth curve.
 
@@ -39,6 +40,10 @@ def progress_player(
         Optional mapping of attribute names to weekly XP earned from
         training or in-game performance.
 
+    rng:
+        Optional ``random.Random`` instance used to introduce noise. Providing a
+        seeded generator allows deterministic results for testing.
+
     Returns
     -------
     Player
@@ -46,6 +51,7 @@ def progress_player(
     """
 
     xp_gains = xp_gains or {}
+    rng = rng or random
     attrs = getattr(player, "attributes", None)
     dna = getattr(player, "dna", None)
     if attrs is None or dna is None:
@@ -77,7 +83,7 @@ def progress_player(
         growth = gain * arc_mult * dev_speed * quality_mod
         if current >= soft_cap:
             growth *= 0.25
-        growth *= random.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
+        growth *= rng.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
         container[attr] = round(_clamp(current + growth), 2)
 
     return player
