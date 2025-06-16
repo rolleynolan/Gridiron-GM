@@ -37,6 +37,10 @@ from gridiron_gm_pkg.simulation.systems.player.player_season_progression import 
 from gridiron_gm_pkg.simulation.systems.player.player_regression import apply_regression
 from gridiron_gm_pkg.simulation.systems.player.player_weekly_update import advance_player_week
 from gridiron_gm_pkg.simulation.systems.player.weekly_training import apply_weekly_training
+from gridiron_gm_pkg.simulation.systems.player.offseason_updates import (
+    apply_conditioning_regression,
+    scout_reevaluation,
+)
 
 
 try:
@@ -605,6 +609,8 @@ class SeasonManager:
     def handle_offseason(self):
         print("=== Offseason: Healing injuries and resetting league ===")
         for team in self.league.teams:
+            lost_phys = 0
+            scout_changes = 0
             for player in getattr(team, "roster", []):
                 # Heal all injuries
                 player.is_injured = False
@@ -615,6 +621,18 @@ class SeasonManager:
                 # Optional: retire old/severely injured players
                 if hasattr(player, "age") and player.age >= 38:
                     player.retired = True
+
+                if apply_conditioning_regression(player):
+                    lost_phys += 1
+                if scout_reevaluation(
+                    player, getattr(team, "scouting_accuracy", 0.6)
+                ):
+                    scout_changes += 1
+
+            print(
+                f"[OFFSEASON] {getattr(team, 'abbreviation', team.team_name)}: "
+                f"{lost_phys} conditioning regressions, {scout_changes} scouting updates"
+            )
         # Reset standings, playoff bracket, and schedule for new season
         self.standings_manager.reset_for_new_season()
         self.playoff_bracket = {}
