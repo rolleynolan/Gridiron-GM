@@ -156,37 +156,44 @@ def add_nfl_style_playoff_schedule(schedule_by_week, standings_by_conf, id_to_ab
     playoff_games = []
     playoff_rounds = ["Wild Card", "Divisional", "Conference Championship", "Gridiron Bowl"]
 
-    # Seeds: [1,2,3,4,5,6,7] for each conference
+    # Seeds: [1,2,3,4,5,6,7,8] for each conference
     seeds = {}
     for conf in ["Nova", "Atlas"]:
-        seeds[conf] = standings_by_conf[conf][:7]  # List of team dicts
+        seeds[conf] = standings_by_conf[conf][:8]  # List of team dicts
 
     week = start_week
 
     # --- Wild Card Round (week 1 of playoffs) ---
     wc_games = []
     for conf in ["Nova", "Atlas"]:
-        # 2 vs 7, 3 vs 6, 4 vs 5; 1 seed gets bye
+        # 1 vs 8, 2 vs 7, 3 vs 6, 4 vs 5
         conf_seeds = seeds[conf]
         wc_games += [
             {
-                "home_id": conf_seeds[1]["id"], "away_id": conf_seeds[6]["id"],
+                "home_id": conf_seeds[0]["id"], "away_id": conf_seeds[7]["id"],
                 "day": "Sunday" if conf == "Nova" else "Monday",
                 "week": week, "kickoff": "1:00 PM", "playoff": True,
+                "round": "Wild Card", "conference": conf,
+                "home_abbr": id_to_abbr[conf_seeds[0]["id"]], "away_abbr": id_to_abbr[conf_seeds[7]["id"]]
+            },
+            {
+                "home_id": conf_seeds[1]["id"], "away_id": conf_seeds[6]["id"],
+                "day": "Sunday" if conf == "Nova" else "Monday",
+                "week": week, "kickoff": "4:30 PM", "playoff": True,
                 "round": "Wild Card", "conference": conf,
                 "home_abbr": id_to_abbr[conf_seeds[1]["id"]], "away_abbr": id_to_abbr[conf_seeds[6]["id"]]
             },
             {
                 "home_id": conf_seeds[2]["id"], "away_id": conf_seeds[5]["id"],
                 "day": "Sunday" if conf == "Nova" else "Monday",
-                "week": week, "kickoff": "4:30 PM", "playoff": True,
+                "week": week, "kickoff": "8:15 PM", "playoff": True,
                 "round": "Wild Card", "conference": conf,
                 "home_abbr": id_to_abbr[conf_seeds[2]["id"]], "away_abbr": id_to_abbr[conf_seeds[5]["id"]]
             },
             {
                 "home_id": conf_seeds[3]["id"], "away_id": conf_seeds[4]["id"],
                 "day": "Sunday" if conf == "Nova" else "Monday",
-                "week": week, "kickoff": "8:15 PM", "playoff": True,
+                "week": week, "kickoff": "11:30 PM", "playoff": True,
                 "round": "Wild Card", "conference": conf,
                 "home_abbr": id_to_abbr[conf_seeds[3]["id"]], "away_abbr": id_to_abbr[conf_seeds[4]["id"]]
             }
@@ -199,14 +206,14 @@ def add_nfl_style_playoff_schedule(schedule_by_week, standings_by_conf, id_to_ab
     for conf in ["Nova", "Atlas"]:
         div_games += [
             {
-                "home_id": seeds[conf][0]["id"], "away_id": "TBD_LowestSeedWinner_" + conf,
+                "home_id": "Winner_1v8_" + conf, "away_id": "Winner_4v5_" + conf,
                 "day": "Sunday" if conf == "Nova" else "Monday",
                 "week": week, "kickoff": "3:00 PM", "playoff": True,
                 "round": "Divisional", "conference": conf,
-                "home_abbr": id_to_abbr[seeds[conf][0]["id"]], "away_abbr": "TBD"
+                "home_abbr": "TBD", "away_abbr": "TBD"
             },
             {
-                "home_id": "TBD_HighSeedHost_" + conf, "away_id": "TBD_OtherWinner_" + conf,
+                "home_id": "Winner_2v7_" + conf, "away_id": "Winner_3v6_" + conf,
                 "day": "Sunday" if conf == "Nova" else "Monday",
                 "week": week, "kickoff": "6:30 PM", "playoff": True,
                 "round": "Divisional", "conference": conf,
@@ -220,7 +227,7 @@ def add_nfl_style_playoff_schedule(schedule_by_week, standings_by_conf, id_to_ab
     cc_games = []
     for conf in ["Nova", "Atlas"]:
         cc_games.append({
-            "home_id": "TBD_CC_Host_" + conf, "away_id": "TBD_CC_Away_" + conf,
+            "home_id": "Winner_Div1_" + conf, "away_id": "Winner_Div2_" + conf,
             "day": "Sunday" if conf == "Nova" else "Monday",
             "week": week, "kickoff": "6:30 PM", "playoff": True,
             "round": "Conference Championship", "conference": conf,
