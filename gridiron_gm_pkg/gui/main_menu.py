@@ -8,7 +8,8 @@ from gridiron_gm_pkg.simulation.systems.core.save_system import (
 )
 from gridiron_gm_pkg.gui.in_game_menu import in_game_menu
 from gridiron_gm_pkg.simulation.entities.team import Team
-from gridiron_gm_pkg.simulation.utils.roster_generator import RosterGenerator, PlayerGenerator  # ✅ NEW import
+from gridiron_gm_pkg.simulation.utils.roster_generator import RosterGenerator
+from gridiron_gm_pkg.simulation.utils.player_generator import PlayerGenerator
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
