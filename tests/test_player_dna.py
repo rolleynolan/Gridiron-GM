@@ -17,6 +17,7 @@ from gridiron_gm_pkg.simulation.systems.player.player_regression import (
 )
 from gridiron_gm_pkg.simulation.systems.player.player_dna import ATTRIBUTE_DECAY_TYPE
 from gridiron_gm_pkg.simulation.entities.player import Player
+from gridiron_gm_pkg.simulation.systems.player.player_weekly_update import advance_player_week
 
 
 def export_player_log(player_id, dna, position, age, attributes, caps, arc_val):
@@ -27,6 +28,7 @@ def export_player_log(player_id, dna, position, age, attributes, caps, arc_val):
         "age": age,
         "arc": round(arc_val, 3),
         "dev_speed": dna.dev_speed,
+        "traits": ", ".join(dna.traits),
         "mutations": ", ".join(m.name for m in dna.mutations),
         **{attr: attributes.get(attr) for attr in caps},
         **{f"{attr}_cap": caps[attr] for attr in caps},
@@ -140,46 +142,45 @@ def test_apply_regression_decreases_values():
 
 
 def _simulate_full_career(player_id: str, position: str, years: int = 15):
-    """Return season-by-season attribute log and arc for a player."""
+    """Simulate weekly development/regression for a player's career."""
 
-    dna = PlayerDNA.generate_random_dna(position)
-    data = dna.to_dict()
+    player = Player(player_id, position, 22, "2000-01-01", "U", "USA", 1, 70)
+
+    data = player.dna.to_dict()
     clone = PlayerDNA.from_dict(data)
-    assert [m.name for m in clone.mutations] == [m.name for m in dna.mutations]
+    assert [m.name for m in clone.mutations] == [m.name for m in player.dna.mutations]
 
-    from gridiron_gm_pkg.simulation.systems.player import attribute_generator
+    attr_names = list(player.dna.attribute_caps.keys())
+    logs = []
+    arc_vals = []
+    rng = random.Random(123)
 
-    attrs, caps = attribute_generator.generate_attributes_for_position(position)
+    for season in range(years):
+        for _ in range(17):
+            advance_player_week(player, {}, 1.0, rng)
 
-    class AttrSet:
-        def __init__(self, core: dict):
-            self.core = core
-            self.position_specific = {}
-
-    class DummyPlayer:
-        pass
-
-    player = DummyPlayer()
-    player.position = position
-    player.dna = dna
-    player.attributes = AttrSet(attrs)
-
-    base_attrs = attrs.copy()
-    arc = dna.career_arc[:years]
-    log = []
-    for year in range(1, years + 1):
-        age = 23 + year - 1
-        player.age = age
-        arc_val = arc[year - 1] if year - 1 < len(arc) else arc[-1]
-        for attr in list(attrs.keys()):
-            baseline = base_attrs[attr]
-            target = baseline + (caps[attr] - baseline) * arc_val
-            attrs[attr] = round(min(caps[attr], max(baseline, target)), 2)
-            player.attributes.core[attr] = attrs[attr]
-        log.append(
-            export_player_log(player_id, dna, position, age, attrs, caps, arc_val)
+        arc_val = (
+            player.dna.career_arc[season]
+            if season < len(player.dna.career_arc)
+            else player.dna.career_arc[-1]
         )
-    return log, arc
+
+        attributes = {
+            attr: player.attributes.core.get(attr, player.attributes.position_specific.get(attr))
+            for attr in attr_names
+        }
+        caps = {
+            attr: player.hidden_caps.get(attr, player.dna.attribute_caps.get(attr, {}).get("hard_cap"))
+            for attr in attr_names
+        }
+
+        logs.append(
+            export_player_log(player_id, player.dna, position, player.age, attributes, caps, arc_val)
+        )
+        arc_vals.append(arc_val)
+        player.age += 1
+
+    return logs, arc_vals
 
 
 def test_dna_long_term_progression(tmp_path):
