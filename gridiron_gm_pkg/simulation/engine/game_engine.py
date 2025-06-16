@@ -11,29 +11,102 @@ from gridiron_gm_pkg.simulation.engine.stat_utils import merge_player_stats, get
 # These functions are placeholders for more advanced simulation logic.
 # You can expand them to include real calculations based on player ratings, weather, etc
 
-def apply_roster_skill(offense: Dict[str, Any], defense: Dict[str, Any], play_context: Dict[str, Any]) -> float:
-    """Stub: Returns a modifier based on overall roster skill."""
-    return 1.0
+def _avg_overall(team: Any) -> float:
+    players = getattr(team, "players", None) or getattr(team, "roster", [])
+    if not players:
+        return 50.0
+    return sum(getattr(p, "overall", 50) for p in players) / len(players)
 
-def apply_coaching(offense: Dict[str, Any], defense: Dict[str, Any], play_context: Dict[str, Any]) -> float:
-    """Stub: Returns a modifier based on coaching quality."""
-    return 1.0
 
-def apply_player_matchups(offense: Dict[str, Any], defense: Dict[str, Any], play_context: Dict[str, Any]) -> float:
-    """Stub: Returns a modifier based on individual player matchups."""
-    return 1.0
+def apply_roster_skill(offense: Any, defense: Any, play_context: Dict[str, Any]) -> float:
+    """Return a modifier based on relative roster strength."""
+    off_rating = _avg_overall(offense)
+    def_rating = _avg_overall(defense)
+    diff = off_rating - def_rating
+    mod = 1.0 + diff / 150.0  # 15 OVR diff ~10% swing
+    return max(0.85, min(1.15, mod))
 
-def apply_schemes(offense: Dict[str, Any], defense: Dict[str, Any], play_context: Dict[str, Any]) -> float:
-    """Stub: Returns a modifier based on offensive and defensive schemes."""
+def _coach_quality(team: Any) -> float:
+    quality = 1.0
+    if hasattr(team, "get_coach_quality"):
+        try:
+            quality = float(team.get_coach_quality())
+        except Exception:
+            quality = 1.0
+    else:
+        quality = float(getattr(team, "coach_quality", 1.0))
+    return quality
+
+
+def apply_coaching(offense: Any, defense: Any, play_context: Dict[str, Any]) -> float:
+    """Return a modifier based on coaching quality of each team."""
+    off_q = _coach_quality(offense)
+    def_q = _coach_quality(defense)
+    if def_q <= 0:
+        return 1.0
+    mod = off_q / def_q
+    return max(0.85, min(1.15, mod))
+
+def _top_group_rating(team: Any, positions: List[str], count: int = 1) -> float:
+    chart = getattr(team, "depth_chart", None) or generate_depth_chart(team)
+    players: List[Any] = []
+    for pos in positions:
+        players.extend(chart.get(pos, [])[:count])
+    if not players:
+        return 50.0
+    return sum(getattr(p, "overall", 50) for p in players) / len(players)
+
+
+def apply_player_matchups(offense: Any, defense: Any, play_context: Dict[str, Any]) -> float:
+    """Return a modifier based on key positional matchups."""
+    off_rating = _top_group_rating(offense, ["QB", "RB", "WR", "TE"], count=2)
+    def_rating = _top_group_rating(defense, ["CB", "S", "LB"], count=2)
+    diff = off_rating - def_rating
+    mod = 1.0 + diff / 200.0
+    return max(0.85, min(1.15, mod))
+
+def apply_schemes(offense: Any, defense: Any, play_context: Dict[str, Any]) -> float:
+    """Return a modifier based on offensive and defensive schemes if available."""
+    off_scheme = getattr(offense, "offensive_scheme", None)
+    def_scheme = getattr(defense, "defensive_scheme", None)
+    if not off_scheme or not def_scheme:
+        return 1.0
+    if isinstance(off_scheme, str) and isinstance(def_scheme, str):
+        if "spread" in off_scheme.lower() and def_scheme == "3-4":
+            return 1.05
+        if "power" in off_scheme.lower() and def_scheme == "4-3":
+            return 1.05
     return 1.0
 
 def apply_weather(weather: Optional[Dict[str, Any]], play_context: Dict[str, Any]) -> float:
-    """Stub: Returns a modifier based on weather conditions."""
-    return 1.0
+    """Return a modifier based on weather conditions and play type."""
+    if not weather:
+        return 1.0
+    play_type = play_context.get("play_type")
+    mod = 1.0
+    wtype = weather.get("type")
+    wind = weather.get("wind_speed", 0)
+    if play_type == "pass":
+        if wtype == "rain":
+            mod -= 0.1
+        elif wtype == "snow":
+            mod -= 0.15
+        if wind > 20:
+            mod -= 0.05
+    else:
+        if wtype in ("rain", "snow"):
+            mod -= 0.05
+    return max(mod, 0.7)
 
 def apply_home_field_advantage(home_team: Any, away_team: Any, play_context: Dict[str, Any]) -> float:
-    """Stub: Returns a modifier for home field advantage."""
-    return 1.0
+    """Return a modifier reflecting home field advantage."""
+    offense = play_context.get("offense")
+    if not home_team or not offense:
+        return 1.0
+    base = float(getattr(home_team, "home_field_advantage", 0.02))
+    if offense is home_team:
+        return 1.0 + base
+    return 1.0 - base
 
 # ---- Fatigue Integration (updated) ----
 
@@ -145,7 +218,7 @@ def simulate_pass_play(qb: Any, wr_list: List[Any], depth: str, context: Dict[st
             yards = random.randint(base_range[1]+1, base_range[1]+30)
         else:
             yards = random.randint(base_range[0], base_range[1])
-        yards = int(yards * wr_perf)
+        yards = int(yards * wr_perf * modifier)
         log = f"{sub_log + ' ' if sub_log else ''}{qb_name} completed a {depth} pass to {wr_name} for {yards} yards"
         stats = {
             qb_name: {"pass_attempts": 1, "completions": 1, "pass_yards": yards, "player_obj": qb},
@@ -217,9 +290,18 @@ def simulate_run_play(runner: Any, gap: str, context: Dict[str, Any]) -> Dict[st
     else:
         yards = random.randint(base_range[0], base_range[1])
 
+    modifier = (
+        apply_roster_skill(context["offense"], context["defense"], context) *
+        apply_coaching(context["offense"], context["defense"], context) *
+        apply_player_matchups(context["offense"], context["defense"], context) *
+        apply_schemes(context["offense"], context["defense"], context) *
+        apply_weather(context.get("weather"), context) *
+        apply_home_field_advantage(context.get("home_team"), context.get("away_team"), context)
+    )
+
     apply_fatigue(runner, 5 if gap == "inside" else 7)
     perf = get_performance_modifier(runner)
-    yards = int(yards * perf)
+    yards = int(yards * perf * modifier)
 
     # Short-yardage conversion (e.g., 3rd/4th and 1)
     down = context.get("down", 1)
@@ -317,39 +399,54 @@ def sim_play(offense, defense, down, to_go, yardline, sub_manager, fatigue_log, 
     return play_result
 
 def choose_play_type_intelligent(offense, down, to_go, yardline, context):
-    """
-    Chooses play type (run/pass) based on down, distance, score, clock, and weather.
-    Always expects weather to have 'type' and 'wind_speed' keys.
-    """
-    score_diff = context.get("score_diff", 0)  # offense - defense
-    clock = context.get("clock", 900)  # seconds left in half/quarter
-    weather = context.get("weather", {})
+    """Return 'run' or 'pass' considering roster strengths and game situation."""
 
-    # Ensure weather has required keys
-    weather_type = weather.get("type", "clear")
-    wind_speed = weather.get("wind_speed", 0)
-    severe_weather = weather_type in ("rain", "snow") or wind_speed > 20
+    def avg(players: List[Any]) -> float:
+        if not players:
+            return 50.0
+        return sum(getattr(p, "overall", 50) for p in players) / len(players)
 
-    # Down/distance logic
+    chart = getattr(offense, "depth_chart", None) or generate_depth_chart(offense)
+    run_players = []
+    for pos in ["RB", "LT", "LG", "C", "RG", "RT"]:
+        run_players.extend(chart.get(pos, [])[:1])
+    pass_players = chart.get("QB", [])[:1] + chart.get("WR", [])[:2]
+
+    run_skill = avg(run_players)
+    pass_skill = avg(pass_players)
+    if run_skill + pass_skill == 0:
+        base_bias = 0.5
+    else:
+        base_bias = run_skill / (run_skill + pass_skill)
+
+    run_weight = base_bias
+    pass_weight = 1 - base_bias
+
+    score_diff = context.get("score_diff", 0)
+    clock = context.get("clock", 900)
+
+    if to_go <= 2 and down in (1, 2):
+        run_weight += 0.25
     if to_go >= 8:
-        if severe_weather:
-            return "run" if random.random() < 0.5 else "pass"
-        return "pass" if random.random() < 0.8 else "run"
-    elif down == 1:
-        if to_go <= 3:
-            return "run" if random.random() < 0.7 else "pass"
-        return "run" if random.random() < 0.6 else "pass"
-    elif down in [2, 3] and to_go <= 3:
-        return "run" if random.random() < 0.75 else "pass"
-    elif down == 4:
+        pass_weight += 0.25
+    if down == 4:
         if to_go <= 2:
-            return "run" if random.random() < 0.7 else "pass"
+            run_weight += 0.2
+        else:
+            pass_weight += 0.3
+    if clock < 120:
+        if score_diff < 0:
+            pass_weight += 0.3
+        elif score_diff > 0:
+            run_weight += 0.3
+    if yardline >= 80:
+        run_weight += 0.1
+
+    if run_weight > pass_weight:
+        return "run"
+    if pass_weight > run_weight:
         return "pass"
-    if clock < 120 and score_diff < 0:
-        return "pass"
-    if clock < 120 and score_diff > 0:
-        return "run" if random.random() < 0.8 else "pass"
-    return "pass" if random.random() < 0.55 else "run"
+    return random.choice(["run", "pass"])
 
 def apply_weather_enhanced(weather, play_type):
     """
