@@ -1,5 +1,44 @@
 from __future__ import annotations
 
+"""
+TASK: Expand the Scout class to support fog-of-war evaluations based on scout skill and bias.
+
+FEATURES TO ADD:
+1. Evaluate any player (college or pro) and generate a 'scouted profile'.
+2. Output should include:
+    - Estimated OVR and POT as RANGES, not single values (e.g. 67–74)
+    - Text blurbs based on standout traits (e.g. "Explosive runner", "Elite agility")
+    - Specific attributes (e.g. Speed, Awareness) shown as ranges if relevant to scout role
+    - Tag known traits like 'High Work Ethic' or 'Injury Prone' with chance for accuracy
+
+3. Inaccuracy Rules:
+    - Scouts use Gaussian noise scaled to their skill level (higher skill = tighter ranges)
+    - Bias can influence reporting (e.g. overrate athletes, underrate low-IQ players)
+    - Potentials are harder to scout accurately than current ability
+
+4. Evaluation evolves over time:
+    - Add `refine_evaluation(player)` method that reduces error margins if scout watches more film or sees combine
+    - Scout accuracy should improve over multiple evaluations
+
+5. Add methods:
+    - `evaluate_player(player, context="season") -> dict`  # full scouting report
+    - `refine_evaluation(player)`                         # narrows ranges, updates report
+
+6. Output format:
+{
+  "summary": "Big-play receiver with elite top speed. Needs polish as a route runner.",
+  "ovr_range": [67, 74],
+  "pot_range": [83, 94],
+  "attribute_ranges": {
+    "speed": [91, 97],
+    "awareness": [60, 72],
+    "catching": [78, 85]
+  },
+  "known_traits": ["Explosive Athlete", "Raw Route Tree"],
+  "scout_accuracy": 0.78,  # reflects confidence level (0–1)
+}
+"""
+
 import random
 from typing import Dict, List, Optional, Tuple
 
@@ -56,6 +95,8 @@ class Scout:
         self.exposure_map: Dict[str, float] = {}
         # Per-player opinion modifiers from events
         self._player_modifiers: Dict[str, float] = {}
+        # Cached scouting reports
+        self._reports: Dict[str, Dict[str, object]] = {}
 
     # ------------------------------------------------------------------
     def get_accuracy_for(self, attribute: str) -> float:
@@ -69,10 +110,11 @@ class Scout:
         self.exposure_map[player_id] = min(1.0, current + amount)
 
     # ------------------------------------------------------------------
-    def _apply_noise(self, true_value: float) -> float:
+    def _apply_noise(self, true_value: float, exposure: float = 0.0) -> float:
         """Return a value with scouting noise applied."""
-        noise_range = (1.0 - self.evaluation_skill) * 10.0
-        return max(0.0, min(99.0, true_value + random.uniform(-noise_range, noise_range)))
+        std_dev = (1.0 - self.evaluation_skill) * 5.0 * max(0.25, 1.0 - exposure)
+        noisy = random.gauss(true_value, std_dev)
+        return max(0.0, min(99.0, noisy))
 
     # ------------------------------------------------------------------
     def _apply_bias(self, attr: str, value: float) -> float:
@@ -83,37 +125,72 @@ class Scout:
         return max(0.0, min(99.0, value))
 
     # ------------------------------------------------------------------
-    def evaluate_player(self, player: Player) -> Dict[str, object]:
-        """Return estimated attribute ranges and commentary for a player."""
-        skill_bonus = 0.05 if self.focus_position and player.position == self.focus_position else 0.0
-        accuracy = min(1.0, self.evaluation_skill + skill_bonus)
-        estimates: Dict[str, Tuple[int, int]] = {}
-        commentary: List[str] = []
+    def evaluate_player(self, player: Player, context: str = "season") -> Dict[str, object]:
+        """Return a fog-of-war scouting profile for a player."""
+        exposure = self.exposure_map.get(player.id, 0.0)
+        skill_bonus = 0.1 if self.focus_position and player.position == self.focus_position else 0.0
+        accuracy = min(1.0, self.evaluation_skill + skill_bonus + exposure * 0.3)
+
+        attribute_ranges: Dict[str, Tuple[int, int]] = {}
+        blurbs: List[str] = []
 
         for attr, true_val in player.get_all_attributes().items():
             if true_val is None:
                 continue
             biased = self._apply_bias(attr, float(true_val))
-            est_center = self._apply_noise(biased)
-            range_width = 4 + (1.0 - accuracy) * 12
+            est_center = self._apply_noise(biased, exposure)
+            range_width = 8 + (1.0 - accuracy) * 20
             low = int(max(40.0, est_center - range_width / 2))
             high = int(min(99.0, est_center + range_width / 2))
-            estimates[attr] = (low, high)
-            if random.random() < 0.25 + accuracy * 0.5:
-                commentary.append(_describe_rating(attr, est_center))
+            attribute_ranges[attr] = (low, high)
+            if random.random() < 0.3 + accuracy * 0.5:
+                blurbs.append(_describe_rating(attr, est_center))
 
-        # Exposure increases with each evaluation
+        # Estimated overall and potential
+        true_ovr = player.overall + self._player_modifiers.get(player.id, 0.0)
+        true_pot = player.potential or player.hidden_caps.get("overall", player.overall)
+        ovr_center = self._apply_noise(self._apply_bias("overall", float(true_ovr)), exposure)
+        pot_center = self._apply_noise(self._apply_bias("potential", float(true_pot)), exposure)
+        ovr_width = 6 + (1.0 - accuracy) * 14
+        pot_width = ovr_width + 4
+        ovr_range = [int(max(40.0, ovr_center - ovr_width / 2)), int(min(99.0, ovr_center + ovr_width / 2))]
+        pot_range = [int(max(60.0, pot_center - pot_width / 2)), int(min(99.0, pot_center + pot_width / 2))]
+
+        known_traits: List[str] = []
+        for category, traits in player.traits.items():
+            for trait in traits:
+                if random.random() < accuracy * 0.7 + exposure * 0.3:
+                    known_traits.append(trait.replace("_", " ").title())
+
+        summary = "; ".join(blurbs[:2]) if blurbs else f"{player.position} prospect"
+
+        report = {
+            "summary": summary,
+            "ovr_range": ovr_range,
+            "pot_range": pot_range,
+            "attribute_ranges": attribute_ranges,
+            "known_traits": known_traits,
+            "scout_accuracy": round(accuracy, 2),
+        }
+
         self.add_exposure(player.id)
+        self._reports[player.id] = report
+        return report
 
-        return {"estimates": estimates, "commentary": commentary}
+    # ------------------------------------------------------------------
+    def refine_evaluation(self, player: Player) -> Dict[str, object]:
+        """Improve an existing scouting report by increasing exposure."""
+        self.add_exposure(player.id, 0.2)
+        return self.evaluate_player(player)
 
     # ------------------------------------------------------------------
     def evaluate_potential(self, player: Player) -> Dict[str, str]:
         """Estimate a player's potential ceiling."""
+        exposure = self.exposure_map.get(player.id, 0.0)
         base = player.hidden_caps.get("overall", player.overall)
         base = self._apply_bias("overall", float(base))
-        est_center = self._apply_noise(base)
-        range_width = 10 + (1.0 - self.evaluation_skill) * 20
+        est_center = self._apply_noise(base, exposure)
+        range_width = 10 + (1.0 - self.evaluation_skill) * 20 * max(0.5, 1.0 - exposure)
         low = int(max(60.0, est_center - range_width / 2))
         high = int(min(99.0, est_center + range_width / 2))
         confidence = (
@@ -141,23 +218,4 @@ class Scout:
     # ------------------------------------------------------------------
     def generate_report(self, player: Player) -> Dict[str, object]:
         """Compile a full scouting report for a player."""
-        player_adjust = self._player_modifiers.get(player.id, 0.0)
-        eval_result = self.evaluate_player(player)
-        pot_result = self.evaluate_potential(player)
-
-        overall_true = player.overall + player_adjust
-        overall_est = self._apply_noise(self._apply_bias("overall", overall_true))
-        overall_low = int(max(40.0, overall_est - 5))
-        overall_high = int(min(99.0, overall_est + 5))
-
-        strengths = [c for c in eval_result["commentary"] if c.startswith("Elite") or c.startswith("Great")]
-        weaknesses = [c for c in eval_result["commentary"] if c.startswith("poor") or c.startswith("Adequate")]
-
-        return {
-            "position_summary": player.position,
-            "strengths": strengths,
-            "weaknesses": weaknesses,
-            "estimated_overall_range": f"{overall_low}\u2013{overall_high}",
-            "estimated_potential_range": pot_result["range"],
-            "commentary": eval_result["commentary"],
-        }
+        return self.evaluate_player(player)
