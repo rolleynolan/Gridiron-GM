@@ -13,9 +13,9 @@ from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, Muta
 from gridiron_gm_pkg.simulation.systems.player import player_regression
 from gridiron_gm_pkg.simulation.systems.player.player_regression import (
     valid_attributes_by_position,
-    attribute_decay_type,
     decay_multipliers,
 )
+from gridiron_gm_pkg.simulation.systems.player.player_dna import ATTRIBUTE_DECAY_TYPE
 from gridiron_gm_pkg.simulation.entities.player import Player
 
 
@@ -61,7 +61,7 @@ def apply_regression_local(attributes: dict, caps: dict, age: int, dna: PlayerDN
         if attr not in valid_attributes_by_position[position]:
             continue
 
-        decay_type = attribute_decay_type.get(attr, "physical")
+        decay_type = ATTRIBUTE_DECAY_TYPE.get(attr, "physical")
         decay_mult = decay_multipliers.get(decay_type, 1.0)
         total_decay = decay_base * position_mod * decay_mult
 
@@ -132,7 +132,9 @@ def test_apply_regression_decreases_values():
     player = Player("Old", "RB", 31, "1990-01-01", "U", "USA", 22, 70)
     player.attributes.core["speed"] = 80
     player.attributes.core["acceleration"] = 80
-    player_regression.apply_regression(player)
+    # Force decline to begin at or before the player's current age
+    player.dna.growth_arc.decline_start_age = 30
+    player_regression.apply_regression(player, age=31)
     assert player.attributes.core["speed"] < 80
     assert player.attributes.core["acceleration"] < 80
 
