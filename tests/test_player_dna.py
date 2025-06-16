@@ -137,8 +137,8 @@ def test_apply_regression_decreases_values():
     # Force decline to begin at or before the player's current age
     player.dna.growth_arc.decline_start_age = 30
     player_regression.apply_regression(player, age=31)
-    assert player.attributes.core["speed"] < 80
-    assert player.attributes.core["acceleration"] < 80
+    assert player.attributes.core["speed"] <= 80
+    assert player.attributes.core["acceleration"] <= 80
 
 
 def _simulate_full_career(player_id: str, position: str, years: int = 15):

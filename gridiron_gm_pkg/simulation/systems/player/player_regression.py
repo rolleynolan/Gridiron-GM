@@ -106,9 +106,9 @@ def apply_regression(
             "mental": 0.5,
         }.get(decay_type, 1.0)
 
-        regression_amount = current * effective_rate * type_modifier
+        weekly_regression = (current * effective_rate * type_modifier) / 52
         noise = rng.uniform(0.85, 1.15)
-        total_loss = int(regression_amount * noise)
+        total_loss = int(weekly_regression * noise)
 
         container[attr] = max(40, current - total_loss)
 
