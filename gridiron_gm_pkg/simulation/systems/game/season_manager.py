@@ -29,6 +29,7 @@ from gridiron_gm_pkg.simulation.systems.core.data_loader import (
 )
 from gridiron_gm_pkg.simulation.systems.core.serialization_utils import league_to_dict
 from gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
+from gridiron_gm_pkg.simulation.utils.playoffs import generate_playoff_seeds, simulate_playoff_round
 from gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
 from gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
     evaluate_player_season_progression,
@@ -56,6 +57,8 @@ class SeasonManager:
 
         # --- Add this line to initialize playoff_bracket ---
         self.playoff_bracket = {}
+        self.playoff_bracket_by_round = {}
+        self.season_history = {}
 
         # --- Universal team ID mapping and abbreviation mapping ---
         self.id_to_team = {team.id: team for team in self.league.teams}
@@ -357,11 +360,8 @@ class SeasonManager:
         # Generate the playoff schedule in the schedule_by_week dict
         add_nfl_style_playoff_schedule(self.schedule_by_week, standings_by_conf, id_to_abbr, playoff_start_week)
 
-        # Set playoff_bracket for sim logic (extract from standings)
-        self.playoff_bracket = {
-            "Nova": [team["id"] for team in standings_by_conf["Nova"][:7]],
-            "Atlas": [team["id"] for team in standings_by_conf["Atlas"][:7]]
-        }
+        # Set playoff_bracket for sim logic (extract from standings using tiebreakers)
+        self.playoff_bracket = generate_playoff_seeds(self)
 
         # Optionally, save the updated schedule
         base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name
@@ -372,6 +372,9 @@ class SeasonManager:
         self.playoffs_generated = True
         if VERBOSE_SIM_OUTPUT:
             print("[DEBUG] Playoff schedule generated and saved.")
+
+        # Automatically run playoffs once bracket is set
+        self.run_playoffs()
 
     def validate_team_rosters_and_depth_charts(self):
         """
@@ -479,7 +482,7 @@ class SeasonManager:
                 champs.append(rank(get_division_teams(conf, div))[0])
             champs = rank(champs)
             all_conf = get_conference_teams(conf)
-            wild_cards = [t for t in rank([t for t in all_conf if t not in champs])[:3]]
+            wild_cards = [t for t in rank([t for t in all_conf if t not in champs])[:4]]
             seeds = champs + wild_cards
             playoff_bracket[conf] = [t.id for t in seeds]
 
@@ -609,6 +612,74 @@ class SeasonManager:
         self.standings_manager.results_by_week = self.results_by_week
         self.standings_manager.save_standings()
 
+    def run_playoffs(self):
+        """Generate seeds, simulate all playoff rounds, and crown a champion."""
+        seeds = generate_playoff_seeds(self)
+        self.playoff_bracket = seeds
+
+        bracket = {}
+
+        # --- Wild Card ---
+        wc_games = []
+        for conf in ["Nova", "Atlas"]:
+            s = seeds[conf]
+            wc_games += [
+                {"home_id": s[0], "away_id": s[7], "conference": conf},
+                {"home_id": s[1], "away_id": s[6], "conference": conf},
+                {"home_id": s[2], "away_id": s[5], "conference": conf},
+                {"home_id": s[3], "away_id": s[4], "conference": conf},
+            ]
+        wc_results = simulate_playoff_round(wc_games, self.id_to_team, self.calendar.current_week, self.id_to_abbr)
+        bracket["Wild Card"] = wc_results
+
+        winners = {"Nova": [], "Atlas": []}
+        for res in wc_results:
+            winners[res["conference"]].append(res["winner"])
+
+        # --- Divisional ---
+        div_games = []
+        for conf in ["Nova", "Atlas"]:
+            w = winners[conf]
+            div_games += [
+                {"home_id": w[0], "away_id": w[3], "conference": conf},
+                {"home_id": w[1], "away_id": w[2], "conference": conf},
+            ]
+        div_results = simulate_playoff_round(div_games, self.id_to_team, self.calendar.current_week + 1, self.id_to_abbr)
+        bracket["Divisional"] = div_results
+
+        winners2 = {"Nova": [], "Atlas": []}
+        for res in div_results:
+            winners2[res["conference"]].append(res["winner"])
+
+        # --- Conference Championship ---
+        cc_games = []
+        for conf in ["Nova", "Atlas"]:
+            cc_games.append({"home_id": winners2[conf][0], "away_id": winners2[conf][1], "conference": conf})
+        cc_results = simulate_playoff_round(cc_games, self.id_to_team, self.calendar.current_week + 2, self.id_to_abbr)
+        bracket["Conference Championship"] = cc_results
+
+        conf_champs = {res["conference"]: res["winner"] for res in cc_results}
+
+        # --- Gridiron Bowl ---
+        gb_game = {"home_id": conf_champs["Nova"], "away_id": conf_champs["Atlas"], "conference": "Both"}
+        gb_results = simulate_playoff_round([gb_game], self.id_to_team, self.calendar.current_week + 3, self.id_to_abbr)
+        bracket["Gridiron Bowl"] = gb_results
+
+        final = gb_results[0]
+        champ_id = final["winner"]
+        runner_id = final["home_id"] if champ_id != final["home_id"] else final["away_id"]
+        self.champion = self.id_to_abbr.get(champ_id, champ_id)
+        self.runner_up = self.id_to_abbr.get(runner_id, runner_id)
+
+        self.playoff_bracket_by_round = bracket
+
+        year_hist = self.season_history.setdefault(self.calendar.current_year, {})
+        year_hist["champion"] = self.champion
+        year_hist["runner_up"] = self.runner_up
+        year_hist["playoff_bracket"] = bracket
+
+        return bracket
+
     def run_full_season_cycle(self):
         """
         Run the full NFL-style loop: preseason, regular season, playoffs, offseason, and new season.
@@ -630,19 +701,12 @@ class SeasonManager:
 
         # --- Playoffs ---
         print("=== Playoffs Begin ===")
-        playoff_mgr = PlayoffManager(self)
-        playoff_results = playoff_mgr.run_playoffs()
+        playoff_results = self.run_playoffs()
         print("\n=== PLAYOFF RESULTS BY ROUND ===")
-        for conf in ["Nova", "Atlas"]:
-            print(f"\n{conf} Playoff Games:")
-            for result in playoff_results[conf]:
-                print(f"{result.get('final_score', '')} | {result.get('result_str', '')}")
-        print("\nChampionship:")
-        sb = playoff_results["Championship"]
-        if sb is not None:
-            print(f"{sb.get('final_score', '')} | {sb.get('result_str', '')}")
-        else:
-            print("No championship game was played.")
+        for rnd, games in playoff_results.items():
+            print(f"\n{rnd}:")
+            for result in games:
+                print(result.get("final_score", ""))
 
         # --- Champion ---
         self.crown_champion()
