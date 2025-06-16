@@ -17,7 +17,7 @@ Week number can be hardcoded to 1 for now.
 import json
 import random
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import sys
 
@@ -167,8 +167,9 @@ def summarize_stats(team: Team, stats: Dict) -> Dict:
         },
         "wr": {
             "name": getattr(wr, "name", "N/A"),
-            "rec_yards": stats.get("pass_yards", 0),
-            "rec_td": stats.get("pass_td", 0),
+            # Receiving yards/TDs aren't tracked separately yet, so use pass stats
+            "rec_yards": stats.get("rec_yards", stats.get("pass_yards", 0)),
+            "rec_td": stats.get("rec_td", stats.get("pass_td", 0)),
         },
     }
 
@@ -177,7 +178,9 @@ def main() -> None:
     week = 1
     teams = load_or_create_teams()
     random.shuffle(teams)
-    results_by_week = {week: []}
+    results_by_week: Dict[int, List[Dict[str, Any]]] = {}
+    total_injuries = 0
+    stat_players = {"QB": 0, "RB": 0, "WR": 0}
 
     for i in range(0, len(teams), 2):
         home = teams[i]
@@ -194,7 +197,9 @@ def main() -> None:
             "away_yards": away_stats.get("rush_yards", 0) + away_stats.get("pass_yards", 0),
             "injuries": context["game_injuries"],
         }
+        results_by_week.setdefault(week, [])
         results_by_week[week].append(result)
+        print(f"[RESULT STORED] Week {week} now has {len(results_by_week[week])} game(s)")
 
         print(f"=== {home.abbreviation} vs {away.abbreviation} ===")
         print(f"Final Score: {result['home_score']} - {result['away_score']}")
@@ -203,13 +208,32 @@ def main() -> None:
         away_summary = summarize_stats(away, away_stats)
         print("Home Key Stats:", home_summary)
         print("Away Key Stats:", away_summary)
+
+        for summary in (home_summary, away_summary):
+            qb = summary["qb"]
+            rb = summary["rb"]
+            wr = summary["wr"]
+            if qb["pass_yards"] or qb["pass_td"]:
+                stat_players["QB"] += 1
+            if rb["rush_yards"] or rb["rush_td"]:
+                stat_players["RB"] += 1
+            if wr["rec_yards"] or wr["rec_td"]:
+                stat_players["WR"] += 1
+            if qb["pass_yards"] >= 300 and wr["rec_yards"] == 0:
+                print(f"[STAT ISSUE] {wr['name']} has 0 rec_yards despite {qb['name']} throwing for {qb['pass_yards']}")
         if result["injuries"]:
             print("Injuries:")
             for inj in result["injuries"]:
-                print(f"  {inj['player']} ({inj['team']}) - {inj['injury_type']} {inj.get('weeks_out', '')}")
+                print(f"  {inj['player']} ({inj['team']}) - {inj['injury_type']} ({inj.get('severity','?')})")
+                print(f"    Week: {week}")
+            total_injuries += len(result["injuries"])
         print()
 
-    print("Results stored in results_by_week[1]")
+    print(f"Results stored in results_by_week[{week}]: {len(results_by_week.get(week, []))} game(s)")
+    print(f"Total injuries this week: {total_injuries}")
+    print("Players recording stats:")
+    for pos, count in stat_players.items():
+        print(f"  {pos}: {count}")
 
 
 if __name__ == "__main__":
