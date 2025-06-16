@@ -161,3 +161,10 @@ class Team:
 
     def __repr__(self) -> str:
         return f"{self.team_name} | Roster Size: {len(self.players)}"
+
+    def get_coach_quality(self) -> float:
+        """Return the team's coaching quality rating."""
+        try:
+            return float(getattr(self, "coach_quality", 1.0))
+        except (TypeError, ValueError):
+            return 1.0
