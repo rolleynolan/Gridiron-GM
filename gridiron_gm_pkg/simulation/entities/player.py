@@ -286,6 +286,7 @@ class Player:
                 "carry_security",
                 "pass_block",
                 "route_running_short",
+                "throw_power",
                 "catching",
             ]
         elif position in ["WR"]:
