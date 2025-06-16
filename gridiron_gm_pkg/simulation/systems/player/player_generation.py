@@ -2,9 +2,9 @@ import random
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA
 
 
-def generate_player_dna(position: str) -> PlayerDNA:
+def generate_player_dna(position: str, level: str = "pro") -> PlayerDNA:
     """Convenience wrapper to produce a ``PlayerDNA`` instance."""
-    return PlayerDNA.generate_random_dna(position)
+    return PlayerDNA.generate_random_dna(position, level=level)
 
 
 def generate_player_attributes_from_caps(dna: PlayerDNA, bias: str = "average") -> dict:
@@ -28,7 +28,7 @@ def generate_player_attributes_from_caps(dna: PlayerDNA, bias: str = "average") 
 
 
 def generate_pro_player(position: str, age: int) -> dict:
-    dna = generate_player_dna(position)
+    dna = generate_player_dna(position, level="pro")
     attributes = generate_player_attributes_from_caps(dna, bias="pro")
     return {
         "position": position,
@@ -40,7 +40,7 @@ def generate_pro_player(position: str, age: int) -> dict:
 
 
 def generate_college_player(position: str, age: int = 21) -> dict:
-    dna = generate_player_dna(position)
+    dna = generate_player_dna(position, level="college")
     attributes = generate_player_attributes_from_caps(dna, bias="college")
     return {
         "position": position,
@@ -52,7 +52,7 @@ def generate_college_player(position: str, age: int = 21) -> dict:
 
 
 def generate_free_agent(position: str, age: int) -> dict:
-    dna = generate_player_dna(position)
+    dna = generate_player_dna(position, level="pro")
     attributes = generate_player_attributes_from_caps(dna, bias="free_agent")
     return {
         "position": position,

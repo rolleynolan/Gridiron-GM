@@ -368,7 +368,7 @@ class PlayerDNA:
 
     # Convenience factory used by Player for compatibility
     @staticmethod
-    def generate_random_dna(position: str | None = None) -> "PlayerDNA":
+    def generate_random_dna(position: str | None = None, level: str = "pro") -> "PlayerDNA":
         dna = PlayerDNA()
         dna.growth_arc = generate_growth_arc(position)
         if position:
@@ -376,6 +376,19 @@ class PlayerDNA:
             attr_caps: Dict[str, Dict] = {}
             for attr, val in attrs.items():
                 hard_cap = caps.get(attr, val)
+                attr_type = ATTRIBUTE_DECAY_TYPE.get(attr, "skill")
+
+                if level == "pro":
+                    if random.random() < 0.02:
+                        hard_cap = 99
+                    else:
+                        hard_cap = min(99, max(hard_cap, caps.get(attr, hard_cap)))
+                elif level == "college":
+                    if attr_type == "physical":
+                        hard_cap = min(99, max(hard_cap, random.randint(85, 99)))
+                    else:
+                        hard_cap = min(90, hard_cap)
+
                 soft_cap = min(hard_cap, max(val + random.randint(2, 5), val))
                 attr_caps[attr] = {
                     "current": val,
