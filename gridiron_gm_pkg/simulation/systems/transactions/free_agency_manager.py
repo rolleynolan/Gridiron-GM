@@ -40,7 +40,9 @@ class FreeAgencyManager:
         player.contract = {
             "years": contract_offer.years,
             "salary_per_year": contract_offer.salary_per_year,
-            "rookie": contract_offer.rookie
+            "rookie": contract_offer.rookie,
+            "years_left": contract_offer.years,
+            "expiring": False,
         }
         team.roster.append(player)
         team.cap_used += contract_offer.salary_per_year

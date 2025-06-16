@@ -26,7 +26,13 @@ class TransactionManager:
             player.assign_rookie_contract(team)
         else:
             # Fallback: set a basic rookie contract
-            player.contract = {"type": "rookie", "years": 4, "salary": 1_000_000}
+            player.contract = {
+                "type": "rookie",
+                "years": 4,
+                "salary": 1_000_000,
+                "years_left": 4,
+                "expiring": False,
+            }
 
     def sign_free_agent(self, team, player):
         """Signs a free agent to a team and removes from free agent pool."""
