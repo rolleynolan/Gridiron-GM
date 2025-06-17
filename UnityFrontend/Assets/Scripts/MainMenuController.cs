@@ -4,7 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Newtonsoft.Json;
+using System;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -28,12 +28,19 @@ public class MainMenuController : MonoBehaviour
 
     void Start()
     {
-        leagueStatePath = Path.Combine(Application.dataPath, "..", "league_state.json");
+        leagueStatePath = Path.Combine(Application.dataPath, "..", "save", "league_state.json");
         LoadLeagueState();
         PopulateTeamDropdown();
         PopulateGmDropdown();
-        UpdateUI();
-        PopulateGameResults();
+        if (leagueState != null)
+            UpdateUI();
+        else
+        {
+            if (weekText != null)
+                weekText.text = "Week N/A";
+            if (resultsText != null)
+                resultsText.text = "No league data.";
+        }
 
         if (createGmButton != null)
             createGmButton.onClick.AddListener(CreateGm);
@@ -49,7 +56,17 @@ public class MainMenuController : MonoBehaviour
             return;
         }
         string json = File.ReadAllText(leagueStatePath);
-        leagueState = JsonConvert.DeserializeObject<LeagueState>(json);
+        leagueState = JsonUtility.FromJson<LeagueState>(json);
+
+        UnityEngine.Debug.Log("Current Week: " + leagueState.week);
+        if (leagueState.results_by_week != null && leagueState.results_by_week.TryGetValue("1", out var week1))
+        {
+            for (int i = 0; i < Math.Min(3, week1.Count); i++)
+            {
+                var res = week1[i];
+                UnityEngine.Debug.Log($"{res.away} {res.away_score} @ {res.home} {res.home_score}");
+            }
+        }
     }
 
     void PopulateTeamDropdown()
