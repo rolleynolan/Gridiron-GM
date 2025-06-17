@@ -56,6 +56,22 @@ def update_league_state(teams: List[Team], week: int, results_by_week: Dict[int,
             {
                 "name": getattr(team, "team_name", getattr(team, "name", "")),
                 "abbreviation": team.abbreviation,
+                "roster": [
+                    {
+                        "name": p.name,
+                        "position": p.position,
+                        "age": getattr(p, "age", 0),
+                        "overall": getattr(p, "overall", 0),
+                        "contract": {
+                            "years_left": (
+                                p.contract.get("years_left", p.contract.get("years", 0))
+                                if getattr(p, "contract", None)
+                                else 0
+                            )
+                        },
+                    }
+                    for p in getattr(team, "players", [])
+                ],
             }
             for team in teams
         ],
