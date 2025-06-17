@@ -97,12 +97,17 @@ class OffseasonManager:
         new_freshmen = generate_freshman_class()
         league.college_db.extend(new_freshmen)
 
-        # 4. Generate this year's draft class using DraftManager for realism
+        # 4. Generate this year's draft class
+        self.create_rookie_draft_class()
+
+    def create_rookie_draft_class(self, num_players: int = 256) -> None:
+        """Generate and store the rookie draft class."""
         from gridiron_gm_pkg.simulation.systems.game.draft_manager import DraftManager
-        draft_manager = DraftManager(league, None)  # TransactionManager will be set later for run_draft
-        year = getattr(self.calendar, "current_year", 1)
-        draft_class = draft_manager.generate_draft_class(year, n_players=256)
-        league.draft_prospects = draft_class
+
+        draft_manager = DraftManager(self.league_manager, None)
+        draft_class = draft_manager.generate_draft_class(num_players)
+        self.league_manager.draft_prospects = draft_class
+        print(f"Draft class created with {len(draft_class)} players")
 
     def _update_active_phases(self):
         """

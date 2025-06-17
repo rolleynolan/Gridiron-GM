@@ -178,7 +178,7 @@ def project_dev_curve(college_stats, traits=None, scout_accuracy=0.8):
 
     return guess
 
-def generate_college_player(year_in_college: int) -> Player:
+def generate_college_player(year_in_college: int, position: str | None = None) -> Player:
     base_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
     data_dir = os.path.join(project_root, "data")
@@ -189,7 +189,8 @@ def generate_college_player(year_in_college: int) -> Player:
     cities = load_enriched_cities(os.path.join(data_dir, "locations", "enriched_us_cities.json"), DEFAULT_CITIES)
 
     name = f"{random.choice(first_names)} {random.choice(last_names)}"
-    position = random.choice(['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'])
+    if position is None:
+        position = random.choice(['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'])
     dob = datetime.now() - timedelta(days=random.randint(18*365, 23*365))
     age = (datetime.now() - dob).days // 365
 

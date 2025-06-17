@@ -201,6 +201,9 @@ class Player:
         self.drafted_by = None
         self.draft_round = None
         self.draft_pick = None
+        self.draft_class_year = None
+        self.is_draft_eligible = False
+        self.rookie = False
 
         self.injuries = []
         self.injury_history = []
@@ -212,16 +215,6 @@ class Player:
         # Track active temporary penalties from injuries
         self.active_injury_effects = {}
 
-    def decrement_contract_year(self) -> None:
-        """Reduce remaining years on contract and flag expiration."""
-        if not self.contract:
-            return
-        years_left = self.contract.get("years_left")
-        if years_left is None:
-            years_left = self.contract.get("years", 0)
-        years_left = max(0, years_left - 1)
-        self.contract["years_left"] = years_left
-        self.contract["expiring"] = years_left == 0
 
         self.traits = {
             "training": [],
@@ -259,6 +252,17 @@ class Player:
         self.mutations = [m.name.lower() for m in self.dna.mutations]
 
         self.generate_caps()
+
+    def decrement_contract_year(self) -> None:
+        """Reduce remaining years on contract and flag expiration."""
+        if not self.contract:
+            return
+        years_left = self.contract.get("years_left")
+        if years_left is None:
+            years_left = self.contract.get("years", 0)
+        years_left = max(0, years_left - 1)
+        self.contract["years_left"] = years_left
+        self.contract["expiring"] = years_left == 0
 
     def init_core_attributes(self):
         """Return baseline attribute mapping common to all players."""
@@ -657,6 +661,9 @@ class Player:
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
             "draft_pick": self.draft_pick,
+            "draft_class_year": self.draft_class_year,
+            "is_draft_eligible": self.is_draft_eligible,
+            "rookie": self.rookie,
             "hidden_caps": self.hidden_caps,
             "scouted_potential": self.scouted_potential,
             "last_attribute_values": self.last_attribute_values,
@@ -705,6 +712,13 @@ class Player:
         player.season_stats = data.get("season_stats", {})
         player.on_injured_reserve = data.get("on_injured_reserve", False)
         player.is_injured = data.get("is_injured", False)
+        player.rookie_year = data.get("rookie_year")
+        player.drafted_by = data.get("drafted_by")
+        player.draft_round = data.get("draft_round")
+        player.draft_pick = data.get("draft_pick")
+        player.draft_class_year = data.get("draft_class_year")
+        player.is_draft_eligible = data.get("is_draft_eligible", False)
+        player.rookie = data.get("rookie", False)
         player.snap_counts = data.get("snap_counts", {})
         player.milestones_hit = set(data.get("milestones_hit", []))
         player.active_injury_effects = data.get("active_injury_effects", [])
