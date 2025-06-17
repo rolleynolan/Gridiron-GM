@@ -24,6 +24,10 @@ public class MainMenuController : MonoBehaviour
     public GameObject gameResultRowPrefab;
     public Transform resultsContent;
 
+    [Header("Roster UI")]
+    public GameObject playerRowPrefab;
+    public Transform rosterContent;
+
     private LeagueState leagueState;
     private string leagueStatePath;
 
@@ -33,8 +37,13 @@ public class MainMenuController : MonoBehaviour
         LoadLeagueState();
         PopulateTeamDropdown();
         PopulateGmDropdown();
+        if (teamDropdown != null)
+            teamDropdown.onValueChanged.AddListener(delegate { OnTeamSelected(); });
         if (leagueState != null)
+        {
             UpdateUI();
+            OnTeamSelected();
+        }
         else
         {
             if (weekText != null)
@@ -157,6 +166,36 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    void OnTeamSelected()
+    {
+        if (teamDropdown == null || leagueState == null) return;
+        if (teamDropdown.value < 0 || teamDropdown.value >= leagueState.teams.Count) return;
+        var team = leagueState.teams[teamDropdown.value];
+        PopulateTeamRoster(team);
+    }
+
+    void PopulateTeamRoster(TeamInfo selectedTeam)
+    {
+        if (selectedTeam == null || rosterContent == null || playerRowPrefab == null)
+            return;
+
+        foreach (Transform child in rosterContent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (selectedTeam.roster != null)
+        {
+            foreach (var player in selectedTeam.roster)
+            {
+                var rowObj = Instantiate(playerRowPrefab, rosterContent);
+                var row = rowObj.GetComponent<PlayerRow>();
+                if (row != null)
+                    row.SetData(player);
+            }
+        }
+    }
+
     void CreateGm()
     {
         if (gmNameInput == null) return;
@@ -212,6 +251,7 @@ public class MainMenuController : MonoBehaviour
         LoadLeagueState();
         UpdateUI();
         PopulateGameResults();
+        OnTeamSelected();
     }
 }
 

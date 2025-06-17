@@ -2,10 +2,27 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
+public class ContractInfo
+{
+    public int years_left;
+}
+
+[Serializable]
+public class PlayerInfo
+{
+    public string name;
+    public string position;
+    public int age;
+    public int overall;
+    public ContractInfo contract;
+}
+
+[Serializable]
 public class TeamInfo
 {
     public string name;
     public string abbreviation;
+    public List<PlayerInfo> roster;
 }
 
 [Serializable]
