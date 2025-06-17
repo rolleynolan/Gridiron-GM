@@ -32,6 +32,7 @@ class FreeAgencyManager:
         return sorted(agents, key=lambda p: p.overall, reverse=True)[:limit]
 
     def sign_player(self, team, player, contract_offer):
+        """Finalize signing a free agent to a team."""
         if player not in self.free_agents:
             print(f"{player.name} is no longer a free agent.")
             return False
@@ -41,8 +42,13 @@ class FreeAgencyManager:
             print(f"{team.name} roster is full. Cannot sign {player.name}.")
             return False
 
-        projected_cap = getattr(team, "cap_used", 0) + contract_offer.salary_per_year
-        if projected_cap > getattr(team, "SALARY_CAP", 200):
+        if not hasattr(team, "cap_used"):
+            team.cap_used = 0
+        if not hasattr(team, "SALARY_CAP"):
+            team.SALARY_CAP = 200
+
+        projected_cap = team.cap_used + contract_offer.salary_per_year
+        if projected_cap > team.SALARY_CAP:
             over_by = round(projected_cap - team.SALARY_CAP, 2)
             print(f"{team.name} cannot sign {player.name}; would exceed cap by ${over_by}M.")
             return False
@@ -63,6 +69,28 @@ class FreeAgencyManager:
         self.cpu_withdraw_offers(team, player.position)
 
         return True
+
+    def process_user_signing(self, team, player, offer):
+        """Public wrapper used by the UI to sign a player immediately.
+
+        Parameters
+        ----------
+        team : Team
+            The user's team attempting to sign the player.
+        player : Player
+            The free agent being signed.
+        offer : ContractOffer | dict
+            Offer details. If a dict is provided, it must contain at least
+            ``years`` and ``salary_per_year`` keys.
+        """
+        if isinstance(offer, dict):
+            offer = ContractOffer(
+                total_value=offer.get("salary_per_year", offer.get("total_value", 0)),
+                years=offer.get("years", 1),
+                rookie=offer.get("rookie", False),
+            )
+
+        return self.sign_player(team, player, offer)
 
     def generate_random_contract_offer(self, overall_rating):
         base_salary = 0.5 + ((overall_rating - 60) * 0.12)
