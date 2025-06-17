@@ -354,6 +354,51 @@ class SeasonManager:
 
             # Call fatigue accumulation hook (empty list for heavy_usage_players for now)
             accumulate_season_fatigue_for_team(team, [])
+
+            # Performance-based progression from season stats
+            year_key = str(self.calendar.current_year)
+            for player in getattr(team, "roster", []):
+                raw_stats = getattr(player, "season_stats", {})
+                if isinstance(raw_stats, dict) and year_key in raw_stats:
+                    season_totals = raw_stats[year_key].get("season_totals", {})
+                else:
+                    season_totals = raw_stats if isinstance(raw_stats, dict) else {}
+                snap_counts = getattr(player, "snap_counts", {})
+                deltas = evaluate_player_season_progression(player, season_totals, snap_counts)
+                if deltas:
+                    attr_container = getattr(player, "attributes", None)
+                    if attr_container:
+                        core = attr_container.get("core", {}) if isinstance(attr_container, dict) else getattr(attr_container, "core", {})
+                        pos = attr_container.get("position_specific", {}) if isinstance(attr_container, dict) else getattr(attr_container, "position_specific", {})
+                        caps = getattr(player, "hidden_caps", {})
+                        for attr, change in deltas.items():
+                            if attr in core:
+                                core[attr] = max(1, min(core.get(attr, 0) + change, caps.get(attr, 99)))
+                            else:
+                                pos[attr] = max(1, min(pos.get(attr, 0) + change, caps.get(attr, 99)))
+
+        # Apply weekly regression/progression for free agents
+        for player in getattr(self.league, "free_agents", []):
+            apply_regression(player)
+            year_key = str(self.calendar.current_year)
+            raw_stats = getattr(player, "season_stats", {})
+            if isinstance(raw_stats, dict) and year_key in raw_stats:
+                season_totals = raw_stats[year_key].get("season_totals", {})
+            else:
+                season_totals = raw_stats if isinstance(raw_stats, dict) else {}
+            snap_counts = getattr(player, "snap_counts", {})
+            deltas = evaluate_player_season_progression(player, season_totals, snap_counts)
+            if deltas:
+                attr_container = getattr(player, "attributes", None)
+                if attr_container:
+                    core = attr_container.get("core", {}) if isinstance(attr_container, dict) else getattr(attr_container, "core", {})
+                    pos = attr_container.get("position_specific", {}) if isinstance(attr_container, dict) else getattr(attr_container, "position_specific", {})
+                    caps = getattr(player, "hidden_caps", {})
+                    for attr, change in deltas.items():
+                        if attr in core:
+                            core[attr] = max(1, min(core.get(attr, 0) + change, caps.get(attr, 99)))
+                        else:
+                            pos[attr] = max(1, min(pos.get(attr, 0) + change, caps.get(attr, 99)))
         # Persist standings at the end of the week as well
         self.standings_manager.save_standings()
 
