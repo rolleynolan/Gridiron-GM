@@ -17,7 +17,8 @@ public class MainMenuController : MonoBehaviour
     public Dropdown teamDropdown;
     public Text weekText;
     public Text resultsText;
-    public Button simulateButton;
+    public Button simulateWeekButton;
+    public TMP_Text simStatusText;
 
     [Header("Results UI")]
     public GameObject gameResultRowPrefab;
@@ -44,8 +45,8 @@ public class MainMenuController : MonoBehaviour
 
         if (createGmButton != null)
             createGmButton.onClick.AddListener(CreateGm);
-        if (simulateButton != null)
-            simulateButton.onClick.AddListener(SimulateWeek);
+        if (simulateWeekButton != null)
+            simulateWeekButton.onClick.AddListener(RunSimulateWeek);
     }
 
     void LoadLeagueState()
@@ -174,22 +175,43 @@ public class MainMenuController : MonoBehaviour
             gmDropdown.value = index;
     }
 
-    void SimulateWeek()
+    void RunSimulateWeek()
     {
         var process = new Process();
         process.StartInfo.FileName = "python";
+        process.StartInfo.WorkingDirectory = Path.Combine(Application.dataPath, "..", "..");
         process.StartInfo.Arguments = "scripts/run_weekly_simulation.py";
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
-        process.Start();
-        process.WaitForExit();
-
-        UnityEngine.Debug.Log(process.StandardOutput.ReadToEnd());
-        UnityEngine.Debug.LogError(process.StandardError.ReadToEnd());
+        if (simulateWeekButton != null)
+            simulateWeekButton.interactable = false;
+        if (simStatusText != null)
+            simStatusText.text = "Simulating...";
+        try
+        {
+            process.Start();
+            process.WaitForExit();
+            UnityEngine.Debug.Log(process.StandardOutput.ReadToEnd());
+            UnityEngine.Debug.LogError(process.StandardError.ReadToEnd());
+            if (simStatusText != null)
+                simStatusText.text = "Simulation complete";
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError(ex);
+            if (simStatusText != null)
+                simStatusText.text = "Simulation failed";
+        }
+        finally
+        {
+            if (simulateWeekButton != null)
+                simulateWeekButton.interactable = true;
+        }
 
         LoadLeagueState();
         UpdateUI();
         PopulateGameResults();
     }
 }
+
