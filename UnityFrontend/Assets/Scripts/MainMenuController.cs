@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,6 +18,10 @@ public class MainMenuController : MonoBehaviour
     public Text weekText;
     public Text resultsText;
     public Button simulateButton;
+
+    [Header("Results UI")]
+    public GameObject gameResultRowPrefab;
+    public Transform resultsContent;
 
     private LeagueState leagueState;
     private string leagueStatePath;
@@ -115,6 +120,42 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    void PopulateGameResults()
+    {
+        if (resultsContent == null || gameResultRowPrefab == null || leagueState == null)
+            return;
+
+        foreach (Transform child in resultsContent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (leagueState.results_by_week != null &&
+            leagueState.results_by_week.TryGetValue(leagueState.week.ToString(), out var games))
+        {
+            foreach (var game in games)
+            {
+                var rowObj = Instantiate(gameResultRowPrefab, resultsContent);
+                var row = rowObj.GetComponent<GameResultRow>();
+                if (row != null)
+                {
+                    row.SetData(game);
+                }
+                else
+                {
+                    var texts = rowObj.GetComponentsInChildren<TMP_Text>();
+                    if (texts.Length >= 4)
+                    {
+                        texts[0].text = game.home;
+                        texts[1].text = game.away;
+                        texts[2].text = game.home_score.ToString();
+                        texts[3].text = game.away_score.ToString();
+                    }
+                }
+            }
+        }
+    }
+
     void CreateGm()
     {
         if (gmNameInput == null) return;
@@ -149,5 +190,6 @@ public class MainMenuController : MonoBehaviour
 
         LoadLeagueState();
         UpdateUI();
+        PopulateGameResults();
     }
 }
