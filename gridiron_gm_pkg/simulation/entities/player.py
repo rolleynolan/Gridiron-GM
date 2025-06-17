@@ -3,6 +3,7 @@ from uuid import uuid4
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA
+from gridiron_gm_pkg.engine.free_agency.free_agent_profile import FreeAgentProfile
 
 # Generic attributes shared by all players
 CORE_ATTRIBUTES = [
@@ -252,6 +253,9 @@ class Player:
         self.mutations = [m.name.lower() for m in self.dna.mutations]
 
         self.generate_caps()
+
+        # Profile used when the player is a free agent
+        self.free_agent_profile = FreeAgentProfile(self)
 
     def decrement_contract_year(self) -> None:
         """Reduce remaining years on contract and flag expiration."""
@@ -767,6 +771,7 @@ class Player:
         )
         if not player.hidden_caps or not player.scouted_potential:
             player.generate_caps()
+        player.free_agent_profile = FreeAgentProfile(player)
         return player
 
 
