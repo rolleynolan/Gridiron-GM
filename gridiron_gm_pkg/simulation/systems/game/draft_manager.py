@@ -1,6 +1,7 @@
 from gridiron_gm_pkg.simulation.utils.college_player_generator import (
     generate_college_player,
 )
+
 import random
 
 
@@ -76,12 +77,47 @@ class DraftManager:
         pick_number = 1
         drafted_players = set()
 
+        def _need_bonus(team, position):
+            count = sum(
+                1
+                for p in getattr(team, "roster", [])
+                if getattr(p, "position", None) == position
+            )
+            if count == 0:
+                return 10
+            if count == 1:
+                return 7
+            if count == 2:
+                return 4
+            return 0
+
         for rnd in range(1, rounds + 1):
             for team in draft_order:
                 if not prospects:
                     break  # No more prospects to draft
-                # For now, pick the "best" available (e.g., highest rating)
-                best_player = max(prospects, key=lambda p: getattr(p, "rating", 0))
+
+                board = getattr(team, "draft_board", [])
+                available_entries = [
+                    entry for entry in board if entry.get("player") in prospects
+                ]
+                if not available_entries:
+                    available_entries = [
+                        {"player": p, "score": getattr(p, "rating", 0)}
+                        for p in prospects
+                    ]
+
+                def value(entry):
+                    player = entry["player"]
+                    scout_score = entry.get("score", 0)
+                    bonus = _need_bonus(team, player.position)
+                    return scout_score + bonus * 2
+
+                best_entry = max(
+                    available_entries,
+                    key=lambda e: (value(e), e.get("score", 0)),
+                )
+                best_player = best_entry["player"]
+
                 self.transaction_manager.draft_pick(team, best_player)
 
                 # Determine base salary from draft slot (0-indexed)
