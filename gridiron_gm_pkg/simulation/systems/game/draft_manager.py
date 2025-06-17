@@ -1,15 +1,20 @@
-from gridiron_gm_pkg.simulation.engine.contract_engine import ContractEngine
-from gridiron_gm_pkg.simulation.utils.college_player_generator import generate_college_player
+from gridiron_gm_pkg.simulation.utils.college_player_generator import (
+    generate_college_player,
+)
 import random
+
 
 class DraftManager:
     """
     Handles the league draft process, including order, rounds, and pick transactions.
     """
+
     def __init__(self, league, transaction_manager):
         self.league = league
         self.transaction_manager = transaction_manager
-        self.draft_history = []  # List of dicts: {"round": int, "pick": int, "team": team, "player": player}
+        self.draft_history = (
+            []
+        )  # List of dicts: {"round": int, "pick": int, "team": team, "player": player}
 
     def generate_draft_class(self, num_players: int) -> list:
         """Generate a rookie draft class."""
@@ -50,8 +55,12 @@ class DraftManager:
         """
         teams = list(self.league.teams)
         # Sort by (wins, losses), lowest wins first, then highest losses
-        teams.sort(key=lambda t: (self.league.standings.get(t.id, {}).get("W", 0),
-                                  -self.league.standings.get(t.id, {}).get("L", 0)))
+        teams.sort(
+            key=lambda t: (
+                self.league.standings.get(t.id, {}).get("W", 0),
+                -self.league.standings.get(t.id, {}).get("L", 0),
+            )
+        )
         return teams
 
     def run_draft(self, rounds=7):
@@ -65,8 +74,6 @@ class DraftManager:
         prospects = list(self.league.draft_prospects)
         self.draft_history = []
         pick_number = 1
-        contract_engine = ContractEngine()
-
         drafted_players = set()
 
         for rnd in range(1, rounds + 1):
@@ -76,15 +83,45 @@ class DraftManager:
                 # For now, pick the "best" available (e.g., highest rating)
                 best_player = max(prospects, key=lambda p: getattr(p, "rating", 0))
                 self.transaction_manager.draft_pick(team, best_player)
-                # Assign rookie contract using ContractEngine
-                rookie_contract = contract_engine.generate_rookie_contract(team, best_player, round=rnd, pick=pick_number)
+
+                # Determine base salary from draft slot (0-indexed)
+                slot = pick_number - 1
+                if slot < 5:
+                    base_salary = 10_000_000
+                elif slot < 10:
+                    base_salary = 8_500_000
+                elif slot < 20:
+                    base_salary = 6_000_000
+                elif slot < 32:
+                    base_salary = 4_000_000
+                elif slot < 64:
+                    base_salary = 2_500_000
+                elif slot < 100:
+                    base_salary = 1_500_000
+                else:
+                    base_salary = 800_000
+
+                rookie_contract = {
+                    "years": 4,
+                    "salary_per_year": base_salary,
+                    "total_value": base_salary * 4,
+                    "years_left": 4,
+                    "expiring": False,
+                    "year_signed": getattr(self.league, "year", 0),
+                    "is_rookie_deal": True,
+                }
                 best_player.contract = rookie_contract
-                self.draft_history.append({
-                    "round": rnd,
-                    "pick": pick_number,
-                    "team": team,
-                    "player": best_player
-                })
+                if best_player not in team.roster:
+                    team.roster.append(best_player)
+                best_player.team = team
+                self.draft_history.append(
+                    {
+                        "round": rnd,
+                        "pick": pick_number,
+                        "team": team,
+                        "player": best_player,
+                    }
+                )
                 prospects.remove(best_player)
                 drafted_players.add(best_player)
                 pick_number += 1
