@@ -28,7 +28,10 @@ from gridiron_gm_pkg.simulation.systems.core.data_loader import (
     load_schedule_files, save_results, save_league_state, save_playoff_bracket, save_playoff_results
 )
 from gridiron_gm_pkg.simulation.systems.core.serialization_utils import league_to_dict
-from gridiron_gm_pkg.simulation.utils.generate_schedule import add_nfl_style_playoff_schedule
+from gridiron_gm_pkg.simulation.utils.generate_schedule import (
+    add_nfl_style_playoff_schedule,
+    generate_schedule,
+)
 from gridiron_gm_pkg.simulation.utils.playoffs import generate_playoff_seeds, simulate_playoff_round
 from gridiron_gm_pkg.simulation.systems.game.daily_manager import DailyOperationsManager
 from gridiron_gm_pkg.simulation.systems.player.player_season_progression import (
@@ -76,6 +79,13 @@ class SeasonManager:
         self.team_map = self.id_to_team  # For compatibility, but always use team.id as key
 
         self.schedule_by_week, self.results_by_week = load_schedule_files(save_name)
+        schedule_by_team_path = Path(__file__).resolve().parents[3] / "data" / "saves" / save_name / "schedule_by_team.json"
+        if schedule_by_team_path.exists():
+            with open(schedule_by_team_path, "r") as f:
+                self.schedule_by_team = json.load(f)
+        else:
+            self.schedule_by_team = {}
+
         self.last_scheduled_day_for_week = {
             str(week): (
                 max(
@@ -653,13 +663,50 @@ class SeasonManager:
     def start_new_season(self):
         print("=== Starting New Season ===")
         self.calendar.current_year += 1
+        self.calendar.nfl_week1_start_date = self.calendar.get_nfl_week1_start(self.calendar.current_year)
+        self.calendar.current_date = self.calendar.nfl_week1_start_date
         self.calendar.current_week = 1
-        self.calendar.current_day_index = 0
+        self.calendar.season_phase = "Preseason"
+        self.calendar.playoff_subphase = None
+        self.calendar.offseason_subphase = None
+
         # Validate rosters and depth charts before loading schedule
         self.validate_team_rosters_and_depth_charts()
-        # Generate new schedule, reset standings, etc.
+
+        # Generate brand new schedule
+        generate_schedule(self.league.teams, self.save_name)
+
+        # Load the freshly generated schedule files
         self.schedule_by_week, self.results_by_week = load_schedule_files(self.save_name)
+        team_path = Path(__file__).resolve().parents[3] / "data" / "saves" / self.save_name / "schedule_by_team.json"
+        if team_path.exists():
+            with open(team_path, "r") as f:
+                self.schedule_by_team = json.load(f)
+        else:
+            self.schedule_by_team = {}
+
+        # Reset standings and related metadata
+        self.standings_manager.reset_for_new_season()
         self.standings_manager.results_by_week = self.results_by_week
+
+        self.last_scheduled_day_for_week = {
+            str(week): (
+                max(
+                    self.calendar.DAYS_OF_WEEK.index(game["day"].strip().capitalize())
+                    for game in games
+                    if game.get("day") and game["day"].strip().capitalize() in self.calendar.DAYS_OF_WEEK
+                )
+                if games else 6
+            )
+            for week, games in self.schedule_by_week.items()
+        }
+
+        # Ensure results file exists
+        save_results(self.results_by_week, self.save_name)
+
+        total_weeks = len(self.schedule_by_week)
+        total_games = sum(len(g) for g in self.schedule_by_week.values())
+        print(f"New season schedule generated with {total_weeks} weeks and {total_games} total games")
 
     def process_player_retirements(self):
         """Check all players for retirement and update rosters."""
