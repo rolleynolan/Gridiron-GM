@@ -15,6 +15,7 @@ Week number can be hardcoded to 1 for now.
 """
 
 import json
+import os
 import random
 from pathlib import Path
 from typing import Any, Dict, List
@@ -33,6 +34,35 @@ from gridiron_gm_pkg.simulation.engine.game_engine import simulate_game
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "gridiron_gm_pkg" / "config"
 PLAYER_DATA_PATH = Path("dna_output/player_generation_output.json")
 TEAMS_PATH = CONFIG_DIR / "teams.json"
+
+SAVE_DIR = Path(__file__).resolve().parents[1] / "save"
+LEAGUE_STATE_FILE = SAVE_DIR / "league_state.json"
+
+
+def ensure_league_state_file() -> None:
+    """Create the league_state.json file if it doesn't exist."""
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    if not LEAGUE_STATE_FILE.exists():
+        with open(LEAGUE_STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump({"week": 0, "teams": [], "results_by_week": {}}, f, indent=2)
+
+
+def update_league_state(teams: List[Team], week: int, results_by_week: Dict[int, List[Dict[str, Any]]]) -> None:
+    """Write the current league state used by the Unity frontend."""
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    state = {
+        "week": week,
+        "teams": [
+            {
+                "name": getattr(team, "team_name", getattr(team, "name", "")),
+                "abbreviation": team.abbreviation,
+            }
+            for team in teams
+        ],
+        "results_by_week": {str(k): v for k, v in results_by_week.items()},
+    }
+    with open(LEAGUE_STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2)
 
 
 def load_player_pool() -> Dict[str, List]:
@@ -176,6 +206,7 @@ def summarize_stats(team: Team, stats: Dict) -> Dict:
 
 def main() -> None:
     week = 1
+    ensure_league_state_file()
     teams = load_or_create_teams()
     random.shuffle(teams)
     results_by_week: Dict[int, List[Dict[str, Any]]] = {}
@@ -234,6 +265,8 @@ def main() -> None:
     print("Players recording stats:")
     for pos, count in stat_players.items():
         print(f"  {pos}: {count}")
+
+    update_league_state(teams, week, results_by_week)
 
 
 if __name__ == "__main__":
