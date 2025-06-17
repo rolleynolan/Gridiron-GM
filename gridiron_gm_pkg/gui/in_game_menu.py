@@ -1,8 +1,10 @@
 # ui/in_game_menu.py
 
 from gridiron_gm_pkg.gui.roster_screen import roster_screen
+from gridiron_gm_pkg.controllers.game_actions import GameActionController
 
 def in_game_menu(game_world, gm_profile):
+    controller = GameActionController(game_world)
     save_slot = game_world.get("save_slot", None)
 
     while True:
@@ -46,11 +48,11 @@ def in_game_menu(game_world, gm_profile):
             user_team = game_world.get("user_team", {})
             roster_screen(game_world, user_team)
         elif choice == "5":
-            scouting_menu(game_world)
+            controller.scouting_department()
         elif choice == "6":
-            free_agency_menu(game_world)
+            controller.free_agency_hub()
         elif choice == "7":
-            trade_center_menu(game_world)
+            controller.trade_center()
         elif choice == "8":
             draft_room_menu(game_world)
         elif choice == "9":
@@ -77,13 +79,16 @@ def view_roster(game_world):
     print("\n📋 Viewing Roster (Coming Soon)")
 
 def scouting_menu(game_world):
-    print("\n🔍 Scouting Department (Coming Soon)")
+    controller = GameActionController(game_world)
+    controller.scouting_department()
 
 def free_agency_menu(game_world):
-    print("\n📝 Free Agency Hub (Coming Soon)")
+    controller = GameActionController(game_world)
+    controller.free_agency_hub()
 
 def trade_center_menu(game_world):
-    print("\n🔄 Trade Center (Coming Soon)")
+    controller = GameActionController(game_world)
+    controller.trade_center()
 
 def draft_room_menu(game_world):
     print("\n🏈 Draft Room (Coming Soon)")
