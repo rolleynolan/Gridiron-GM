@@ -18,6 +18,15 @@ def load_schedule_files(save_name, calendar=None):
         results_by_week = {}
     return schedule_by_week, results_by_week
 
+def load_schedule_by_team(save_name):
+    """Load team-centric schedule from disk if it exists."""
+    base_path = Path(__file__).resolve().parents[3] / "data" / "saves" / save_name
+    team_path = base_path / "schedule_by_team.json"
+    if os.path.exists(team_path):
+        with open(team_path, "r") as f:
+            return json.load(f)
+    return {}
+
 def save_results(results_by_week, save_name):
     results_path = Path(__file__).resolve().parents[3] / "data" / "saves" / save_name / "results_by_week.json"
     os.makedirs(results_path.parent, exist_ok=True)
