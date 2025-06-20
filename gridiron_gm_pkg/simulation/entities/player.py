@@ -637,6 +637,7 @@ class Player:
             "contract": self.contract,
             "experience": self.experience,
             "injuries": [i for i in self.injuries],
+            "injury_history": [i for i in self.injury_history],
             "weeks_out": self.weeks_out,
             "retired_due_to_injury": self.retired_due_to_injury,
             "retired": self.retired,
@@ -707,6 +708,7 @@ class Player:
             player.contract.setdefault("expiring", player.contract.get("years_left", 0) == 0)
         player.experience = data.get("experience", 0)
         player.injuries = data.get("injuries", [])
+        player.injury_history = data.get("injury_history", [])
         player.weeks_out = data.get("weeks_out", 0)
         player.retired_due_to_injury = data.get("retired_due_to_injury", False)
         player.retired = data.get("retired", False)
