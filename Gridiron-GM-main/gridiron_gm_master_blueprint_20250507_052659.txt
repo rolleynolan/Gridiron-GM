@@ -1,0 +1,1908 @@
+Scouting System – Final Philosophy-Driven Draft (Gridiron GM)
+Core Concept
+Every player’s full attribute set is visible from day one — but you’re not seeing their true values, you’re seeing estimates. The more you scout, the tighter and more accurate those estimates become.
+
+No attribute is ever perfectly guaranteed. Even at “fully scouted,” accuracy still depends on scout quality.
+
+1. Player Visibility
+All prospects show:
+
+Name, position, school, size, year
+
+Estimated ratings for every attribute (e.g. Speed: 88–94)
+
+Unscouted players have wide error bands (e.g. 65–90)
+
+Combine invitees show real Combine numbers once the event is complete
+
+2. Combine Results
+Only Combine invitees participate
+
+Their performance is based on their actual athletic ratings
+
+e.g. a 93-Speed WR likely runs a 4.40
+
+Combine results are public to all teams once complete
+
+Pro Day performances are also based on true attributes but may be inflated (e.g., fast tracks, bad timing)
+
+Important: Combine data does NOT tighten your scouting range automatically. But it helps the user infer where in the range the player might fall.
+
+3. Scouting Mechanics (Updated: Staff-Driven Scouting)
+Scout-Based Workload Model
+Each team has a set of scouts, each with an Efficiency Rating and other future traits (e.g., position expertise, region strength, personality). These scouts are the backbone of all draft intel gathering.
+
+Scout Efficiency Rating
+Determines how many players or schools a scout can meaningfully evaluate per week.
+
+Example:
+
+Elite Scout: Can handle ~15 players per week
+
+Average Scout: ~8–10 players
+
+Poor Scout: ~4–6 players
+
+Efficiency influences the number of ratings ranges tightened or players discovered per week.
+
+Scouting Assignments
+Each week, you assign scouts to one of the following tasks:
+
+1. Region-Based Scouting
+“Scout the top 50 players in the Southeast”
+
+Scout will prioritize high-ranked players by projection, draft stock, or position
+
+Efficiency determines how deep down the list they go
+
+2. Position + Region
+“Scout Offensive Tackles in the Midwest”
+
+Efficiency determines how many players they can cover
+
+3. School-Based Scouting
+“Scout all draft-eligible players at Alabama”
+
+Useful for powerhouse schools with stacked classes
+
+Higher efficiency = deeper or more accurate coverage
+
+4. Individual Player Scouting
+Assign a scout to a specific player or short list
+
+Prioritizes deep accuracy, especially useful late in the process
+
+Scout Assignment Outcomes
+At the end of each week:
+
+Player ranges tighten (based on scout quality and depth)
+
+New players may be discovered (sleepers or late risers)
+
+Red flags or traits may surface
+
+Scout reports are updated with notes ("dominates poor competition", "plays faster than 40 time")
+
+Scouting UI Concept (for later)
+Drag-and-drop interface or assignment dropdown:
+
+Assign Scout A: “Scout QBs in Big Ten”
+
+Assign Scout B: “Scout LSU”
+
+Assign Scout C: “Scout Player #3147”
+
+Each scout will return:
+
+Number of players scouted
+
+Updated scouting report accuracy
+
+Notes or storylines (if applicable)
+
+4. Interviews
+Interview 10–20 players per cycle
+
+Reveals:
+
+Personality traits (“Film Junkie”, “High Ego”)
+
+Off-field red flags
+
+Mental makeup (IQ, leadership, competitiveness)
+
+Higher scout quality = more truthful and detailed notes
+
+5. GM Interpretation Bias
+The user’s GM has a personality profile:
+
+Film Junkie: trusts traits over numbers
+
+Combine Obsessed: overweights 40 times
+
+Risk Taker: ignores red flags
+
+Safe Drafter: avoids unknowns
+
+This affects how the game presents ratings, how media influence is interpreted, and how confident the GM is in their board.
+
+6. Hidden Red Flags
+Some issues only emerge with deep scouting or interviews:
+
+Medical history
+
+Locker room problems
+
+Positional limitations (can’t play zone, poor run blocker)
+
+Drive questions (e.g. “doesn’t love football”)
+
+Media may also leak this information, or hide it.
+
+7. Draft Board & Media Movement
+Prospects move up/down dynamically based on:
+
+Combine & Pro Day performance
+
+Media hype or exposés
+
+Team visits & rumored interviews
+
+All-Star Game impact
+
+Social media flare-ups (optional future feature)
+
+Users must weigh hype vs substance when adjusting their board.
+
+
+Injury & Recovery System Design – Gridiron GM
+Purpose
+Simulate a realistic and dynamic injury system that affects team strategy, player careers, depth chart decisions, and long-term planning. Injuries should carry risk, require management, and sometimes define a season.
+
+Key Principles
+Injuries can occur during games, training, or practice.
+
+Different types of injuries (e.g. soft tissue, bone, concussion) with varying durations and recurrence risk.
+
+Traits, fatigue, and staff impact injury chance and recovery.
+
+Players don't always return at 100% immediately.
+
+Injury history affects long-term health and scouting red flags.
+
+1. Injury Occurrence Triggers
+Injuries can happen in:
+
+Game simulation (tied to fatigue, hit impact, weather, player traits)
+
+Practice weeks (minor tweaks, season-ending freak injuries)
+
+Training camp/preseason (wear and tear risk)
+
+Rehab setbacks (only in rare cases)
+
+The system considers:
+
+Player durability rating
+
+Current fatigue and morale
+
+Injury-prone traits (e.g., Glass Cannon, Fragile Bones)
+
+Environmental factors (cold weather, poor turf)
+
+2. Injury Types
+Each injury has:
+
+Category: soft tissue, ligament, fracture, concussion, etc.
+
+Body part: knee, shoulder, ankle, hand, etc.
+
+Severity Level:
+
+Minor (0–2 weeks)
+
+Moderate (3–6 weeks)
+
+Major (7+ weeks)
+
+Season-ending
+
+Career-threatening (rare)
+
+Certain injury types affect performance even after return. For example:
+
+Torn hamstring: reduced acceleration
+
+Shoulder injury: reduced throw power
+
+Concussion history: long-term risk factor
+
+3. Recovery Timeline
+Every injury includes:
+
+Expected duration
+
+Re-evaluation window
+
+Risk of aggravation if rushed back too soon
+
+Recovery curve: may return at 70–90% and ramp back up over 1–3 games
+
+Recovery time is affected by:
+
+Medical staff quality
+
+Player work ethic / rehab traits
+
+Facilities / stadium condition
+
+Injury history
+
+4. IR System and Game Day Availability
+Players can be placed on:
+
+Short-Term IR (eligible return in 4+ weeks)
+
+Season-Ending IR
+
+Teams must decide:
+
+Rush back a starter at 85%?
+
+Keep on IR and elevate a backup?
+
+Weekly injury reports include:
+
+"Questionable", "Doubtful", "Out", "Day-to-Day"
+
+5. Long-Term Impact
+Injuries can:
+
+Lower long-term durability
+
+Reduce physical attributes (Speed, Strength, Acceleration)
+
+Appear as red flags in scouting future rookies
+
+Force early retirements
+
+Trigger contract clause disputes (future feature)
+
+6. Trait and Staff Interactions
+Player Traits
+Iron Man: less likely to get injured
+
+Glass Cannon: explosive athlete, but more injury-prone
+
+Quick Healer: returns faster
+
+Lingering Issue: suffers long-term effects
+
+Staff Influence
+Better medical/training staff reduce:
+
+Injury chance
+
+Recovery time
+
+Long-term decline
+
+Optional: some staff may push players to return too soon.
+
+7. Game Engine Integration
+During games:
+
+Injury rolls are triggered per play, based on:
+
+Player fatigue
+
+Hit severity
+
+Position wear (RBs take more hits)
+
+Trait stacking
+
+Injuries update the depth chart automatically, with team decisions required after game day.
+
+Morale & Chemistry System Design – Gridiron GM
+Purpose
+Track the emotional and psychological state of players and teams. Morale influences individual performance, locker room stability, trade requests, and roster cohesion. Chemistry reflects how well a roster plays together — influenced by leadership, tenure, and winning culture.
+
+Key Principles
+Morale is tracked per player and updates weekly.
+
+Chemistry is tracked per team and affects overall cohesion and in-game performance.
+
+Systems are influenced by performance, management decisions, team success, and personal factors.
+
+1. Morale (Individual Level)
+Each player has a morale rating (0–100) affected by:
+
+Morale Boosters
+Big individual games
+
+Team wins
+
+Promotions in depth chart
+
+Contract extensions
+
+Praise in media
+
+Mentorship or trusted coach
+
+Morale Hitters
+Losing streaks
+
+Poor personal performance
+
+Being benched or demoted
+
+Trade rumors
+
+Contract disputes
+
+Off-field distractions
+
+Clashing with teammates or coaches
+
+Morale impacts:
+
+In-game performance (especially focus-based ratings like Catching or Awareness)
+
+Likelihood of holding out or requesting trade
+
+Veteran leadership effectiveness (high-morale leaders elevate teammates)
+
+2. Chemistry (Team Level)
+Each team has a locker room chemistry rating, driven by:
+
+Chemistry Boosters
+Veteran leadership presence
+
+Stable starting lineup
+
+Long-tenured teammates
+
+Consistent coaching staff
+
+Team success and playoff contention
+
+Chemistry Killers
+Roster turnover
+
+Poor leadership or cliques
+
+Young/unbalanced rosters
+
+Back-to-back losing seasons
+
+Multiple trade demands or disputes
+
+Chemistry affects:
+
+Game-day cohesion (penalties, blown coverages)
+
+Development rate (young players grow faster on high-chemistry teams)
+
+Likelihood of locker room drama events
+
+3. Morale Events and System Behavior
+At specific triggers, players may generate:
+
+Morale events ("Frustrated with usage", "Wants extension", "Tired of losing")
+
+Player decisions (request trade, hold out, decline extension, retire early)
+
+Locker room drama (affects multiple players, lowers chemistry)
+
+Weekly morale updates factor in:
+
+Player personality (emotional, stoic, diva)
+
+Team state (contender, rebuilding, chaotic)
+
+Media pressure and fan sentiment
+
+4. Trait Interaction
+Some players have traits that influence morale behavior:
+
+High Ego: Quick to drop morale over slights
+
+Natural Leader: Boosts nearby players
+
+Loyal: Stays happy on one team
+
+Mercenary: Morale tied to salary and usage
+
+Hot-Headed: Prone to sudden morale swings or outbursts
+
+5. Gameplay Impact
+Morale and chemistry influence:
+
+Player performance (mild modifers)
+
+Trade value (morale affects demand)
+
+Team performance under pressure
+
+Player retention (contract interest)
+
+Morale Impact Clarification
+Morale influences performance slightly, not dramatically.
+
+Think of it as a +/- 2% swing, not a +/- 20% swing.
+
+A 99 OVR team with awful morale might:
+
+Start sluggish
+
+Commit more penalties
+
+Lose a close game or two
+
+Have locker room drama or player frustration
+
+But they won’t collapse into a 3–14 disaster unless other systems (injuries, chemistry, etc.) also spiral.
+
+Specific Mechanics:
+Slight temporary reductions to mental/focus attributes:
+
+Awareness, Catching, Play Recognition, Composure (if added)
+
+Slight drop in development rate for low-morale players
+
+Slight rise in in-game penalties for low-chemistry teams
+
+Slight boost for high-morale players in key moments
+
+These will accumulate for long-term team culture impact — but never override base team strength.
+
+GM Personality System – Gridiron GM
+Purpose
+Create varied and believable decision-making across CPU-controlled teams. GM personalities influence drafting, trading, free agency, contract philosophy, team building, and even risk-taking behavior. It also gives each CPU team a recognizable "identity."
+
+1. GM Personality Profiles
+Each GM is assigned a personality profile at hire. This profile affects:
+
+Draft strategy
+
+Trade behavior
+
+Contract style
+
+Cap management
+
+Risk tolerance
+
+Rebuild/retool timing
+
+Scouting focus
+
+2. Example GM Archetypes
+These are foundational types — each GM may lean toward one or blend several traits.
+
+The Aggressive Rebuilder
+Quickly dumps aging talent
+
+Stockpiles draft picks
+
+Prioritizes high-potential youth over proven veterans
+
+Will trade stars mid-season if record is poor
+
+The Win-Now Tactician
+Keeps veteran-heavy rosters intact
+
+Pushes cap to the edge
+
+Makes deadline trades to stay in playoff race
+
+Short-term thinkers: mortgaging future for the present
+
+The Value Hoarder
+Only trades when they “win” on value charts
+
+Lowball contract offers
+
+Avoids risky signings or trades
+
+Rarely overextends on draft board or free agency
+
+The Analytics GM
+Overweights combine stats and efficiency metrics
+
+Ignores intangibles and locker room concerns
+
+Loves late-round value and positional versatility
+
+The Star Hunter
+Wants big names
+
+Signs splashy free agents
+
+Aggressive at trade deadline or draft-day trades
+
+Loves top-10 picks
+
+3. Modifiable Personality Traits
+Rather than fixed types, GMs are defined by trait sliders, which can shift over time or evolve across jobs.
+
+Trait	Range	Examples
+Draft Risk	Safe — Wild	Always takes 3-year starters vs. boom/bust freaks
+Trade Frequency	Passive — Active	Never trades vs. weekly caller
+Pick Preference	Late Round — Early Round	Loves late gems vs. wants top-10 only
+Cap Management	Conservative — Aggressive	Avoids dead cap vs. restructures constantly
+Scouting Style	Tape — Combine	Prioritizes interviews vs. loves 40 times
+Player Loyalty	Emotional — Detached	Keeps veterans too long vs. ruthless churn
+
+4. GM Personality Impacts
+These traits affect:
+
+Draft board construction
+
+Who gets traded and when
+
+Whether a team enters rebuild mode
+
+Contract extension likelihood
+
+Reaction to player holdouts or demands
+
+How well a GM can identify player value
+
+GMs with the same roster will behave differently.
+
+5. Dynamic Personality System
+GMs may:
+
+Gain or lose traits based on team success
+
+Adapt when hired by a new team
+
+Develop reputations (e.g. “The QB Whisperer” or “The Cap Genius”)
+
+Be replaced by owners based on mismatch of vision
+
+Contract & Salary Cap System – Gridiron GM
+Purpose
+Simulate a realistic NFL-style financial system that governs player contracts, team building, and long-term roster planning. The system should challenge the user to manage short-term competitiveness and long-term sustainability.
+
+1. NFL-Style Cap Model
+Hard salary cap with annual increase (with optional inflation toggle)
+
+All contracts, bonuses, and salaries count against the cap
+
+Teams must be cap-compliant during the offseason and regular season
+
+Includes dead cap tracking from releases and trades
+
+2. Contract Components
+Each player contract includes:
+
+Years
+Typical range: 1–6 years
+
+Rookies follow pre-set contract lengths based on draft slot
+
+Base Salary
+Paid yearly, increases/decreases over time
+
+Signing Bonus
+Paid upfront
+
+Prorated over life of contract for cap purposes
+
+Cap Hit
+Calculated: Base Salary + Prorated Signing Bonus
+
+Dead Cap
+Amount of guaranteed/prorated money left after release
+
+Affects future flexibility
+
+3. Contract Types
+Rookie Contracts: Slotted based on draft position (with offsets)
+
+Veteran Extensions: Negotiated mid-contract, often cheaper
+
+Free Agent Contracts: Market-driven, may include competition or bidding
+
+Franchise Tag: 1-year fully guaranteed at top-5 salary for position
+
+Restructures: Push cap hits into future (riskier flexibility tool)
+
+4. Contract Negotiation System (Updated)
+When negotiating, players factor in both objective market metrics and subjective recent performance, including:
+
+Key Influences:
+Overall and Age (baseline value)
+
+Positional market rate (based on similar players)
+
+Team success and culture
+
+Recent individual performance:
+
+All-Pro selections
+
+Pro Bowl
+
+Stat leader status
+
+Near-record-setting seasons
+
+Playoff dominance
+
+Comeback seasons
+
+Players with recent breakout years demand more than their base market suggests.
+
+Example:
+
+An 82 OVR WR with a typical value of $15M/year
+
+Just posted 1,600 yards and 14 TDs, made All-Pro
+
+Now asks for $20M+/year and more guaranteed money
+
+This makes the system dynamic and reward-aware, and creates tension between:
+
+Paying for what a player did
+
+Or projecting their future
+
+5. Free Agency
+Multiple waves (early, mid, late)
+
+Player interest factors:
+
+Contract value
+
+Depth chart opportunity
+
+Team prestige or market
+
+Fit with GM/coaches
+
+Existing chemistry
+
+Competing teams may need to:
+
+Overpay
+
+Offer more guaranteed money
+
+Add player options
+
+6. Cap Penalties & Rules
+June 1st cuts can split dead cap into two years
+
+Restructure abuse leads to long-term cap hell
+
+Cap floor may be added to prevent tanking
+
+Option to disable cap in sandbox mode
+
+7. GM Strategy Impact
+GM traits affect:
+
+How much cap flexibility is maintained
+
+Willingness to front-load or back-load deals
+
+Willingness to tag players
+
+How they handle aging stars vs. emerging talent
+
+Trade Logic & Philosophy System – Gridiron GM
+Purpose
+Create a smart, realistic trade system that reflects team goals, player value, contract situations, and GM behavior. Trades should feel authentic, rare but possible, and reflect contextual logic rather than raw ratings alone.
+
+1. Core Trade Engine Behavior
+Each team evaluates every trade through the lens of:
+
+Team status: Contender, Rebuilder, Stuck, Rising
+
+GM philosophy: Aggressive, Conservative, Star-chaser, Value-maximizer
+
+Financial flexibility: Can they afford the player?
+
+Positional need: Depth chart holes, injuries, age, expiring contracts
+
+Asset value: What are they giving vs. getting?
+
+2. Trade Value Calculation
+All assets have trade value scores, updated dynamically:
+
+Players:
+Overall and potential
+
+Age
+
+Contract status (cheap rookie deal vs. massive veteran salary)
+
+Traits and scheme fit
+
+Morale / chemistry concerns
+
+Recent performance (boosts value)
+
+Picks:
+Round + year (e.g., 2026 1st vs. 2025 3rd)
+
+Discounted based on how far in the future they are
+
+Each GM values picks differently:
+
+Some hoard late-rounders
+
+Others treat 1st-round picks like gold
+
+Teams may overvalue their own players or picks, adding realism and friction.
+
+3. Trade Types
+Supported deal types:
+
+Player for pick
+
+Player for player
+
+Multi-player + pick packages
+
+Future picks allowed (up to 3 years out)
+
+No cash considerations or “player to be named later” — stays realistic to NFL rules.
+
+4. Buyer vs. Seller Logic (Final with Deadline Rush)
+Trade Timeline & Frequency Behavior
+Season Phase	Trade Activity Level	Description
+Preseason	Low	Teams may move camp bodies or fill unexpected injury holes
+Weeks 1–5	Low-Moderate	Smart teams start plugging roster holes or testing rebuild waters
+Weeks 6–7	Moderate	More teams reassess identity: contender or not? Minor depth moves start
+Week 8 (Deadline Week)	High	Trade volume spikes — known as Deadline Rush. Buyers become aggressive, sellers start fire sales, and surprise blockbusters can happen
+
+This creates the narrative pacing of a real NFL season, where:
+
+You can trade any week, but it’s rare early
+
+GMs have internal logic that ramps up trade behavior gradually
+
+Deadline week features:
+
+Buyers calling sellers
+
+Sellers actively shopping players
+
+A sense of urgency: “last chance to fix our season”
+
+5. GM-Specific Trade Behavior
+Each GM’s personality affects:
+
+Aggressiveness (frequency of trade attempts)
+
+Patience (waits for perfect deal or acts early)
+
+Pick vs. Player preference
+
+Win-now vs. Future focus
+
+Two GMs might view the same player completely differently based on scheme fit, need, or philosophy.
+
+6. Trade Deadline Logic
+CPU teams initiate trades during the final 2 weeks before deadline
+
+Buyers contact sellers based on positional need and target lists
+
+Offers may be accepted, countered, or ignored
+
+Teams may also block rival trades for strategic reasons
+
+7. Trade Evaluation for User Deals
+When you propose a trade:
+
+CPU checks:
+
+Are we a buyer or seller?
+
+Do we need this position?
+
+Does this player fit our cap?
+
+Do we like the contract?
+
+What’s the return?
+
+May counteroffer or reject entirely if it doesn’t meet internal value models
+
+Fanbase Pressure & Market Influence System – Gridiron GM
+Purpose
+Simulate how a team’s city, fanbase, and market pressure affect GM decisions, team finances, and public perception. Adds off-field tension, narrative stakes, and market-specific challenges to managing a franchise.
+
+1. Fanbase Profile
+Each team has a fanbase profile with the following variables:
+
+Loyalty (0–10)
+How forgiving and supportive the fans are over time
+
+High loyalty = patient rebuild support
+
+Low loyalty = quick backlash during losing seasons
+
+Media Pressure (0–10)
+How intense the local/national coverage is
+
+High pressure = daily scrutiny, hot takes, leaked rumors
+
+Low pressure = quiet markets, fewer distractions
+
+Market Size (Small, Medium, Large)
+Affects:
+
+Team revenue and merchandise sales
+
+National attention
+
+Ability to lure free agents
+
+Media narrative volume
+
+2. Fan Expectations
+Every season, the fanbase has contextual expectations, based on:
+
+Recent team performance
+
+Roster strength
+
+Star player presence
+
+Offseason moves
+
+Owner goals
+
+Examples:
+
+“Make the playoffs or bust”
+
+“Let the rookie QB develop”
+
+“Beat our rival at least once”
+
+Failing expectations drops approval, which can:
+
+Lower morale
+
+Trigger booing or public backlash
+
+Affect coach or GM job security
+
+Drop attendance and revenue
+
+3. Attendance & Financial Impact
+Fan happiness affects:
+
+Attendance rates
+
+Merchandise revenue
+
+Concessions/stadium earnings
+
+TV ratings if media system is expanded
+
+Winning = packed stadiums
+Losing + bad morale = empty seats, media noise
+
+4. Dynamic Narrative Events
+When pressure builds:
+
+Media generates headlines
+
+Fan petitions start (“Fire the Coach!”)
+
+Players make public comments (“We’re tired of losing”)
+
+Rumors appear in the news feed (trade rumors, locker tension)
+
+GM must balance:
+
+Making smart moves
+
+Versus appeasing the fans/owner in the short term
+
+5. Gameplay Impact
+Fanbase pressure ties into:
+
+Owner expectations and job security
+
+Trade deadline urgency
+
+Free agent decisions (do stars want to play here?)
+
+Team branding and national relevance
+
+Game Rules Engine – Gridiron GM
+Purpose
+Simulate realistic NFL game-day decision-making, including clock management, penalties, 4th down logic, and scoring strategy. Ensures CPU teams play believably and gives users control over rule toggles.
+
+1. Game Situational Logic
+4th Down Decision-Making
+AI considers:
+
+Field position
+
+Time remaining
+
+Score differential
+
+Team strength (offense vs. defense)
+
+Coach aggressiveness trait
+
+Typical logic:
+
+4th & short near midfield?: Aggressive teams may go for it
+
+Trailing in 4Q?: More likely to take risks
+
+Inside opponent’s 40?: May attempt long field goal, punt, or go
+
+2-Point Conversion Logic
+AI considers:
+
+Score margin
+
+Time left
+
+Probability model (based on success rate of XP vs. 2PT)
+
+Coach preference
+
+Example:
+
+Down 8 late in 4Q? AI may go for 2 to win
+
+Up 1 with 30 seconds left? Kick XP to avoid risk
+
+2. Penalties System
+Each game includes a range of penalties:
+
+False Start, Holding, Offside, Pass Interference, Personal Foul, Delay of Game
+
+Penalties are influenced by:
+
+Player discipline rating
+
+Fatigue
+
+Game pressure
+
+Chemistry
+
+Each team has a penalty tendency rating (based on coaching and roster discipline).
+
+Stats are tracked:
+
+Penalties per team
+
+Yardage lost
+
+Individual penalty leaders
+
+3. Clock Management
+CPU uses realistic end-of-half and end-of-game logic:
+
+Spike ball to stop clock
+
+Burn clock when ahead
+
+Timeout usage optimized based on:
+
+Time left
+
+Field position
+
+Remaining timeouts
+
+Score gap
+
+Poor-coaching teams may mismanage time more often.
+
+4. Kick Decision Logic
+AI decides to:
+
+Punt, kick FG, or go for it
+
+Based on kicker skill, weather, wind, game context
+
+Also accounts for:
+
+Indoor vs. outdoor stadiums
+
+Recent kicker performance
+
+5. Rule Toggles & Customization
+User can adjust:
+
+Overtime format
+
+PI challenge rules
+
+Number of challenges
+
+Play clock duration
+
+Penalty frequency
+
+2-minute warning setting
+
+These allow sandbox realism or custom leagues with unique rules.
+
+Trait & Personality System (Expanded)
+Each player and coach can have multiple traits that influence their behavior, development, and performance. Traits fall into several categories:
+
+1. Development Traits
+These affect how quickly or reliably a player improves.
+
+Trait	Effect
+Film Junkie	Gains experience faster, weekly training more effective
+Practice Warrior	Dominates in camp, big camp/depth chart gains
+Lazy	Rarely improves, even with playing time
+Mentored	Learns faster with a specific veteran on roster
+Coachable	Responds well to staff input, grows quickly with good coaches
+Unfocused	Inconsistent week-to-week development
+All Work, No Flash	Slow starter but steady growth over years
+Confidence Driven	Breakout performances trigger growth spikes, slumps cause drops
+
+2. Personality Traits
+These affect contract negotiations, morale swings, and media interaction.
+
+Trait	Effect
+High Ego	Demands big contracts, gets upset if not featured
+Team-First	Tolerates smaller roles or pay cuts
+Quiet Leader	Boosts nearby morale slowly over time
+Hot-Headed	Prone to morale drops or locker tension
+Media Friendly	Boosts team’s brand value and attention
+Mercenary	Follows the money in free agency
+Loyal	More likely to re-sign with same team if respected
+
+3. Durability & Injury Traits
+Trait	Effect
+Iron Man	Rarely injured, recovers fast
+Fragile Bones	Prone to bone injuries, even with low contact
+Quick Healer	Returns ahead of schedule from most injuries
+Lingering Issue	Old injuries flare up over time
+Play-Through-It	Performs while hurt, but risks aggravation
+Glass Cannon	Explosive performance, but very high injury risk
+
+4. Game Day Traits
+Trait	Effect
+Clutch Performer	Boost to awareness, accuracy, hands late in close games
+Choker	Stat drop in 4th quarter of close games
+Primetime Beast	Boosts performance in night games or playoffs
+Slow Starter	Bad 1st quarter performance, improves as game goes on
+Momentum Dependent	Plays better after a hot streak
+High Motor	Higher chance to make effort plays (INTs, sacks, big tackles)
+
+5. Coach Traits (Future-Ready)
+Trait	Effect
+QB Whisperer	Boosts QB development and performance consistency
+Scheme Stubborn	Refuses to adapt scheme even if talent doesn’t fit
+Player’s Coach	Boosts team morale and chemistry
+Disciplinarian	Reduces penalties and locker room incidents
+Developmental Guru	Boosts rookie development curve
+Win-Now Mindset	Prefers veterans and short-term results
+
+Individualized Development Curves
+Every player follows a unique development arc, but it’s anchored to a base type:
+
+Base Curve	Description
+Early Bloomer	Fast OVR gain in college/rookie years, plateaus early
+Late Bloomer	Minimal gains until age 25+, then surges
+Steady Developer	Gains a little every year, long prime
+Rollercoaster	Performance- and morale-driven growth/spikes
+Flatline	Hits 1 plateau and stays there
+Exploder	One huge growth year, then tapers
+Bust Trajectory	Early promise, quick stagnation or regression
+
+But within each arc...
+Each player's curve includes individualized parameters:
+
+Year-to-year growth chance (random + trait-influenced)
+
+Attribute-specific growth (e.g. a WR might grow in Route Running but not Speed)
+
+External event modifiers (breakout game, mentor presence, major injury)
+
+Peak age and decline speed are randomized within the arc type
+
+This means no two players progress the same way, even with identical OVRs or traits.
+
+Trait & Development Arc Discovery System
+1. Scouting Exposure
+When viewing a draft prospect or young player, you never see everything immediately.
+
+What’s visible early:
+Basic physical data (height, weight, position)
+
+Combine/pro day metrics (if attended)
+
+Estimated overall and potential ranges
+
+Trait hints (e.g., "Player shows great effort on tape" = High Motor?)
+
+What scouting can reveal:
+Development curve archetype (e.g., “Appears to be a late bloomer”)
+
+Partial trait discovery (your scout suspects “Mentored” or “Film Junkie”)
+
+Work ethic or coachability feedback
+
+Trait accuracy improves as:
+
+More weeks are spent scouting the player
+
+Interviews are conducted
+
+Your scout has relevant trait awareness
+
+2. Gameplay Discovery
+Once a player is on your roster or in the league:
+
+Traits revealed gradually via performance:
+Clutch Performer: Only becomes obvious after multiple late-game heroics
+
+Practice Warrior: Dominates every camp battle, shows weekly growth
+
+Hot-Headed: Gets in fights, commits dumb penalties, morale dips
+
+Rollercoaster Arc: Jumps 6 OVR one year, then flatlines the next
+
+Development arcs confirmed over time:
+If a player explodes in Year 4, he’s likely a Late Bloomer
+
+If he hits 84 OVR by Year 2 and stays there, he may have a Flatline arc
+
+Traits like "Lazy" or "All Work, No Flash" show up as inconsistent or quiet growth, respectively
+
+Media & News Feed Clues:
+Headlines like:
+
+“Film Junkie Rookie Impressing in Camp”
+
+“Scouts Say WR May Be Peaking Early”
+
+“Veteran Called ‘Uncoachable’ by Position Coach”
+
+“QB Falls Apart in Another Primetime Game”
+
+This creates a living narrative where you learn who players really are over years — not just by reading a stat sheet.
+
+3. Trait Uncertainty Mechanic (Optional but Smart)
+Players may have hidden traits or misleading scouting reports:
+
+A player might be labeled “Lazy,” but your scout was wrong
+
+A player might not show “Clutch Performer” until a critical moment
+
+This encourages:
+
+Observation over assumption
+
+Development investment
+
+Mentor-player pairing, hoping to uncover traits like “Mentored” or “Natural Leader”
+
+Summary of Discovery Triggers
+Trigger	What Can Be Learned
+Scouting time	Traits, dev arc, red flags (with accuracy tied to scout skill)
+Interviews	Work ethic, personality, mental traits
+Game performance	Clutch, Choker, Confidence-Driven, Momentum traits
+Practice/Camp	Practice Warrior, Lazy, Coachable
+Mentorship pairings	Mentored, Loyalty, Quiet Leader
+Media	Fan rumors, media leaks, coach comments — hint at hidden traits
+
+Staff System – Gridiron GM
+Purpose
+Introduce coaching, scouting, and medical staff as key contributors to team success. Each staff member has traits, strengths, weaknesses, and contract logic. Staff hiring, firing, and synergy shape player growth, injury management, and team identity.
+
+1. Staff Types
+Core Positions
+Every team has:
+
+Head Coach
+Controls overall strategy, game plan tendencies, and team culture
+
+Offensive Coordinator (OC)
+Affects offensive scheme, playcalling logic, and positional development
+
+Defensive Coordinator (DC)
+Affects defensive system, pressure/aggression, and defensive development
+
+Position Coaches (optional later)
+Could specialize in specific groups (QB Coach, OL Coach, DB Coach)
+
+Scouting Director
+Coordinates regional scouts, affects scouting accuracy and player evaluation
+
+Medical Staff Lead
+Influences injury recovery, prevention, and treatment accuracy
+
+2. Staff Attributes
+Each staff member has ratings (0–100 or tiered) that affect game logic.
+
+Attribute	Applies To	Function
+Development Boost	HC, OC, DC, Pos Coaches	Affects attribute growth for players by position
+Scheme Knowledge	HC, OC, DC	Boosts in-game performance for players in system
+Discipline	HC	Lowers team penalties, helps morale
+Leadership	HC	Improves team chemistry and stability
+Scouting Eye	Scouting Dir, Scouts	Improves trait detection and estimate accuracy
+Efficiency	Scouts	Determines how many players can be evaluated per week
+Medical Skill	Medical Staff	Shortens injuries, reduces flare-up chance
+Durability Training	Med Staff	Reduces injury risk from fatigue or practice
+
+3. Staff Traits
+Like players, staff have personality/functional traits that modify behavior:
+
+Trait	Staff Type	Effect
+QB Whisperer	HC, OC	Accelerates QB development
+Win-Now Strategist	HC	Pushes for veteran usage, hates rebuilds
+Scheme Stubborn	HC, Coord	Refuses to adapt to roster talent
+Flexible Mind	Coord	Switches scheme to fit personnel
+Risk Averse	Coord	Punts more, avoids blitzes
+Player’s Coach	HC	Boosts morale, reduces chemistry loss during losses
+Film Room Addict	Scout	Detects hidden traits faster
+Inflator	Scout	Tends to overrate prospects
+Conservative Diagnostician	Med Staff	Keeps players sidelined longer “just to be safe”
+
+Expanded Staff Traits – Gridiron GM
+Scout Traits
+Trait	Effect
+Combine Obsessed	Overvalues athleticism; may underrate productive players with poor measurables
+Intangibles Guy	Gives higher grades to players with leadership or high IQ traits; may miss athletic red flags
+Overprojects Potential	Inflates projected ceilings for raw players
+Safe Evaluator	Undervalues boom/bust players, favors polished, high-floor prospects
+Interrogator	Gains enhanced insights from player interviews; more likely to reveal hidden traits, red flags, or motivation issues early in the scouting process
+School Bias	Overrates (or underrates) players from certain pipelines (e.g., SEC favoritism)
+Tape Grinder	Values film over metrics; ignores bad Combine/pro day numbers
+Checklist Scouter	Prioritizes players who meet prototype size/speed thresholds
+Coach Traits (HC, OC, DC)
+Trait	Effect
+Over-Aggressive	Blitz-heavy defense, goes for 4th downs too often, causes blown leads
+Ultra Conservative	Punts on 4th and 2, plays soft coverage, milks clock early
+Scheme Zealot	Refuses to adapt scheme even if it doesn't fit the roster (e.g., insists on man coverage without fast corners)
+Scheme Adapter	Will shift between systems based on roster strengths
+Star Worshipper	Overuses star players regardless of game plan fit or fatigue
+Development Guru	Boosts attribute growth across key positions (position-specific or system-wide)
+Energy Manager	Manages reps well; reduces fatigue-based injury risk over the season
+Discipline Expert	Reduces penalty rate, increases team focus under pressure
+Medical Staff Traits
+Trait	Effect
+Aggressive Rehabber	Returns players sooner, but increases re-injury risk slightly
+Conservative Diagnostician	Holds players out longer than necessary, lowers re-injury risk
+Pain Management Expert	Allows players to play through minor injuries with less performance drop
+Durability Builder	Reduces soft tissue injury rates during training and games
+Recovery Maximizer	Accelerates post-injury stat recovery (e.g., regain lost Speed or Accel faster)
+
+4. Hiring & Firing
+Coaches and staff have contracts (years, salary).
+
+Can be hired/fired, poached by other teams, or retire.
+
+Every offseason includes:
+
+Coaching carousel
+
+Scouting staff turnover
+
+Medical staff changes
+
+Hiring decisions should consider:
+
+Scheme fit
+
+Player development pipeline
+
+Rebuild vs. contention status
+
+Cap cost vs. value
+
+5. Staff Reputation
+Over time, staff gain reputation tags:
+
+"Top DC in the league"
+
+"QB Developer"
+
+"Overrated motivator"
+
+"Injury-prone teams follow him"
+
+These can affect:
+
+Hiring interest
+
+Staff poaching risk
+
+Media narratives
+
+Draft Board & Media Narrative System – Gridiron GM
+Purpose
+Simulate the ever-shifting perception of draft prospects based on performance, media coverage, scouting rumors, and storyline momentum. Creates a dynamic draft atmosphere where players rise and fall — even without changing their actual skill.
+
+Revised Draft Stock Tiers – Gridiron GM
+Draft Stock Tier	Description
+Top 5 Lock	Universally viewed as elite, near-certain top-5 selection
+Early 1st Rounder	Strong Round 1 talent (picks 6–15), not quite generational
+Mid 1st Rounder	Solid Round 1 projection (picks 16–22)
+Late 1st Rounder	Fringe first-rounder, often scheme-specific or positional value pick
+2nd–3rd Rounder	Day 2 prospect; strong upside but may lack polish or have red flags
+Day 2/3 Fringe	On the bubble; could sneak into 3rd or fall to 5th
+Day 3 Prospect	Likely Round 4–6 pick; often role players or athletic projects
+Sleeper (Scouting-unlocked)	Projected Day 3/UDFA, but scouts/insiders believe in high hidden upside
+High-Priority UDFA	Projected to go undrafted, but teams have eyes on them post-draft
+Undrafted	Expected to go unselected; typically backup-level or developmental-only
+Falling Star	Once highly regarded, but stock is dropping rapidly due to narrative or discovery
+Buzzing Late Riser	Previously overlooked; media or scouting hype has rapidly raised their stock
+
+How It Functions In-Game
+Every player starts with an initial perceived stock level, randomly seeded and adjusted weekly.
+
+Media and scouting findings shift perceived stock, not actual talent.
+
+Teams and users must decide:
+
+Trust the board?
+
+Follow the media hype?
+
+Or dig for that Sleeper label through great scouting?
+
+2. Draft Board System
+Each team builds its own draft board, influenced by:
+
+Scouting quality
+
+GM/scout preferences (physical traits, school bias, scheme fit)
+
+Traits or red flags found
+
+Combine performance
+
+Boards differ across the league. A player may be:
+
+#8 overall on one board
+
+#65 on another
+
+Boards update weekly as new information is gathered.
+
+3. Media Narrative Engine
+The league-wide media system creates storylines that influence perception, such as:
+
+Narrative Type	Example
+Combine Buzz	“QB1 runs a 4.41 — comparisons to Lamar heating up”
+Work Ethic Concerns	“Scouts question WR’s love of football after early exit from bowl game”
+Small School Spotlight	“D-III pass rusher dominates Shrine Game — real deal or one-week wonder?”
+Injury Flag	“ACL report drops stock of All-American linebacker”
+Off-Field Noise	“Star DB deletes all social media posts — attitude issue?”
+
+These stories:
+
+Affect CPU team draft boards
+
+Appear in the news feed
+
+May or may not reflect the truth
+
+4. Dynamic Draft Movement
+Prospects can:
+
+Rise into Day 1 based on buzz, breakout games, Combine
+
+Fall due to bad interviews, injury news, red flags
+
+Rebound after Pro Day or media spin
+
+This creates chaos and opportunity — true sleepers can fall, and overhyped busts can get drafted early.
+
+5. User Draft Board Tools
+Players can:
+
+Create their own board manually
+
+Tag players as "Targets" or "Avoid"
+
+Sort by:
+
+Scouted info
+
+Narrative heat (media buzz)
+
+Combine stats
+
+Traits/position fit
+
+Risk tier (Boom/Bust, Safe, Injured)
+
+The user has to weigh stock momentum vs. true scouting insight.
+
+✅ Draft Stock Assignment Logic – Gridiron GM
+Perceived Draft Stock is based on true talent, but filtered through incomplete information and external influence. It’s not random — but it’s not perfect either.
+1. Core Inputs for Initial Stock Placement
+Factor	Weight	Description
+True Overall + Potential	High	Raw talent anchors the base stock tier
+College Production	High	Players with gaudy stats (especially in Power 5) may be overvalued
+Conference Strength	Medium	SEC/Big Ten stars get more early hype; small school players start lower
+Combine Status	Medium	Combine invitees gain visibility; non-invitees remain under radar
+Position Value	Medium	QBs, pass rushers, OTs more likely to be overvalued
+Age/Class	Low-Medium	True juniors and underclassmen are often viewed as more upside-driven
+Injury History	Penalty	Drops starting perceived stock, even if talent is high
+Media/Scout Biases	Randomized Layer	School pipelines, traits, or combine over/underrating may nudge stock up/down slightly
+
+2. Example Outcomes
+95 POT WR from LSU who posted 1,500 yards → Mid 1st Rounder to Top 5 Lock
+
+88 POT QB from Montana State with huge stats but poor conference → Starts as Day 2/3 Fringe, becomes a Buzzing Late Riser
+
+91 OVR CB with a broken leg → Perceived as 2nd–3rd Rounder, could fall despite top-end ability
+
+82 OVR DE from Georgia with average stats but freak Combine → Seen as Early 1st Rounder
+
+3. How Media, Combine & Scouting Shift Stock
+Combine → boosts stock only if it confirms upside
+
+Media → creates buzz spikes or red flags
+
+User/CPU scouting → may unlock the “Sleeper” tier or reveal bust risk
+
+Historical Archive System – Gridiron GM
+Purpose
+Preserve league history across seasons, creating a rich, evolving world that players can revisit. Tracks individual careers, team legacies, award winners, playoff moments, and record-breaking performances — building immersion and nostalgia over time.
+
+1. Player Career Archive
+Each retired player retains a full career bio, including:
+
+Info Tracked	Description
+Name, Position, College	Draft info included
+Draft Round/Pick	Team and pick number
+Career Stats	Per-year and career totals (passing, rushing, sacks, etc.)
+Teams Played For	With years listed
+Awards & Honors	MVPs, Pro Bowls, All-Pro, etc.
+Championships	Rings won and with which teams
+Notable Records Held	“All-time sack leader”, etc.
+Career Milestones	100-sack club, 1,000-catch club, etc.
+Development Arc Summary	Optional tag: “Late Bloomer”, “Bust”, etc.
+
+These bios are browsable by position, team, or Hall of Fame status.
+
+2. Team History Archive
+Each team has a season-by-season history, including:
+
+Tracked Per Year	Example
+Record	11–6
+Playoff Result	Lost Divisional
+Division Finish	1st in AFC South
+Coach / GM / QB	Snapshot of leadership
+Draft Class Recap	Who they picked, busts and stars
+Major Trades or Moves	Star trades, signings, or releases
+Key Injuries	Optional highlight of major setbacks
+
+Also tracks franchise records, like:
+
+Most wins in a season
+
+Longest playoff drought
+
+All-time win/loss record
+
+Historic coaches or GMs
+
+3. Awards & Honors Tracker
+Tracks league-wide awards by year:
+
+MVP
+
+Rookie of the Year (O/D)
+
+Coach of the Year
+
+Best Positional Player Awards
+
+Comeback Player of the Year
+
+Super Bowl MVP
+
+You can view winners by year, or filter by player (e.g., “How many MVPs did this QB win?”).
+
+4. Playoff History
+Each year stores:
+
+Playoff bracket results
+
+Super Bowl matchup and winner
+
+Game scores and box scores
+
+Championship highlights (e.g. “Game-winning TD in final minute”)
+
+Eventually, playoff games could even have named classics if dramatic enough (e.g., “The Snow Game”).
+
+5. Records & Milestones
+Tracks both career and single-season records for:
+
+Passing Yards, TDs, INTs
+
+Rushing Yards, TDs
+
+Receptions, Yards, TDs
+
+Sacks, INTs, Tackles
+
+Return Yards, FG %, and more
+
+Records can be:
+
+League-wide all-time
+
+Team-specific (e.g. Packers rushing record)
+
+Displays:
+
+Who holds the record
+
+Year it was set
+
+Record progression over time
+
+6. Hall of Fame System
+Optional layer for later:
+
+Players auto-nominated based on stats + honors
+
+Induction tied to milestones (e.g. 10K receiving yards, 5 All-Pros)
+
+Option for user voting in future builds
+
+Preseason & Camp Battle System – Gridiron GM
+Purpose
+Simulate training camp and preseason competitions that determine depth charts, reveal surprises, and drive early development. Creates dynamic roster decisions and player momentum heading into the regular season.
+
+1. Training Camp Phase
+Takes place before preseason games begin. Designed to:
+
+Track position battles
+
+Apply player growth or decline
+
+Trigger media buzz or internal coaching notes
+
+Key Features:
+Every position group has:
+
+Incumbent favorites
+
+Challengers or rookies
+
+Staff evaluates weekly based on:
+
+Work ethic
+
+Morale
+
+Development curve
+
+Performance during drills (simulated under the hood)
+
+Fatigue or injury
+
+Outcomes:
+
+Players may gain/lose attributes
+
+Coach feedback: "Player X is earning first-team reps"
+
+Breakout tags: “Training Camp Star” or “Struggling to Adjust”
+
+2. Camp Battles
+System tracks head-to-head competitions at key positions:
+
+QB1, RB2, WR3, CB2, Kicker, etc.
+
+Position battles are triggered automatically or manually assigned
+
+Users receive weekly updates:
+
+“Rookie WR closing in on WR2 spot”
+
+“Veteran LT still ahead, but for how long?”
+
+Battles are decided by:
+
+Trait interactions (e.g., Practice Warrior)
+
+Coaching staff preferences
+
+Fatigue/injury
+
+Preseason performance (see below)
+
+3. Preseason Games
+Simulated as a separate game layer:
+
+Starters may play 1–2 series
+
+Backups and bubble players play full quarters
+
+Stat tracking matters more for bubble/development players
+
+Outcomes:
+
+Young players who dominate may get promoted
+
+Injuries can open surprise roster spots
+
+Media generates hype (“Undrafted RB makes noise”)
+
+4. Roster Cut Logic
+Preseason ends with:
+
+Roster cutdown to 53
+
+Team may:
+
+Cut low performers
+
+Promote surprise players
+
+Stash players on practice squad (if implemented)
+
+Keep injured players on short-term IR
+
+Players at risk:
+
+Low morale
+
+Poor camp reports
+
+Red flags uncovered during preseason
+
+Bubble players may flash in Week 4 but still be cut based on total body of work.
+
+5. Media & Morale Integration
+Media covers biggest battles and surprise cuts
+
+Locker room morale shifts:
+
+Fan favorite cut = morale dip
+
+Rookie surprise win = chemistry boost
+
+Headlines like:
+
+“Former 2nd-rounder released in shocking move”
+
+“Coaches praise unheralded TE all camp”
+
+Practice Squad & Injury Call-Up System – Gridiron GM
+Purpose
+Replicate real NFL depth management by giving teams a place to stash developmental players, elevate backups during injury crises, and promote standout performers. Adds long-term strategy and short-term flexibility.
+
+1. Practice Squad Overview
+Each team has a 16-player practice squad
+
+Eligibility:
+
+Young players (limit of NFL experience years)
+
+Waived players who cleared waivers
+
+Can include:
+
+Developmental QBs
+
+Late-round picks
+
+Bubble players from camp/preseason
+
+Players can:
+
+Be promoted to the active roster
+
+Be poached by other teams (must be signed to 53-man roster)
+
+Develop slowly while on the squad (traits and dev curve matter)
+
+2. Practice Squad Mechanics
+Weekly evaluation simulates:
+
+Progress in practice
+
+Chemistry with staff
+
+Trait-driven development (e.g., “Practice Warrior” grows faster)
+
+Coaches may flag:
+
+“RB X has earned a call-up”
+
+“WR Y could be elevated next week if injuries persist”
+
+3. Injury Call-Up Logic
+When a player is injured:
+
+CPU or user can:
+
+Sign free agent
+
+Elevate from practice squad
+
+Move another player up depth chart
+
+Emergency promotions may affect morale or chemistry depending on:
+
+Fan reaction (“Why didn’t we sign a vet?”)
+
+Player readiness (“Not ready for this role”)
+
+GM/coach personality (some prefer next-man-up over outside help)
+
+4. Waivers & Roster Risk
+Cut players go through waivers for 1–2 days
+
+Teams can:
+
+Claim player (must add to 53)
+
+Let player clear, then assign to practice squad
+
+If another team poaches your PS player:
+
+You receive a notification with their new team
+
+You may feel the chemistry loss or depth hit
+
+5. Development & Promotion Incentives
+Practice squad players may:
+
+Develop differently than active roster players (slower, but safer)
+
+Be given in-game reps if elevated due to injuries
+
+Become late-season surprises
+
+Teams that invest in PS players may find long-term depth gems.
+
+UI & Menu Layout System – Gridiron GM
+Purpose
+Design an intuitive, deep, and modular user interface inspired by OOTP-style sports sims — allowing users to easily access team info, make decisions, and immerse themselves in the league.
+
+1. Main Menu
+Tab	Description
+Continue / Load Save	Resume or load existing game
+New Franchise	Begin a new sim (choose team, league settings, etc.)
+Settings	Toggle options like simulation speed, injuries, cap rules
+Mod Manager	Import draft classes, rosters, team files (post-1.0)
+Credits / Version	Dev info, changelog
+
+2. League Home Screen
+The primary dashboard for your current save.
+
+Top Bar
+Current date
+
+Season phase (Preseason, Week 5, Playoffs, etc.)
+
+Active user team(s)
+
+Quick-sim options (advance day, week, milestone)
+
+✅ Finalized Main UI Tab Layout – Gridiron GM
+Top-Level Tabs
+Tab	Contents
+📬 Inbox	All messages from coaches, scouts, league office, trade offers, media, and player alerts.
+🏆 League	Standings, playoff picture, league leaders, team rankings, power rankings.
+📰 News Feed	Dynamic media stories, player rumors, combine buzz, draft hype, locker room drama.
+🔁 Trade Hub	Initiate trades, browse trade block, compare rosters, CPU trade offers, deadline moves.
+📋 Transactions	Sortable list of all moves — view by your team or entire league. Includes:
+
+Signings
+
+Cuts
+
+Waivers
+
+IR moves
+
+Trades
+
+Retirements |
+| 🏛️ Hall of Fame / Records | View all-time player and team records, HOF class by year, award history, playoff brackets, retired legends. |
+| ⚙️ Options | Gameplay settings, rules toggles, auto-GM delegation, sim speed, cap enforcement, injury frequency, etc. |
+
+3. Team Home Screen
+Section	Description
+Overview	Team record, streak, current depth chart, upcoming game
+Roster	Full player list with sortable stats, morale, contract, traits
+Depth Chart	Drag-and-drop starters by position group
+Injuries	Injury report, IR options, recovery progress
+Contracts/Cap	Salaries, bonuses, dead cap, extension options
+Coaching Staff	View staff ratings, traits, contract terms
+Scouting Dept	Assign scouts, view weekly progress, trait reports
+Practice Squad	Manage PS, promote players, track dev status
+Draft Picks	Future assets, trade block, traded pick tree
+
+4. Player Profile Screen
+Panel	Info
+Header	Name, position, team, age, dev curve type (if known)
+Ratings	Full attribute list (some hidden based on fog of war)
+Contract	Salary breakdown, years left, extension option
+Career Stats	By year, team, and playoff performance
+Traits	Discovered traits, potential personality conflicts
+Scouting Notes	If scouted: ranges, dev arc guesses, interview highlights
+
+5. Game Simulation Interface
+View Mode	What’s Displayed
+Quick Sim	Box score only
+Drive Sim	Play-by-play summary of drives
+Full Broadcast (Future)	Play-by-play and visual field screen
+Game Log	Score by quarter, key events, injuries
+
+6. Scouting & Draft UI
+Panel	Info
+Prospect List	Sort by name, position, stock level, combine, scouting accuracy
+Scout Assignments	Weekly task view with drag-and-drop UI per scout
+Player Card	Estimated ratings, dev arc guess, trait hints, interview logs
+Draft Board	Pin/tag players, reorder by custom ranking
+Combine Results	Raw numbers only (no direct OVR reveal)
+Draft History (post-draft)	Full results, bust/steal tags
+
+7. Contract & Trade Interfaces
+Section	Features
+Trade Screen	Compare team needs, offer players/picks, value meters
+Negotiation	Offer salary/bonus/years, player response slider
+Trade Block	CPU teams list who they’re shopping
+Cap Impact Display	See pre- and post-trade cap situation live
+
+Full Roster Simulation Plan
+
+1. 🏈 Pro Players (NFL)
+Sim on a per-week basis:
+
+Games: full box score + stat tracking
+
+Injuries: weekly random + fatigue checks
+
+Dev: small gains weekly or after games
+
+Depth chart shuffles
+
+Training effects
+
+for team in pro_teams:
+    simulate_week(team)
+    update_injuries(team)
+    update_player_progress(team.roster)
+
+2.🎓 College Players (NCAA)
+Sim once per year, after the season:
+
+Generate stats by year
+
+Apply development curve
+
+Determine who declares for draft
+
+Store injuries only if major
+
+for player in college_db:
+    simulate_college_season(player)
+    update_dev(player)
+
+3.🔄 Timeline Flow Example
+Phase	Action
+Preseason	NFL training camp, roster cuts, injuries
+Regular season	NFL games weekly, college season sim in bulk
+Offseason	NFL playoffs + dev, college dev, draft declares
+Draft	Pull draft_pool from NCAA, run draft UI
+Post-draft	Move drafted college players to NFL teams
