@@ -1,7 +1,6 @@
 import json
 import os
 from pathlib import Path
-import random
 
 import sys
 
@@ -10,7 +9,6 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from gridiron_gm_pkg.simulation.entities.team import Team
 from gridiron_gm_pkg.simulation.utils.player_generator import PlayerGenerator
 from gridiron_gm_pkg.simulation.utils.roster_generator import RosterGenerator
 
@@ -25,39 +23,32 @@ def generate_league_state() -> None:
 
     pg = PlayerGenerator()
     rg = RosterGenerator(pg)
-    teams = []
 
-    for entry in teams_data:
-        team = Team(
-            team_name=entry.get("name"),
-            city=entry.get("city"),
-            abbreviation=entry.get("abbreviation"),
-            conference=entry.get("conference", "Nova"),
-            division=entry.get("division", "Unknown"),
-            id=entry.get("id"),
-        )
-        roster = rg.generate_team_roster()
-        for p in roster:
-            team.add_player(p, position_override=p.position)
-        team.generate_depth_chart()
-        teams.append(team)
-
-    free_agents = rg.generate_free_agents(120)
+    def player_entry(player):
+        data = {
+            "name": player.name,
+            "position": player.position,
+            "college": player.college,
+        }
+        if getattr(player, "overall", None) is not None:
+            data["overall"] = player.overall
+        return data
 
     league_state = {
-        "week": 0,
-        "teams": [
-            {
-                "id": t.id,
-                "city": t.city,
-                "name": t.team_name,
-                "abbreviation": t.abbreviation,
-                "roster": [p.to_dict() for p in t.players],
-            }
-            for t in teams
-        ],
-        "free_agents": [p.to_dict() for p in free_agents],
+        "teams": [],
+        "free_agents": [],
     }
+
+    for entry in teams_data:
+        roster = rg.generate_team_roster()
+        league_state["teams"].append(
+            {
+                "team": entry.get("abbreviation"),
+                "players": [player_entry(p) for p in roster],
+            }
+        )
+
+    league_state["free_agents"] = [player_entry(p) for p in rg.generate_free_agents(120)]
 
     os.makedirs(SAVE_DIR, exist_ok=True)
     with open(LEAGUE_STATE_PATH, "w", encoding="utf-8") as f:
