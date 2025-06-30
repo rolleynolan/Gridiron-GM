@@ -1,1 +1,7 @@
 numpy
+<<<<<<< HEAD
+=======
+matplotlib
+seaborn
+pandas
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802

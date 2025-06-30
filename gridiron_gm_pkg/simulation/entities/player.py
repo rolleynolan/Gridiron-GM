@@ -3,6 +3,10 @@ from uuid import uuid4
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA
+<<<<<<< HEAD
+=======
+from gridiron_gm_pkg.engine.free_agency.free_agent_profile import FreeAgentProfile
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 # Generic attributes shared by all players
 CORE_ATTRIBUTES = [
@@ -17,6 +21,12 @@ CORE_ATTRIBUTES = [
     "balance",
     "discipline",
     "consistency",
+<<<<<<< HEAD
+=======
+    "tackling",
+    "catching",
+    "return_skill",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 ]
 
 
@@ -141,6 +151,17 @@ class Player:
     @consistency.setter
     def consistency(self, value: int) -> None:
         self._set_core_attr("consistency", value)
+<<<<<<< HEAD
+=======
+
+    @property
+    def return_skill(self) -> Optional[int]:
+        return self._get_core_attr("return_skill")
+
+    @return_skill.setter
+    def return_skill(self, value: int) -> None:
+        self._set_core_attr("return_skill", value)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     def __init__(
         self,
         name,
@@ -190,6 +211,12 @@ class Player:
         self.drafted_by = None
         self.draft_round = None
         self.draft_pick = None
+<<<<<<< HEAD
+=======
+        self.draft_class_year = None
+        self.is_draft_eligible = False
+        self.rookie = False
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
         self.injuries = []
         self.injury_history = []
@@ -201,6 +228,10 @@ class Player:
         # Track active temporary penalties from injuries
         self.active_injury_effects = {}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         self.traits = {
             "training": [],
             "gameday": [],
@@ -234,6 +265,7 @@ class Player:
 
         # --- Procedural DNA profile ---
         self.dna = PlayerDNA.generate_random_dna(self.position)
+<<<<<<< HEAD
 
         relevant = self.get_relevant_attribute_names()
         self.hidden_caps = {}
@@ -252,11 +284,36 @@ class Player:
                 self.attributes.core[attr] = cur
             else:
                 self.attributes.position_specific[attr] = cur
+=======
+        self.mutations = [m.name.lower() for m in self.dna.mutations]
+
+        self.generate_caps()
+
+        # Profile used when the player is a free agent
+        self.free_agent_profile = FreeAgentProfile(self)
+
+    def decrement_contract_year(self) -> None:
+        """Reduce remaining years on contract and flag expiration."""
+        if not self.contract:
+            return
+        years_left = self.contract.get("years_left")
+        if years_left is None:
+            years_left = self.contract.get("years", 0)
+        years_left = max(0, years_left - 1)
+        self.contract["years_left"] = years_left
+        self.contract["expiring"] = years_left == 0
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def init_core_attributes(self):
         """Return baseline attribute mapping common to all players."""
         core = {attr: None for attr in CORE_ATTRIBUTES}
         core["stamina"] = 80
+<<<<<<< HEAD
+=======
+        core["tackling"] = 40
+        core["catching"] = 40
+        core["return_skill"] = 20
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         return core
 
     def init_position_attributes(self):
@@ -266,6 +323,10 @@ class Player:
         if position in ["QB"]:
             attrs = [
                 "throw_power",
+<<<<<<< HEAD
+=======
+                "throw_velocity",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 "throw_accuracy_short",
                 "throw_accuracy_mid",
                 "throw_accuracy_deep",
@@ -285,7 +346,12 @@ class Player:
                 "trucking",
                 "carry_security",
                 "pass_block",
+<<<<<<< HEAD
                 "route_running",
+=======
+                "route_running_short",
+                "throw_power",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 "catching",
             ]
         elif position in ["WR"]:
@@ -299,6 +365,14 @@ class Player:
                 "route_running_deep",
                 "separation",
                 "run_blocking",
+<<<<<<< HEAD
+=======
+                "carry_security",
+                "elusiveness",
+                "break_tackle",
+                "trucking",
+
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             ]
         elif position in ["TE"]:
             attrs = [
@@ -319,7 +393,11 @@ class Player:
                 "run_block",
                 "impact_blocking",
                 "block_shed_resistance",
+<<<<<<< HEAD
                 "footwork_ol",
+=======
+                "block_footwork",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 "lead_blocking",
             ]
         elif position in ["EDGE", "DE"]:
@@ -405,8 +483,33 @@ class Player:
         return attrs
 
     def get_relevant_attribute_names(self) -> List[str]:
+<<<<<<< HEAD
         """Return list of all attribute names used for this player."""
         return list(self.get_all_attributes().keys())
+=======
+        """Return list of attribute names relevant to this player's position."""
+        names = list(self.attributes.core.keys()) + list(self.position_specific.keys())
+        for base in ["tackling", "catching"]:
+            if base not in names:
+                names.append(base)
+        return names
+
+    def generate_caps(self) -> None:
+        """Initialize hidden and scouted caps using the player's DNA."""
+        relevant = self.get_relevant_attribute_names()
+        self.hidden_caps = {}
+        self.scouted_potential = {}
+        for attr in relevant:
+            cap_info = self.dna.attribute_caps.get(attr, {}) if hasattr(self, "dna") else {}
+            cur = cap_info.get("current", 20)
+            hard_cap = cap_info.get("hard_cap", 20)
+            self.hidden_caps[attr] = hard_cap
+            self.scouted_potential[attr] = self.dna.scouted_caps.get(attr, hard_cap) if hasattr(self, "dna") else hard_cap
+            if attr in self.attributes.core:
+                self.attributes.core[attr] = cur
+            else:
+                self.attributes.position_specific[attr] = cur
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def add_trait(self, category, trait):
         if category in self.traits:
@@ -592,6 +695,10 @@ class Player:
             "contract": self.contract,
             "experience": self.experience,
             "injuries": [i for i in self.injuries],
+<<<<<<< HEAD
+=======
+            "injury_history": [i for i in self.injury_history],
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "weeks_out": self.weeks_out,
             "retired_due_to_injury": self.retired_due_to_injury,
             "retired": self.retired,
@@ -620,12 +727,22 @@ class Player:
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
             "draft_pick": self.draft_pick,
+<<<<<<< HEAD
+=======
+            "draft_class_year": self.draft_class_year,
+            "is_draft_eligible": self.is_draft_eligible,
+            "rookie": self.rookie,
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "hidden_caps": self.hidden_caps,
             "scouted_potential": self.scouted_potential,
             "last_attribute_values": self.last_attribute_values,
             "no_growth_years": self.no_growth_years,
             "progress_history": self.progress_history,
             "dna": self.dna.to_dict() if hasattr(self, "dna") else None,
+<<<<<<< HEAD
+=======
+            "mutations": self.mutations,
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         }
 
     @staticmethod
@@ -652,8 +769,18 @@ class Player:
         )
         player.notes = data.get("notes", [])
         player.contract = data.get("contract", None)
+<<<<<<< HEAD
         player.experience = data.get("experience", 0)
         player.injuries = data.get("injuries", [])
+=======
+        if player.contract is not None:
+            if "years_left" not in player.contract:
+                player.contract["years_left"] = player.contract.get("years", 0)
+            player.contract.setdefault("expiring", player.contract.get("years_left", 0) == 0)
+        player.experience = data.get("experience", 0)
+        player.injuries = data.get("injuries", [])
+        player.injury_history = data.get("injury_history", [])
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         player.weeks_out = data.get("weeks_out", 0)
         player.retired_due_to_injury = data.get("retired_due_to_injury", False)
         player.retired = data.get("retired", False)
@@ -663,6 +790,16 @@ class Player:
         player.season_stats = data.get("season_stats", {})
         player.on_injured_reserve = data.get("on_injured_reserve", False)
         player.is_injured = data.get("is_injured", False)
+<<<<<<< HEAD
+=======
+        player.rookie_year = data.get("rookie_year")
+        player.drafted_by = data.get("drafted_by")
+        player.draft_round = data.get("draft_round")
+        player.draft_pick = data.get("draft_pick")
+        player.draft_class_year = data.get("draft_class_year")
+        player.is_draft_eligible = data.get("is_draft_eligible", False)
+        player.rookie = data.get("rookie", False)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         player.snap_counts = data.get("snap_counts", {})
         player.milestones_hit = set(data.get("milestones_hit", []))
         player.active_injury_effects = data.get("active_injury_effects", [])
@@ -705,6 +842,7 @@ class Player:
             player.dna = PlayerDNA.from_dict(dna_data)
         else:
             player.dna = PlayerDNA.generate_random_dna(player.position)
+<<<<<<< HEAD
         if not player.hidden_caps:
             player.hidden_caps = {}
             for attr in player.get_relevant_attribute_names():
@@ -718,6 +856,15 @@ class Player:
                 attr: player.dna.scouted_caps.get(attr, player.hidden_caps.get(attr, 20))
                 for attr in player.get_relevant_attribute_names()
             }
+=======
+        player.mutations = data.get(
+            "mutations",
+            [m.name.lower() for m in getattr(player.dna, "mutations", [])],
+        )
+        if not player.hidden_caps or not player.scouted_potential:
+            player.generate_caps()
+        player.free_agent_profile = FreeAgentProfile(player)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         return player
 
 
