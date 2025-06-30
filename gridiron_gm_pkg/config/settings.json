@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "fatigue": {
     "recovery_between_plays": 0.015,
@@ -11,3 +12,18 @@
   }
   // ... other system configs go here ...
 }
+=======
+{
+  "fatigue": {
+    "recovery_between_plays": 0.015,
+    "recovery_on_sideline": 0.08,
+    "recovery_halftime": 0.5,
+    "recovery_timeout": 0.05,
+    "recovery_bye_week": 1.0,
+    "recovery_post_game": 0.3,
+    "max_fatigue": 1.0,
+    "min_fatigue": 0.0
+  }
+  // ... other system configs go here ...
+}
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802

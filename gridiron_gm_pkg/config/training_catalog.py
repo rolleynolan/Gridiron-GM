@@ -253,7 +253,11 @@ TRAINING_CATALOG = {
     "OL Pass Set Footwork": {
         "positions": ["OL"],
         "attribute_weights": {
+<<<<<<< HEAD
+            "footwork_ol": 1.0,
+=======
             "block_footwork": 1.0,
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "pass_block": 0.5,
         },
         "injury_chance": 0.004,
@@ -277,7 +281,11 @@ TRAINING_CATALOG = {
     "OL Mirror Step Drill": {
         "positions": ["OL"],
         "attribute_weights": {
+<<<<<<< HEAD
+            "footwork_ol": 0.7,
+=======
             "block_footwork": 0.7,
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "balance": 0.6,
         },
         "injury_chance": 0.004,
@@ -518,11 +526,14 @@ TRAINING_CATALOG = {
         },
         "injury_chance": 0.001,
     },
+<<<<<<< HEAD
+=======
     "Return Specialist Drill": {
         "positions": ["WR", "RB", "CB", "S"],
         "attribute_weights": {"return_skill": 1.0, "speed": 0.4},
         "injury_chance": 0.003,
     },
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     # === General / Team-Wide ===
     "Weight Room": {

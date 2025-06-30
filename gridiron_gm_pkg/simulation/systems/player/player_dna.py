@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, List, Optional
 
+<<<<<<< HEAD
+=======
 from gridiron_gm_pkg.simulation.systems.player import attribute_generator
 
 # === Position-based peak age ranges ===
@@ -36,6 +38,7 @@ class GrowthArc:
     peak_end_age: int
     decline_start_age: int
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 # === TRAITS (Behavioral Modifiers) ===
 TRAIT_POOL = [
     "Leader",
@@ -74,6 +77,8 @@ def assign_mutations() -> List[MutationType]:
     return random.sample(list(MutationType), 2)
 
 
+<<<<<<< HEAD
+=======
 def generate_growth_arc(position: str | None) -> GrowthArc:
     """Create a positional growth arc describing rise, peak and decline ages."""
     min_age, max_age = POSITION_PEAK_RANGES.get(position, (24, 30))
@@ -91,6 +96,7 @@ def generate_growth_arc(position: str | None) -> GrowthArc:
     )
 
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 def generate_dev_speed() -> float:
     """Generate development speed using a bell curve distribution."""
     value = random.normalvariate(0.65, 0.1)
@@ -131,7 +137,10 @@ ATTRIBUTE_DECAY_TYPE = {
     "throw_power": "skill",
     "throw_accuracy": "skill",
     "lead_blocking": "skill",
+<<<<<<< HEAD
+=======
     "return_skill": "skill",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     # Mental
     "awareness": "mental",
     "iq": "mental",
@@ -150,7 +159,10 @@ def generate_attribute_caps(dev_focus: Dict[str, float]) -> Dict[str, Dict]:
         "tackle",
         "catching",
         "route_running_short",
+<<<<<<< HEAD
+=======
         "return_skill",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     ]:
         base = random.randint(70, 90)
         soft_cap = int(base + random.randint(2, 5))
@@ -174,7 +186,10 @@ class PlayerDNA:
     peak_value: float = field(init=False)
     stability: float = field(init=False)
     career_arc: List[float] = field(init=False)
+<<<<<<< HEAD
+=======
     growth_arc: GrowthArc = field(init=False)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     regression_profile: Dict[str, any] = field(init=False)
     attribute_decay_type: Dict[str, str] = field(init=False)
@@ -184,8 +199,11 @@ class PlayerDNA:
     mutations: List[MutationType] = field(init=False)
     attribute_caps: Dict[str, Dict] = field(init=False)
     scouted_caps: Dict[str, int] = field(init=False)
+<<<<<<< HEAD
+=======
     injury_multiplier: float = field(init=False)
     recovery_speed_bonus: float = field(init=False)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def __post_init__(self) -> None:
         self.rise_duration = random.randint(1, 6)
@@ -194,7 +212,10 @@ class PlayerDNA:
         self.peak_value = round(random.uniform(0.85, 1.0), 2)
         self.stability = round(random.uniform(0.01, 0.05), 3)
         self.career_arc = self.generate_procedural_arc()
+<<<<<<< HEAD
+=======
         self.growth_arc = generate_growth_arc(None)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
         self.regression_profile = DEFAULT_REGRESSION_PROFILE.copy()
         self.attribute_decay_type = ATTRIBUTE_DECAY_TYPE
@@ -204,8 +225,11 @@ class PlayerDNA:
         self.mutations = assign_mutations()
         self.attribute_caps = generate_attribute_caps(self.dev_focus)
         self.scouted_caps = self._generate_scouted_caps()
+<<<<<<< HEAD
+=======
         self.injury_multiplier = 1.0
         self.recovery_speed_bonus = 0.0
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def generate_procedural_arc(self, total_years: int = 25) -> List[float]:
         """Return an annual multiplier curve representing the player's career trajectory."""
@@ -318,11 +342,14 @@ class PlayerDNA:
             "peak_value": self.peak_value,
             "stability": self.stability,
             "career_arc": self.career_arc,
+<<<<<<< HEAD
+=======
             "growth_arc": {
                 "peak_start_age": self.growth_arc.peak_start_age,
                 "peak_end_age": self.growth_arc.peak_end_age,
                 "decline_start_age": self.growth_arc.decline_start_age,
             },
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "regression_profile": self.regression_profile,
             "attribute_decay_type": self.attribute_decay_type,
             "dev_speed": self.dev_speed,
@@ -331,8 +358,11 @@ class PlayerDNA:
             "mutations": [m.name for m in self.mutations],
             "attribute_caps": self.attribute_caps,
             "scouted_caps": self.scouted_caps,
+<<<<<<< HEAD
+=======
             "injury_multiplier": self.injury_multiplier,
             "recovery_speed_bonus": self.recovery_speed_bonus,
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         }
 
     @classmethod
@@ -345,7 +375,10 @@ class PlayerDNA:
             "peak_value",
             "stability",
             "career_arc",
+<<<<<<< HEAD
+=======
             "growth_arc",
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "regression_profile",
             "attribute_decay_type",
             "dev_speed",
@@ -353,6 +386,11 @@ class PlayerDNA:
             "traits",
             "attribute_caps",
             "scouted_caps",
+<<<<<<< HEAD
+        ]:
+            setattr(obj, field_name, data.get(field_name))
+        obj.mutations = [MutationType[m] for m in data.get("mutations", [])]
+=======
             "injury_multiplier",
             "recovery_speed_bonus",
         ]:
@@ -364,10 +402,16 @@ class PlayerDNA:
             arc_data.get("peak_end_age", 0),
             arc_data.get("decline_start_age", 0),
         )
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         return obj
 
     # Convenience factory used by Player for compatibility
     @staticmethod
+<<<<<<< HEAD
+    def generate_random_dna(position: str | None = None) -> "PlayerDNA":
+        _ = position  # position is unused but kept for API compatibility
+        return PlayerDNA()
+=======
     def generate_random_dna(position: str | None = None, level: str = "pro") -> "PlayerDNA":
         dna = PlayerDNA()
         dna.growth_arc = generate_growth_arc(position)
@@ -399,3 +443,4 @@ class PlayerDNA:
             dna.attribute_caps = attr_caps
             dna.scouted_caps = dna._generate_scouted_caps()
         return dna
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802

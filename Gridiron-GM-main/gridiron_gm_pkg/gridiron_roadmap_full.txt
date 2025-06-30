@@ -1,0 +1,209 @@
+========================
+BETA STAGE (Systems Expansion)
+========================
+Goal: Enhance core gameplay with depth, persistence, and realism.
+
+
+--- BETA PHASE I: Core Simulation Enhancements ---
+
+5. NFL Game Rules Engine
+- Penalty system with rule enforcement and discipline traits
+- PAT vs 2-point conversion decisions based on game context
+- Advanced timeout and clock rules (already partially implemented)
+
+6. Stat Tracking
+- Track full season + career stats for players and teams
+- Milestone and record tracking (e.g. 1,000-yard seasons)
+- Stat leaders and historical views
+
+7. Save/Load System
+- GM profile creation
+- Multiple save slots
+- Tracks current season year, team, GM identity
+
+8. Calendar System
+- Daily/weekly progression with game scheduling
+- Simulates seasons, playoffs, offseason phases
+- Handles draft, free agency, trade deadlines
+
+9. Staff System
+- Hire/fire coaching, training, medical staff
+- Staff traits and effectiveness
+- Staff influence on fatigue, injury recovery, player morale
+
+10. Weather Conditions
+- Dynamic weather (rain, wind, snow)
+- Gameplay impact: passing difficulty, injuries, fatigue
+- Stadium/weather profiles
+
+11. Stadium Traits
+- Dome vs outdoor, turf vs grass
+- Altitude effects (e.g., Denver advantage)
+- Home-field advantages, attendance boosts
+
+
+--- BETA PHASE II: League Depth & Strategy Expansion ---
+
+1. Trade System
+- CPU vs CPU, user vs CPU trades
+- Trade picks up to 3 years out
+- Buyer/seller logic, rebuild detection
+
+2. Draft Logic
+- Full 7-round draft with team AI strategy
+- Trade-up/down logic during draft
+- Draft board influenced by team philosophy
+
+3. Scouting System
+- Teams see different potential based on scout quality
+- Hidden true potential behind scouting "grades"
+- Draft board movement, combine/pro day events
+
+4. Training Camps
+- Players gain or lose attribute points during camp
+- Rare large gains or declines; performance-based
+
+5. Contract & Free Agency System
+- Player preferences (money, role, fit, contender)
+- CPU free agency bidding logic
+- Holdouts and tag disputes
+
+6. Coordinators & Scheme Fit
+- Coordinators modify unit performance
+- Scheme match boosts or limits player output
+
+7. Financial System (Highly Detailed)
+- Revenue: TV deals, merchandise, attendance, sponsors
+- Expenses: Salaries, staff, stadium upkeep
+- Attendance varies by market, weather, performance
+
+8. Practice Squad System
+- 16-man practice squad per team
+- Logic for promotions and player development
+
+9. Coach Personalities
+- Aggressive vs conservative decision makers
+- Affects 4th down, playcalling, clock usage
+
+10. Player Morale & Locker Room Chemistry
+- Morale based on playing time, results, media
+- Chemistry affects performance and trade demands
+
+11. Rivalries & Divisional Tension
+- High-emotion games with boosted intensity
+- Extra fan/media attention, higher stakes
+
+12. Historical Team Legacy
+- Prestige rating affects free agency, fan expectations, pressure
+
+13. In-Season Strategy Adjustments
+- Weekly coaching strategy shifts (e.g. run-heavy, play safe)
+- Affects playcalling and player usage
+
+14. Legacy Draft Pick Tracker
+- Track history of every draft pick (who owned, who drafted, who traded)
+
+15. Hot & Cold Streaks
+- Players perform better or worse over short-term stretches
+- Confidence system tied to past performance
+
+16. Fatigue-Based Auto-Substitutions
+- Smart substitution logic based on fatigue, stamina, and traits
+
+17. Opponent Game Planning AI
+- CPU scouts and adjusts to your tendencies weekly
+- Encourages diverse strategies and game planning
+
+18. Preseason Position Battles
+- Players compete during preseason for starting jobs
+- Performance-based role assignment
+
+19. Real-Time League News Feed
+- Scrolling in-game ticker that displays dynamic league events
+- Includes trades, injuries, signings, rumors, stat milestones
+- Adds immersion and up-to-date context during sim weeks
+
+
+========================
+1.0 RELEASE STAGE (Polish & Presentation)
+========================
+Goal: Ship a polished, complete version.
+
+1. UI System (OOTP-style)
+- Tabs: Team Home, League Overview, Inbox, Scouting, Staff
+- Easy navigation and historical views
+
+2. In-Game Draft Presentation
+- Interactive draft interface with trades, recaps
+
+3. Social Media & Fan Sentiment
+- Fanbase reactions to trades, wins/losses, stars
+- Influences ticket sales and morale
+
+4. Career Achievements & Hall of Fame
+- Tracks historic players and milestones
+- Hall of Fame voting and retirement summaries
+
+5. Custom League Rules / CBA Editor
+- Toggle league rules: cap enforcement, tag policy, roster size
+- Enable/disable options like IR rules or trade deadlines
+
+6. Personalized GM Career Mode
+- Track your GM across multiple franchises
+- Dynamic career progression with hiring, firing, and contract offers
+- Reputation traits earned over time (e.g., QB Whisperer, Cap Genius)
+- Possibility to retire, take time off, or build legacy with one team
+- Owner Expectations & Job Security (goals, performance pressure)
+
+7. Media System
+- Media Interaction System (respond to reporters, shape narrative)
+- Live media storylines based on current league status (eg. Team fires Head coach mid-season, Star QB hurt for season, etc)
+- Power rankings system
+
+8. Final Testing & Bug Fixing
+- QA, polish, and system integration
+
+========================
+POST-RELEASE & FUTURE EXPANSION
+========================
+
+- Advanced press conferences & media questions
+- Narrative storylines and dynamic league drama
+- Expansion draft and relocation
+- League Expansion Voting System
+  - Team owners vote on when/where to add new franchises
+  - Influenced by team market size, revenue sharing, and political alliances
+  - Expansion draft, relocation, and realignment considerations
+- Integrated Mod Tools
+  - In-game support for importing/exporting draft classes, teams, and logos
+  - Allows for fictional or historical leagues
+  - Supports community sharing and custom scenarios
+- Retired Player Career Paths (coach, scout, GM)
+- Agent Personalities (negotiation style, influence on signings)
+- Historical League Archive (MVPs, stat leaders, playoff brackets)
+- Draft Class Import/Export (support for real or custom classes)
+
+
+========================
+Reclassified Alpha (✅ Completed)
+========================
+
+1. Player System
+- Full player creation and management
+- Attributes, contracts, traits (e.g. Iron Man, Fragile Bones)
+- Age, potential, and development logic
+
+2. Injury System
+- IR eligibility and return logic
+- Trait-influenced injury simulation
+- Daily injury checks and recovery tracking
+
+3. Team Management
+- Roster control and depth chart logic
+- Track season win/loss records and playoff history
+
+4. Game Simulation
+- Drive-based play simulation with realistic stat output
+- Factors in fatigue, player traits, and team style
+- Simulates daily or weekly depending on calendar setting
+

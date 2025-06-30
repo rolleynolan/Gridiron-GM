@@ -3,7 +3,11 @@ from typing import Any, Dict
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 def load_settings(path: str | None = None) -> Dict[str, Any]:
     """Load simulation settings from a JSON config file."""
     if path is None:

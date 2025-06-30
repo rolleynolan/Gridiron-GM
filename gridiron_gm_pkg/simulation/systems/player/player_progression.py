@@ -8,7 +8,10 @@ from typing import Dict
 from gridiron_gm_pkg.simulation.entities.player import Player
 from gridiron_gm_pkg.simulation.systems.player.weekly_training import (
     PHYSICAL_ATTRIBUTES,
+<<<<<<< HEAD
+=======
     _get_attr_container,
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 )
 
 # === Tunable parameters ===
@@ -24,12 +27,16 @@ def _clamp(value: float, low: float = 40.0, high: float = 99.0) -> float:
     return max(low, min(high, value))
 
 
+<<<<<<< HEAD
+def progress_player(player: Player, xp_gains: Dict[str, float] | None = None) -> Player:
+=======
 def progress_player(
     player: Player,
     xp_gains: Dict[str, float] | None = None,
     coach_quality: float = 1.0,
     rng: random.Random | None = None,
 ) -> Player:
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     """Update a player's attributes using their DNA growth curve.
 
     Parameters
@@ -40,10 +47,13 @@ def progress_player(
         Optional mapping of attribute names to weekly XP earned from
         training or in-game performance.
 
+<<<<<<< HEAD
+=======
     rng:
         Optional ``random.Random`` instance used to introduce noise. Providing a
         seeded generator allows deterministic results for testing.
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     Returns
     -------
     Player
@@ -51,12 +61,36 @@ def progress_player(
     """
 
     xp_gains = xp_gains or {}
+<<<<<<< HEAD
+=======
     rng = rng or random
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     attrs = getattr(player, "attributes", None)
     dna = getattr(player, "dna", None)
     if attrs is None or dna is None:
         return player
 
+<<<<<<< HEAD
+    dev_speed = getattr(dna, "development_speed", 1.0)
+    age = getattr(player, "age", 25)
+    age_mult = dna.growth_curve.get(age, 1.0)
+    if age_mult < 0:
+        age_mult *= getattr(dna, "regression_rate", 1.0)
+
+    def _apply(container: Dict[str, float]) -> None:
+        for attr, value in container.items():
+            base_gain = xp_gains.get(attr, BASE_XP)
+            net = base_gain * age_mult * dev_speed
+            if attr in PHYSICAL_ATTRIBUTES:
+                net *= PHYSICAL_MULTIPLIER
+            else:
+                net *= MENTAL_TECH_MULTIPLIER
+            net *= random.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
+            container[attr] = round(_clamp(value + net), 2)
+
+    _apply(getattr(attrs, "core", {}))
+    _apply(getattr(attrs, "position_specific", {}))
+=======
     try:
         quality_mod = min(1.2, max(0.8, float(coach_quality)))
     except (TypeError, ValueError):
@@ -101,4 +135,5 @@ def progress_player(
         growth *= rng.uniform(1.0 + NOISE_RANGE[0], 1.0 + NOISE_RANGE[1])
         container[attr] = round(_clamp(current + growth), 2)
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     return player

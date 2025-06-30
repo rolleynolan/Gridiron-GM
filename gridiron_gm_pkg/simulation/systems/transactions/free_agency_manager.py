@@ -1,4 +1,6 @@
 import random
+<<<<<<< HEAD
+=======
 from typing import Dict, List, Tuple
 
 from gridiron_gm_pkg.engine.free_agency.contract_offer import ContractOffer
@@ -7,12 +9,16 @@ from gridiron_gm_pkg.simulation.AI.cpu_free_agency import (
     estimate_player_value,
     generate_contract_offer,
 )
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 class FreeAgencyManager:
     def __init__(self, game_world):
         self.game_world = game_world
         self.free_agents = game_world.get("free_agents", [])
+<<<<<<< HEAD
+=======
         self.pending_offers: Dict[str, List[Tuple[object, Dict]]] = {}
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def add_free_agent(self, player):
         if player not in self.free_agents:
@@ -32,11 +38,22 @@ class FreeAgencyManager:
         return sorted(agents, key=lambda p: p.overall, reverse=True)[:limit]
 
     def sign_player(self, team, player, contract_offer):
+<<<<<<< HEAD
+=======
         """Finalize signing a free agent to a team."""
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         if player not in self.free_agents:
             print(f"{player.name} is no longer a free agent.")
             return False
 
+<<<<<<< HEAD
+        if len(team.roster) >= getattr(team, "MAX_ROSTER_SIZE", 53):
+            print(f"{team.name} roster is full. Cannot sign {player.name}.")
+            return False
+
+        projected_cap = getattr(team, "cap_used", 0) + contract_offer.salary_per_year
+        if projected_cap > getattr(team, "SALARY_CAP", 200):
+=======
         roster = getattr(team, "roster", getattr(team, "players", []))
         if len(roster) >= getattr(team, "MAX_ROSTER_SIZE", 53):
             print(f"{team.name} roster is full. Cannot sign {player.name}.")
@@ -49,6 +66,7 @@ class FreeAgencyManager:
 
         projected_cap = team.cap_used + contract_offer.salary_per_year
         if projected_cap > team.SALARY_CAP:
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             over_by = round(projected_cap - team.SALARY_CAP, 2)
             print(f"{team.name} cannot sign {player.name}; would exceed cap by ${over_by}M.")
             return False
@@ -56,11 +74,17 @@ class FreeAgencyManager:
         player.contract = {
             "years": contract_offer.years,
             "salary_per_year": contract_offer.salary_per_year,
+<<<<<<< HEAD
+            "rookie": contract_offer.rookie
+        }
+        team.roster.append(player)
+=======
             "rookie": contract_offer.rookie,
             "years_left": contract_offer.years,
             "expiring": False,
         }
         roster.append(player)
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         team.cap_used += contract_offer.salary_per_year
         self.remove_free_agent(player)
 
@@ -70,6 +94,8 @@ class FreeAgencyManager:
 
         return True
 
+<<<<<<< HEAD
+=======
     def process_user_signing(self, team, player, offer):
         """Public wrapper used by the UI to sign a player immediately.
 
@@ -92,6 +118,7 @@ class FreeAgencyManager:
 
         return self.sign_player(team, player, offer)
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     def generate_random_contract_offer(self, overall_rating):
         base_salary = 0.5 + ((overall_rating - 60) * 0.12)
         salary_per_year = max(0.5, round(base_salary, 2))
@@ -101,6 +128,8 @@ class FreeAgencyManager:
             years=years
         )
 
+<<<<<<< HEAD
+=======
     # ------------------------------------------------------------------
     def generate_cpu_offers(self) -> None:
         """Create contract offers from all CPU-controlled teams."""
@@ -135,6 +164,7 @@ class FreeAgencyManager:
             if offers:
                 self.pending_offers[team.id] = offers
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     def cpu_submit_offers(self):
         for team in self.game_world["teams"]:
             if getattr(team, "user_controlled", False):
@@ -152,12 +182,27 @@ class FreeAgencyManager:
                     agent.free_agent_profile.receive_offer(team, offer)
 
     def advance_free_agency_day(self):
+<<<<<<< HEAD
+        # CPU teams submit new offers daily
+        self.cpu_submit_offers()
+=======
         """Process a single day of free agency."""
         self.generate_cpu_offers()
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
         players_signed_today = []
 
         for player in list(self.free_agents):
+<<<<<<< HEAD
+            result = player.free_agent_profile.daily_tick()
+
+            if result is not None:
+                team, contract_offer = result
+
+                signed = self.sign_player(team, player, contract_offer)
+                if signed:
+                    players_signed_today.append((player.name, team.name, contract_offer.salary_per_year))
+=======
             # gather all offers for this player from pending_offers
             player_offers = []
             for team_id, offers in self.pending_offers.items():
@@ -197,6 +242,7 @@ class FreeAgencyManager:
                     self.pending_offers[t_id] = [
                         (p, o) for (p, o) in self.pending_offers[t_id] if p != player
                     ]
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
         if players_signed_today:
             print("\n[Free Agency Signings Today]")

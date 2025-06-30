@@ -3,16 +3,25 @@ import csv
 import random
 import sys
 
+<<<<<<< HEAD
+=======
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA, MutationType
 from gridiron_gm_pkg.simulation.systems.player import player_regression
 from gridiron_gm_pkg.simulation.systems.player.player_regression import (
     valid_attributes_by_position,
+<<<<<<< HEAD
+    attribute_decay_type,
+    decay_multipliers,
+)
+from gridiron_gm_pkg.simulation.entities.player import Player
+=======
     decay_multipliers,
 )
 from gridiron_gm_pkg.simulation.systems.player.player_dna import ATTRIBUTE_DECAY_TYPE
@@ -59,6 +68,7 @@ def plot_career_arcs(
     else:
         plt.show()
     plt.close()
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 
 def export_player_log(player_id, dna, position, age, attributes, caps, arc_val):
@@ -69,7 +79,10 @@ def export_player_log(player_id, dna, position, age, attributes, caps, arc_val):
         "age": age,
         "arc": round(arc_val, 3),
         "dev_speed": dna.dev_speed,
+<<<<<<< HEAD
+=======
         "traits": ", ".join(dna.traits),
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         "mutations": ", ".join(m.name for m in dna.mutations),
         **{attr: attributes.get(attr) for attr in caps},
         **{f"{attr}_cap": caps[attr] for attr in caps},
@@ -104,7 +117,11 @@ def apply_regression_local(attributes: dict, caps: dict, age: int, dna: PlayerDN
         if attr not in valid_attributes_by_position[position]:
             continue
 
+<<<<<<< HEAD
+        decay_type = attribute_decay_type.get(attr, "physical")
+=======
         decay_type = ATTRIBUTE_DECAY_TYPE.get(attr, "physical")
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         decay_mult = decay_multipliers.get(decay_type, 1.0)
         total_decay = decay_base * position_mod * decay_mult
 
@@ -160,7 +177,11 @@ def test_position_attribute_storage():
     rb = Player("Back", "RB", 22, "2003-01-01", "U", "USA", 25, 70)
     assert "speed" in rb.attributes.core
     assert "break_tackle" in rb.attributes.position_specific
+<<<<<<< HEAD
+    assert "throw_power" not in rb.attributes.position_specific
+=======
     assert "throw_power" in rb.attributes.position_specific
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 
 def test_regression_profile_defaults():
@@ -175,6 +196,59 @@ def test_apply_regression_decreases_values():
     player = Player("Old", "RB", 31, "1990-01-01", "U", "USA", 22, 70)
     player.attributes.core["speed"] = 80
     player.attributes.core["acceleration"] = 80
+<<<<<<< HEAD
+    player_regression.apply_regression(player)
+    assert player.attributes.core["speed"] < 80
+    assert player.attributes.core["acceleration"] < 80
+
+
+def _simulate_full_career(player_id: str, position: str, years: int = 15):
+    """Return season-by-season attribute log for a player."""
+
+    dna = PlayerDNA.generate_random_dna(position)
+    data = dna.to_dict()
+    clone = PlayerDNA.from_dict(data)
+    assert [m.name for m in clone.mutations] == [m.name for m in dna.mutations]
+
+    attrs = {
+        attr: random.randint(65, 75)
+        for attr in valid_attributes_by_position[position]
+    }
+    caps = {
+        attr: min(attrs[attr] + random.randint(10, 25), 100)
+        for attr in attrs
+    }
+
+    class AttrSet:
+        def __init__(self, core: dict):
+            self.core = core
+            self.position_specific = {}
+
+    class DummyPlayer:
+        pass
+
+    player = DummyPlayer()
+    player.position = position
+    player.dna = dna
+    player.attributes = AttrSet(attrs)
+
+    base_attrs = attrs.copy()
+    arc = dna.career_arc[:years]
+    log = []
+    for year in range(1, years + 1):
+        age = 23 + year - 1
+        player.age = age
+        arc_val = arc[year - 1] if year - 1 < len(arc) else arc[-1]
+        for attr in list(attrs.keys()):
+            baseline = base_attrs[attr]
+            target = baseline + (caps[attr] - baseline) * arc_val
+            attrs[attr] = round(min(caps[attr], max(baseline, target)), 2)
+            player.attributes.core[attr] = attrs[attr]
+        log.append(
+            export_player_log(player_id, dna, position, age, attrs, caps, arc_val)
+        )
+    return log
+=======
     # Force decline to begin at or before the player's current age
     player.dna.growth_arc.decline_start_age = 30
     player_regression.apply_regression(player, age=31)
@@ -235,6 +309,7 @@ def _simulate_full_career(player_id: str, position: str, years: int = 15):
         player.age += 1
 
     return logs, arc_vals, decline_age, start_age
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 
 def test_dna_long_term_progression(tmp_path):
@@ -246,6 +321,11 @@ def test_dna_long_term_progression(tmp_path):
     csv_file = out_dir / "dna_long_term_progression.csv"
 
     logs = []
+<<<<<<< HEAD
+    for pos in ["QB", "RB", "WR"]:
+        for i in range(2):
+            logs.extend(_simulate_full_career(f"{pos}_{i+1}", pos))
+=======
     arcs = []
     decline_ages = {}
     start_ages = {}
@@ -257,6 +337,7 @@ def test_dna_long_term_progression(tmp_path):
             arcs.append((player_label, arc))
             decline_ages[player_label] = decline_age
             start_ages[player_label] = start_age
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     fieldnames = []
     for row in logs:
@@ -270,6 +351,9 @@ def test_dna_long_term_progression(tmp_path):
         for row in logs:
             writer.writerow(row)
 
+<<<<<<< HEAD
+    assert csv_file.exists() and csv_file.stat().st_size > 0
+=======
     graph_file = out_dir / "career_arcs.png"
     arc_dict = {label: arc for label, arc in arcs}
     plot_career_arcs(
@@ -282,3 +366,4 @@ def test_dna_long_term_progression(tmp_path):
 
     assert csv_file.exists() and csv_file.stat().st_size > 0
     assert graph_file.exists() and graph_file.stat().st_size > 0
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802

@@ -8,6 +8,8 @@ used by scouting screens or season wrap up reports.
 from typing import Any, Dict
 
 
+<<<<<<< HEAD
+=======
 # -- QB Archetype definitions used by ``evaluate_qb_archetype`` --
 QB_ARCHETYPES: Dict[str, Dict[str, float]] = {
     "Pocket Passer": {
@@ -374,6 +376,7 @@ RETURNER_ARCHETYPES: Dict[str, Dict[str, float]] = {
 }
 
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str, int]) -> str:
     """Return a short archetype description based on attributes and stats.
 
@@ -455,6 +458,8 @@ def evaluate_archetype(player: Any, stats: Dict[str, int], attributes: Dict[str,
 
     # Fallback
     return "Raw Prospect"
+<<<<<<< HEAD
+=======
 
 
 def evaluate_qb_archetype(attributes: Dict[str, int]) -> str:
@@ -794,3 +799,4 @@ def evaluate_special_teams_archetype(attributes: Dict[str, int], position: str) 
 
     return best_type
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802

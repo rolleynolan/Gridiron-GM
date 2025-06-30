@@ -1,0 +1,178 @@
+Gridiron GM – MASTER BLUEPRINT (v2025.05.16)
+
+I. CORE SIMULATION ENGINE
+
+1. League & Calendar Structure
+NFL-style league: 32 teams (customizable), two conferences, four divisions each
+
+Custom teams/league: Team maker at launch, league customizer post-launch
+
+Full-year calendar: Preseason, regular season, playoffs, detailed offseason
+
+Offseason subphases: Combine, Draft, Free Agency, Rookie Minicamp, Team Minicamp, Training Camp
+
+Automatic year rollover and multi-year sim support
+
+Expansion-ready framework (future)
+
+2. Game Simulation
+Game engine: Realistic, drive-based with play-by-play log and stat output
+
+Game viewer: Isometric live sim (basic at launch, expandable)
+
+Schemes & playbooks: Affect simulation outcomes, matchup logic, and player usage
+
+Weather, injuries, fatigue, morale, chemistry, home field
+
+Special teams & situational AI (4th down, clock mgmt, etc.)
+
+3. College System 
+
+NCAA-style college database: Freshmen generated annually, full 4-year tracking
+
+College player dev: Ratings, stats, dev curves, injuries, transfers, and media coverage
+
+Draft pool: Seniors/juniors can declare, includes combine invites, Pro Days, draft stock movement
+
+Media stories: College stars, sleepers, scandals, breakouts
+
+Player tracking: College-to-NFL history, records, award watch, injury flags
+
+II. DATA & STATE MANAGEMENT
+
+Save/load system: Multi-slot, auto-save, robust backup (local, with cloud/Steam later)
+
+Historical archive: All league, team, player, staff stats and milestones
+
+Awards, records, playoff brackets, retired players, HOF, transaction history
+
+Export/import for stats and rosters
+
+III. TEAM, PLAYER & STAFF MANAGEMENT
+
+1. Rosters, Depth Chart, and Player Model
+Roster logic: 53-man active, 16-player practice squad, IR, call-ups
+
+Depth chart: Drag-and-drop, auto-fill, position battles
+
+Player attributes: Ratings (physical, mental, technical), true/scouted ability, dev arcs, morale, traits, chemistry, injury history
+
+Face generation: For all players/coaches/staff (basic facegen at launch)
+
+Contract/financials: Full NFL-style contracts, cap hits, extensions, bonuses
+
+2. Staff & Coaches System
+
+Staff roles: GM, Head Coach, Coordinators, Scouting Director, College and NFL Scouts, Medical, Position Coaches
+
+Staff attributes: Ratings, traits, contract, preferences, styles
+
+GM differences: Philosophy, risk, draft/trade/cap approach, negotiation style
+
+Coach styles: Scheme focus, discipline vs. “player’s coach”, aggressiveness, adaptability
+
+IV. OFF-FIELD SYSTEMS
+
+1. Scouting & Draft
+
+Staff-driven scouting: Assign scouts, efficiency system, fog-of-war, ranges
+
+Combine, Pro Days, interviews: Attribute hints, hidden traits, medicals, red flags
+
+Draft board: Dynamic team/league boards, media big boards, live timer, team order, media takes, draft-day trade UI
+
+Prospect “hype” and media movement, Busts, Sleepers, scouts and media can "miss"
+
+Draft UI: Tag targets, “media takes” panel, sortable by buzz, stats, combine, potential
+
+2. Trade, Free Agency, and Contracts
+
+Trade logic: Realistic buyer/seller, deadline rush, asset value, needs, CPU GMs
+
+Trade interface: Manual trade builder (add players/picks), trade finder/shop a player
+
+Negotiation UI: Feels like real phone call with other GMs (dynamic feedback)
+
+Contracts: Extensions, FA bidding, tags, rookie scale, contract disputes, holdouts in FA
+
+3. Injuries, Morale, Chemistry, and Fanbase
+
+Injury system: Type, severity, recovery, IR, re-injury, long-term risk
+
+Morale/chemistry: Player & team level, locker room, leader effects, drama
+
+Fanbase system: Loyalty, media pressure, market size, attendance, financials, narrative events
+
+V. MEDIA, STORY, & EVENTS
+
+Dynamic news feed: League headlines, rumors, interviews, injury reports, trade buzz, college stories
+
+Narrative engine: Player and team arcs, media hype/bust, coaching stories, fan petitions, scandals
+
+Achievements: Steam, in-game (post-launch: scenarios/challenges)
+
+Inbox: All game events/messages (offers, news, player notes, staff alerts)
+
+VI. UI/UX & ACCESSIBILITY
+
+1. Main UI Structure
+
+Main menu: Continue/load, new franchise, settings, mod manager, credits/version
+
+Top bar: Date, season phase, user team, sim controls
+
+Main tabs: Inbox, Team, Scouting, Finances, Trade Center, League, Options
+
+2. Key Screens & Features
+
+Inbox: All alerts, media, league messages
+
+Team: Overview, roster, depth, injuries, staff, PS, draft picks, Training, schedule
+
+Scouting: Draft board, scouting assignments, combine/pro days, reports
+
+Finances: Team revenue, expenses, contracts, cap, stadium
+
+Trade Center: Manual trade, trade finder/shop player, negotiation UI (phone), trade block, offers
+
+League: Standings, power rankings, playoff picture, playoff scenarios, league leaders, HOF/records, awards, schedule/results
+
+Options: All settings (sliders/inputs for rules, sim speed, injury frequency, cap, CBA toggles, auto-GM, etc.), accessibility (colorblind, font size, help/cheat sheet)
+
+Game viewer: Isometric live sim (with crowd, SFX, play-by-play, stats), drive log/quick sim options
+
+3. Player & Staff Profiles
+
+Player: Photo/facegen, position, team, age, contract, dev arc, true/scouted ability (per stat), career stats, traits, morale, chemistry, injury history, scouting notes
+
+Staff: Role, facegen, contract, ratings, traits, coaching philosophy/history
+
+4. Accessibility & Help
+
+Accessibility: Colorblind mode, font size slider, basic screen reader/narration hooks
+
+Help/cheat sheet: In-game football glossary, rules, finance basics, management strategy guide, UI guide, FAQ
+
+VII. CUSTOMIZATION & MODDING
+
+Custom team maker: Name, city, logo, colors, uniforms (UI at launch)
+
+Rules/settings: Sliders/inputs for all league/game rules (cap, injuries, playoffs, etc.)
+
+Mod support: Import/export logos, rosters, draft classes (at launch)
+
+Editors: In-game editors for more (future/post-1.0)
+
+VIII. TECH, SETTINGS & QOL
+
+Save/load: Multiple saves, backup, export, (Steam Cloud if feasible)
+
+Audio: Fan noise, whistles, basic music; commentary planned for post-launch
+
+Settings: Graphics (quality, windowed/fullscreen, vsync), audio (sliders), sim speed, UI scale
+
+Achievements: Full Steam/in-game list
+
+No multiplayer 
+
+Local saves only (cloud future)

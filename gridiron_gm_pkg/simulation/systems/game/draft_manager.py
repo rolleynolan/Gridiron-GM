@@ -1,14 +1,24 @@
+<<<<<<< HEAD
+from gridiron_gm_pkg.simulation.engine.contract_engine import ContractEngine
+=======
 from gridiron_gm_pkg.simulation.utils.college_player_generator import (
     generate_college_player,
 )
 
 import random
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 class DraftManager:
     """
     Handles the league draft process, including order, rounds, and pick transactions.
     """
+<<<<<<< HEAD
+    def __init__(self, league, transaction_manager):
+        self.league = league
+        self.transaction_manager = transaction_manager
+        self.draft_history = []  # List of dicts: {"round": int, "pick": int, "team": team, "player": player}
+=======
 
     def __init__(self, league, transaction_manager):
         self.league = league
@@ -48,6 +58,7 @@ class DraftManager:
             players.append(player)
 
         return players
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def determine_draft_order(self):
         """
@@ -56,12 +67,17 @@ class DraftManager:
         """
         teams = list(self.league.teams)
         # Sort by (wins, losses), lowest wins first, then highest losses
+<<<<<<< HEAD
+        teams.sort(key=lambda t: (self.league.standings.get(t.id, {}).get("W", 0),
+                                  -self.league.standings.get(t.id, {}).get("L", 0)))
+=======
         teams.sort(
             key=lambda t: (
                 self.league.standings.get(t.id, {}).get("W", 0),
                 -self.league.standings.get(t.id, {}).get("L", 0),
             )
         )
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         return teams
 
     def run_draft(self, rounds=7):
@@ -75,6 +91,12 @@ class DraftManager:
         prospects = list(self.league.draft_prospects)
         self.draft_history = []
         pick_number = 1
+<<<<<<< HEAD
+        contract_engine = ContractEngine()
+
+        drafted_players = set()
+
+=======
         drafted_players = set()
 
         def _need_bonus(team, position):
@@ -91,10 +113,25 @@ class DraftManager:
                 return 4
             return 0
 
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         for rnd in range(1, rounds + 1):
             for team in draft_order:
                 if not prospects:
                     break  # No more prospects to draft
+<<<<<<< HEAD
+                # For now, pick the "best" available (e.g., highest rating)
+                best_player = max(prospects, key=lambda p: getattr(p, "rating", 0))
+                self.transaction_manager.draft_pick(team, best_player)
+                # Assign rookie contract using ContractEngine
+                rookie_contract = contract_engine.generate_rookie_contract(team, best_player, round=rnd, pick=pick_number)
+                best_player.contract = rookie_contract
+                self.draft_history.append({
+                    "round": rnd,
+                    "pick": pick_number,
+                    "team": team,
+                    "player": best_player
+                })
+=======
 
                 board = getattr(team, "draft_board", [])
                 available_entries = [
@@ -158,6 +195,7 @@ class DraftManager:
                         "player": best_player,
                     }
                 )
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 prospects.remove(best_player)
                 drafted_players.add(best_player)
                 pick_number += 1
@@ -174,4 +212,8 @@ class DraftManager:
         """
         Returns the draft history for reporting or review.
         """
+<<<<<<< HEAD
         return self.draft_history
+=======
+        return self.draft_history
+>>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
