@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Contract v1",
+  "type": "object",
+  "required": ["api_version", "startYear", "endYear", "terms"],
+  "properties": {
+    "api_version": {"const": "gg.v1"},
+    "startYear": {"type": "integer"},
+    "endYear": {"type": "integer"},
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["year", "base"],
+        "properties": {
+          "year": {"type": "integer"},
+          "base": {"type": "integer"},
+          "signingProrated": {"type": "integer", "default": 0},
+          "rosterBonus": {"type": "integer", "default": 0},
+          "workoutBonus": {"type": "integer", "default": 0},
+          "guaranteedBase": {"type": "integer", "default": 0}
+        },
+        "additionalProperties": true
+      }
+    },
+    "guarantees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "throughYear"],
+        "properties": {
+          "type": {"enum": ["full", "injury", "partial"]},
+          "throughYear": {"type": "integer"}
+        },
+        "additionalProperties": true
+      },
+      "default": []
+    },
+    "incentives": {
+      "type": "array",
+      "description": "reserved; ignored in v1",
+      "items": {
+        "type": "object",
+        "required": ["type", "amount", "metric", "threshold"],
+        "properties": {
+          "type": {"enum": ["PPI", "LTBE", "NLTBE"]},
+          "amount": {"type": "integer"},
+          "metric": {"type": "string"},
+          "threshold": {"type": "string"}
+        },
+        "additionalProperties": true
+      },
+      "default": []
+    },
+    "flags": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"},
+      "default": {}
+    },
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    }
+  },
+  "additionalProperties": true
+}

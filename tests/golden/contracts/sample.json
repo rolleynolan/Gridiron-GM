@@ -1,0 +1,12 @@
+{
+  "api_version": "gg.v1",
+  "startYear": 2024,
+  "endYear": 2027,
+  "terms": [
+    {"year": 2024, "base": 5000000, "signingProrated": 5000000},
+    {"year": 2025, "base": 6000000, "signingProrated": 5000000},
+    {"year": 2026, "base": 7000000, "signingProrated": 5000000},
+    {"year": 2027, "base": 8000000, "signingProrated": 5000000}
+  ],
+  "voidable": true
+}
