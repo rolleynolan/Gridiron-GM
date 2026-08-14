@@ -1,0 +1,57 @@
+[
+  {
+    "name": "New York",
+    "state": "NY",
+    "population": 8419600,
+    "region": "Northeast",
+    "weather": "Cold",
+    "loyalty": 9,
+    "media_pressure": 10,
+    "cost_of_living": 10,
+    "stadium_quality": 8
+  },
+  {
+    "name": "Los Angeles",
+    "state": "CA",
+    "population": 3980400,
+    "region": "West",
+    "weather": "Warm",
+    "loyalty": 6,
+    "media_pressure": 8,
+    "cost_of_living": 9,
+    "stadium_quality": 9
+  },
+  {
+    "name": "Chicago",
+    "state": "IL",
+    "population": 2716000,
+    "region": "Midwest",
+    "weather": "Cold",
+    "loyalty": 8,
+    "media_pressure": 9,
+    "cost_of_living": 7,
+    "stadium_quality": 7
+  },
+  {
+    "name": "Houston",
+    "state": "TX",
+    "population": 2328000,
+    "region": "South",
+    "weather": "Hot",
+    "loyalty": 7,
+    "media_pressure": 6,
+    "cost_of_living": 6,
+    "stadium_quality": 8
+  },
+  {
+    "name": "Phoenix",
+    "state": "AZ",
+    "population": 1690000,
+    "region": "West",
+    "weather": "Hot",
+    "loyalty": 6,
+    "media_pressure": 5,
+    "cost_of_living": 5,
+    "stadium_quality": 7
+  }
+]

@@ -1,0 +1,84 @@
+Gridiron GM - Current Python System Map
+
+Key Python files inspected:
+- gridiron_gm_pkg/simulation/facade/game_facade.py
+  Central application facade. Approximately 4.4k lines. Contains most compact endpoint logic: dashboard, roster, depth chart, schedule, standings, results, continue, sim game, inbox, game result lookup.
+
+- gridiron_gm_pkg/api/server.py
+  HTTP API route layer. Approximately 800 lines. Exposes GET/POST endpoints used by Godot.
+
+- gridiron_gm_pkg/api/rpc_server.py
+  RPC API layer. Approximately 660 lines. Mostly aligned with server.py.
+
+- gridiron_gm_pkg/api/schemas.py
+  API response/request schema support.
+
+- gridiron_gm_pkg/simulation/entities/league.py
+  LeagueManager state object. Owns teams, free agents, draft prospects, calendar, schedule, standings, results_by_week, user/control team ids, inboxes, decisions, simulated games, and time engine fields.
+
+- gridiron_gm_pkg/simulation/entities/team.py
+  Team object. Owns roster, IR list, practice squad, depth chart, team record, division/conference, cap placeholders, staff placeholders.
+
+- gridiron_gm_pkg/simulation/entities/player.py
+  Large Player model. Includes attributes, overall/potential generation, DNA-related systems, contract structures, injuries/status, and serialization helpers.
+
+- gridiron_gm_pkg/simulation/utils/calendar.py
+  Calendar model and serialization.
+
+- gridiron_gm_pkg/simulation/utils/generate_schedule.py
+  Schedule generation.
+
+- gridiron_gm_pkg/simulation/engine/game_engine.py
+  Basic game simulation engine. Approximately 944 lines.
+
+- gridiron_gm_pkg/simulation/utils/box_score.py
+  Box score helpers.
+
+- gridiron_gm_pkg/simulation/systems/roster/depth_chart.py
+  Depth chart helper logic.
+
+- gridiron_gm_pkg/simulation/persistence/savegame.py
+  Save/load support.
+
+Key Godot files inspected:
+- Godot/Scripts/DashboardController.cs
+  Main UI controller. Approximately 7.1k lines. Currently owns dashboard loading, tab switching, roster/depth chart UI, schedule, standings, inbox, popups, game sim flow, recent results, and backend calls.
+
+- Godot/Scripts/BackendProcessManager.cs
+  Launches local Python backend process and attaches HTTP/RPC client.
+
+- Godot/Scripts/API/IBackendClient.cs
+  Current backend abstraction. Important migration seam.
+
+- Godot/Scripts/API/APIclient.cs
+  HTTP client implementation.
+
+- Godot/Scripts/API/RpcClient.cs
+  RPC client implementation.
+
+- Godot/Dashboard.tscn
+  Main dashboard scene.
+
+Major current compact features:
+- Dashboard state
+- Continue / stop continue
+- Sim until
+- Team schedule
+- Standings
+- Recent results
+- Game result lookup
+- Game day popup data from dashboard/schedule
+- Sim user game
+- Recap and box score
+- Team roster
+- Team depth chart
+- Auto-fill depth chart
+- Manual depth chart update
+- Injury report support exists
+- Inbox/decision support exists
+
+Initial migration risk notes:
+- game_facade.py is doing too much. C# should split this into services.
+- DashboardController.cs is doing too much. Migration should not make it larger if avoidable.
+- Existing compact endpoint contracts are valuable. Use them as DTO shapes for C# services.
+- IBackendClient is a useful seam, but final C# GameCore should not pretend to be HTTP forever unless that keeps migration simple.

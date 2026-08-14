@@ -1,0 +1,42 @@
+Gridiron GM - Python to Godot C# Migration Roadmap
+
+Decision:
+Start a controlled C# GameCore migration now, before adding major systems such as trades, contracts, scouting, draft, free agency, injuries, player development, and CPU GM logic.
+
+Reason:
+The current Python backend is still portable. The working vertical slice is meaningful but not yet too large to recreate. Waiting longer will make the port harder because every new Python feature becomes future migration debt.
+
+Migration principle:
+Use Python as the reference implementation. Do not delete or replace the Python backend until the C# GameCore reaches vertical-slice parity.
+
+Target final architecture:
+Godot C# game process
+  - UI: existing Godot scenes/controllers
+  - GameCore: C# simulation/state/services
+  - Save/load: local C# JSON save system
+  - No local Python server required for normal play
+
+Transition architecture:
+Godot C# UI can temporarily support both:
+  - Python backend through IBackendClient
+  - Native C# GameCore through a local service adapter
+
+Port order:
+1. Create C# GameCore folder structure and service interfaces.
+2. Define C# DTOs matching current compact API contracts.
+3. Port core data models: LeagueState, TeamState, PlayerState, GameResultState, CalendarState.
+4. Port DashboardState service.
+5. Port TeamRoster and TeamDepthChart services.
+6. Port Continue/calendar advancement service.
+7. Port TeamSchedule, GameResult, and Standings services.
+8. Port GameDay/SimGame/BoxScore basics.
+9. Port save/load.
+10. Switch DashboardController from backend client calls to GameCore adapter calls.
+11. Remove Python backend process from normal Godot startup.
+12. Keep Python tests/docs as reference until C# tests cover parity.
+
+Do not do:
+- Do not ask Copilot to port everything in one prompt.
+- Do not mix large UI redesign with core migration.
+- Do not continue adding major Python systems during migration except bug fixes.
+- Do not delete current Python backend until C# vertical slice works.

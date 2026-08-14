@@ -1,5 +1,22 @@
-__pycache__/
-*.py[cod]
-*.egg-info/
-.pytest_cache/
-data/
+# Godot-generated files
+.godot/
+.mono/
+bin/
+obj/
+Godot/Godot/
+
+# Local saves and transient output
+Saves/
+*.log
+*.tmp
+.ggm-tmp/
+.test_tmp/
+pytest-temp*/
+zz_tmp*/
+
+# Editor and operating-system files
+.vs/
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
