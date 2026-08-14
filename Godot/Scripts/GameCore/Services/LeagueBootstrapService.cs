@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using GridironGM.GameCore.Models;
 using GridironGM.GameCore.Utilities;
 
@@ -98,9 +100,9 @@ public sealed class LeagueBootstrapService
         _context = context;
     }
 
-    public LeagueState CreateTestLeague()
+    public LeagueState CreateTestLeague(string teamSeedPath = null)
     {
-        var teams = CreateLeagueTeams();
+        var teams = CreateLeagueTeams(teamSeedPath);
         var userTeam = teams[0];
 
         var league = new LeagueState
@@ -197,9 +199,10 @@ public sealed class LeagueBootstrapService
         return schedule;
     }
 
-    private static List<TeamState> CreateLeagueTeams()
+    private static List<TeamState> CreateLeagueTeams(string teamSeedPath)
     {
-        return TeamSeeds
+        var seeds = LoadTeamSeeds(teamSeedPath);
+        return seeds
             .Select(seed => CreateTeam(
                 seed.TeamId,
                 seed.Name,
@@ -209,6 +212,58 @@ public sealed class LeagueBootstrapService
                 seed.CapRoom,
                 seed.SeedOffset))
             .ToList();
+    }
+
+    private static IReadOnlyList<TeamSeed> LoadTeamSeeds(string teamSeedPath)
+    {
+        if (string.IsNullOrWhiteSpace(teamSeedPath) || !File.Exists(teamSeedPath))
+            return TeamSeeds;
+
+        try
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var entries = JsonSerializer.Deserialize<List<TeamSeedAsset>>(File.ReadAllText(teamSeedPath), options);
+            if (entries == null || entries.Count != TeamCount)
+                return TeamSeeds;
+
+            var seeds = entries
+                .Where(entry =>
+                    !string.IsNullOrWhiteSpace(entry.City)
+                    && !string.IsNullOrWhiteSpace(entry.Name)
+                    && !string.IsNullOrWhiteSpace(entry.Abbreviation)
+                    && !string.IsNullOrWhiteSpace(entry.Conference)
+                    && !string.IsNullOrWhiteSpace(entry.Division))
+                .Select((entry, index) => new TeamSeed(
+                    entry.Abbreviation.Trim().ToLowerInvariant(),
+                    $"{entry.City.Trim()} {entry.Name.Trim()}",
+                    entry.Abbreviation.Trim().ToUpperInvariant(),
+                    entry.Division.Trim(),
+                    entry.Conference.Trim(),
+                    7_500_000m + (index * 425_000m),
+                    5 + (index * 4)))
+                .ToList();
+
+            var hasUniqueAbbreviations = seeds
+                .Select(seed => seed.Abbreviation)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() == TeamCount;
+            var hasBalancedConferences = seeds
+                .GroupBy(seed => seed.Conference, StringComparer.OrdinalIgnoreCase)
+                .Count() == 2
+                && seeds.GroupBy(seed => seed.Conference, StringComparer.OrdinalIgnoreCase).All(group => group.Count() == TeamCount / 2);
+
+            return seeds.Count == TeamCount && hasUniqueAbbreviations && hasBalancedConferences
+                ? seeds
+                : TeamSeeds;
+        }
+        catch (IOException)
+        {
+            return TeamSeeds;
+        }
+        catch (JsonException)
+        {
+            return TeamSeeds;
+        }
     }
 
     private static List<List<(TeamState HomeTeam, TeamState AwayTeam)>> BuildRoundRobinRounds(IReadOnlyList<TeamState> teams)
@@ -325,6 +380,15 @@ public sealed class LeagueBootstrapService
         string Conference,
         decimal CapRoom,
         int SeedOffset);
+
+    private sealed class TeamSeedAsset
+    {
+        public string City { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Abbreviation { get; set; } = "";
+        public string Conference { get; set; } = "";
+        public string Division { get; set; } = "";
+    }
 
     private static TeamState CreateTeam(
         string teamId,

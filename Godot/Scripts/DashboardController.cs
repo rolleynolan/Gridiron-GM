@@ -279,7 +279,7 @@ public partial class DashboardController : Control
     {
         if (OS.GetCmdlineUserArgs().Contains("--gamecore-smoke-test", StringComparer.Ordinal))
         {
-            var smokeResult = await Task.Run(GameCoreSmokeTest.Run);
+            var smokeResult = await Task.Run(() => GameCoreSmokeTest.Run(GetTeamSeedPath()));
             foreach (var step in smokeResult.Steps)
                 GD.Print($"[GameCore smoke] {step}");
 
@@ -807,7 +807,7 @@ public partial class DashboardController : Control
 
         try
         {
-            var result = await Task.Run(GameCoreSmokeTest.Run);
+            var result = await Task.Run(() => GameCoreSmokeTest.Run(GetTeamSeedPath()));
             var statusMessage = result.Ok
                 ? "C# GameCore smoke test passed."
                 : $"C# GameCore smoke test failed: {InlineMessage(result.Message)}";
@@ -2389,20 +2389,18 @@ public partial class DashboardController : Control
     {
         EnsureNativeGameCoreServices();
         _nativeGameCoreContext.ActiveLeague = null;
-        new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague();
+        new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath());
         _nativeStartupState = NativeStartupState.Ready;
         ResetDashboardPreviewUiState();
         ResetClientCachesForNewGame();
-        var saveResult = await SaveCurrentNativeGame(
-            GameCoreSaveService.NamedSaveFileName,
-            "New game started.",
-            autosaveToo: true);
-        if (!saveResult.Ok)
-            return;
-        HideStartupPanel();
         await RefreshAll();
-        SetPrimaryStatus("New game started.");
+        PrepareNewGameTeamPicker();
+        ShowNewGameTeamPicker();
+        SetPrimaryStatus("Choose a franchise to begin.");
     }
+
+    private static string GetTeamSeedPath()
+        => ProjectSettings.GlobalizePath("res://Assets/data_seed/teams.json");
 
     private async Task<bool> RefreshStateSummaryForNewGame()
     {
@@ -2465,7 +2463,8 @@ public partial class DashboardController : Control
 
             var display = BuildTeamPickDisplay(team);
             _teamPickIndexToId.Add(teamId);
-            _teamPickList.AddItem(display);
+            var abbreviation = team.ContainsKey("abbreviation") ? team["abbreviation"].ToString() : "";
+            _teamPickList.AddItem(display, LoadTeamLogo(abbreviation));
         }
 
         if (_teamPickIndexToId.Count == 0)
@@ -2530,6 +2529,36 @@ public partial class DashboardController : Control
 
     private async Task SetUserTeamForNewGame(string teamId)
     {
+        if (IsNativeRuntimeSource())
+        {
+            EnsureNativeGameCoreServices();
+            var league = _nativeGameCoreContext?.ActiveLeague;
+            var team = league?.Teams.FirstOrDefault(candidate =>
+                string.Equals(candidate.TeamId, teamId, StringComparison.OrdinalIgnoreCase));
+            if (team == null)
+            {
+                _gmTeamLabel = "(error)";
+                RenderFrontOfficeLabel();
+                SetPrimaryStatus("Unable to select that franchise.");
+                return;
+            }
+
+            league.UserTeamId = team.TeamId;
+            ResetClientCachesForNewGame();
+            var saveResult = await SaveCurrentNativeGame(
+                GameCoreSaveService.NamedSaveFileName,
+                $"Franchise started with {team.Name}.",
+                autosaveToo: true);
+            if (!saveResult.Ok)
+                return;
+
+            HideStartupPanel();
+            await RefreshAll();
+            await TrySelectTeamInRoster(team.TeamId);
+            SetPrimaryStatus($"Franchise started with {team.Name}.");
+            return;
+        }
+
         var payload = new Godot.Collections.Dictionary
         {
             { "team_id", teamId }
@@ -2617,6 +2646,14 @@ public partial class DashboardController : Control
         return string.IsNullOrWhiteSpace(abbr) ? name : $"{name} ({abbr})";
     }
 
+    private static Texture2D LoadTeamLogo(string abbreviation)
+    {
+        if (string.IsNullOrWhiteSpace(abbreviation))
+            return null;
+
+        return ResourceLoader.Load<Texture2D>($"res://Assets/team_logos/{abbreviation.Trim().ToUpperInvariant()}.png");
+    }
+
     private void SetNewGameButtonsDisabled(bool disabled)
     {
         if (_btnNewGame != null)
@@ -2639,7 +2676,7 @@ public partial class DashboardController : Control
                 saveService.Delete(GameCoreSaveService.NamedSaveFileName);
                 EnsureNativeGameCoreServices();
                 _nativeGameCoreContext.ActiveLeague = null;
-                new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague();
+                new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath());
                 _nativeStartupState = NativeStartupState.Ready;
                 ResetDashboardPreviewUiState();
                 ResetClientCachesForNewGame();
