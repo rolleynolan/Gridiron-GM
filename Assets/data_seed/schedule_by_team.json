@@ -1,0 +1,50 @@
+{
+  "BUF": [
+    { "week": 1, "opponent": "NE", "home": true },
+    { "week": 2, "opponent": "MIA", "home": false },
+    { "week": 3, "opponent": "NYJ", "home": true },
+    { "week": 4, "opponent": "NE", "home": false },
+    { "week": 5, "opponent": "MIA", "home": true },
+    { "week": 6, "opponent": "NYJ", "home": false },
+    { "week": 7, "opponent": "NE", "home": true },
+    { "week": 8, "opponent": "MIA", "home": false },
+    { "week": 9, "opponent": "NYJ", "home": true },
+    { "week": 10, "opponent": "NE", "home": false }
+  ],
+  "NE": [
+    { "week": 1, "opponent": "BUF", "home": false },
+    { "week": 2, "opponent": "NYJ", "home": true },
+    { "week": 3, "opponent": "MIA", "home": true },
+    { "week": 4, "opponent": "BUF", "home": true },
+    { "week": 5, "opponent": "NYJ", "home": false },
+    { "week": 6, "opponent": "MIA", "home": false },
+    { "week": 7, "opponent": "BUF", "home": false },
+    { "week": 8, "opponent": "NYJ", "home": true },
+    { "week": 9, "opponent": "MIA", "home": true },
+    { "week": 10, "opponent": "BUF", "home": true }
+  ],
+  "MIA": [
+    { "week": 1, "opponent": "NYJ", "home": true },
+    { "week": 2, "opponent": "BUF", "home": true },
+    { "week": 3, "opponent": "NE", "home": false },
+    { "week": 4, "opponent": "NYJ", "home": true },
+    { "week": 5, "opponent": "BUF", "home": false },
+    { "week": 6, "opponent": "NE", "home": true },
+    { "week": 7, "opponent": "NYJ", "home": false },
+    { "week": 8, "opponent": "BUF", "home": true },
+    { "week": 9, "opponent": "NE", "home": false },
+    { "week": 10, "opponent": "NYJ", "home": true }
+  ],
+  "NYJ": [
+    { "week": 1, "opponent": "MIA", "home": false },
+    { "week": 2, "opponent": "NE", "home": false },
+    { "week": 3, "opponent": "BUF", "home": false },
+    { "week": 4, "opponent": "MIA", "home": false },
+    { "week": 5, "opponent": "NE", "home": true },
+    { "week": 6, "opponent": "BUF", "home": true },
+    { "week": 7, "opponent": "MIA", "home": true },
+    { "week": 8, "opponent": "NE", "home": false },
+    { "week": 9, "opponent": "BUF", "home": false },
+    { "week": 10, "opponent": "MIA", "home": false }
+  ]
+}
