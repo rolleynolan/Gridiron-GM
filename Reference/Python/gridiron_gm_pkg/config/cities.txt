@@ -1,0 +1,351 @@
+New York City
+Los Angeles
+Chicago
+Houston
+Phoenix
+San Antonio
+Philadelphia
+San Diego
+Dallas
+Fort Worth
+Jacksonville
+Austin
+San Jose
+Charlotte
+Columbus
+Indianapolis
+San Francisco
+Seattle
+Oklahoma City
+Denver
+Nashville
+Washington
+El Paso
+Las Vegas
+Boston
+Detroit
+Louisville
+Portland
+Memphis
+Albuquerque
+Baltimore
+Milwaukee
+Tucson
+Fresno
+Sacramento
+Atlanta
+Mesa
+Kansas City
+Colorado Springs
+Raleigh
+Omaha
+Miami
+Virginia Beach
+Long Beach
+Oakland
+Minneapolis
+Bakersfield
+Tampa
+Tulsa
+Arlington
+Aurora
+Wichita
+Cleveland
+New Orleans
+Henderson
+Honolulu
+Anaheim
+Orlando
+Riverside
+Irvine
+Stockton
+Lexington
+Corpus Christi
+Cincinnati
+Santa Ana
+Greensboro
+Durham
+Pittsburgh
+Newark
+North Las Vegas
+St. Paul
+Lincoln
+Plano
+Jersey City
+Madison
+Anchorage
+Chandler
+Reno
+Gilbert
+Fort Wayne
+Chula Vista
+Lubbock
+Buffalo
+Port St. Lucie
+St. Louis
+St. Petersburg
+Toledo
+Laredo
+Glendale
+Chesapeake
+Winston-Salem
+Enterprise
+Irving
+Scottsdale
+Cape Coral
+Arlington
+Garland
+Frisco
+Boise City
+Huntsville
+Richmond
+Spring Valley
+Spokane
+Norfolk
+Tacoma
+San Bernardino
+McKinney
+Fremont
+Hialeah
+Fontana
+Modesto
+Santa Clarita
+Salt Lake City
+Baton Rouge
+Sioux Falls
+Moreno Valley
+Fayetteville
+Worcester
+Des Moines
+Grand Prairie
+Yonkers
+Tallahassee
+Rochester
+Little Rock
+Amarillo
+Peoria
+Knoxville
+Sunrise Manor
+Augusta
+Vancouver
+Columbus
+Overland Park
+Oxnard
+Grand Rapids
+Birmingham
+Tempe
+Brownsville
+Montgomery
+Providence
+Chattanooga
+Clarksville
+Huntington Beach
+Akron
+Ontario
+Fort Lauderdale
+Cary
+Paradise
+Newport News
+Glendale
+Mobile
+Elk Grove
+Salem
+Eugene
+Aurora
+Santa Rosa
+Rancho Cucamonga
+Murfreesboro
+Shreveport
+Pembroke Pines
+Springfield
+Fort Collins
+Denton
+Surprise
+Oceanside
+Roseville
+Garden Grove
+Killeen
+Corona
+Lancaster
+Charleston
+Salinas
+Palmdale
+Macon-Bibb County
+Lakewood
+Hollywood
+Paterson
+Alexandria
+Springfield
+Bellevue
+Olathe
+Hayward
+Naperville
+Kansas City
+Joliet
+Sunnyvale
+McAllen
+Bridgeport
+Gainesville
+Savannah
+Waco
+Visalia
+Thornton
+Columbia
+Escondido
+Palm Bay
+Mesquite
+Meridian
+Syracuse
+Rockford
+Pasadena
+Midland
+Pomona
+Victorville
+Miramar
+Metairie
+New Haven
+Lewisville
+Fargo
+Orange
+Jackson
+Round Rock
+Hampton
+Stamford
+Fullerton
+Coral Springs
+Elizabeth
+Warren
+Cedar Rapids
+Torrance
+Dayton
+Lehigh Acres
+Sterling Heights
+Santa Clara
+Carrollton
+Abilene
+Columbia
+Norman
+Kent
+West Valley City
+Pasadena
+Athens
+Clovis
+Pearland
+West Palm Beach
+College Station
+Lakeland
+Wilmington
+North Charleston
+Topeka
+The Woodlands
+Allentown
+Simi Valley
+New Braunfels
+Billings
+Rochester
+Nampa
+Broken Arrow
+Lafayette
+Spring Hill
+Fairfield
+Thousand Oaks
+Goodyear
+Vallejo
+Concord
+Menifee
+Independence
+Hartford
+Conroe
+Arvada
+Buckeye
+High Point
+Antioch
+Cambridge
+Brandon
+League City
+Las Cruces
+Ann Arbor
+Clearwater
+Odessa
+Richardson
+Tuscaloosa
+Waterbury
+Allen
+Berkeley
+Manchester
+East Los Angeles
+Greeley
+Rio Rancho
+Pompano Beach
+Georgetown
+Evansville
+Westminster
+Concord
+Lowell
+West Jordan
+Tyler
+South Fulton
+Richmond
+Carlsbad
+Elgin
+Murrieta
+Provo
+Lansing
+Springfield
+Everett
+Spokane Valley
+Sparks
+Temecula
+Pueblo
+Beaumont
+Palm Coast
+Riverview
+St. George
+Miami Gardens
+Santa Maria
+Edinburg
+Davie
+Peoria
+Jurupa Valley
+Columbia
+Hillsboro
+Gresham
+San Buenaventura (Ventura)
+Bend
+Fishers
+Sugar Land
+Fayetteville
+San Tan Valley
+Costa Mesa
+Centennial
+Lee's Summit
+Downey
+Green Bay
+Suffolk
+Brockton
+Boulder
+Sandy Springs
+Fort Myers
+Carmel
+South Bend
+Dearborn
+West Covina
+Yuma
+Renton
+Rialto
+Albany
+Wichita Falls
+Vacaville
+Highlands Ranch
+Deltona
+Quincy
+Lynn
+Boca Raton
+Hesperia
+Tracy
+El Cajon
+New Bedford
+Edmond
+Chico
+El Monte
+Temple

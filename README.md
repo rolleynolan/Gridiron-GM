@@ -1,22 +1,18 @@
-# How to Write Codex-Friendly Prompts for Gridiron GM
+# Gridiron GM
 
-## ✅ Prompt Format Template
+This is the master working folder for Gridiron GM.
 
-**Title:** Clear and concise description of task  
-**Files Affected:** List where changes will happen  
-**Goal:** What the code should do  
-**Constraints:** Any restrictions or design rules  
-**Examples (Optional):** Inputs/outputs, edge cases
+## Active game
 
----
+`Godot/` is the active Godot/C# game. It is the only runtime that should be developed or shipped.
 
-## 🔧 Example
+## Folder guide
 
-**Title:** Add rookie scouting fog of war  
-**Files:** `scouting/scout_engine.py`, `players/player.py`  
-**Goal:** Hide full OVR/POT unless team has strong scouting  
-**Constraints:** Scouting accuracy varies by GM/team profile  
-**Prompt:**  
-```python
-"Implement a fog-of-war system that limits how accurately teams can see rookie ratings based on their scouting bias. Add masking logic and GM-specific accuracy profiles."
-```
+- `Assets/Data/` holds imported league, city, and supporting data assets.
+- `Reference/Python/` holds the retired Python implementation for behavior reference only. Do not run, change, test, or ship it unless the project direction explicitly changes.
+- `Saves/` is for local save files. Saves are intentionally excluded from Git.
+- `Archive/Porting-Notes/` preserves older C# migration notes; the root planning files are authoritative.
+
+## Project planning
+
+Read `AI_INSTRUCTIONS.md`, `ROADMAP.md`, and `BLUEPRINT.md` before making project changes.

@@ -1,0 +1,95 @@
+Gridiron GM - Target C# GameCore Structure
+
+Recommended folder:
+Godot/Scripts/GameCore/
+
+Recommended subfolders:
+GameCore/
+  Models/
+    LeagueState.cs
+    TeamState.cs
+    PlayerState.cs
+    CalendarState.cs
+    GameScheduleEntry.cs
+    GameResultState.cs
+    BoxScoreState.cs
+    DepthChartState.cs
+  DTOs/
+    DashboardDtos.cs
+    RosterDtos.cs
+    DepthChartDtos.cs
+    ScheduleDtos.cs
+    StandingsDtos.cs
+    GameResultDtos.cs
+    ContinueDtos.cs
+  Services/
+    GameCoreContext.cs
+    LeagueBootstrapService.cs
+    DashboardService.cs
+    TimeService.cs
+    ScheduleService.cs
+    StandingsService.cs
+    RosterService.cs
+    DepthChartService.cs
+    GameSimulationService.cs
+    SaveService.cs
+  Utilities/
+    SafeValue.cs
+    IdGenerator.cs
+    RandomService.cs
+    CompactMappers.cs
+  Tests/ or separate test project later
+
+Service responsibilities:
+
+GameCoreContext:
+- Owns current LeagueState.
+- Tracks selected/user team id.
+- Provides shared access to services.
+
+LeagueBootstrapService:
+- Creates a new league from teams/config.
+- Generates initial rosters if needed.
+- Generates schedule if needed.
+
+DashboardService:
+- Builds compact dashboard state.
+- Builds action_items.
+- Builds recent_results.
+
+TimeService:
+- Continue logic.
+- Day/week/phase advancement.
+- Stop reason detection.
+
+ScheduleService:
+- Team schedule rows.
+- Current game day detection.
+- Game id generation/lookup.
+
+StandingsService:
+- Compact standings.
+- Fallback computation from completed results.
+
+RosterService:
+- Team roster compact rows.
+- Roster validation.
+- Position counts.
+
+DepthChartService:
+- Read compact depth chart.
+- Validate depth chart.
+- Auto-fill.
+- Move up/down/set starter.
+
+GameSimulationService:
+- Simulate current/user game.
+- Store result.
+- Build compact box score.
+
+SaveService:
+- Serialize/deserialize LeagueState.
+- Later handles versioned save migrations.
+
+Migration guideline:
+Do not put all of this into DashboardController.cs. The port should reduce reliance on the 7k-line controller, not increase it.

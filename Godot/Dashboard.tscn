@@ -1,0 +1,1428 @@
+[gd_scene load_steps=2 format=3 uid="uid://dhwnw6srg1ng5"]
+
+[ext_resource type="Script" uid="uid://dxr30sl3wnfus" path="res://Scripts/DashboardController.cs" id="1_pj1bh"]
+
+[node name="Dashboard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pj1bh")
+
+[node name="AppMargin" type="MarginContainer" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MainPadding" type="MarginContainer" parent="AppMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="MainLayout" type="VBoxContainer" parent="AppMargin/MainPadding"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="TabButtonRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="BtnOverviewTab" type="Button" parent="AppMargin/MainPadding/MainLayout/TabButtonRow"]
+custom_minimum_size = Vector2(108, 28)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+theme_override_font_sizes/font_size = 14
+text = "Overview"
+
+[node name="BtnLeagueTab" type="Button" parent="AppMargin/MainPadding/MainLayout/TabButtonRow"]
+custom_minimum_size = Vector2(108, 28)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 14
+text = "League"
+
+[node name="BtnRosterTab" type="Button" parent="AppMargin/MainPadding/MainLayout/TabButtonRow"]
+custom_minimum_size = Vector2(108, 28)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 14
+text = "Roster"
+
+[node name="HeaderPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="HeaderRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/HeaderPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 6
+
+[node name="CalendarBlock" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="CalendarTitle" type="Label" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/CalendarBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Season"
+
+[node name="CalendarText" type="Label" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/CalendarBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "State: loading..."
+
+[node name="FrontOfficeBlock" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="LblFrontOfficeHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/FrontOfficeBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "GM: User GM"
+
+[node name="LblUserTeam" type="Label" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/FrontOfficeBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "General Manager - Team: ??"
+
+[node name="GameBlock" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="GameStatus" type="Label" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/GameBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "No user game today"
+
+[node name="GameNext" type="Label" parent="AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/GameBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Next: TBD"
+
+[node name="ContinueBlock" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="ContinueStatus" type="Label" parent="AppMargin/MainPadding/MainLayout/ContinueBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Status: Ready"
+
+[node name="ServerStatus" type="Label" parent="AppMargin/MainPadding/MainLayout/ContinueBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Server: checking..."
+
+[node name="ActionButtonRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="BtnContinue" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(166, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Continue"
+
+[node name="BtnInbox" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Inbox"
+
+[node name="BtnLeagueShortcut" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "League"
+
+[node name="BtnRosterShortcut" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Roster"
+
+[node name="SimUntilSelect" type="OptionButton" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(190, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="BtnSimUntil" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Sim Until"
+
+[node name="BtnSaveGame" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Save Game"
+
+[node name="DebugToggleRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="BtnToggleDebug" type="CheckButton" parent="AppMargin/MainPadding/MainLayout/DebugToggleRow"]
+custom_minimum_size = Vector2(144, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Show Debug Tools"
+
+[node name="DebugPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="DebugToolsRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/DebugPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="BtnRefresh" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Refresh"
+
+[node name="BtnAdvanceDay" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Advance Day"
+
+[node name="BtnNewGame" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "New Game"
+
+[node name="BtnResetSave" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Reset Save"
+
+[node name="BtnSaveNativeGame" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(150, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Save Native Game"
+
+[node name="BtnLoadNativeGame" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(150, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Load Native Game"
+
+[node name="BtnRunGameCoreSmokeTest" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(240, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Run C# GameCore Smoke Test"
+
+[node name="BtnCompareGameCoreContracts" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Compare C# / Python Contracts"
+
+[node name="LblRuntimeSource" type="Label" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Runtime Source:"
+
+[node name="OptRuntimeSource" type="OptionButton" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
+custom_minimum_size = Vector2(250, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="DebugOutputLabel" type="Label" parent="AppMargin/MainPadding/MainLayout/DebugPanel"]
+layout_mode = 2
+text = "Debug Output"
+
+[node name="MainTabs" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = false
+theme_override_constants/separation = 0
+
+[node name="OverviewTab" type="ScrollContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+metadata/_tab_index = 0
+
+[node name="OverviewContentMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 12
+
+[node name="OverviewContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="OverviewRow" type="HBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="OverviewLeftColumn" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="TeamSummaryPanel" type="PanelContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn"]
+custom_minimum_size = Vector2(0, 112)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TeamSummaryMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/TeamSummaryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="TeamSummaryContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/TeamSummaryPanel/TeamSummaryMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="LblTeamSummaryHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/TeamSummaryPanel/TeamSummaryMargin/TeamSummaryContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Team Summary"
+
+[node name="RtlTeamSummary" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/TeamSummaryPanel/TeamSummaryMargin/TeamSummaryContent"]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = false
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="StandingsPanel" type="PanelContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn"]
+custom_minimum_size = Vector2(0, 178)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="StandingsMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/StandingsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="StandingsContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/StandingsPanel/StandingsMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="StandingsSummaryHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/StandingsPanel/StandingsMargin/StandingsContent"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Standings Snapshot"
+
+[node name="OverviewStandingsSnapshot" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/StandingsPanel/StandingsMargin/StandingsContent"]
+custom_minimum_size = Vector2(0, 108)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="RecentResultsPanel" type="PanelContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn"]
+custom_minimum_size = Vector2(0, 156)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RecentResultsMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="RecentResultsContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel/RecentResultsMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="LblRecentResultsHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel/RecentResultsMargin/RecentResultsContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Recent Results"
+
+[node name="RecentResultsScroll" type="ScrollContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel/RecentResultsMargin/RecentResultsContent"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="OverviewRecentResults" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel/RecentResultsMargin/RecentResultsContent/RecentResultsScroll"]
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = false
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="OverviewRightColumn" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="ActionRequiredPanel" type="PanelContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn"]
+custom_minimum_size = Vector2(0, 206)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="ActionRequiredMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="ActionRequiredContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_constants/separation = 10
+
+[node name="LblOverviewActionHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Action Required"
+
+[node name="OverviewActionTitle" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="OverviewActionBody" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="OverviewActionSuggested" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Suggested action:"
+
+[node name="OverviewActionButton" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Continue"
+
+[node name="NextEventPanel" type="PanelContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn"]
+custom_minimum_size = Vector2(0, 136)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="NextEventMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/NextEventPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="NextEventContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/NextEventPanel/NextEventMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_constants/separation = 8
+
+[node name="LblNextEventHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/NextEventPanel/NextEventMargin/NextEventContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Next Event"
+
+[node name="OverviewNextEventSummary" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/NextEventPanel/NextEventMargin/NextEventContent"]
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="PlayoffPicturePanel" type="PanelContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent"]
+visible = false
+custom_minimum_size = Vector2(0, 260)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PlayoffPictureMargin" type="MarginContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="PlayoffPictureContent" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel/PlayoffPictureMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="LblPlayoffPictureHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel/PlayoffPictureMargin/PlayoffPictureContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Playoff Picture"
+
+[node name="PlayoffPictureScroll" type="ScrollContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel/PlayoffPictureMargin/PlayoffPictureContent"]
+custom_minimum_size = Vector2(0, 188)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="OverviewPlayoffSummary" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel/PlayoffPictureMargin/PlayoffPictureContent/PlayoffPictureScroll"]
+visible = true
+custom_minimum_size = Vector2(0, 188)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="PopupColumns" type="PopupMenu" parent="AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab"]
+
+[node name="StateDump" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/DebugPanel"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+scroll_active = true
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="LeagueTab" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 1
+
+[node name="LeagueHubPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="LeagueHubHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "League Hub"
+
+[node name="LeagueHubControls" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="LblResultsWeek" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Results Week"
+
+[node name="ResultsWeekSelect" type="OptionButton" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="BtnHubRefresh" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Refresh"
+
+[node name="LeagueHubTabs" type="TabContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="StandingsTab" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 0
+
+[node name="StandingsTree" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/StandingsTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+
+[node name="ResultsTab" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 1
+
+[node name="ResultsListPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResultsList" type="ItemList" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/ResultsListPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="BoxScorePanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="BoxScoreHeaderRow" type="HBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnBoxScoreBack" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreHeaderRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Back"
+
+[node name="LblBoxScoreHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+
+[node name="BoxScoreQuarterTree" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel"]
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="BoxScoreTeamStatsTree" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel"]
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="LblBoxScoreLeaders" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Leaders"
+
+[node name="BoxScoreLeadersList" type="ItemList" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel"]
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="ScheduleTab" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 2
+
+[node name="ScheduleList" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="ScheduleActionRow" type="HBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LblScheduleActionStatus" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+text = "Select a game to view details."
+
+[node name="BtnScheduleAction" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleActionRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+disabled = true
+theme_override_font_sizes/font_size = 14
+text = "View"
+
+[node name="Injuries" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 3
+
+[node name="InjuriesTree" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/Injuries"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="HistoryTab" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+metadata/_tab_index = 4
+
+[node name="HistorySplit" type="HSplitContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+split_offset = 250
+
+[node name="HistorySeasonListPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="LblHistorySeasons" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistorySeasonListPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Completed Seasons"
+
+[node name="HistorySeasonList" type="ItemList" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistorySeasonListPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="HistoryDetailPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="LblHistoryDetail" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistoryDetailPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Season Detail"
+
+[node name="HistoryDetailScroll" type="ScrollContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistoryDetailPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HistoryDetailText" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistoryDetailPanel/HistoryDetailScroll"]
+custom_minimum_size = Vector2(0, 420)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="RosterTab" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+metadata/_tab_index = 2
+
+[node name="TeamList" type="ItemList" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BtnSetUserTeam" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab"]
+visible = false
+layout_mode = 2
+text = "Set as User Team"
+
+[node name="RosterSummary" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+text = "Team: -\nActive: - / -\nIR: -\nPractice Squad: - / -\nTotal: -"
+
+[node name="RosterModeRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="BtnRosterViewMode" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterModeRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+theme_override_font_sizes/font_size = 14
+text = "Roster"
+
+[node name="BtnDepthChartViewMode" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterModeRow"]
+custom_minimum_size = Vector2(120, 28)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 14
+text = "Depth Chart"
+
+[node name="RosterSplit" type="HSplitContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RosterPane" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="FilterRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="RosterSearch" type="LineEdit" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/FilterRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+placeholder_text = "Search name..."
+
+[node name="PosFilter" type="OptionButton" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/FilterRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="BtnClearFilters" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/FilterRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Clear"
+
+[node name="RosterTree" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="PlayerReportPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="LblPlayerHeader" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="RtlScoutSummary" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 14
+
+[node name="ReportScroll" type="ScrollContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RtlScoutReport" type="RichTextLabel" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/ReportScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content = true
+
+[node name="TagsRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="DepthChartPanel" type="VBoxContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="DepthChartSummary" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+text = "Depth Chart Status: -"
+
+[node name="DepthChartActionRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="BtnAutoFillDepthChart" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(152, 28)
+theme_override_font_sizes/font_size = 14
+text = "Auto-Fill Depth Chart"
+
+[node name="BtnDepthChartMoveUp" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(92, 28)
+disabled = true
+theme_override_font_sizes/font_size = 14
+text = "Move Up"
+
+[node name="BtnDepthChartMoveDown" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(102, 28)
+disabled = true
+theme_override_font_sizes/font_size = 14
+text = "Move Down"
+
+[node name="BtnDepthChartSetStarter" type="Button" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(104, 28)
+disabled = true
+theme_override_font_sizes/font_size = 14
+text = "Set Starter"
+
+[node name="DepthChartActionStatus" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+text = ""
+
+[node name="DepthChartSelectionStatus" type="Label" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Selected: none"
+
+[node name="DepthChartTree" type="Tree" parent="AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="GameDayPopup" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="ColorRect" parent="GameDayPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+mouse_filter = 1
+
+[node name="CenterWrap" type="CenterContainer" parent="GameDayPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="GameDayPopup/CenterWrap"]
+custom_minimum_size = Vector2(500, 248)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Margin" type="MarginContainer" parent="GameDayPopup/CenterWrap/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="GameDayPopup/CenterWrap/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="LblGameDayTitle" type="Label" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Game Day"
+
+[node name="LblGameDayWeek" type="Label" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Game"
+
+[node name="LblGameDayMatchup" type="Label" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Unknown matchup"
+
+[node name="LblGameDayVenue" type="Label" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Home Game"
+
+[node name="LblGameDayRecords" type="Label" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Record unavailable"
+
+[node name="LblGameDayStatus" type="Label" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Game ready."
+
+[node name="Spacer" type="Control" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="GameDayPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="BtnGameDaySim" type="Button" parent="GameDayPopup/CenterWrap/Panel/Margin/Content/ButtonRow"]
+custom_minimum_size = Vector2(112, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Sim Game"
+
+[node name="BtnGameDayWatch" type="Button" parent="GameDayPopup/CenterWrap/Panel/Margin/Content/ButtonRow"]
+custom_minimum_size = Vector2(112, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Watch Game"
+
+[node name="BtnGameDayCancel" type="Button" parent="GameDayPopup/CenterWrap/Panel/Margin/Content/ButtonRow"]
+custom_minimum_size = Vector2(112, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Cancel"
+
+[node name="PostGameRecapPopup" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="ColorRect" parent="PostGameRecapPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+mouse_filter = 1
+
+[node name="CenterWrap" type="CenterContainer" parent="PostGameRecapPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="PostGameRecapPopup/CenterWrap"]
+custom_minimum_size = Vector2(536, 292)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Margin" type="MarginContainer" parent="PostGameRecapPopup/CenterWrap/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="PostGameRecapPopup/CenterWrap/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="LblPostGameTitle" type="Label" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Final"
+
+[node name="LblPostGameScore" type="Label" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "HOME - AWAY"
+
+[node name="LblPostGameWinner" type="Label" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Winner: TBD"
+
+[node name="LblPostGameInfo" type="Label" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Game complete"
+
+[node name="LblPostGameSummary" type="Label" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+autowrap_mode = 3
+text = "Game complete."
+
+[node name="LblPostGameStatus" type="Label" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = ""
+
+[node name="Spacer" type="Control" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="BtnPostGameBoxScore" type="Button" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content/ButtonRow"]
+custom_minimum_size = Vector2(128, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "View Box Score"
+
+[node name="BtnPostGameClose" type="Button" parent="PostGameRecapPopup/CenterWrap/Panel/Margin/Content/ButtonRow"]
+custom_minimum_size = Vector2(108, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Close"
+
+[node name="BoxScorePopup" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="ColorRect" parent="BoxScorePopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+mouse_filter = 1
+
+[node name="CenterWrap" type="CenterContainer" parent="BoxScorePopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="BoxScorePopup/CenterWrap"]
+custom_minimum_size = Vector2(668, 452)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Margin" type="MarginContainer" parent="BoxScorePopup/CenterWrap/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="BoxScorePopup/CenterWrap/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="LblBoxScorePopupTitle" type="Label" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Box Score"
+
+[node name="LblBoxScorePopupInfo" type="Label" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Game info"
+
+[node name="LblBoxScorePopupScore" type="Label" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "HOME - AWAY"
+
+[node name="LblBoxScorePopupStatus" type="Label" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = ""
+
+[node name="LblBoxScorePopupTeamStats" type="Label" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Team Stats"
+
+[node name="BoxScorePopupTeamStatsTree" type="Tree" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 156)
+layout_mode = 2
+size_flags_horizontal = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="LblBoxScorePopupQuarterScores" type="Label" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+text = "Scoring By Quarter"
+
+[node name="BoxScorePopupQuarterTree" type="Tree" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+column_titles_visible = true
+theme_override_font_sizes/font_size = 13
+
+[node name="Spacer" type="Control" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="BtnBoxScorePopupClose" type="Button" parent="BoxScorePopup/CenterWrap/Panel/Margin/Content/ButtonRow"]
+custom_minimum_size = Vector2(108, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Close"
+
+[node name="StartupPanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="ColorRect" parent="StartupPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+mouse_filter = 1
+
+[node name="CenterWrap" type="CenterContainer" parent="StartupPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="StartupPanel/CenterWrap"]
+custom_minimum_size = Vector2(420, 256)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Margin" type="MarginContainer" parent="StartupPanel/CenterWrap/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="StartupPanel/CenterWrap/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LblStartupTitle" type="Label" parent="StartupPanel/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Gridiron GM"
+
+[node name="LblStartupSubtitle" type="Label" parent="StartupPanel/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Native C# GameCore"
+
+[node name="LblStartupWarning" type="Label" parent="StartupPanel/CenterWrap/Panel/Margin/Content"]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = "Unable to load native save."
+
+[node name="LblStartupStatus" type="Label" parent="StartupPanel/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Start a new game or load an existing native save."
+
+[node name="StartupButtonRow" type="VBoxContainer" parent="StartupPanel/CenterWrap/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BtnStartupContinue" type="Button" parent="StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Continue / Load Autosave"
+
+[node name="BtnStartupLoadGame" type="Button" parent="StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Load Game"
+
+[node name="BtnStartupNewGame" type="Button" parent="StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "New Game"
+
+[node name="BtnStartupExit" type="Button" parent="StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Exit"
+
+[node name="NewGameConfirmDialog" type="ConfirmationDialog" parent="."]
+title = "Confirm New Game"
+ok_button_text = "Confirm New Game"
+dialog_text = "Start a new game? This will overwrite the current autosave."
+
+[node name="NewGameTeamPicker" type="AcceptDialog" parent="."]
+title = "Select Starting Team"
+
+[node name="PickerContent" type="VBoxContainer" parent="NewGameTeamPicker"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LblPickTeamText" type="Label" parent="NewGameTeamPicker/PickerContent"]
+layout_mode = 2
+text = "Select your starting team"
+
+[node name="TeamPickList" type="ItemList" parent="NewGameTeamPicker/PickerContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LblPickTeamHint" type="Label" parent="NewGameTeamPicker/PickerContent"]
+layout_mode = 2
+text = "This sets your GM team for this save."
+

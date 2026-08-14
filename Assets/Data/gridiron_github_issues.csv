@@ -1,0 +1,35 @@
+Title,Body,Labels,State
+Implement Depth Chart Logic (starter ranking),Needed for accurate game simulation. Implement in `depth_chart_manager.py`.,high,open
+Add Playoff Bracket & Seeding logic,Create playoff logic in `season_calendar.py` based on standings.,high,open
+Finalize Save/Load System,Complete serialization in `save_game_manager.py` for full persistence.,high,open
+Implement Buyer-Initiated Trades,Allow AI teams to initiate trades proactively.,high,open
+Add Multi-Asset Trade Handling,Support trades involving multiple players/picks in `market_analysis.py`.,high,open
+Add CPU Draft Logic,Implement draft decision-making logic in `draft_manager.py`.,high,open
+Add Salary Cap System,Implement enforcement and calculation in `contract_engine.py`.,high,open
+Build Player Progression Engine,Simulate player growth in `player_development_engine.py`.,high,open
+Implement Aging & Regression Logic,Add aging impact to performance over time.,high,open
+Add Depth-Based Sim Effects,Use depth chart rankings to affect sim outcomes.,high,open
+Add Trade Block & Rumors System,Simulate trade rumors and block in front office.,high,open
+Draft Day Trade Engine,Enable time-limited trades during draft flow.,medium,open
+Scouting Fog of War Mechanics,Restrict full player info; add mystery to scouting.,medium,open
+Rookie Scouting + Interviews System,Add narrative/interview layer to rookie scouting.,medium,open
+Practice Squad / Call-Ups,Manage fringe roster player mechanics.,medium,open
+Counteroffer Evaluation Expansion,Enhance AI trade negotiation logic.,medium,open
+Player Usage Stats in Game Sim,Track player touches/snaps for stat realism.,medium,open
+Coach Impact on Game Sim,Tie coaches to play calling/outcomes.,medium,open
+Add Owner Goals System,"Set season objectives, bonuses, penalties.",medium,open
+Implement Rookie Draft Board Movement,Shift rankings and visibility dynamically.,medium,open
+Add Prospect Media Storylines,Simulate narratives around prospects.,medium,open
+Social Media System,Create simulated tweets/news for immersion.,low,open
+Hall of Fame Tracking,Track legacy and achievements over years.,low,open
+Retired Player Career Paths,Simulate post-retirement jobs/stories.,low,open
+Ownership Personalities & Reactions,Add variance to team owner decisions.,low,open
+Medical/Training Staff Systems,Handle injuries and recovery realism.,low,open
+Inflation System for Contracts,Adjust financials over time periods.,low,open
+Stadium Costs & Revenue,Add income/expense layer for stadium.,low,open
+Ownership Cash Injection Logic,Simulate bailouts or cash infusions.,low,open
+Add Financial Engine (Revenue/Expenses),Track all team income/outgo.,low,open
+Veteran Mentorship Logic,Let vets help rookies develop.,low,open
+Agent Personalities,Add behavior differences during contract talks.,low,open
+GM & Team Style Profiles,Affect CPU logic with style types.,low,open
+League-Wide News Feed System,Surface important stories league-wide.,low,open
