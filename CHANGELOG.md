@@ -17,6 +17,7 @@ All notable project changes are recorded here.
 - Restored the dashboard's missing column-picker button.
 - Moved active data, logo, and font assets under `Godot/Assets/` so they are packaged with the game.
 - New franchises now load the seeded 32-team league and display team logos in the franchise picker.
+- Removed the retired HTTP rendering paths for roster, depth chart, standings, results, schedule, and injury-report screens; those views now call GameCore directly.
 
 ### Notes
 

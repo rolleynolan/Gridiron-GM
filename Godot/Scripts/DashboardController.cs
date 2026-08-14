@@ -2792,89 +2792,14 @@ public partial class DashboardController : Control
             return;
         }
 
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeRosterTab();
-            return;
-        }
-
-        SetRosterSummaryPlaceholder();
-        ShowRosterMessage("Loading roster...");
-
-        var (status, body) = await GetWithTimeoutAsync("/team_roster", REQUEST_TIMEOUT_MS);
-        if (status < 200 || status >= 300)
-        {
-            ClearRosterTab("Roster unavailable");
-            SetStateDumpText(body);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(body))
-        {
-            ClearRosterTab("Roster unavailable");
-            return;
-        }
-
-        var parsed = Json.ParseString(body);
-        if (parsed.VariantType != Variant.Type.Dictionary)
-        {
-            ClearRosterTab("Roster unavailable");
-            return;
-        }
-
-        var payload = parsed.AsGodotDictionary();
-        var okVar = GetFirstNonNil(payload, "ok", "success");
-        if (!IsNil(okVar) && !GetBoolValue(okVar, true))
-        {
-            var error = FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Roster unavailable");
-            ClearRosterTab(string.IsNullOrWhiteSpace(error) ? "Roster unavailable" : error);
-            return;
-        }
-
-        RenderRosterSnapshot(payload);
+        RefreshNativeRosterTab();
+        await Task.CompletedTask;
     }
 
     private async Task RefreshDepthChartView()
     {
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeDepthChartView();
-            return;
-        }
-
-        SetDepthChartPlaceholder();
-
-        var (status, body) = await GetWithTimeoutAsync("/team_depth_chart", REQUEST_TIMEOUT_MS);
-        if (status < 200 || status >= 300)
-        {
-            ClearDepthChartView("Depth chart unavailable");
-            SetStateDumpText(body);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(body))
-        {
-            ClearDepthChartView("Depth chart unavailable");
-            return;
-        }
-
-        var parsed = Json.ParseString(body);
-        if (parsed.VariantType != Variant.Type.Dictionary)
-        {
-            ClearDepthChartView("Depth chart unavailable");
-            return;
-        }
-
-        var payload = parsed.AsGodotDictionary();
-        var okVar = GetFirstNonNil(payload, "ok", "success");
-        if (!IsNil(okVar) && !GetBoolValue(okVar, true))
-        {
-            var error = FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Depth chart unavailable");
-            ClearDepthChartView(string.IsNullOrWhiteSpace(error) ? "Depth chart unavailable" : error);
-            return;
-        }
-
-        RenderDepthChartSnapshot(payload);
+        RefreshNativeDepthChartView();
+        await Task.CompletedTask;
     }
 
     private async Task AutoFillDepthChart()
@@ -4680,116 +4605,14 @@ public partial class DashboardController : Control
 
     private async Task RefreshStandingsAsync()
     {
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeStandingsView();
-            return;
-        }
-
-        ShowStandingsMessage("Standings: loading...");
-        var (status, body) = await GetWithTimeoutAsync("/standings", REQUEST_TIMEOUT_MS);
-        if (status < 200 || status >= 300)
-        {
-            var summary = SummarizeRequestError("/standings", status, body);
-            ShowStandingsMessage($"(error) {summary}");
-            SetStateDumpText(body);
-            SetServerError(summary);
-            return;
-        }
-
-        var parsed = Json.ParseString(body);
-        if (parsed.VariantType == Variant.Type.Dictionary)
-        {
-            var payload = parsed.AsGodotDictionary();
-            var ok = GetBoolValue(GetFirstNonNil(payload, "ok", "success"), true);
-            if (!ok)
-            {
-                var error = CleanStatusMessage(
-                    FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Unable to load standings."),
-                    "Unable to load standings.");
-                ShowStandingsMessage(error);
-                return;
-            }
-        }
-        var standings = ExtractStandingsArray(parsed);
-        if (standings == null)
-        {
-            SetStateDumpText(body);
-            ShowStandingsMessage("(error) invalid standings payload");
-            return;
-        }
-
-        PopulateStandingsTree(standings);
+        RefreshNativeStandingsView();
+        await Task.CompletedTask;
     }
 
     private async Task RefreshResultsAsync(string weekKey)
     {
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeResultsView(weekKey);
-            await Task.CompletedTask;
-            return;
-        }
-
-        var selectedIndex = _resultsWeekSelect != null ? _resultsWeekSelect.Selected : -1;
-        var requestedLabel = string.IsNullOrWhiteSpace(weekKey) ? "auto" : weekKey;
-        GD.Print($"Results refresh week={requestedLabel} (selectedIndex={selectedIndex})");
-        ShowResultsMessage("Results: loading...");
-        var path = string.IsNullOrWhiteSpace(weekKey)
-            ? "/results"
-            : $"/results?week_key={Uri.EscapeDataString(weekKey)}";
-        var (status, body) = await GetWithTimeoutAsync(path, REQUEST_TIMEOUT_MS);
-        if (status < 200 || status >= 300)
-        {
-            var summary = SummarizeRequestError(path, status, body);
-            ShowResultsMessage($"(error) {summary}");
-            SetStateDumpText(body);
-            return;
-        }
-
-        var parsed = Json.ParseString(body);
-        Godot.Collections.Dictionary payload = null;
-        if (parsed.VariantType == Variant.Type.Dictionary)
-            payload = parsed.AsGodotDictionary();
-        var results = ExtractArrayPayload(parsed, "results", "games", "matchups");
-        if (results == null)
-        {
-            ShowResultsMessage("(error)");
-            return;
-        }
-
-        var payloadWeekKey = "";
-        var availableWeekKeys = new List<string>();
-        var availableWeekLabels = new List<string>();
-        var completedWeekKeys = new List<string>();
-        var completedWeekLabels = new List<string>();
-        if (payload != null)
-        {
-            payloadWeekKey = FmtString(GetFirstNonNil(payload, "week_key", "selected_week_key", "selectedWeekKey"), "");
-            availableWeekKeys = ParseStringList(TryExtractArray(payload, "available_week_keys", "availableWeekKeys"));
-            availableWeekLabels = ParseStringList(TryExtractArray(payload, "available_week_labels", "availableWeekLabels"));
-            completedWeekKeys = ParseStringList(TryExtractArray(payload, "completed_week_keys", "completedWeekKeys"));
-            completedWeekLabels = ParseStringList(TryExtractArray(payload, "completed_week_labels", "completedWeekLabels"));
-        }
-
-        _availableResultsWeekKeys.Clear();
-        _availableResultsWeekKeys.AddRange(availableWeekKeys);
-        _resultsWeekLabels.Clear();
-        for (var i = 0; i < availableWeekKeys.Count; i++)
-        {
-            var key = availableWeekKeys[i];
-            var label = i < availableWeekLabels.Count ? availableWeekLabels[i] : "";
-            if (!string.IsNullOrWhiteSpace(key))
-                _resultsWeekLabels[key] = label;
-        }
-        _completedResultsWeekKeys.Clear();
-        for (var i = 0; i < completedWeekKeys.Count; i++)
-            _completedResultsWeekKeys.Add(completedWeekKeys[i]);
-        SetupResultsWeekOptions(availableWeekKeys, payloadWeekKey);
-        if (!string.IsNullOrWhiteSpace(payloadWeekKey))
-            _selectedResultsWeekKey = payloadWeekKey;
-
-        PopulateResultsList(results);
+        RefreshNativeResultsView(weekKey);
+        await Task.CompletedTask;
     }
 
     private async Task RefreshScheduleAsync(string teamId, int selectionVersion = -1)
@@ -4803,49 +4626,8 @@ public partial class DashboardController : Control
             return;
         }
 
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeScheduleView(teamId, selectionVersion);
-            return;
-        }
-
-        ShowScheduleMessage("Schedule: loading...");
-        var (status, body) = await GetWithTimeoutAsync($"/team_schedule?team_id={teamId}", REQUEST_TIMEOUT_MS);
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-        if (status < 200 || status >= 300)
-        {
-            ShowScheduleMessage($"(error) HTTP {status}");
-            SetStateDumpText(body);
-            return;
-        }
-
-        var parsed = Json.ParseString(body);
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-        if (parsed.VariantType == Variant.Type.Dictionary)
-        {
-            var payload = parsed.AsGodotDictionary();
-            var ok = GetBoolValue(GetFirstNonNil(payload, "ok", "success"), true);
-            if (!ok)
-            {
-                var error = CleanStatusMessage(
-                    FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Unable to load schedule."),
-                    "Unable to load schedule.");
-                ShowScheduleMessage(error);
-                return;
-            }
-        }
-        var schedule = ExtractArrayPayload(parsed, "schedule", "games", "matchups");
-        if (schedule == null)
-        {
-            ShowScheduleMessage("(error)");
-            return;
-        }
-
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-        PopulateScheduleList(schedule, teamId);
+        RefreshNativeScheduleView(teamId, selectionVersion);
+        await Task.CompletedTask;
     }
 
     private async Task RefreshInjuryReportAsync(string teamId, int selectionVersion = -1)
@@ -4859,37 +4641,8 @@ public partial class DashboardController : Control
             return;
         }
 
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeInjuryReport(teamId, selectionVersion);
-            await Task.CompletedTask;
-            return;
-        }
-
-        ShowInjuriesMessage("Injury report: loading...");
-        var (status, body) = await GetWithTimeoutAsync($"/injury_report?team_id={teamId}", REQUEST_TIMEOUT_MS);
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-        if (status < 200 || status >= 300)
-        {
-            ShowInjuriesMessage($"(error) HTTP {status}");
-            SetStateDumpText(body);
-            return;
-        }
-
-        var parsed = Json.ParseString(body);
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-        var injuries = ExtractArrayPayload(parsed, "entries", "injuries", "injury_report");
-        if (injuries == null)
-        {
-            ShowInjuriesMessage("(error)");
-            return;
-        }
-
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-        PopulateInjuryTree(injuries);
+        RefreshNativeInjuryReport(teamId, selectionVersion);
+        await Task.CompletedTask;
     }
 
     private void OnResultsWeekSelected(long index)

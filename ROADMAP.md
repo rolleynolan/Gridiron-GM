@@ -22,7 +22,8 @@ Build one playable C# vertical slice at a time. Do not start a later layer until
 - The accidental `Godot/Godot` duplicate created during consolidation has been removed locally; the project now has one active Godot source tree.
 - The native automated smoke run now validates a complete first season flow: league bootstrap, dashboard, roster/depth chart, preseason, regular season, playoffs, season transition, retirements, history, save/load, and cleanup.
 - New franchises load the packaged 32-team seed data and present the included team logos during team selection.
-- The next active implementation slice is to complete native dashboard coverage for every remaining screen/action, then delete the remaining unreachable fallback rendering branches as each native screen is verified.
+- The roster, depth chart, standings, results, schedule, and injury-report views now call GameCore directly; remaining dead fallback code is limited to dashboard actions and legacy parsing helpers.
+- The next active implementation slice is to complete native dashboard actions, then remove their unreachable fallback code and legacy parsing helpers.
 
 ## 1. C# playable season loop
 
