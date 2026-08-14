@@ -15,11 +15,12 @@ Build one playable C# vertical slice at a time. Do not start a later layer until
 
 - Planning authorities are now consolidated at the repository root: `BLUEPRINT.md`, `ROADMAP.md`, and `AI_INSTRUCTIONS.md`.
 - `gridiron_gm_pkg` is retained as read-only behavioral reference. It is not part of the runtime, build, or test path.
-- The Godot project has one scene (`Dashboard.tscn`) and five authored C# scripts. The dashboard is a large presentation asset, but it currently obtains all state through a retired Python HTTP/RPC backend.
-- Legacy coupling is isolated to `Scripts/BackendProcessManager.cs`, `Scripts/API/ApiClient.cs`, `Scripts/API/RpcClient.cs`, `Scripts/API/IBackendClient.cs`, and transport-driven portions of `Scripts/DashboardController.cs`. These files must be replaced, not extended.
-- There are no active C# domain, simulation, rules, persistence, or test layers yet. Create them under `Godot/Scripts/Domain`, `Godot/Scripts/Simulation`, `Godot/Scripts/Rules`, `Godot/Scripts/Persistence`, and `Godot/Scripts/Presentation` as real features require them; do not add empty placeholders.
-- The first migration slice is: create/load franchise → choose team → advance a calendar week → simulate scheduled games → show regular-season standings → save/load. Reuse the existing dashboard layout only after it reads direct C# application state.
-- Current workstation build check is blocked before compilation because the installed .NET/NuGet configuration references a missing fallback package folder (`D:\\VS_Shared\\NuGetPackages`). Resolve the local Godot/.NET toolchain before using command-line build results as validation.
+- The Godot project has one main dashboard scene and a substantial C# `GameCore` layer for league bootstrap, schedules, game resolution, standings, playoffs, rosters, depth charts, saves, season history, retirements, and smoke-test coverage.
+- The dashboard now starts directly in the C# runtime. The retired Python backend setting, backend process manager, HTTP client, and RPC client have been removed.
+- The remaining dashboard fallback branches are unreachable and return a local error if called. Remove those dead branches incrementally while keeping the working C# screens intact; never restore an external backend.
+- A project-level `NuGet.Config` clears an obsolete workstation fallback-package path. `dotnet build` now restores and compiles the Godot project successfully.
+- `Godot/Godot` is a duplicate directory created during consolidation. It is excluded from the build and Git, but should be deleted locally once no Godot editor instance is using it.
+- The next active implementation slice is to complete native dashboard coverage for every remaining screen/action, then delete the unreachable fallback branches as each native screen is verified.
 
 ## 1. C# playable season loop
 

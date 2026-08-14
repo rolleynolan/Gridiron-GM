@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using GridironGM.Client.Api;
 using GridironGM.GameCore.DTOs;
 using GridironGM.GameCore.Services;
 using GridironGM.GameCore.Utilities;
@@ -256,8 +255,6 @@ public partial class DashboardController : Control
         "P"
     };
 
-    private IBackendClient _api;
-    private BackendProcessManager _backendManager;
     private GameCoreContext _nativeGameCoreContext;
     private GameCoreSaveService _nativeGameCoreSaveService;
     private RosterService _nativeRosterService;
@@ -443,14 +440,6 @@ public partial class DashboardController : Control
         _resultsWeekSelect = GetNodeOrWarn<OptionButton>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls/ResultsWeekSelect");
         _btnHubRefresh = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls/BtnHubRefresh");
 
-        var useRpc = (bool)ProjectSettings.GetSetting("backend/use_rpc", false);
-        Node apiNode = useRpc ? new RpcClient() : new ApiClient();
-        _api = (IBackendClient)apiNode;
-        AddChild(apiNode);
-        _backendManager = new BackendProcessManager();
-        AddChild(_backendManager);
-        _backendManager.Initialize(_api, ReportBackendError);
-
         if (_btnRefresh != null)
             _btnRefresh.Pressed += async () => await RefreshAll();
         if (_btnAdvanceDay != null)
@@ -613,36 +602,14 @@ public partial class DashboardController : Control
         HideBoxScorePopup();
         SetMainTab(0);
 
-        await EnsureBackendAndRefresh();
+        await EnsureNativeGameCoreAndRefresh();
     }
 
-    private async Task EnsureBackendAndRefresh()
+    private async Task EnsureNativeGameCoreAndRefresh()
     {
-        var ready = await _backendManager.EnsureBackendAsync();
-        if (!ready && !IsNativeRuntimeSource())
-        {
-            var message = InlineMessage(_lastBackendError);
-            if (string.IsNullOrWhiteSpace(message))
-                message = "Backend failed to start.";
-            SetServerError(message);
-            ShowStandingsMessage($"(error) {message}");
-            ShowResultsMessage($"(error) {message}");
+        var loadedNativeState = await EnsureNativeStartupState();
+        if (!loadedNativeState)
             return;
-        }
-
-        if (!ready && IsNativeRuntimeSource())
-        {
-            var message = InlineMessage(_lastBackendError);
-            if (!string.IsNullOrWhiteSpace(message))
-                SetServerError($"Legacy backend unavailable. {message}");
-        }
-
-        if (IsNativeRuntimeSource())
-        {
-            var loadedNativeState = await EnsureNativeStartupState();
-            if (!loadedNativeState)
-                return;
-        }
 
         await RefreshAll();
     }
@@ -692,8 +659,7 @@ public partial class DashboardController : Control
             return;
 
         _optRuntimeSource.Clear();
-        _optRuntimeSource.AddItem("Native C# GameCore", (int)RuntimeSource.NativeGameCore);
-        _optRuntimeSource.AddItem("Legacy Python Backend", (int)RuntimeSource.LegacyPythonBackend);
+        _optRuntimeSource.AddItem("C# GameCore", (int)RuntimeSource.NativeGameCore);
         SetRuntimeSource(_runtimeSource, updateUi: true);
     }
 
@@ -712,17 +678,14 @@ public partial class DashboardController : Control
     {
         _runtimeSource = source;
         SyncLegacyRuntimeFlags();
-        if (updateUi && _optRuntimeSource != null && _optRuntimeSource.ItemCount >= 2)
+        if (updateUi && _optRuntimeSource != null && _optRuntimeSource.ItemCount >= 1)
             _optRuntimeSource.Select((int)_runtimeSource);
         UpdateNativeSourceStatus();
     }
 
     private void UpdateNativeSourceStatus()
     {
-        var label = IsNativeRuntimeSource()
-            ? "Runtime source: Native C# GameCore"
-            : "Runtime source: Legacy Python Backend";
-        SetDebugOutputStatus(label);
+        SetDebugOutputStatus("Runtime: C# GameCore");
         UpdateNativeSaveLoadButtons();
     }
 
@@ -874,10 +837,7 @@ public partial class DashboardController : Control
 
     private async Task OnRuntimeSourceSelected(long index)
     {
-        var selected = index == (long)RuntimeSource.LegacyPythonBackend
-            ? RuntimeSource.LegacyPythonBackend
-            : RuntimeSource.NativeGameCore;
-        SetRuntimeSource(selected, updateUi: false);
+        SetRuntimeSource(RuntimeSource.NativeGameCore, updateUi: false);
         ResetDashboardPreviewUiState();
         ClearInboxDetail();
         _selectedInboxMessageId = "";
@@ -891,19 +851,10 @@ public partial class DashboardController : Control
             _resultsList.DeselectAll();
         if (_scheduleList != null)
             _scheduleList.DeselectAll();
-        SetPrimaryStatus(IsNativeRuntimeSource()
-            ? "Runtime source: Native C# GameCore"
-            : "Runtime source: Legacy Python Backend");
-        if (IsNativeRuntimeSource())
-        {
-            var loadedNativeState = await EnsureNativeStartupState();
-            if (!loadedNativeState)
-                return;
-        }
-        else
-        {
-            HideStartupPanel();
-        }
+        SetPrimaryStatus("Runtime: C# GameCore");
+        var loadedNativeState = await EnsureNativeStartupState();
+        if (!loadedNativeState)
+            return;
         await RefreshAll();
     }
 
@@ -1125,43 +1076,18 @@ public partial class DashboardController : Control
         return clean;
     }
 
-    private string BuildApiUrl(string path)
-    {
-        if (_api is ApiClient apiClient)
-        {
-            var baseUrl = apiClient.BaseUrl ?? "";
-            if (string.IsNullOrWhiteSpace(baseUrl))
-                return path;
-            return baseUrl.TrimEnd('/') + path;
-        }
-
-        return path;
-    }
+    private static string BuildApiUrl(string path) => path;
 
     private async Task<(int status, string body)> GetWithTimeoutAsync(string path, int timeoutMs)
     {
-        var requestTask = _api.GetAsync(path);
-        var completed = await Task.WhenAny(requestTask, Task.Delay(timeoutMs));
-        if (completed != requestTask)
-        {
-            var url = BuildApiUrl(path);
-            return (0, $"Request failed for {url}: Timeout after {timeoutMs}ms");
-        }
-
-        return await requestTask;
+        await Task.CompletedTask;
+        return (0, "The retired Python backend is unavailable in the C# runtime.");
     }
 
     private async Task<(int status, string body)> PostWithTimeoutAsync(string path, string json, int timeoutMs)
     {
-        var requestTask = _api.PostAsync(path, json);
-        var completed = await Task.WhenAny(requestTask, Task.Delay(timeoutMs));
-        if (completed != requestTask)
-        {
-            var url = BuildApiUrl(path);
-            return (0, $"Request failed for {url}: Timeout after {timeoutMs}ms");
-        }
-
-        return await requestTask;
+        await Task.CompletedTask;
+        return (0, "The retired Python backend is unavailable in the C# runtime.");
     }
 
     private static string InlineMessage(string message, int maxLength = 240)
@@ -1289,6 +1215,14 @@ public partial class DashboardController : Control
 
     private async Task RefreshHealth()
     {
+        if (IsNativeRuntimeSource())
+        {
+            if (_serverStatus != null)
+                _serverStatus.Text = "Runtime: C# GameCore";
+            await Task.CompletedTask;
+            return;
+        }
+
         if (_serverStatus != null)
             _serverStatus.Text = "Server: checking...";
         var (status, body) = await GetWithTimeoutAsync("/health", REQUEST_TIMEOUT_MS);
