@@ -12,6 +12,9 @@ All notable project changes are recorded here.
 - Added the Godot seed asset pack: 32 team logos, seeded league data, the included font, and its readme.
 - Removed the retired Python backend startup path, HTTP client, RPC client, and backend setting from the Godot runtime.
 - Added a project-level NuGet configuration so the Godot/C# project builds without the obsolete Visual Studio fallback-package path.
+- Added a headless C# GameCore smoke-test mode and verified a full season, playoffs, save/load, history, and retirement flow.
+- Removed the retired runtime selector and C#/Python comparison tool from the dashboard.
+- Restored the dashboard's missing column-picker button.
 
 ### Notes
 
