@@ -197,6 +197,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Save Game"
 
+[node name="BtnColumns" type="Button" parent="AppMargin/MainPadding/MainLayout/ActionButtonRow"]
+custom_minimum_size = Vector2(100, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Columns"
+
 [node name="DebugToggleRow" type="HFlowContainer" parent="AppMargin/MainPadding/MainLayout"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -262,22 +268,6 @@ custom_minimum_size = Vector2(240, 28)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Run C# GameCore Smoke Test"
-
-[node name="BtnCompareGameCoreContracts" type="Button" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
-custom_minimum_size = Vector2(220, 28)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Compare C# / Python Contracts"
-
-[node name="LblRuntimeSource" type="Label" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "Runtime Source:"
-
-[node name="OptRuntimeSource" type="OptionButton" parent="AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow"]
-custom_minimum_size = Vector2(250, 28)
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
 
 [node name="DebugOutputLabel" type="Label" parent="AppMargin/MainPadding/MainLayout/DebugPanel"]
 layout_mode = 2
@@ -1425,4 +1415,3 @@ size_flags_vertical = 3
 [node name="LblPickTeamHint" type="Label" parent="NewGameTeamPicker/PickerContent"]
 layout_mode = 2
 text = "This sets your GM team for this save."
-

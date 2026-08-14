@@ -10,12 +10,6 @@ using GridironGM.GameCore.Utilities;
 
 public partial class DashboardController : Control
 {
-    private enum RuntimeSource
-    {
-        NativeGameCore = 0,
-        LegacyPythonBackend = 1,
-    }
-
     private enum NativeStartupState
     {
         Unknown = 0,
@@ -32,7 +26,6 @@ public partial class DashboardController : Control
     private const int REQUEST_TIMEOUT_MS = 5000;
     private const int SIM_UNTIL_TIMEOUT_MS = 30000;
     private static bool _printedFirstPlayerDebug = false;
-    private static bool _printedBackendLogPath = false;
     [Export]
     public bool DebugToolsVisibleByDefault { get; set; } = false;
     private Label _serverStatus;
@@ -66,8 +59,6 @@ public partial class DashboardController : Control
     private Button _btnSaveNativeGame;
     private Button _btnLoadNativeGame;
     private Button _btnRunGameCoreSmokeTest;
-    private Button _btnCompareGameCoreContracts;
-    private OptionButton _optRuntimeSource;
     private OptionButton _simUntilSelect;
     private Button _btnSimUntil;
     private Button _btnColumns;
@@ -164,7 +155,6 @@ public partial class DashboardController : Control
     private RichTextLabel _historyDetailText;
     private OptionButton _resultsWeekSelect;
     private Button _btnHubRefresh;
-    private string _lastBackendError = "";
 
     private readonly List<RosterColumn> _columns = new();
     private readonly Dictionary<string, bool> _columnVisibility = new();
@@ -183,10 +173,6 @@ public partial class DashboardController : Control
     private bool _suppressTeamListEvents = false;
     private bool _suppressRosterFilterEvents = false;
     private bool _depthChartViewActive = false;
-    private RuntimeSource _runtimeSource = RuntimeSource.NativeGameCore;
-    private bool _useNativeGameCoreRosterDepthChart = true;
-    private bool _useNativeGameCoreScheduleStandings = true;
-    private bool _useNativeGameCoreDashboardPreview = true;
     private bool _depthChartRequestBusy = false;
     private bool _dashboardRefreshPendingFromDepthChartEdit = false;
     private Godot.Collections.Array _inboxMessages = new();
@@ -291,16 +277,22 @@ public partial class DashboardController : Control
 
     public override async void _Ready()
     {
+        if (OS.GetCmdlineUserArgs().Contains("--gamecore-smoke-test", StringComparer.Ordinal))
+        {
+            var smokeResult = await Task.Run(GameCoreSmokeTest.Run);
+            foreach (var step in smokeResult.Steps)
+                GD.Print($"[GameCore smoke] {step}");
+
+            if (!smokeResult.Ok)
+                GD.PushError($"[GameCore smoke] {smokeResult.Message}");
+
+            GetTree().Quit(smokeResult.Ok ? 0 : 1);
+            return;
+        }
+
         var window = GetWindow();
         if (window != null)
             window.MinSize = new Vector2I(1152, 648);
-
-        if (!_printedBackendLogPath)
-        {
-            _printedBackendLogPath = true;
-            var logPath = ProjectSettings.GlobalizePath("user://logs/backend.log");
-            GD.Print($"Backend log path: {logPath}");
-        }
 
         // Existing nodes
         _serverStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/ContinueBlock/ServerStatus");
@@ -337,8 +329,6 @@ public partial class DashboardController : Control
         _btnSaveNativeGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnSaveNativeGame");
         _btnLoadNativeGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnLoadNativeGame");
         _btnRunGameCoreSmokeTest = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnRunGameCoreSmokeTest");
-        _btnCompareGameCoreContracts = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnCompareGameCoreContracts");
-        _optRuntimeSource = GetNodeOrWarn<OptionButton>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/OptRuntimeSource");
         _btnColumns = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnColumns", "BtnColumns not found; skipping columns menu binding.");
         _popupColumns = GetNodeOrWarn<PopupMenu>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/PopupColumns");
         _lblPlayerHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/LblPlayerHeader");
@@ -454,10 +444,6 @@ public partial class DashboardController : Control
             _btnLoadNativeGame.Pressed += async () => await LoadNativeGame();
         if (_btnRunGameCoreSmokeTest != null)
             _btnRunGameCoreSmokeTest.Pressed += async () => await RunGameCoreSmokeTestAsync();
-        if (_btnCompareGameCoreContracts != null)
-            _btnCompareGameCoreContracts.Pressed += async () => await RunContractComparisonAsync();
-        if (_optRuntimeSource != null)
-            _optRuntimeSource.ItemSelected += async index => await OnRuntimeSourceSelected(index);
         if (_btnContinue != null)
             _btnContinue.Pressed += async () => await ContinueUntilPause();
         if (_btnInbox != null)
@@ -574,7 +560,6 @@ public partial class DashboardController : Control
         SetupSimUntilOptions();
         SetupPosFilterItems();
         LoadRosterFilters();
-        SetupRuntimeSourceOptions();
         ApplyDebugPanelVisibility(DebugToolsVisibleByDefault);
         UpdateDepthChartSelectionLabel();
         UpdateDepthChartEditButtons();
@@ -614,17 +599,6 @@ public partial class DashboardController : Control
         await RefreshAll();
     }
 
-    private void ReportBackendError(string message)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-            return;
-
-        _lastBackendError = message;
-        SetStateDumpText(message);
-
-        SetServerError(message);
-    }
-
     private void SetServerError(string message)
     {
         if (_serverStatus == null || string.IsNullOrWhiteSpace(message))
@@ -653,35 +627,7 @@ public partial class DashboardController : Control
         _debugOutputLabel.Text = string.IsNullOrWhiteSpace(text) ? "Debug Output" : text;
     }
 
-    private void SetupRuntimeSourceOptions()
-    {
-        if (_optRuntimeSource == null)
-            return;
-
-        _optRuntimeSource.Clear();
-        _optRuntimeSource.AddItem("C# GameCore", (int)RuntimeSource.NativeGameCore);
-        SetRuntimeSource(_runtimeSource, updateUi: true);
-    }
-
-    private bool IsNativeRuntimeSource()
-        => _runtimeSource == RuntimeSource.NativeGameCore;
-
-    private void SyncLegacyRuntimeFlags()
-    {
-        var useNative = IsNativeRuntimeSource();
-        _useNativeGameCoreDashboardPreview = useNative;
-        _useNativeGameCoreRosterDepthChart = useNative;
-        _useNativeGameCoreScheduleStandings = useNative;
-    }
-
-    private void SetRuntimeSource(RuntimeSource source, bool updateUi)
-    {
-        _runtimeSource = source;
-        SyncLegacyRuntimeFlags();
-        if (updateUi && _optRuntimeSource != null && _optRuntimeSource.ItemCount >= 1)
-            _optRuntimeSource.Select((int)_runtimeSource);
-        UpdateNativeSourceStatus();
-    }
+    private static bool IsNativeRuntimeSource() => true;
 
     private void UpdateNativeSourceStatus()
     {
@@ -835,29 +781,6 @@ public partial class DashboardController : Control
         ApplyDebugPanelVisibility(toggledOn);
     }
 
-    private async Task OnRuntimeSourceSelected(long index)
-    {
-        SetRuntimeSource(RuntimeSource.NativeGameCore, updateUi: false);
-        ResetDashboardPreviewUiState();
-        ClearInboxDetail();
-        _selectedInboxMessageId = "";
-        _selectedInboxActionItem = null;
-        _selectedResultsWeekKey = "";
-        _latestGameResult = null;
-        _gameCache.Clear();
-        ClearScheduleSelectionState();
-        ClearDepthChartSelection();
-        if (_resultsList != null)
-            _resultsList.DeselectAll();
-        if (_scheduleList != null)
-            _scheduleList.DeselectAll();
-        SetPrimaryStatus("Runtime: C# GameCore");
-        var loadedNativeState = await EnsureNativeStartupState();
-        if (!loadedNativeState)
-            return;
-        await RefreshAll();
-    }
-
     private void ApplyDebugPanelVisibility(bool visible)
     {
         if (_debugPanel != null)
@@ -912,150 +835,6 @@ public partial class DashboardController : Control
         var lines = new List<string> { statusMessage };
         if (result.Steps != null && result.Steps.Count > 0)
             lines.AddRange(result.Steps);
-
-        return string.Join("\n", lines);
-    }
-
-    private async Task RunContractComparisonAsync()
-    {
-        if (_btnCompareGameCoreContracts == null)
-            return;
-
-        _btnCompareGameCoreContracts.Disabled = true;
-        SetDebugOutputStatus("Comparing C# / Python compact contracts...");
-        SetStateDumpText("Comparing C# / Python compact contracts...");
-
-        try
-        {
-            var payloads = await FetchContractComparisonPayloadsAsync();
-            if (payloads.PythonLeagueInactive)
-            {
-                var message = "Python league is not active. Start/load a game before comparing contracts.";
-                SetDebugOutputStatus(message);
-                SetStateDumpText(message);
-                return;
-            }
-
-            if (!payloads.Ok)
-            {
-                var message = $"C# / Python contract comparison failed: {InlineMessage(payloads.Error)}";
-                SetDebugOutputStatus(message);
-                SetStateDumpText(message);
-                return;
-            }
-
-            var result = GameCoreContractComparison.CompareCompactContracts(
-                payloads.Dashboard,
-                payloads.Roster,
-                payloads.DepthChart,
-                payloads.Schedule,
-                payloads.Standings);
-
-            var statusMessage = result.Ok
-                ? "C# / Python contract comparison passed."
-                : "C# / Python contract comparison found issues.";
-
-            SetDebugOutputStatus(statusMessage);
-            SetStateDumpText(BuildContractComparisonOutput(result, statusMessage));
-        }
-        catch (Exception ex)
-        {
-            var message = $"C# / Python contract comparison failed: {InlineMessage(ex.Message)}";
-            SetDebugOutputStatus(message);
-            SetStateDumpText(message);
-        }
-        finally
-        {
-            _btnCompareGameCoreContracts.Disabled = false;
-        }
-    }
-
-    private async Task<ContractComparisonPayloads> FetchContractComparisonPayloadsAsync()
-    {
-        var payloads = new ContractComparisonPayloads();
-
-        var dashboard = await FetchJsonObjectAsync("/dashboard_state");
-        if (!dashboard.Ok)
-            return payloads.WithError(dashboard.Error, dashboard.PythonLeagueInactive);
-        payloads.Dashboard = dashboard.Payload;
-
-        var roster = await FetchJsonObjectAsync("/team_roster");
-        if (!roster.Ok)
-            return payloads.WithError(roster.Error, roster.PythonLeagueInactive);
-        payloads.Roster = roster.Payload;
-
-        var depthChart = await FetchJsonObjectAsync("/team_depth_chart");
-        if (!depthChart.Ok)
-            return payloads.WithError(depthChart.Error, depthChart.PythonLeagueInactive);
-        payloads.DepthChart = depthChart.Payload;
-
-        var schedule = await FetchJsonObjectAsync("/team_schedule");
-        if (!schedule.Ok)
-            return payloads.WithError(schedule.Error, schedule.PythonLeagueInactive);
-        payloads.Schedule = schedule.Payload;
-
-        var standings = await FetchJsonObjectAsync("/standings");
-        if (!standings.Ok)
-            return payloads.WithError(standings.Error, standings.PythonLeagueInactive);
-        payloads.Standings = standings.Payload;
-
-        payloads.Ok = true;
-        return payloads;
-    }
-
-    private async Task<FetchedJsonObject> FetchJsonObjectAsync(string path)
-    {
-        var (status, body) = await GetWithTimeoutAsync(path, REQUEST_TIMEOUT_MS);
-        if (status < 200 || status >= 300)
-        {
-            return new FetchedJsonObject
-            {
-                Ok = false,
-                Error = SummarizeRequestError(path, status, body),
-            };
-        }
-
-        var parsed = Json.ParseString(body);
-        if (parsed.VariantType != Variant.Type.Dictionary)
-        {
-            return new FetchedJsonObject
-            {
-                Ok = false,
-                Error = $"{path} did not return a JSON object.",
-            };
-        }
-
-        var payload = parsed.AsGodotDictionary();
-        var okVar = GetFirstNonNil(payload, "ok");
-        if (!IsNil(okVar) && !GetBoolValue(okVar, true))
-        {
-            var error = FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Request failed.");
-            var pythonLeagueInactive = string.Equals(error, "No active league loaded.", StringComparison.OrdinalIgnoreCase);
-            return new FetchedJsonObject
-            {
-                Ok = false,
-                Error = error,
-                PythonLeagueInactive = pythonLeagueInactive,
-            };
-        }
-
-        return new FetchedJsonObject
-        {
-            Ok = true,
-            Payload = payload,
-        };
-    }
-
-    private static string BuildContractComparisonOutput(ContractComparisonResult result, string statusMessage)
-    {
-        if (result == null)
-            return statusMessage;
-
-        var lines = new List<string> { statusMessage };
-        if (result.Steps != null && result.Steps.Count > 0)
-            lines.AddRange(result.Steps);
-        if (result.Errors != null && result.Errors.Count > 0)
-            lines.AddRange(result.Errors);
 
         return string.Join("\n", lines);
     }
@@ -1215,28 +994,9 @@ public partial class DashboardController : Control
 
     private async Task RefreshHealth()
     {
-        if (IsNativeRuntimeSource())
-        {
-            if (_serverStatus != null)
-                _serverStatus.Text = "Runtime: C# GameCore";
-            await Task.CompletedTask;
-            return;
-        }
-
         if (_serverStatus != null)
-            _serverStatus.Text = "Server: checking...";
-        var (status, body) = await GetWithTimeoutAsync("/health", REQUEST_TIMEOUT_MS);
-
-        if (status < 200 || status >= 300)
-        {
-            if (_serverStatus != null)
-                _serverStatus.Text = "Server: offline";
-            SetStateDumpText(body);
-            return;
-        }
-
-        if (_serverStatus != null)
-            _serverStatus.Text = "Server: OK";
+            _serverStatus.Text = "Runtime: C# GameCore";
+        await Task.CompletedTask;
     }
 
     // UPDATED: now uses /state_summary (small payload)
@@ -2043,7 +1803,7 @@ public partial class DashboardController : Control
                 _calendarTitle.Text = $"{year} Season";
 
             if (_calendarText != null)
-                // Legacy top-bar layout reference kept for test compatibility:
+        // Preserve the compact top-bar layout while the native dashboard is refreshed.
                 // _calendarText.Text = $"{year} Season\n{weekLabel}\n{date}\n\n{scheduleLine}";
                 _calendarText.Text = $"{weekLabel} - {date}";
             if (_lblGameStatus != null)
@@ -2995,7 +2755,7 @@ public partial class DashboardController : Control
             return;
         }
 
-        if (_useNativeGameCoreRosterDepthChart)
+        if (IsNativeRuntimeSource())
         {
             RefreshNativeRosterTab();
             return;
@@ -3039,7 +2799,7 @@ public partial class DashboardController : Control
 
     private async Task RefreshDepthChartView()
     {
-        if (_useNativeGameCoreRosterDepthChart)
+        if (IsNativeRuntimeSource())
         {
             RefreshNativeDepthChartView();
             return;
@@ -3088,7 +2848,7 @@ public partial class DashboardController : Control
         SetDepthChartRequestBusy(true, "Auto-filling...");
         SetDepthChartActionStatus("Auto-filling...");
 
-        if (_useNativeGameCoreRosterDepthChart)
+        if (IsNativeRuntimeSource())
         {
             try
             {
@@ -3266,12 +3026,6 @@ public partial class DashboardController : Control
 
     private async Task SaveNativeGame()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Legacy save uses Python backend.");
-            return;
-        }
-
         if (_btnSaveNativeGame != null)
             _btnSaveNativeGame.Disabled = true;
         if (_btnSaveGame != null)
@@ -3289,12 +3043,6 @@ public partial class DashboardController : Control
 
     private async Task LoadNativeGame()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Legacy save uses Python backend.");
-            return;
-        }
-
         if (_btnLoadNativeGame != null)
             _btnLoadNativeGame.Disabled = true;
         if (_btnStartupLoadGame != null)
@@ -4314,7 +4062,7 @@ public partial class DashboardController : Control
         SetDepthChartRequestBusy(true);
         SetDepthChartActionStatus("Updating depth chart...");
 
-        if (_useNativeGameCoreRosterDepthChart)
+        if (IsNativeRuntimeSource())
         {
             try
             {
@@ -10151,31 +9899,4 @@ public partial class DashboardController : Control
         public bool Sortable { get; }
     }
 
-    private sealed class FetchedJsonObject
-    {
-        public bool Ok { get; set; }
-        public bool PythonLeagueInactive { get; set; }
-        public string Error { get; set; } = "";
-        public Godot.Collections.Dictionary Payload { get; set; }
-    }
-
-    private sealed class ContractComparisonPayloads
-    {
-        public bool Ok { get; set; }
-        public bool PythonLeagueInactive { get; set; }
-        public string Error { get; set; } = "";
-        public Godot.Collections.Dictionary Dashboard { get; set; }
-        public Godot.Collections.Dictionary Roster { get; set; }
-        public Godot.Collections.Dictionary DepthChart { get; set; }
-        public Godot.Collections.Dictionary Schedule { get; set; }
-        public Godot.Collections.Dictionary Standings { get; set; }
-
-        public ContractComparisonPayloads WithError(string error, bool pythonLeagueInactive)
-        {
-            Ok = false;
-            Error = error ?? "";
-            PythonLeagueInactive = pythonLeagueInactive;
-            return this;
-        }
-    }
 }
