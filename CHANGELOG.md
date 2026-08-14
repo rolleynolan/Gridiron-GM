@@ -15,6 +15,8 @@ All notable project changes are recorded here.
 - Added a headless C# GameCore smoke-test mode and verified a full season, playoffs, save/load, history, and retirement flow.
 - Removed the retired runtime selector and C#/Python comparison tool from the dashboard.
 - Restored the dashboard's missing column-picker button.
+- Moved active data, logo, and font assets under `Godot/Assets/` so they are packaged with the game.
+- New franchises now load the seeded 32-team league and display team logos in the franchise picker.
 
 ### Notes
 

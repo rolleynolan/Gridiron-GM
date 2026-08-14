@@ -16,7 +16,7 @@ public sealed class GameCoreSmokeTestResult
 
 public static class GameCoreSmokeTest
 {
-    public static GameCoreSmokeTestResult Run()
+    public static GameCoreSmokeTestResult Run(string teamSeedPath = null)
     {
         var result = new GameCoreSmokeTestResult();
         var currentStep = "Initialize services";
@@ -37,9 +37,14 @@ public static class GameCoreSmokeTest
             const string smokeSaveName = "native_smoke_test_save.json";
 
             currentStep = "Bootstrap league";
-            var league = bootstrap.CreateTestLeague();
+            var league = bootstrap.CreateTestLeague(teamSeedPath);
             Require(league != null && context.ActiveLeague != null && league.Teams.Count == LeagueBootstrapService.TeamCount, $"Bootstrap should create {LeagueBootstrapService.TeamCount} teams.");
             Require(league.Results.Count == 0, "Fresh bootstrap should not seed completed results.");
+            if (!string.IsNullOrWhiteSpace(teamSeedPath))
+            {
+                Require(league.Teams.Any(team => string.Equals(team.Name, "Chicago Cyclones", StringComparison.Ordinal)), "Seeded team data did not load Chicago Cyclones.");
+                Require(league.Teams.Any(team => string.Equals(team.Abbreviation, "ATL", StringComparison.OrdinalIgnoreCase)), "Seeded team data did not load team abbreviations.");
+            }
             Require(league.Schedule.Count == LeagueBootstrapService.ExpectedScheduleGameCount, $"Expected a full native schedule with {LeagueBootstrapService.ExpectedScheduleGameCount} games, got {league.Schedule.Count}.");
             Require(league.Schedule.Count(game => string.Equals(game.GameType, "preseason", StringComparison.OrdinalIgnoreCase)) == LeagueBootstrapService.PreseasonWeeks * LeagueBootstrapService.PreseasonGamesPerWeek, "Unexpected preseason game count.");
             Require(league.Schedule.Count(game => string.Equals(game.GameType, "regular_season", StringComparison.OrdinalIgnoreCase)) == LeagueBootstrapService.RegularSeasonGameCount, $"Expected {LeagueBootstrapService.RegularSeasonGameCount} regular-season games.");
