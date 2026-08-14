@@ -5,4 +5,8 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>GridironGM</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- This is an accidental duplicate created during consolidation. -->
+    <Compile Remove="Godot\**\*.cs" />
+  </ItemGroup>
 </Project>

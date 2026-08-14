@@ -15,10 +15,6 @@ run/main_scene="uid://dhwnw6srg1ng5"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
-[backend]
-
-use_rpc=true
-
 [display]
 
 window/stretch/mode="canvas_items"
