@@ -181,7 +181,9 @@ class Team:
             "depth_chart": {pos: [p.name for p in players] for pos, players in self.depth_chart.items()},
             "team_record": self.team_record,
             "playoff_seed": self.playoff_seed,
-            "rebuild_mode": self.rebuild_mode
+            "rebuild_mode": self.rebuild_mode,
+            "salary_cap": self.salary_cap,
+            "payroll": self.payroll,
         }
 
     @classmethod
@@ -209,6 +211,8 @@ class Team:
         team.team_record = data.get("team_record", {"wins": 0, "losses": 0, "ties": 0})
         team.playoff_seed = data.get("playoff_seed", None)
         team.rebuild_mode = data.get("rebuild_mode", False)
+        team.salary_cap = data.get("salary_cap")
+        team.payroll = data.get("payroll")
         return team
 
     def __repr__(self) -> str:

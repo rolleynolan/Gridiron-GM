@@ -2,26 +2,12 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
-using GridironGM.GameCore.DTOs;
-using GridironGM.GameCore.Models;
-using GridironGM.GameCore.Services;
-using GridironGM.GameCore.Utilities;
+using GridironGM.Client.Api;
 
 public partial class DashboardController : Control
 {
-    private enum NativeStartupState
-    {
-        Unknown = 0,
-        Ready = 1,
-        MissingAutosave = 2,
-        CorruptAutosave = 3,
-    }
-
     private const bool DEBUG_DASHBOARD = true;
-    private const int LEAGUE_TAB_INDEX = 1;
-    private const int LEAGUE_HISTORY_SUBTAB_INDEX = 4;
     private const int ROSTER_TAB_INDEX = 2;
     private const int CONTINUE_MAX_DAYS = 14;
     private const int REQUEST_TIMEOUT_MS = 5000;
@@ -43,34 +29,23 @@ public partial class DashboardController : Control
     private Label _lblUserTeam;
     private Label _lblGameStatus;
     private Label _lblGameNext;
+    private Label _seasonNoteLabel;
+    private VBoxContainer _recentResultsList;
     private Label _continueStatus;
     private Control _debugPanel;
-    private Label _debugOutputLabel;
     private RichTextLabel _stateDump;
     private Button _btnContinue;
     private Button _btnInbox;
     private Button _btnLeagueShortcut;
     private Button _btnRosterShortcut;
-    private Button _btnSaveGame;
     private CheckButton _btnToggleDebug;
     private Button _btnRefresh;
     private Button _btnAdvanceDay;
     private Button _btnNewGame;
     private Button _btnResetSave;
-    private Button _btnSaveNativeGame;
-    private Button _btnLoadNativeGame;
-    private Button _btnRunGameCoreSmokeTest;
     private OptionButton _simUntilSelect;
     private Button _btnSimUntil;
     private Button _btnColumns;
-    private Control _startupPanel;
-    private Label _lblStartupWarning;
-    private Label _lblStartupStatus;
-    private Button _btnStartupContinue;
-    private Button _btnStartupLoadGame;
-    private Button _btnStartupNewGame;
-    private Button _btnStartupExit;
-    private ConfirmationDialog _newGameConfirmDialog;
     private Button _btnSetUserTeam;
     private AcceptDialog _newGameTeamPicker;
     private ItemList _teamPickList;
@@ -79,41 +54,21 @@ public partial class DashboardController : Control
     private AcceptDialog _franchiseSetupDialog;
     private OptionButton _setupProfileSelect;
     private LineEdit _setupGmName;
+    private OptionButton _setupRosterSource;
+    private Label _setupRosterDescription;
     private SpinBox _setupNegotiation;
     private SpinBox _setupPlayerManagement;
-    private SpinBox _setupScouting;
+    private SpinBox _setupScoutingJudgment;
     private SpinBox _setupLeadership;
-    private OptionButton _setupRosterSource;
-    private OptionButton _setupOutfit;
-    private Label _setupBudget;
+    private Label _setupAttributeBudget;
     private Label _setupStatus;
-    private List<GmProfile> _setupProfiles = new();
-    private Button _btnFreeAgency;
-    private AcceptDialog _freeAgencyDialog;
-    private Label _freeAgencyCapSummary;
-    private ItemList _freeAgentList;
-    private RichTextLabel _freeAgentDetail;
-    private SpinBox _freeAgentAnnualOffer;
-    private SpinBox _freeAgentGuaranteeOffer;
-    private SpinBox _freeAgentYearsOffer;
-    private Button _btnSubmitFreeAgentOffer;
-    private Label _freeAgencyStatus;
-    private string _selectedFreeAgentId = "";
-    private Button _btnReleaseSelectedPlayer;
-    private Button _btnOfferExtension;
-    private AcceptDialog _extensionDialog;
-    private Label _extensionPlayerLabel;
-    private SpinBox _extensionAnnualOffer;
-    private SpinBox _extensionGuaranteeOffer;
-    private SpinBox _extensionYearsOffer;
-    private Label _extensionStatus;
-    private string _extensionPlayerId = "";
-    private Button _btnDraftBoard;
-    private AcceptDialog _draftBoardDialog;
-    private ItemList _draftProspectList;
-    private Label _draftStatus;
-    private Button _btnMakeDraftPick;
-    private string _selectedDraftProspectId = "";
+    private OptionButton _setupPronouns;
+    private OptionButton _setupHairStyle;
+    private OptionButton _setupHairColor;
+    private OptionButton _setupSkinTone;
+    private OptionButton _setupOutfit;
+    private Godot.Collections.Array _setupProfiles = new();
+    private bool _setupProfileSelectionBusy;
     private PopupMenu _popupColumns;
     private Label _lblPlayerHeader;
     private RichTextLabel _rtlScoutSummary;
@@ -139,18 +94,12 @@ public partial class DashboardController : Control
     private Label _depthChartActionStatus;
     private Label _depthChartSelectionStatus;
     private Tree _depthChartTree;
-    private RichTextLabel _rtlTeamSummary;
-    private Label _lblRecentResultsHeader;
-    private RichTextLabel _overviewRecentResults;
-    private Label _overviewActionHeader;
-    private Label _overviewActionTitle;
-    private Label _overviewActionSuggested;
-    private RichTextLabel _overviewActionBody;
-    private RichTextLabel _overviewNextEventSummary;
-    private Control _overviewPlayoffPanel;
-    private Label _overviewPlayoffHeader;
-    private RichTextLabel _overviewPlayoffSummary;
-    private Button _overviewActionButton;
+    private ItemList _inboxList;
+    private Label _lblInboxHeader;
+    private Label _lblInboxSubject;
+    private RichTextLabel _rtlInboxBody;
+    private Button _btnSimGame;
+    private Button _btnAcknowledge;
     private Control _gameDayPopup;
     private Label _lblGameDayWeek;
     private Label _lblGameDayMatchup;
@@ -176,7 +125,8 @@ public partial class DashboardController : Control
     private Tree _boxScorePopupQuarterTree;
     private Button _btnBoxScorePopupClose;
     private Tree _standingsTree;
-    private RichTextLabel _overviewStandingsSnapshot;
+    private Tree _standingsSummaryTree;
+    private Tree _historyTree;
     private VBoxContainer _resultsListPanel;
     private ItemList _resultsList;
     private VBoxContainer _boxScorePanel;
@@ -185,17 +135,16 @@ public partial class DashboardController : Control
     private Tree _boxScoreTeamStatsTree;
     private ItemList _boxScoreLeadersList;
     private Button _btnBoxScoreBack;
-    private Tree _scheduleList;
+    private ItemList _scheduleList;
     private Label _lblScheduleActionStatus;
     private Button _btnScheduleAction;
     private Tree _injuriesTree;
-    private TabContainer _leagueHubTabs;
-    private ItemList _historySeasonList;
-    private RichTextLabel _historyDetailText;
     private OptionButton _resultsWeekSelect;
     private Button _btnHubRefresh;
 
     private readonly List<RosterColumn> _columns = new();
+    private readonly Dictionary<string, Godot.Collections.Dictionary> _simUntilMilestonesById = new();
+    private string _selectedSimUntilMilestoneId = "";
     private readonly Dictionary<string, bool> _columnVisibility = new();
     private Godot.Collections.Array _currentRoster = new();
     private readonly List<PlayerRow> _rosterRows = new();
@@ -237,9 +186,6 @@ public partial class DashboardController : Control
     private string _gmTeamLabel = "(unknown)";
     private int? _gmReputation = null;
     private int? _gmJobSecurity = null;
-    private readonly List<LeagueHistorySeasonDto> _leagueHistorySeasons = new();
-    private bool _suppressHistorySelectionEvents = false;
-    private int? _selectedHistorySeasonYear = null;
     private string _dashboardTeamName = "";
     private string _dashboardTeamRecord = "0-0";
     private int? _dashboardRosterSize = null;
@@ -251,7 +197,6 @@ public partial class DashboardController : Control
     private Godot.Collections.Dictionary _dashboardNextGame = new();
     private Godot.Collections.Dictionary _activeGameDayGame = new();
     private Godot.Collections.Array _dashboardRecentResults = new();
-    private Godot.Collections.Dictionary _dashboardPlayoffBracket = new();
     private Godot.Collections.Dictionary _latestGameResult = null;
     private Godot.Collections.Dictionary _selectedScheduleGame = null;
     private bool _restorePostGameRecapAfterBoxScore = false;
@@ -280,15 +225,7 @@ public partial class DashboardController : Control
         "P"
     };
 
-    private GameCoreContext _nativeGameCoreContext;
-    private GameCoreSaveService _nativeGameCoreSaveService;
-    private RosterService _nativeRosterService;
-    private DepthChartService _nativeDepthChartService;
-    private ScheduleService _nativeScheduleService;
-    private StandingsService _nativeStandingsService;
-    private DashboardService _nativeDashboardService;
-    private ContinueService _nativeContinueService;
-    private GameDayService _nativeGameDayService;
+    private IBackendClient _api;
 
     // NEW: store team dicts from /state_summary so we can map selection -> team_id
     private Godot.Collections.Array _teams = new();
@@ -298,8 +235,6 @@ public partial class DashboardController : Control
     private bool _awaitingNewGameTeamPick = false;
     private bool _handledNewGameTeamPick = false;
     private int _currentMainTab = 0;
-    private string _pendingNativeStatusMessage = "";
-    private NativeStartupState _nativeStartupState = NativeStartupState.Unknown;
 
     private T GetNodeOrWarn<T>(string path, string missingMessage = null) where T : Node
     {
@@ -316,25 +251,12 @@ public partial class DashboardController : Control
 
     public override async void _Ready()
     {
-        if (OS.GetCmdlineUserArgs().Contains("--gamecore-smoke-test", StringComparer.Ordinal))
-        {
-            var smokeResult = await Task.Run(() => GameCoreSmokeTest.Run(GetTeamSeedPath()));
-            foreach (var step in smokeResult.Steps)
-                GD.Print($"[GameCore smoke] {step}");
-
-            if (!smokeResult.Ok)
-                GD.PushError($"[GameCore smoke] {smokeResult.Message}");
-
-            GetTree().Quit(smokeResult.Ok ? 0 : 1);
-            return;
-        }
-
         var window = GetWindow();
         if (window != null)
             window.MinSize = new Vector2I(1152, 648);
 
         // Existing nodes
-        _serverStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/ContinueBlock/ServerStatus");
+        _serverStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/ContinueBlock/ServerStatus");
         _calendarTitle = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/CalendarBlock/CalendarTitle");
         _calendarText = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/CalendarBlock/CalendarText");
         _mainTabs = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs");
@@ -348,9 +270,10 @@ public partial class DashboardController : Control
         _lblUserTeam = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/FrontOfficeBlock/LblUserTeam");
         _lblGameStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/GameBlock/GameStatus");
         _lblGameNext = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/GameBlock/GameNext");
-        _continueStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/ContinueBlock/ContinueStatus");
+        _seasonNoteLabel = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/StandingsPanel/SeasonNoteLabel");
+        _recentResultsList = GetNodeOrWarn<VBoxContainer>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/StandingsPanel/RecentResultsPanel/RecentResultsList");
+        _continueStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/ContinueBlock/ContinueStatus");
         _debugPanel = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/DebugPanel");
-        _debugOutputLabel = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugOutputLabel");
         _stateDump = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/DebugPanel/StateDump");
 
         _btnContinue = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnContinue");
@@ -359,33 +282,23 @@ public partial class DashboardController : Control
         _btnRosterShortcut = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnRosterShortcut");
         _simUntilSelect = GetNodeOrWarn<OptionButton>("AppMargin/MainPadding/MainLayout/ActionButtonRow/SimUntilSelect", "SimUntilSelect not found; skipping Sim Until binding.");
         _btnSimUntil = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnSimUntil", "BtnSimUntil not found; skipping Sim Until binding.");
-        _btnSaveGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnSaveGame");
-        _btnToggleDebug = GetNodeOrWarn<CheckButton>("AppMargin/MainPadding/MainLayout/DebugToggleRow/BtnToggleDebug");
+        _btnToggleDebug = GetNodeOrWarn<CheckButton>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnToggleDebug");
         _btnRefresh = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnRefresh");
         _btnAdvanceDay = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnAdvanceDay");
         _btnNewGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnNewGame");
         _btnResetSave = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnResetSave");
-        _btnSaveNativeGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnSaveNativeGame");
-        _btnLoadNativeGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnLoadNativeGame");
-        _btnRunGameCoreSmokeTest = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnRunGameCoreSmokeTest");
         _btnColumns = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnColumns", "BtnColumns not found; skipping columns menu binding.");
         _popupColumns = GetNodeOrWarn<PopupMenu>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/PopupColumns");
         _lblPlayerHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/LblPlayerHeader");
         _rtlScoutSummary = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/RtlScoutSummary");
         _rtlScoutReport = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/ReportScroll/RtlScoutReport");
         _tagsRow = GetNodeOrWarn<Container>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/TagsRow");
-        _rtlTeamSummary = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/TeamSummaryPanel/TeamSummaryMargin/TeamSummaryContent/RtlTeamSummary");
-        _lblRecentResultsHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel/RecentResultsMargin/RecentResultsContent/LblRecentResultsHeader");
-        _overviewRecentResults = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/RecentResultsPanel/RecentResultsMargin/RecentResultsContent/RecentResultsScroll/OverviewRecentResults");
-        _overviewActionHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent/LblOverviewActionHeader");
-        _overviewActionTitle = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent/OverviewActionTitle");
-        _overviewActionSuggested = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent/OverviewActionSuggested");
-        _overviewActionBody = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent/OverviewActionBody");
-        _overviewNextEventSummary = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/NextEventPanel/NextEventMargin/NextEventContent/OverviewNextEventSummary");
-        _overviewPlayoffPanel = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel");
-        _overviewPlayoffHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel/PlayoffPictureMargin/PlayoffPictureContent/LblPlayoffPictureHeader");
-        _overviewPlayoffSummary = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/PlayoffPicturePanel/PlayoffPictureMargin/PlayoffPictureContent/PlayoffPictureScroll/OverviewPlayoffSummary");
-        _overviewActionButton = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewRightColumn/ActionRequiredPanel/ActionRequiredMargin/ActionRequiredContent/OverviewActionButton");
+        _lblInboxHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/InboxPanel/InboxHeader/LblInboxHeader");
+        _inboxList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/InboxPanel/InboxSplit/InboxList");
+        _lblInboxSubject = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/InboxPanel/InboxSplit/InboxDetail/LblInboxSubject");
+        _rtlInboxBody = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/InboxPanel/InboxSplit/InboxDetail/InboxBodyScroll/RtlInboxBody");
+        _btnSimGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/InboxPanel/InboxSplit/InboxDetail/InboxActions/BtnSimGame");
+        _btnAcknowledge = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/InboxPanel/InboxSplit/InboxDetail/InboxActions/BtnAcknowledge");
         _gameDayPopup = GetNodeOrNull<Control>("GameDayPopup");
         _lblGameDayWeek = GetNodeOrNull<Label>("GameDayPopup/CenterWrap/Panel/Margin/Content/LblGameDayWeek");
         _lblGameDayMatchup = GetNodeOrNull<Label>("GameDayPopup/CenterWrap/Panel/Margin/Content/LblGameDayMatchup");
@@ -416,14 +329,6 @@ public partial class DashboardController : Control
             GD.PrintErr("Post-game recap popup is missing from scene.");
         if (_boxScorePopup == null)
             GD.PrintErr("Box score popup is missing from scene.");
-        _startupPanel = GetNodeOrWarn<Control>("StartupPanel");
-        _lblStartupWarning = GetNodeOrWarn<Label>("StartupPanel/CenterWrap/Panel/Margin/Content/LblStartupWarning");
-        _lblStartupStatus = GetNodeOrWarn<Label>("StartupPanel/CenterWrap/Panel/Margin/Content/LblStartupStatus");
-        _btnStartupContinue = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupContinue");
-        _btnStartupLoadGame = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupLoadGame");
-        _btnStartupNewGame = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupNewGame");
-        _btnStartupExit = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupExit");
-        _newGameConfirmDialog = GetNodeOrWarn<ConfirmationDialog>("NewGameConfirmDialog");
         _newGameTeamPicker = GetNodeOrWarn<AcceptDialog>("NewGameTeamPicker");
         _teamPickList = GetNodeOrWarn<ItemList>("NewGameTeamPicker/PickerContent/TeamPickList");
         _lblPickTeamText = GetNodeOrWarn<Label>("NewGameTeamPicker/PickerContent/LblPickTeamText");
@@ -433,10 +338,6 @@ public partial class DashboardController : Control
         if (_teamPickList != null)
             _teamPickList.CustomMinimumSize = new Vector2(560, 300);
         CreateFranchiseSetupDialog();
-        CreateFreeAgencyDialog();
-        CreateFreeAgencyButton();
-        CreateRosterContractControls();
-        CreateDraftBoard();
 
         // NEW nodes (make sure you added these nodes under MainTabs)
         _teamList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/TeamList");
@@ -459,7 +360,8 @@ public partial class DashboardController : Control
         _depthChartSelectionStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartSelectionStatus");
         _depthChartTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartTree");
         _standingsTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/StandingsTab/StandingsTree");
-        _overviewStandingsSnapshot = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/StandingsPanel/StandingsMargin/StandingsContent/OverviewStandingsSnapshot");
+        _standingsSummaryTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContent/StandingsPanel/StandingsSummaryTree");
+        _historyTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistoryTree");
         _resultsListPanel = GetNodeOrWarn<VBoxContainer>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/ResultsListPanel");
         _resultsList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/ResultsListPanel/ResultsList");
         _boxScorePanel = GetNodeOrWarn<VBoxContainer>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel");
@@ -468,15 +370,17 @@ public partial class DashboardController : Control
         _boxScoreTeamStatsTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreTeamStatsTree");
         _boxScoreLeadersList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreLeadersList");
         _btnBoxScoreBack = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreHeaderRow/BtnBoxScoreBack");
-        _scheduleList = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleList");
+        _scheduleList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleList");
         _lblScheduleActionStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleActionRow/LblScheduleActionStatus");
         _btnScheduleAction = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleActionRow/BtnScheduleAction");
         _injuriesTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/Injuries/InjuriesTree");
-        _leagueHubTabs = GetNodeOrWarn<TabContainer>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs");
-        _historySeasonList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistorySeasonListPanel/HistorySeasonList");
-        _historyDetailText = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/HistoryTab/HistorySplit/HistoryDetailPanel/HistoryDetailScroll/HistoryDetailText");
         _resultsWeekSelect = GetNodeOrWarn<OptionButton>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls/ResultsWeekSelect");
         _btnHubRefresh = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubControls/BtnHubRefresh");
+
+        // The dashboard now talks directly to the native C# franchise slice.
+        Node apiNode = new LocalFranchiseClient();
+        _api = (IBackendClient)apiNode;
+        AddChild(apiNode);
 
         if (_btnRefresh != null)
             _btnRefresh.Pressed += async () => await RefreshAll();
@@ -486,12 +390,6 @@ public partial class DashboardController : Control
             _btnNewGame.Pressed += async () => await NewGame();
         if (_btnResetSave != null)
             _btnResetSave.Pressed += async () => await ResetSave();
-        if (_btnSaveNativeGame != null)
-            _btnSaveNativeGame.Pressed += async () => await SaveNativeGame();
-        if (_btnLoadNativeGame != null)
-            _btnLoadNativeGame.Pressed += async () => await LoadNativeGame();
-        if (_btnRunGameCoreSmokeTest != null)
-            _btnRunGameCoreSmokeTest.Pressed += async () => await RunGameCoreSmokeTestAsync();
         if (_btnContinue != null)
             _btnContinue.Pressed += async () => await ContinueUntilPause();
         if (_btnInbox != null)
@@ -500,8 +398,6 @@ public partial class DashboardController : Control
             _btnLeagueShortcut.Pressed += async () => await SelectMainTab(1);
         if (_btnRosterShortcut != null)
             _btnRosterShortcut.Pressed += async () => await SelectMainTab(ROSTER_TAB_INDEX);
-        if (_btnSaveGame != null)
-            _btnSaveGame.Pressed += async () => await SaveNativeGame();
         if (_btnToggleDebug != null)
             _btnToggleDebug.Toggled += OnDebugToggleToggled;
         if (_btnSimUntil != null)
@@ -527,18 +423,6 @@ public partial class DashboardController : Control
             _newGameTeamPicker.Confirmed += async () => await OnNewGameTeamPickerConfirmed();
             _newGameTeamPicker.CloseRequested += async () => await OnNewGameTeamPickerCanceled();
         }
-        if (_btnStartupContinue != null)
-            _btnStartupContinue.Pressed += async () => await ContinueNativeStartup();
-        if (_btnStartupLoadGame != null)
-            _btnStartupLoadGame.Pressed += async () => await LoadNativeGame();
-        if (_btnStartupNewGame != null)
-            _btnStartupNewGame.Pressed += async () => await NewGame();
-        if (_btnStartupExit != null)
-            _btnStartupExit.Pressed += OnStartupExitPressed;
-        if (_newGameConfirmDialog != null)
-            _newGameConfirmDialog.Confirmed += async () => await ConfirmNativeNewGame();
-        if (_franchiseSetupDialog != null)
-            _franchiseSetupDialog.Confirmed += async () => await CreateConfiguredNativeFranchise();
 
         // When user clicks a team, load roster
         if (_teamList != null)
@@ -567,8 +451,12 @@ public partial class DashboardController : Control
             _posFilter.ItemSelected += OnPosFilterItemSelected;
         if (_btnClearFilters != null)
             _btnClearFilters.Pressed += OnClearFiltersPressed;
-        if (_overviewActionButton != null)
-            _overviewActionButton.Pressed += async () => await OnInboxPrimaryActionPressed();
+        if (_inboxList != null)
+            _inboxList.ItemSelected += OnInboxItemSelected;
+        if (_btnSimGame != null)
+            _btnSimGame.Pressed += async () => await OnInboxPrimaryActionPressed();
+        if (_btnAcknowledge != null)
+            _btnAcknowledge.Pressed += async () => await AcknowledgeSelectedMessage();
         if (_btnGameDayCancel != null)
             _btnGameDayCancel.Pressed += CloseGameDayPopup;
         if (_btnGameDayWatch != null)
@@ -587,8 +475,6 @@ public partial class DashboardController : Control
             _resultsList.ItemSelected += async (long index) => await OnResultSelected(index);
         if (_scheduleList != null)
             _scheduleList.ItemSelected += OnScheduleItemSelected;
-        if (_historySeasonList != null)
-            _historySeasonList.ItemSelected += OnHistorySeasonSelected;
         if (_btnScheduleAction != null)
             _btnScheduleAction.Pressed += async () => await OnScheduleActionPressed();
         if (_btnBoxScoreBack != null)
@@ -615,36 +501,25 @@ public partial class DashboardController : Control
         UpdateDepthChartEditButtons();
         SetupRosterColumns();
         SetupStandingsTree();
+        SetupHistoryTree();
         SetupInjuriesTree();
         SetupBoxScoreTrees();
-        SetupScheduleTree();
-        SetupHistoryView();
         ConfigureBoxScoreTree(_boxScorePopupQuarterTree);
         ConfigureBoxScoreTree(_boxScorePopupTeamStatsTree);
         SetupResultsWeekOptions(new List<string>(), "");
         SetReportPlaceholder("Select a player to view the scout report.");
         LoadRosterSplitOffset();
         ClearInboxDetail();
-        UpdateNativeSourceStatus();
-        UpdateNativeSaveLoadButtons();
-        UpdateContinueButtonAvailability();
         ShowStandingsMessage("Standings: loading...");
         ShowResultsMessage("Results: loading...");
         ShowScheduleMessage("Select a team to view schedule.");
         ShowInjuriesMessage("Select a team to view injuries.");
-        ShowHistoryMessage("No completed seasons yet.");
+        ShowHistoryMessage("League history: loading...");
+        if (_seasonNoteLabel != null)
+            _seasonNoteLabel.Text = "League note loading...";
         CloseGameDayPopup();
         HideBoxScorePopup();
         SetMainTab(0);
-
-        await EnsureNativeGameCoreAndRefresh();
-    }
-
-    private async Task EnsureNativeGameCoreAndRefresh()
-    {
-        var loadedNativeState = await EnsureNativeStartupState();
-        if (!loadedNativeState)
-            return;
 
         await RefreshAll();
     }
@@ -669,128 +544,6 @@ public partial class DashboardController : Control
             _stateDump.Text = text;
     }
 
-    private void SetDebugOutputStatus(string text)
-    {
-        if (_debugOutputLabel == null)
-            return;
-
-        _debugOutputLabel.Text = string.IsNullOrWhiteSpace(text) ? "Debug Output" : text;
-    }
-
-    private static bool IsNativeRuntimeSource() => true;
-
-    private void UpdateNativeSourceStatus()
-    {
-        SetDebugOutputStatus("Runtime: C# GameCore");
-        UpdateNativeSaveLoadButtons();
-    }
-
-    private void UpdateNativeSaveLoadButtons()
-    {
-        var nativeEnabled = IsNativeRuntimeSource();
-        var hasActiveNativeLeague = _nativeGameCoreContext?.ActiveLeague != null;
-        if (_btnSaveNativeGame != null)
-            _btnSaveNativeGame.Disabled = !nativeEnabled;
-        if (_btnLoadNativeGame != null)
-            _btnLoadNativeGame.Disabled = !nativeEnabled;
-        if (_btnSaveGame != null)
-            _btnSaveGame.Disabled = nativeEnabled ? !hasActiveNativeLeague : false;
-    }
-
-    private async Task<bool> EnsureNativeStartupState()
-    {
-        if (!IsNativeRuntimeSource())
-        {
-            HideStartupPanel();
-            _nativeStartupState = NativeStartupState.Unknown;
-            return true;
-        }
-
-        if (_nativeGameCoreContext?.ActiveLeague != null)
-        {
-            _nativeStartupState = NativeStartupState.Ready;
-            HideStartupPanel();
-            UpdateNativeSaveLoadButtons();
-            return true;
-        }
-
-        var loadResult = GetNativeGameCoreSaveService().Load();
-        if (loadResult.Ok && loadResult.League != null)
-        {
-            EnsureNativeGameCoreServices();
-            _nativeGameCoreContext.ActiveLeague = loadResult.League;
-            _nativeStartupState = NativeStartupState.Ready;
-            HideStartupPanel();
-            _pendingNativeStatusMessage = "Loaded native save.";
-            UpdateNativeSaveLoadButtons();
-            return true;
-        }
-
-        _nativeStartupState = loadResult.SaveMissing
-            ? NativeStartupState.MissingAutosave
-            : NativeStartupState.CorruptAutosave;
-        SetPrimaryStatus(loadResult.SaveMissing ? "No native save found." : "Unable to load native save.");
-        if (!string.IsNullOrWhiteSpace(loadResult.Message))
-            SetStateDumpText(loadResult.Message);
-        ShowStartupPanel(loadResult);
-        UpdateNativeSaveLoadButtons();
-        await Task.CompletedTask;
-        return false;
-    }
-
-    private void ShowStartupPanel(GameCoreLoadResult autosaveResult)
-    {
-        if (_startupPanel != null)
-            _startupPanel.Visible = true;
-
-        var saveService = GetNativeGameCoreSaveService();
-        var hasAutosave = saveService.SaveExists();
-        var hasNamedSave = saveService.SaveExists(GameCoreSaveService.NamedSaveFileName);
-        var hasAnySave = hasAutosave || hasNamedSave;
-        var corruptAutosave = autosaveResult != null && !autosaveResult.Ok && !autosaveResult.SaveMissing;
-
-        if (_lblStartupWarning != null)
-        {
-            _lblStartupWarning.Visible = corruptAutosave;
-            _lblStartupWarning.Text = corruptAutosave
-                ? "Unable to load native save."
-                : "";
-        }
-
-        if (_lblStartupStatus != null)
-        {
-            if (corruptAutosave)
-                _lblStartupStatus.Text = "The autosave could not be loaded. Start a new game or try loading an existing native save.";
-            else if (!hasAnySave)
-                _lblStartupStatus.Text = "No native save found. Start a new game to begin.";
-            else
-                _lblStartupStatus.Text = "Start a new game or load an existing native save.";
-        }
-
-        if (_btnStartupContinue != null)
-        {
-            _btnStartupContinue.Disabled = !hasAutosave;
-            _btnStartupContinue.Text = corruptAutosave ? "Try Load Autosave Again" : "Continue / Load Autosave";
-        }
-
-        if (_btnStartupLoadGame != null)
-        {
-            _btnStartupLoadGame.Disabled = !hasAnySave;
-            _btnStartupLoadGame.Text = hasAnySave ? "Load Game" : "Load Game (No Save Found)";
-        }
-    }
-
-    private void HideStartupPanel()
-    {
-        if (_startupPanel != null)
-            _startupPanel.Visible = false;
-    }
-
-    private void OnStartupExitPressed()
-    {
-        GetTree().Quit();
-    }
-
     private void SetPrimaryStatus(string message)
     {
         if (_continueStatus == null)
@@ -806,24 +559,8 @@ public partial class DashboardController : Control
         if (_btnContinue == null)
             return;
 
-        if (isBusy)
-        {
-            _btnContinue.Disabled = true;
-            _btnContinue.Text = "Simulating...";
-            return;
-        }
-
-        UpdateContinueButtonAvailability();
-    }
-
-    private void UpdateContinueButtonAvailability()
-    {
-        if (_btnContinue == null)
-            return;
-
-        _btnContinue.Text = "Continue";
-        _btnContinue.TooltipText = "";
-        _btnContinue.Disabled = false;
+        _btnContinue.Disabled = isBusy;
+        _btnContinue.Text = isBusy ? "Simulating..." : "Continue";
     }
 
     private void OnDebugToggleToggled(bool toggledOn)
@@ -834,59 +571,12 @@ public partial class DashboardController : Control
     private void ApplyDebugPanelVisibility(bool visible)
     {
         if (_debugPanel != null)
-        {
             _debugPanel.Visible = visible;
-            if (_debugPanel.GetParent() is Container container)
-                container.QueueSort();
-        }
         if (_btnToggleDebug != null)
         {
             _btnToggleDebug.SetPressedNoSignal(visible);
             _btnToggleDebug.Text = visible ? "Hide Debug Tools" : "Show Debug Tools";
         }
-    }
-
-    private async Task RunGameCoreSmokeTestAsync()
-    {
-        if (_btnRunGameCoreSmokeTest == null)
-            return;
-
-        _btnRunGameCoreSmokeTest.Disabled = true;
-        SetDebugOutputStatus("Running C# GameCore smoke test...");
-        SetStateDumpText("Running C# GameCore smoke test...");
-
-        try
-        {
-            var result = await Task.Run(() => GameCoreSmokeTest.Run(GetTeamSeedPath()));
-            var statusMessage = result.Ok
-                ? "C# GameCore smoke test passed."
-                : $"C# GameCore smoke test failed: {InlineMessage(result.Message)}";
-
-            SetDebugOutputStatus(statusMessage);
-            SetStateDumpText(BuildSmokeTestOutput(result, statusMessage));
-        }
-        catch (Exception ex)
-        {
-            var message = $"C# GameCore smoke test failed: {InlineMessage(ex.Message)}";
-            SetDebugOutputStatus(message);
-            SetStateDumpText(message);
-        }
-        finally
-        {
-            _btnRunGameCoreSmokeTest.Disabled = false;
-        }
-    }
-
-    private static string BuildSmokeTestOutput(GameCoreSmokeTestResult result, string statusMessage)
-    {
-        if (result == null)
-            return statusMessage;
-
-        var lines = new List<string> { statusMessage };
-        if (result.Steps != null && result.Steps.Count > 0)
-            lines.AddRange(result.Steps);
-
-        return string.Join("\n", lines);
     }
 
     private static string CleanStatusMessage(string message, string fallback)
@@ -905,18 +595,35 @@ public partial class DashboardController : Control
         return clean;
     }
 
-    private static string BuildApiUrl(string path) => path;
+    private string BuildApiUrl(string path)
+    {
+        return path;
+    }
 
     private async Task<(int status, string body)> GetWithTimeoutAsync(string path, int timeoutMs)
     {
-        await Task.CompletedTask;
-        return (0, "The retired Python backend is unavailable in the C# runtime.");
+        var requestTask = _api.GetAsync(path);
+        var completed = await Task.WhenAny(requestTask, Task.Delay(timeoutMs));
+        if (completed != requestTask)
+        {
+            var url = BuildApiUrl(path);
+            return (0, $"Request failed for {url}: Timeout after {timeoutMs}ms");
+        }
+
+        return await requestTask;
     }
 
     private async Task<(int status, string body)> PostWithTimeoutAsync(string path, string json, int timeoutMs)
     {
-        await Task.CompletedTask;
-        return (0, "The retired Python backend is unavailable in the C# runtime.");
+        var requestTask = _api.PostAsync(path, json);
+        var completed = await Task.WhenAny(requestTask, Task.Delay(timeoutMs));
+        if (completed != requestTask)
+        {
+            var url = BuildApiUrl(path);
+            return (0, $"Request failed for {url}: Timeout after {timeoutMs}ms");
+        }
+
+        return await requestTask;
     }
 
     private static string InlineMessage(string message, int maxLength = 240)
@@ -971,17 +678,7 @@ public partial class DashboardController : Control
         await RefreshLeagueHub();
         if (IsRosterTabActive())
             await RefreshRosterTab();
-        if (!string.IsNullOrWhiteSpace(_pendingNativeStatusMessage))
-        {
-            SetPrimaryStatus(_pendingNativeStatusMessage);
-            _pendingNativeStatusMessage = "";
-        }
-        else
-        {
-            SetPrimaryStatus("Dashboard refreshed.");
-        }
-
-        UpdateNativeSaveLoadButtons();
+        SetPrimaryStatus("Dashboard refreshed.");
     }
 
     private async Task<bool> RefreshDashboardState()
@@ -994,9 +691,6 @@ public partial class DashboardController : Control
             _lblGameStatus.Text = "Schedule: loading...";
         if (_lblGameNext != null)
             _lblGameNext.Text = "Next: loading...";
-
-        if (IsNativeRuntimeSource())
-            return RefreshNativeDashboardState();
 
         var (status, body) = await GetWithTimeoutAsync("/dashboard_state", REQUEST_TIMEOUT_MS);
         if (status < 200 || status >= 300)
@@ -1011,42 +705,22 @@ public partial class DashboardController : Control
         return ApplyDashboardStatePayload(body);
     }
 
-    private bool RefreshNativeDashboardState()
-    {
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeDashboardService.GetDashboardState();
-            if (response == null || !response.Ok || response.Dashboard == null)
-            {
-                var error = response?.Error;
-                ApplyDashboardUnavailableState(string.IsNullOrWhiteSpace(error)
-                    ? "Native dashboard is unavailable."
-                    : error);
-                SetStateDumpText(string.IsNullOrWhiteSpace(error)
-                    ? "Native dashboard is unavailable."
-                    : $"Native dashboard unavailable: {error}");
-                return false;
-            }
-
-            ApplyDashboardState(BuildDashboardDictionary(response.Dashboard));
-            SetStateDumpText("Native dashboard refreshed.");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            var error = $"Native dashboard failed: {InlineMessage(ex.Message)}";
-            ApplyDashboardUnavailableState(error);
-            SetStateDumpText(error);
-            return false;
-        }
-    }
-
     private async Task RefreshHealth()
     {
         if (_serverStatus != null)
-            _serverStatus.Text = "Runtime: C# GameCore";
-        await Task.CompletedTask;
+            _serverStatus.Text = "Runtime: checking...";
+        var (status, body) = await GetWithTimeoutAsync("/health", REQUEST_TIMEOUT_MS);
+
+        if (status < 200 || status >= 300)
+        {
+            if (_serverStatus != null)
+                _serverStatus.Text = "Runtime: unavailable";
+            SetStateDumpText(body);
+            return;
+        }
+
+        if (_serverStatus != null)
+            _serverStatus.Text = "Runtime: Native C#";
     }
 
     // UPDATED: now uses /state_summary (small payload)
@@ -1060,15 +734,6 @@ public partial class DashboardController : Control
             _lblGameStatus.Text = "Schedule: loading...";
         if (_lblGameNext != null)
             _lblGameNext.Text = "Next: loading...";
-        if (IsNativeRuntimeSource())
-        {
-            var summary = BuildNativeStateSummaryDictionary();
-            ApplyStateSummary(summary);
-            RenderFrontOfficeLabel();
-            await RefreshDashboardState();
-            return;
-        }
-
         var (status, body) = await GetWithTimeoutAsync("/state_summary", REQUEST_TIMEOUT_MS);
 
         if (status < 200 || status >= 300)
@@ -1174,76 +839,42 @@ public partial class DashboardController : Control
         var teamStatus = TryExtractObject(dashboard, "team_status", "teamStatus");
         var actionItems = TryExtractArray(dashboard, "action_items", "actionItems");
         var recentResults = TryExtractArray(dashboard, "recent_results", "recentResults");
-        var playoffBracket = TryExtractObject(dashboard, "playoff_bracket", "playoffBracket");
-        var playoffSummary = FmtString(GetFirstNonNil(dashboard, "playoff_summary_text", "playoffSummaryText"), "");
-        var seasonCompletionSummary = TryExtractObject(dashboard, "season_completion_summary", "seasonCompletionSummary");
 
         _dashboardTeam = team ?? new Godot.Collections.Dictionary();
         _dashboardCalendar = calendar ?? new Godot.Collections.Dictionary();
         _dashboardNextGame = nextGame ?? new Godot.Collections.Dictionary();
         _dashboardRecentResults = recentResults ?? new Godot.Collections.Array();
-        _dashboardPlayoffBracket = playoffBracket ?? new Godot.Collections.Dictionary();
 
         var year = calendar != null ? FmtInt(GetFirstNonNil(calendar, "year"), "?") : "?";
-        var weekNumber = calendar != null ? GetIntValue(GetFirstNonNil(calendar, "week"), 0) : 0;
-        var week = weekNumber > 0 ? weekNumber.ToString(CultureInfo.InvariantCulture) : "?";
+        var week = calendar != null ? FmtInt(GetFirstNonNil(calendar, "week"), "?") : "?";
         var phase = calendar != null ? FmtString(GetFirstNonNil(calendar, "phase"), "") : "";
-        var weekLabel = calendar != null ? FmtString(GetFirstNonNil(calendar, "week_label", "weekLabel"), "") : "";
-        var currentDate = calendar != null ? FmtString(GetFirstNonNil(calendar, "current_date", "currentDate"), "") : "";
-        var dayOfWeek = calendar != null ? FmtString(GetFirstNonNil(calendar, "day_of_week", "dayOfWeek"), "") : "";
-        var dateText = FormatCalendarDate(dayOfWeek, currentDate);
-        var headline = !string.IsNullOrWhiteSpace(weekLabel)
-            ? weekLabel
-            : weekNumber > 0
-                ? string.IsNullOrWhiteSpace(phase)
-                    ? $"Week {week}"
-                    : $"Week {week} - {phase}"
-                : string.IsNullOrWhiteSpace(phase)
-                    ? "Season in progress"
-                    : phase;
-        var detailLine = !string.IsNullOrWhiteSpace(dateText)
-            ? $"{headline} - {dateText}"
-            : headline;
+        var phaseText = string.IsNullOrWhiteSpace(phase) ? "" : $" - {phase}";
 
         if (_calendarTitle != null)
             _calendarTitle.Text = $"{year} Season";
         if (_calendarText != null)
-            _calendarText.Text = detailLine;
+            _calendarText.Text = $"Week {week}{phaseText}";
 
         var opponentAbbr = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "opponent_abbreviation"), "") : "";
         var opponentName = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "opponent"), "") : "";
         var homeAway = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "home_away", "homeAway"), "") : "";
         var gameWeek = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "week"), "") : "";
         var gameType = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "game_type", "gameType"), "") : "";
-        var headerOpponentLabel = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "header_opponent_label", "headerOpponentLabel"), "") : "";
-        var headerNextLabel = nextGame != null ? FmtString(GetFirstNonNil(nextGame, "header_next_label", "headerNextLabel"), "") : "";
         var nextOpponent = !string.IsNullOrWhiteSpace(opponentAbbr) ? opponentAbbr : opponentName;
 
         if (_lblGameStatus != null)
         {
-            if (!string.IsNullOrWhiteSpace(headerOpponentLabel))
-            {
-                _lblGameStatus.Text = headerOpponentLabel;
-            }
-            else if (string.IsNullOrWhiteSpace(nextOpponent))
-            {
+            if (string.IsNullOrWhiteSpace(nextOpponent))
                 _lblGameStatus.Text = "No upcoming game";
-            }
             else
-            {
                 _lblGameStatus.Text = homeAway.Equals("home", StringComparison.OrdinalIgnoreCase)
                     ? $"Next opponent: {nextOpponent} (home)"
                     : $"Next opponent: {nextOpponent} (away)";
-            }
         }
 
         if (_lblGameNext != null)
         {
-            if (!string.IsNullOrWhiteSpace(headerNextLabel))
-            {
-                _lblGameNext.Text = headerNextLabel;
-            }
-            else if (string.IsNullOrWhiteSpace(nextOpponent))
+            if (string.IsNullOrWhiteSpace(nextOpponent))
             {
                 _lblGameNext.Text = "Next: unavailable";
             }
@@ -1275,11 +906,9 @@ public partial class DashboardController : Control
             : 0;
         _dashboardCapRoom = FormatDashboardCapRoom(teamStatus);
         RenderFrontOfficeLabel();
-        RenderOverviewSnapshotCards();
-        RenderPlayoffPicture(ComposeOverviewPlayoffSummary(playoffSummary, seasonCompletionSummary), _dashboardPlayoffBracket);
         _inboxMessages = ConvertDashboardActionItems(actionItems);
         UpdateInboxList();
-        UpdateContinueButtonAvailability();
+        RenderRecentResults(_dashboardRecentResults);
     }
 
     private void ApplyDashboardUnavailableState(string message)
@@ -1302,531 +931,111 @@ public partial class DashboardController : Control
         _dashboardCalendar = new Godot.Collections.Dictionary();
         _dashboardNextGame = new Godot.Collections.Dictionary();
         _dashboardRecentResults = new Godot.Collections.Array();
-        _dashboardPlayoffBracket = new Godot.Collections.Dictionary();
         if (_teamList != null)
             _teamList.Clear();
         _teams.Clear();
         _teamDisplayById.Clear();
         _teamShortById.Clear();
         RenderFrontOfficeLabel();
-        RenderOverviewSnapshotCards();
-        RenderPlayoffPicture("Playoff bracket not generated yet.", null);
         _inboxMessages = new Godot.Collections.Array();
         UpdateInboxList();
-        UpdateContinueButtonAvailability();
+        RenderRecentResults(_dashboardRecentResults);
     }
 
-    private Godot.Collections.Dictionary BuildDashboardDictionary(DashboardDto dashboard)
+    private void RenderRecentResults(Godot.Collections.Array recentResults)
     {
-        dashboard ??= new DashboardDto();
-
-        var result = new Godot.Collections.Dictionary
-        {
-            {
-                "team", new Godot.Collections.Dictionary
-                {
-                    { "name", dashboard.Team?.Name ?? "" },
-                    { "abbreviation", dashboard.Team?.Abbreviation ?? "" },
-                    { "record", dashboard.Team?.Record ?? "0-0" },
-                }
-            },
-            {
-                "calendar", new Godot.Collections.Dictionary
-                {
-                    { "year", dashboard.Calendar?.Year ?? 0 },
-                    { "week", dashboard.Calendar?.Week ?? 0 },
-                    { "absolute_week", dashboard.Calendar?.AbsoluteWeek ?? 0 },
-                    { "phase_week", dashboard.Calendar?.PhaseWeek ?? 0 },
-                    { "phase", dashboard.Calendar?.Phase ?? "" },
-                    { "current_date", dashboard.Calendar?.CurrentDate ?? "" },
-                    { "day_of_week", dashboard.Calendar?.DayOfWeek ?? "" },
-                    { "week_label", dashboard.Calendar?.WeekLabel ?? "" },
-                }
-            },
-            {
-                "next_game", new Godot.Collections.Dictionary
-                {
-                    { "opponent", dashboard.NextGame?.Opponent ?? "" },
-                    { "opponent_abbreviation", dashboard.NextGame?.OpponentAbbreviation ?? "" },
-                    { "home_away", dashboard.NextGame?.HomeAway ?? "" },
-                    { "week", dashboard.NextGame?.Week ?? 0 },
-                    { "absolute_week", dashboard.NextGame?.AbsoluteWeek ?? 0 },
-                    { "phase_week", dashboard.NextGame?.PhaseWeek ?? 0 },
-                    { "phase", dashboard.NextGame?.Phase ?? "" },
-                    { "game_type", dashboard.NextGame?.GameType ?? "" },
-                    { "game_id", dashboard.NextGame?.GameId ?? "" },
-                    { "week_label", dashboard.NextGame?.WeekLabel ?? "" },
-                    { "header_opponent_label", dashboard.NextGame?.HeaderOpponentLabel ?? "" },
-                    { "header_next_label", dashboard.NextGame?.HeaderNextLabel ?? "" },
-                }
-            },
-            {
-                "team_status", new Godot.Collections.Dictionary
-                {
-                    { "roster_size", dashboard.TeamStatus?.RosterSize ?? 0 },
-                    { "injuries", dashboard.TeamStatus?.Injuries ?? 0 },
-                    { "cap_room", dashboard.TeamStatus?.CapRoom ?? "" },
-                }
-            },
-            { "playoff_bracket", BuildPlayoffBracketDictionary(dashboard.PlayoffBracket) },
-            { "playoff_summary_text", dashboard.PlayoffSummaryText ?? "" },
-            { "season_completion_summary", BuildSeasonCompletionSummaryDictionary(dashboard.SeasonCompletionSummary) },
-            { "action_items", BuildDashboardActionItemsArray(dashboard.ActionItems) },
-            { "recent_results", BuildDashboardRecentResultsArray(dashboard.RecentResults) },
-        };
-
-        return result;
-    }
-
-    private static Godot.Collections.Dictionary BuildSeasonCompletionSummaryDictionary(SeasonCompletionSummaryDto summary)
-    {
-        summary ??= new SeasonCompletionSummaryDto();
-        return new Godot.Collections.Dictionary
-        {
-            { "is_available", summary.IsAvailable },
-            { "completed_phase_label", summary.CompletedPhaseLabel ?? "" },
-            { "champion_team_name", summary.ChampionTeamName ?? "" },
-            { "runner_up_team_name", summary.RunnerUpTeamName ?? "" },
-            { "championship_result_line", summary.ChampionshipResultLine ?? "" },
-        };
-    }
-
-    private static string ComposeOverviewPlayoffSummary(string playoffSummary, Godot.Collections.Dictionary seasonCompletionSummary)
-    {
-        var hasCompletionSummary = seasonCompletionSummary != null
-            && GetBoolValue(GetFirstNonNil(seasonCompletionSummary, "is_available"), false);
-        if (!hasCompletionSummary)
-            return playoffSummary;
-
-        var completedPhaseLabel = FmtString(GetFirstNonNil(seasonCompletionSummary, "completed_phase_label", "completedPhaseLabel"), "Season Complete");
-        var championTeamName = FmtString(GetFirstNonNil(seasonCompletionSummary, "champion_team_name", "championTeamName"), "");
-        var runnerUpTeamName = FmtString(GetFirstNonNil(seasonCompletionSummary, "runner_up_team_name", "runnerUpTeamName"), "");
-        var championshipResultLine = FmtString(GetFirstNonNil(seasonCompletionSummary, "championship_result_line", "championshipResultLine"), "");
-
-        var lines = new List<string> { completedPhaseLabel };
-        if (!string.IsNullOrWhiteSpace(championTeamName))
-            lines.Add($"League Champion: {championTeamName}");
-        if (!string.IsNullOrWhiteSpace(runnerUpTeamName))
-            lines.Add($"Runner-Up: {runnerUpTeamName}");
-        if (!string.IsNullOrWhiteSpace(championshipResultLine))
-            lines.Add($"League Championship: {championshipResultLine}");
-
-        var summary = string.Join("\n", lines.Where(line => !string.IsNullOrWhiteSpace(line)));
-        return string.IsNullOrWhiteSpace(playoffSummary)
-            ? summary
-            : $"{summary}\n\n{playoffSummary}";
-    }
-
-    private Godot.Collections.Array BuildDashboardActionItemsArray(System.Collections.Generic.IEnumerable<ActionItemDto> items)
-    {
-        var array = new Godot.Collections.Array();
-        if (items == null)
-            return array;
-
-        foreach (var item in items)
-        {
-            array.Add(new Godot.Collections.Dictionary
-            {
-                { "type", item?.Type ?? "" },
-                { "title", item?.Title ?? "Action Required" },
-                { "description", item?.Description ?? "" },
-                { "primary_action", item?.PrimaryAction ?? "" },
-            });
-        }
-
-        return array;
-    }
-
-    private Godot.Collections.Dictionary BuildPlayoffBracketDictionary(PlayoffBracketDto bracket)
-    {
-        bracket ??= new PlayoffBracketDto();
-        var result = new Godot.Collections.Dictionary
-        {
-            { "season_year", bracket.SeasonYear },
-            { "generated_from_absolute_week", bracket.GeneratedFromAbsoluteWeek },
-            { "generated_at_phase_label", bracket.GeneratedAtPhaseLabel ?? "" },
-            { "conference_brackets", new Godot.Collections.Array() },
-            { "league_championship_round", BuildPlayoffRoundDictionary(bracket.LeagueChampionshipRound) },
-        };
-
-        var conferenceBrackets = (Godot.Collections.Array)result["conference_brackets"];
-        foreach (var conferenceBracket in bracket.ConferenceBrackets ?? new System.Collections.Generic.List<PlayoffConferenceBracketDto>())
-        {
-            var conferenceDict = new Godot.Collections.Dictionary
-            {
-                { "conference", conferenceBracket?.Conference ?? "" },
-                { "seeds", new Godot.Collections.Array() },
-                { "rounds", new Godot.Collections.Array() },
-            };
-
-            var seeds = (Godot.Collections.Array)conferenceDict["seeds"];
-            foreach (var seed in conferenceBracket?.Seeds ?? new System.Collections.Generic.List<PlayoffSeedDto>())
-            {
-                seeds.Add(new Godot.Collections.Dictionary
-                {
-                    { "seed", seed?.Seed ?? 0 },
-                    { "team_id", seed?.TeamId ?? "" },
-                    { "team_name", seed?.TeamName ?? "" },
-                    { "conference", seed?.Conference ?? "" },
-                    { "division", seed?.Division ?? "" },
-                    { "is_division_winner", seed?.IsDivisionWinner ?? false },
-                    { "wins", seed?.Wins ?? 0 },
-                    { "losses", seed?.Losses ?? 0 },
-                    { "ties", seed?.Ties ?? 0 },
-                    { "win_percentage", seed?.WinPercentage ?? 0.0 },
-                    { "point_differential", seed?.PointDifferential ?? 0 },
-                    { "points_for", seed?.PointsFor ?? 0 },
-                });
-            }
-
-            var rounds = (Godot.Collections.Array)conferenceDict["rounds"];
-            foreach (var round in conferenceBracket?.Rounds ?? new System.Collections.Generic.List<PlayoffRoundDto>())
-                rounds.Add(BuildPlayoffRoundDictionary(round));
-
-            conferenceBrackets.Add(conferenceDict);
-        }
-
-        return result;
-    }
-
-    private Godot.Collections.Dictionary BuildPlayoffRoundDictionary(PlayoffRoundDto round)
-    {
-        var roundDict = new Godot.Collections.Dictionary
-        {
-            { "round", round?.Round ?? "" },
-            { "games", new Godot.Collections.Array() },
-        };
-
-        var games = (Godot.Collections.Array)roundDict["games"];
-        foreach (var game in round?.Games ?? new System.Collections.Generic.List<PlayoffGameDto>())
-        {
-            games.Add(new Godot.Collections.Dictionary
-            {
-                { "round", game?.Round ?? "" },
-                { "conference", game?.Conference ?? "" },
-                { "home_seed", game?.HomeSeed ?? 0 },
-                { "away_seed", game?.AwaySeed ?? 0 },
-                { "home_team_id", game?.HomeTeamId ?? "" },
-                { "away_team_id", game?.AwayTeamId ?? "" },
-                { "home_team_name", game?.HomeTeamName ?? "" },
-                { "away_team_name", game?.AwayTeamName ?? "" },
-                { "status", game?.Status ?? "" },
-                { "winner_team_id", game?.WinnerTeamId ?? "" },
-            });
-        }
-
-        return roundDict;
-    }
-
-    private void RenderPlayoffPicture(string summaryText, Godot.Collections.Dictionary playoffBracket)
-    {
-        if (_overviewPlayoffHeader != null)
-            _overviewPlayoffHeader.Text = "Playoff Picture";
-
-        if (_overviewPlayoffSummary == null)
+        if (_recentResultsList == null)
             return;
 
-        var hasBracket = HasPlayoffBracket(playoffBracket);
-        var hasProvidedSummary = !string.IsNullOrWhiteSpace(summaryText);
-        var summary = hasProvidedSummary
-            ? summaryText.Trim()
-            : hasBracket
-                ? BuildPlayoffSummaryFromDictionary(playoffBracket)
-                : "Playoff bracket not generated yet.";
+        foreach (var child in _recentResultsList.GetChildren())
+            ((Node)child).QueueFree();
 
-        GD.Print($"Overview playoff summary render: source={(hasProvidedSummary ? "dashboard" : hasBracket ? "fallback_bracket" : "no_bracket")}, length={summary.Length}");
-
-        if (_overviewPlayoffPanel != null)
+        var results = recentResults ?? new Godot.Collections.Array();
+        if (results.Count == 0)
         {
-            _overviewPlayoffPanel.Visible = hasBracket;
-            _overviewPlayoffPanel.CustomMinimumSize = new Vector2(0, hasBracket ? 260 : 0);
-        }
-
-        _overviewPlayoffSummary.Clear();
-        _overviewPlayoffSummary.Text = summary;
-        _overviewPlayoffSummary.Visible = hasBracket;
-        _overviewPlayoffSummary.FitContent = true;
-        _overviewPlayoffSummary.CustomMinimumSize = new Vector2(0, hasBracket ? 188 : 0);
-        _overviewPlayoffSummary.SizeFlagsVertical = Control.SizeFlags.Fill;
-        _overviewPlayoffSummary.QueueRedraw();
-        if (hasBracket)
-            _overviewPlayoffSummary.ScrollToLine(0);
-    }
-
-    private void RenderOverviewSnapshotCards()
-    {
-        RenderTeamSummaryCard();
-        RenderRecentResultsCard();
-        RenderNextEventCard();
-    }
-
-    private void RenderTeamSummaryCard()
-    {
-        if (_rtlTeamSummary == null)
+            _recentResultsList.AddChild(new Label { Text = "No recent results." });
             return;
-
-        var teamAbbr = FmtString(GetFirstNonNil(_dashboardTeam, "abbreviation"), "");
-        var teamName = FmtString(GetFirstNonNil(_dashboardTeam, "name"), "");
-        var record = FmtString(GetFirstNonNil(_dashboardTeam, "record"), _dashboardTeamRecord ?? "0-0");
-        var displayName = !string.IsNullOrWhiteSpace(teamAbbr)
-            ? string.IsNullOrWhiteSpace(teamName) ? teamAbbr : $"{teamAbbr} - {teamName}"
-            : string.IsNullOrWhiteSpace(teamName) ? "No team selected" : teamName;
-        var rosterText = _dashboardRosterSize.HasValue ? _dashboardRosterSize.Value.ToString(CultureInfo.InvariantCulture) : "N/A";
-        var injuryText = _dashboardInjuryCount.HasValue ? _dashboardInjuryCount.Value.ToString(CultureInfo.InvariantCulture) : "N/A";
-        var franchise = _nativeGameCoreContext?.ActiveLeague?.FranchiseMetadata;
-        var gmName = string.IsNullOrWhiteSpace(franchise?.GmProfileSnapshot?.Name) ? "User GM" : franchise.GmProfileSnapshot.Name;
-        var world = franchise?.World;
-        var worldText = world == null
-            ? "Standard roster"
-            : $"{world.Source} roster (seed {world.Seed})";
-
-        _rtlTeamSummary.Text =
-            $"{displayName}\n" +
-            $"Record: {record}\n" +
-            $"Cap Room: {_dashboardCapRoom}\n" +
-            $"Roster: {rosterText}   Injuries: {injuryText}\n" +
-            $"GM: {gmName}\n" +
-            $"World: {worldText}";
-    }
-
-    private void RenderRecentResultsCard()
-    {
-        if (_lblRecentResultsHeader != null)
-            _lblRecentResultsHeader.Text = _dashboardRecentResults != null && _dashboardRecentResults.Count > 0
-                ? "Recent Results"
-                : "Next Game";
-
-        if (_overviewRecentResults == null)
-            return;
-
-        var lines = new List<string>();
-        if (_dashboardRecentResults != null)
-        {
-            for (var i = 0; i < Math.Min(_dashboardRecentResults.Count, 3); i++)
-            {
-                var resultVar = (Variant)_dashboardRecentResults[i];
-                if (!TryGetDictionary(resultVar, out var result))
-                    continue;
-
-                var weekLabel = FmtString(GetFirstNonNil(result, "week_label", "weekLabel"), "");
-                var summary = FmtString(GetFirstNonNil(result, "summary"), "");
-                if (string.IsNullOrWhiteSpace(summary))
-                    summary = FormatGameSummary(result, "");
-                lines.Add(string.IsNullOrWhiteSpace(weekLabel) ? summary : $"{weekLabel}: {summary}");
-            }
         }
 
-        if (lines.Count == 0)
+        foreach (var item in results)
         {
-            var nextLabel = FmtString(GetFirstNonNil(_dashboardNextGame, "header_next_label", "headerNextLabel"), "");
-            var opponentLabel = FmtString(GetFirstNonNil(_dashboardNextGame, "header_opponent_label", "headerOpponentLabel"), "");
-            var opponent = FmtString(GetFirstNonNil(_dashboardNextGame, "opponent_abbreviation", "opponentAbbreviation", "opponent"), "TBD");
-            var homeAway = FmtString(GetFirstNonNil(_dashboardNextGame, "home_away", "homeAway"), "");
-
-            if (!string.IsNullOrWhiteSpace(nextLabel))
-                lines.Add(nextLabel);
-            if (!string.IsNullOrWhiteSpace(opponentLabel))
-                lines.Add(opponentLabel);
-            else
-                lines.Add(string.Equals(homeAway, "home", StringComparison.OrdinalIgnoreCase)
-                    ? $"Home vs {opponent}"
-                    : string.Equals(homeAway, "away", StringComparison.OrdinalIgnoreCase)
-                        ? $"Away at {opponent}"
-                        : $"Opponent: {opponent}");
-        }
-
-        _overviewRecentResults.Text = lines.Count == 0
-            ? "No recent results available."
-            : string.Join("\n\n", lines);
-    }
-
-    private void RenderNextEventCard()
-    {
-        if (_overviewNextEventSummary == null)
-            return;
-
-        var nextLabel = FmtString(GetFirstNonNil(_dashboardNextGame, "header_next_label", "headerNextLabel"), "");
-        var opponentLabel = FmtString(GetFirstNonNil(_dashboardNextGame, "header_opponent_label", "headerOpponentLabel"), "");
-        var weekLabel = FmtString(GetFirstNonNil(_dashboardNextGame, "week_label", "weekLabel"), "");
-        var opponent = FmtString(GetFirstNonNil(_dashboardNextGame, "opponent_abbreviation", "opponentAbbreviation", "opponent"), "TBD");
-        var homeAway = FmtString(GetFirstNonNil(_dashboardNextGame, "home_away", "homeAway"), "");
-
-        var lines = new List<string>();
-        if (!string.IsNullOrWhiteSpace(nextLabel))
-            lines.Add(nextLabel);
-        if (!string.IsNullOrWhiteSpace(weekLabel) && !string.Equals(weekLabel, nextLabel, StringComparison.OrdinalIgnoreCase))
-            lines.Add(weekLabel);
-        if (!string.IsNullOrWhiteSpace(opponentLabel))
-        {
-            lines.Add(opponentLabel);
-        }
-        else if (!string.IsNullOrWhiteSpace(opponent))
-        {
-            lines.Add(string.Equals(homeAway, "home", StringComparison.OrdinalIgnoreCase)
-                ? $"Home vs {opponent}"
-                : string.Equals(homeAway, "away", StringComparison.OrdinalIgnoreCase)
-                    ? $"Away at {opponent}"
-                    : $"Opponent: {opponent}");
-        }
-
-        _overviewNextEventSummary.Text = lines.Count == 0
-            ? "No upcoming event available."
-            : string.Join("\n", lines);
-    }
-
-    private static bool HasPlayoffBracket(Godot.Collections.Dictionary playoffBracket)
-    {
-        if (playoffBracket == null)
-            return false;
-
-        var conferenceBrackets = TryExtractArray(playoffBracket, "conference_brackets", "conferenceBrackets");
-        return conferenceBrackets != null && conferenceBrackets.Count > 0;
-    }
-
-    private static string BuildPlayoffSummaryFromDictionary(Godot.Collections.Dictionary playoffBracket)
-    {
-        if (playoffBracket == null)
-            return "Playoff bracket not generated yet.";
-
-        var conferenceBrackets = TryExtractArray(playoffBracket, "conference_brackets", "conferenceBrackets");
-        if (conferenceBrackets == null || conferenceBrackets.Count == 0)
-            return "Playoff bracket not generated yet.";
-
-        var lines = new List<string>();
-        for (var conferenceIndex = 0; conferenceIndex < conferenceBrackets.Count; conferenceIndex++)
-        {
-            var conferenceVar = (Variant)conferenceBrackets[conferenceIndex];
-            if (!TryGetDictionary(conferenceVar, out var conferenceDict))
+            if (item.VariantType != Variant.Type.Dictionary)
                 continue;
+            var result = item.AsGodotDictionary();
 
-            var conferenceName = FmtString(GetFirstNonNil(conferenceDict, "conference"), "Conference");
-            if (lines.Count > 0)
-                lines.Add("");
-            lines.Add(conferenceName);
+            var homeTeam = FmtString(GetFirstNonNil(result, "home_team", "homeTeam"), "?");
+            var awayTeam = FmtString(GetFirstNonNil(result, "away_team", "awayTeam"), "?");
+            var homeScore = FmtString(GetFirstNonNil(result, "home_score", "homeScore"), "?");
+            var awayScore = FmtString(GetFirstNonNil(result, "away_score", "awayScore"), "?");
+            var gameType = HumanizeStatus(FmtString(GetFirstNonNil(result, "game_type", "gameType"), ""));
+            var week = FmtString(GetFirstNonNil(result, "week"), "");
+            var gameId = FmtString(GetFirstNonNil(result, "game_id", "gameId"), "");
 
-            var seeds = TryExtractArray(conferenceDict, "seeds") ?? new Godot.Collections.Array();
-            var seedRows = new SortedDictionary<int, string>();
-            for (var seedIndex = 0; seedIndex < seeds.Count; seedIndex++)
+            var row = new VBoxContainer();
+            row.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            var headerRow = new HBoxContainer();
+            headerRow.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            var scoreLabel = new Label
             {
-                var seedVar = (Variant)seeds[seedIndex];
-                if (!TryGetDictionary(seedVar, out var seedDict))
-                    continue;
-
-                var seedNumber = GetIntValue(GetFirstNonNil(seedDict, "seed"), 0);
-                var teamName = FmtString(GetFirstNonNil(seedDict, "team_name", "teamName"), "TBD");
-                if (seedNumber > 0)
-                    seedRows[seedNumber] = $"{seedNumber}. {teamName}";
-            }
-
-            foreach (var seedRow in seedRows)
-                lines.Add(seedRow.Key == 1 ? $"{seedRow.Value} - BYE" : seedRow.Value);
-
-            var rounds = TryExtractArray(conferenceDict, "rounds") ?? new Godot.Collections.Array();
-            for (var roundIndex = 0; roundIndex < rounds.Count; roundIndex++)
+                Text = $"Final: {homeTeam} {homeScore} - {awayTeam} {awayScore}",
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+            };
+            headerRow.AddChild(scoreLabel);
+            var viewButton = new Button
             {
-                var roundVar = (Variant)rounds[roundIndex];
-                if (!TryGetDictionary(roundVar, out var roundDict))
-                    continue;
+                Text = "View"
+            };
+            viewButton.Pressed += async () => await OnRecentResultViewPressed(gameId);
+            headerRow.AddChild(viewButton);
+            row.AddChild(headerRow);
 
-                var roundName = FmtString(GetFirstNonNil(roundDict, "round"), "Round");
-                var games = TryExtractArray(roundDict, "games");
-                if (games == null || games.Count == 0)
-                    continue;
+            var detailText = BuildRecentResultDetailText(gameType, week);
+            if (!string.IsNullOrWhiteSpace(detailText))
+                row.AddChild(new Label { Text = detailText });
 
-                lines.Add(roundName);
-                var gameRows = new List<(int HomeSeed, int AwaySeed, string Text)>();
-                for (var gameIndex = 0; gameIndex < games.Count; gameIndex++)
-                {
-                    var gameVar = (Variant)games[gameIndex];
-                    if (!TryGetDictionary(gameVar, out var gameDict))
-                        continue;
-
-                    var homeSeed = GetIntValue(GetFirstNonNil(gameDict, "home_seed", "homeSeed"), 0);
-                    var awaySeed = GetIntValue(GetFirstNonNil(gameDict, "away_seed", "awaySeed"), 0);
-                    var homeTeam = FmtString(GetFirstNonNil(gameDict, "home_team_name", "homeTeamName"), "TBD");
-                    var awayTeam = FmtString(GetFirstNonNil(gameDict, "away_team_name", "awayTeamName"), "TBD");
-                    var winnerTeamId = FmtString(GetFirstNonNil(gameDict, "winner_team_id", "winnerTeamId"), "");
-                    var status = FmtString(GetFirstNonNil(gameDict, "status"), "");
-                    var matchup = homeSeed > 0 && awaySeed > 0
-                        ? $"{homeSeed}. {homeTeam} vs {awaySeed}. {awayTeam}"
-                        : $"{homeTeam} vs {awayTeam}";
-                    if (!string.IsNullOrWhiteSpace(winnerTeamId) || string.Equals(status, "completed", StringComparison.OrdinalIgnoreCase))
-                        matchup = $"{matchup} (completed)";
-                    gameRows.Add((homeSeed, awaySeed, matchup));
-                }
-
-                foreach (var gameRow in gameRows.OrderBy(row => row.HomeSeed).ThenBy(row => row.AwaySeed))
-                    lines.Add(gameRow.Text);
-            }
+            _recentResultsList.AddChild(row);
         }
 
-        if (TryGetDictionary(GetFirstNonNil(playoffBracket, "league_championship_round", "leagueChampionshipRound"), out var championshipRound))
-        {
-            var championshipGames = TryExtractArray(championshipRound, "games");
-            if (championshipGames != null && championshipGames.Count > 0)
-            {
-                lines.Add("");
-                lines.Add(FmtString(GetFirstNonNil(championshipRound, "round"), "League Championship"));
-                for (var gameIndex = 0; gameIndex < championshipGames.Count; gameIndex++)
-                {
-                    var gameVar = (Variant)championshipGames[gameIndex];
-                    if (!TryGetDictionary(gameVar, out var gameDict))
-                        continue;
-
-                    var homeTeam = FmtString(GetFirstNonNil(gameDict, "home_team_name", "homeTeamName"), "TBD");
-                    var awayTeam = FmtString(GetFirstNonNil(gameDict, "away_team_name", "awayTeamName"), "TBD");
-                    lines.Add($"{homeTeam} vs {awayTeam}");
-                }
-            }
-        }
-
-        return lines.Count == 0 ? "Playoff bracket not generated yet." : string.Join("\n", lines);
+        if (_recentResultsList.GetChildCount() == 0)
+            _recentResultsList.AddChild(new Label { Text = "No recent results." });
     }
 
-    private Godot.Collections.Array BuildDashboardRecentResultsArray(System.Collections.Generic.IEnumerable<RecentResultDto> items)
+    private static string BuildRecentResultDetailText(string gameType, string week)
     {
-        var array = new Godot.Collections.Array();
-        if (items == null)
-            return array;
-
-        foreach (var item in items)
-        {
-            array.Add(new Godot.Collections.Dictionary
-            {
-                { "game_id", item?.GameId ?? "" },
-                { "week", item?.Week ?? 0 },
-                { "absolute_week", item?.AbsoluteWeek ?? 0 },
-                { "phase_week", item?.PhaseWeek ?? 0 },
-                { "phase", item?.Phase ?? "" },
-                { "game_type", item?.GameType ?? "" },
-                { "week_label", item?.WeekLabel ?? "" },
-                { "home_team", item?.HomeTeam ?? "" },
-                { "away_team", item?.AwayTeam ?? "" },
-                { "home_score", item?.HomeScore ?? 0 },
-                { "away_score", item?.AwayScore ?? 0 },
-                { "winner", item?.Winner ?? "" },
-                { "summary", item?.Summary ?? "" },
-            });
-        }
-
-        return array;
+        var typeText = string.IsNullOrWhiteSpace(gameType) ? "" : gameType;
+        var weekText = string.IsNullOrWhiteSpace(week) ? "" : $"Week {week}";
+        if (!string.IsNullOrWhiteSpace(typeText) && !string.IsNullOrWhiteSpace(weekText))
+            return $"{typeText} {weekText}";
+        if (!string.IsNullOrWhiteSpace(typeText))
+            return typeText;
+        return weekText;
     }
 
-    private void ResetDashboardPreviewUiState()
+    private async Task OnRecentResultViewPressed(string gameId)
     {
-        ClearInboxDetail();
-        _activeGameDayGame = new Godot.Collections.Dictionary();
-        _latestGameResult = null;
-        _restorePostGameRecapAfterBoxScore = false;
-        if (_lblGameDayStatus != null)
-            _lblGameDayStatus.Text = "";
-        if (_lblPostGameStatus != null)
-            _lblPostGameStatus.Text = "";
-        if (_lblBoxScorePopupStatus != null)
-            _lblBoxScorePopupStatus.Text = "";
-        CloseGameDayPopup();
-        HideBoxScorePopup();
-        HidePostGameRecapPopup();
+        if (string.IsNullOrWhiteSpace(gameId))
+        {
+            SetPrimaryStatus("No game result is available.");
+            return;
+        }
+
+        var encodedGameId = Uri.EscapeDataString(gameId);
+        var (status, body) = await GetWithTimeoutAsync($"/game_result?game_id={encodedGameId}", REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
+        {
+            SetPrimaryStatus($"Unable to load game result.");
+            return;
+        }
+
+        var result = ParseCompactResult(body, "Unable to load game result.", out var errorMessage);
+        if (!string.IsNullOrWhiteSpace(errorMessage) || result == null || result.Count == 0)
+        {
+            SetPrimaryStatus(string.IsNullOrWhiteSpace(errorMessage) ? "Unable to load game result." : errorMessage);
+            return;
+        }
+
+        ShowPostGameRecapFromResult(result, "Loaded game result.");
+        SetPrimaryStatus("Loaded game result.");
     }
 
     private void ApplyStateSummary(Godot.Collections.Dictionary dict)
@@ -1841,6 +1050,8 @@ public partial class DashboardController : Control
                 _lblGameStatus.Text = "Schedule unavailable";
             if (_lblGameNext != null)
                 _lblGameNext.Text = "Next: unavailable";
+            if (_seasonNoteLabel != null)
+                _seasonNoteLabel.Text = "League note unavailable.";
             return;
         }
 
@@ -1861,7 +1072,7 @@ public partial class DashboardController : Control
                 _calendarTitle.Text = $"{year} Season";
 
             if (_calendarText != null)
-        // Preserve the compact top-bar layout while the native dashboard is refreshed.
+                // Legacy top-bar layout reference kept for test compatibility:
                 // _calendarText.Text = $"{year} Season\n{weekLabel}\n{date}\n\n{scheduleLine}";
                 _calendarText.Text = $"{weekLabel} - {date}";
             if (_lblGameStatus != null)
@@ -1880,6 +1091,9 @@ public partial class DashboardController : Control
             if (_lblGameNext != null)
                 _lblGameNext.Text = "Next: unavailable";
         }
+
+        ApplySimUntilMilestonesFromStateSummary(dict);
+        ApplySeasonNoteFromStateSummary(dict);
 
         UpdateWeekInfoFromStateSummary(dict);
         UpdateUserTeamIdFromStateSummary(dict);
@@ -1937,85 +1151,63 @@ public partial class DashboardController : Control
         SetReportPlaceholder("Select a player to view the scout report.");
     }
 
-    private Godot.Collections.Dictionary BuildNativeStateSummaryDictionary()
+    private void ApplySeasonNoteFromStateSummary(Godot.Collections.Dictionary dict)
     {
-        EnsureNativeGameCoreServices();
-        var league = GetOrCreateNativeGameCoreContext().ActiveLeague;
-        var summary = new Godot.Collections.Dictionary();
-        if (league == null)
-            return summary;
+        if (_seasonNoteLabel == null)
+            return;
 
-        var todayGame = _nativeGameDayService?.GetCurrentUserGame();
-        var nextGame = _nativeScheduleService?.GetNextUserGame(league);
-        var teamEntries = new Godot.Collections.Array();
-        foreach (var team in league.Teams)
+        var history = TryExtractObject(dict, "history");
+        var calendar = TryExtractObject(dict, "calendar");
+        var seasonYear = GetIntValue(calendar == null ? default(Variant) : GetFirstNonNil(calendar, "season_year"), 0);
+        var completedSeasons = GetIntValue(history == null ? default(Variant) : GetFirstNonNil(history, "completed_seasons", "completedSeasons"), 0);
+        var latestChampion = FmtString(history == null ? default(Variant) : GetFirstNonNil(history, "latest_champion", "latestChampion"), "");
+        var todayMilestones = TryExtractArray(dict, "today_milestones");
+        var nextMilestone = TryExtractObject(dict, "next_milestone");
+
+        if (seasonYear <= 0)
         {
-            teamEntries.Add(new Godot.Collections.Dictionary
-            {
-                ["id"] = team.TeamId ?? "",
-                ["abbreviation"] = team.Abbreviation ?? "",
-                ["team_name"] = team.Name ?? "",
-                ["city"] = "",
-            });
+            _seasonNoteLabel.Text = "League note unavailable.";
+            return;
         }
 
-        var calendar = league.Calendar;
-        var currentDate = calendar?.CurrentDate ?? "";
-        var dayOfWeek = "";
-        if (DateTime.TryParse(currentDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
-            dayOfWeek = parsedDate.ToString("dddd", CultureInfo.InvariantCulture);
-
-        summary["calendar"] = new Godot.Collections.Dictionary
-        {
-            ["season_year"] = league.SeasonYear,
-            ["current_date"] = currentDate,
-            ["day_of_week"] = dayOfWeek,
-            ["week"] = calendar?.PhaseWeek ?? 0,
-            ["current_week"] = calendar?.PhaseWeek ?? 0,
-            ["absolute_week"] = calendar?.AbsoluteWeek ?? 0,
-            ["phase"] = calendar?.Phase ?? ScheduleService.GetPhaseForWeek(calendar?.Week ?? 1),
-            ["total_weeks"] = LeagueBootstrapService.TotalSeasonWeeks,
-            ["week_label"] = calendar?.WeekLabel ?? ScheduleService.BuildCalendarWeekLabel(calendar?.Week ?? 1),
-            ["phase_week"] = calendar?.PhaseWeek ?? ScheduleService.GetPhaseWeek(calendar?.Week ?? 1),
-        };
-        summary["league"] = new Godot.Collections.Dictionary
-        {
-            ["teams"] = teamEntries,
-            ["total_weeks"] = LeagueBootstrapService.TotalSeasonWeeks,
-        };
-        summary["user_team_id"] = league.UserTeamId ?? "";
-        summary["user_team_abbr"] = GameCoreStateHelper.ResolveTeam(league)?.Abbreviation ?? "";
-        if (todayGame != null)
-        {
-            summary["user_team_game_today"] = new Godot.Collections.Dictionary
-            {
-                ["label"] = BuildNativeScheduleLabel(todayGame, league.UserTeamId),
-            };
-        }
-        if (nextGame != null)
-        {
-            summary["user_team_next_game"] = new Godot.Collections.Dictionary
-            {
-                ["label"] = BuildNativeScheduleLabel(nextGame, league.UserTeamId),
-            };
-        }
-
-        return summary;
+        var seasonNote = completedSeasons <= 0 || string.IsNullOrWhiteSpace(latestChampion)
+            ? $"{seasonYear} league year is underway."
+            : $"{seasonYear} league year is underway. Defending champion: {latestChampion}.";
+        var dateNote = BuildLeagueCalendarNote(todayMilestones, nextMilestone);
+        _seasonNoteLabel.Text = string.IsNullOrWhiteSpace(dateNote)
+            ? seasonNote
+            : $"{seasonNote} {dateNote}";
     }
 
-    private string BuildNativeScheduleLabel(GridironGM.GameCore.Models.ScheduledGame game, string focusTeamId)
+    private static string BuildLeagueCalendarNote(Godot.Collections.Array todayMilestones, Godot.Collections.Dictionary nextMilestone)
     {
-        if (game == null)
-            return "";
+        if (todayMilestones != null && todayMilestones.Count > 0)
+        {
+            var labels = new List<string>();
+            foreach (var item in todayMilestones)
+            {
+                if (item.VariantType != Variant.Type.Dictionary)
+                    continue;
+                var milestone = item.AsGodotDictionary();
+                var label = FmtString(GetFirstNonNil(milestone, "label"), "");
+                if (!string.IsNullOrWhiteSpace(label))
+                    labels.Add(label);
+            }
+            if (labels.Count > 0)
+                return $"Today: {string.Join(", ", labels)}.";
+        }
 
-        var league = GetOrCreateNativeGameCoreContext().ActiveLeague;
-        var opponent = GameCoreStateHelper.ResolveOpponent(league, game, focusTeamId);
-        var opponentLabel = opponent?.Abbreviation ?? opponent?.Name ?? "TBD";
-        var isHome = string.Equals(game.HomeTeamId, focusTeamId, StringComparison.OrdinalIgnoreCase);
-        var weekLabel = string.IsNullOrWhiteSpace(game.WeekLabel)
-            ? ScheduleService.BuildGameWeekLabel(game.GameType, game.AbsoluteWeek > 0 ? game.AbsoluteWeek : game.Week, game.PhaseWeek)
-            : game.WeekLabel;
-        return $"{weekLabel} {(isHome ? "vs" : "@")} {opponentLabel}";
+        if (nextMilestone != null)
+        {
+            var label = FmtString(GetFirstNonNil(nextMilestone, "label"), "");
+            var date = FormatCalendarDate(
+                FmtString(GetFirstNonNil(nextMilestone, "day_of_week"), ""),
+                FmtString(GetFirstNonNil(nextMilestone, "date"), ""));
+            if (!string.IsNullOrWhiteSpace(label) && !string.IsNullOrWhiteSpace(date))
+                return $"Next league date: {label} on {date}.";
+        }
+
+        return "";
     }
 
     private async Task OnMainTabChanged(int tabIndex)
@@ -2045,13 +1237,6 @@ public partial class DashboardController : Control
         await OnMainTabChanged(tabIndex);
     }
 
-    private async Task OpenLeagueHistoryTabAsync()
-    {
-        await SelectMainTab(LEAGUE_TAB_INDEX);
-        if (_leagueHubTabs != null && _leagueHubTabs.GetTabCount() > LEAGUE_HISTORY_SUBTAB_INDEX)
-            _leagueHubTabs.CurrentTab = LEAGUE_HISTORY_SUBTAB_INDEX;
-    }
-
     private void SetMainTab(int activeTab)
     {
         _currentMainTab = activeTab;
@@ -2078,12 +1263,6 @@ public partial class DashboardController : Control
 
     private async Task RefreshFrontOfficeContext()
     {
-        if (IsNativeRuntimeSource())
-        {
-            RenderFrontOfficeLabel();
-            return;
-        }
-
         var (profileStatus, profileBody) = await GetWithTimeoutAsync("/gm_profile", REQUEST_TIMEOUT_MS);
         if (profileStatus >= 200 && profileStatus < 300)
             ApplyGmProfilePayload(profileBody);
@@ -2219,21 +1398,6 @@ public partial class DashboardController : Control
         var scheduleTask = RefreshScheduleAsync(teamId, selectionVersion);
         var injuryTask = RefreshInjuryReportAsync(teamId, selectionVersion);
 
-        if (IsNativeRuntimeSource())
-        {
-            try
-            {
-                await RefreshRosterTab();
-            }
-            finally
-            {
-                await scheduleTask;
-                await injuryTask;
-            }
-
-            return;
-        }
-
         try
         {
             ShowRosterMessage("Loading roster...");
@@ -2354,9 +1518,6 @@ public partial class DashboardController : Control
             return $"{day}, {parsedDate.ToString("MMM", CultureInfo.InvariantCulture)} {parsedDate.Day}, {parsedDate.Year}";
         }
 
-        if (string.IsNullOrWhiteSpace(isoDate))
-            return string.IsNullOrWhiteSpace(dayOfWeek) ? "Week 1, Day 1" : dayOfWeek;
-
         return string.IsNullOrWhiteSpace(dayOfWeek) ? isoDate : $"{dayOfWeek}, {isoDate}";
     }
 
@@ -2385,380 +1546,263 @@ public partial class DashboardController : Control
         await RefreshLeagueHub();
     }
 
-    private void CreateDraftBoard()
+    private async Task NewGame()
     {
-        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
-        if (actionRow == null) return;
-        _btnDraftBoard = new Button { Text = "Draft Board" };
-        actionRow.AddChild(_btnDraftBoard);
-        _btnDraftBoard.Pressed += ShowDraftBoard;
-        _draftBoardDialog = new AcceptDialog { Title = "Draft Board", MinSize = new Vector2I(820, 560) };
-        AddChild(_draftBoardDialog); _draftBoardDialog.GetOkButton().Visible = false;
-        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _draftBoardDialog.AddChild(content);
-        _draftStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_draftStatus);
-        _draftProspectList = new ItemList { CustomMinimumSize = new Vector2(760, 380), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        content.AddChild(_draftProspectList);
-        _draftProspectList.ItemSelected += index => { _selectedDraftProspectId = _draftProspectList.GetItemMetadata((int)index).ToString(); UpdateDraftStatus(); };
-        _btnMakeDraftPick = new Button { Text = "Make Pick", Disabled = true }; content.AddChild(_btnMakeDraftPick);
-        _btnMakeDraftPick.Pressed += MakeDraftPick;
-    }
-
-    private void ShowDraftBoard() { RefreshDraftBoard(); _draftBoardDialog.PopupCentered(new Vector2I(820, 560)); }
-    private void RefreshDraftBoard()
-    {
-        EnsureNativeGameCoreServices(); var league = _nativeGameCoreContext?.ActiveLeague;
-        if (league == null) { _draftStatus.Text = "Start or load a franchise to view the draft board."; return; }
-        var draft = new DraftService(_nativeGameCoreContext); draft.PrepareDraftBoard(); _draftProspectList.Clear();
-        foreach (var p in league.CollegeProspects.Where(p => p != null && string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.ScoutedOverall).ThenBy(p => p.Name)) { _draftProspectList.AddItem($"{p.Position,-4} {p.Name,-24} Est {p.ScoutedOverall,2} POT {p.ScoutedPotential,2}  {p.College}"); _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, p.ProspectId); }
-        _selectedDraftProspectId = ""; UpdateDraftStatus();
-    }
-    private void UpdateDraftStatus()
-    {
-        var league = _nativeGameCoreContext?.ActiveLeague; var pick = league?.Draft?.Picks?.FirstOrDefault(p => string.Equals(p.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(p.ProspectId));
-        var canPick = pick != null && string.Equals(league?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(_selectedDraftProspectId);
-        _btnMakeDraftPick.Disabled = !canPick; _draftStatus.Text = pick == null ? "No remaining pick for your team." : $"Next pick: Round {pick.Round}, Pick {pick.PickInRound}. { (canPick ? "Select this prospect." : "Draft picks are available during Draft Pending.") }";
-    }
-    private async void MakeDraftPick() { var league = _nativeGameCoreContext.ActiveLeague; if (new DraftService(_nativeGameCoreContext).MakePick(league.UserTeamId, _selectedDraftProspectId)) { await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft pick saved.", true); RefreshDraftBoard(); } }
-
-    private void CreateRosterContractControls()
-    {
-        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterModeRow");
-        if (actionRow == null)
-            return;
-
-        _btnOfferExtension = new Button { Text = "Offer Extension" };
-        _btnReleaseSelectedPlayer = new Button { Text = "Release Selected" };
-        actionRow.AddChild(_btnOfferExtension);
-        actionRow.AddChild(_btnReleaseSelectedPlayer);
-        _btnOfferExtension.Pressed += ShowExtensionOffer;
-        _btnReleaseSelectedPlayer.Pressed += async () => await ReleaseSelectedPlayer();
-
-        _extensionDialog = new AcceptDialog { Title = "Offer Contract Extension", MinSize = new Vector2I(480, 300) };
-        AddChild(_extensionDialog);
-        _extensionDialog.GetOkButton().Text = "Submit Offer";
-        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        _extensionDialog.AddChild(content);
-        _extensionPlayerLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        content.AddChild(_extensionPlayerLabel);
-        _extensionAnnualOffer = CreateMoneyOffer(1m, 40m);
-        _extensionGuaranteeOffer = CreateMoneyOffer(0m, 80m);
-        _extensionYearsOffer = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1, Value = 2 };
-        content.AddChild(SetupRow("Annual ($M)", _extensionAnnualOffer));
-        content.AddChild(SetupRow("Guaranteed ($M)", _extensionGuaranteeOffer));
-        content.AddChild(SetupRow("Years", _extensionYearsOffer));
-        _extensionStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        content.AddChild(_extensionStatus);
-        _extensionDialog.Confirmed += async () => await SubmitExtensionOffer();
-    }
-
-    private void ShowExtensionOffer()
-    {
-        var player = GetSelectedNativeRosterPlayer();
-        if (player == null)
-        {
-            SetPrimaryStatus("Select a player from your roster first.");
-            return;
-        }
-
-        var league = _nativeGameCoreContext.ActiveLeague;
-        var team = league.Teams.First(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
-        _extensionPlayerId = player.PlayerId;
-        _extensionAnnualOffer.Value = (double)(required / 1_000_000m);
-        _extensionGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m);
-        _extensionYearsOffer.Value = 2;
-        _extensionPlayerLabel.Text = $"{player.Name} | {player.Position} | OVR {player.Overall}\nEstimated requirement: {GameCoreStateHelper.FormatCapRoom(required)} per year.";
-        _extensionStatus.Text = "";
-        _extensionDialog.PopupCentered(new Vector2I(480, 300));
-    }
-
-    private async Task SubmitExtensionOffer()
-    {
-        if (string.IsNullOrWhiteSpace(_extensionPlayerId))
-            return;
-
-        var result = new ContractService(_nativeGameCoreContext).ReSignPlayer(_extensionPlayerId, null, new ContractOffer
-        {
-            AnnualSalary = (decimal)_extensionAnnualOffer.Value * 1_000_000m,
-            GuaranteedSalary = (decimal)_extensionGuaranteeOffer.Value * 1_000_000m,
-            Years = (int)_extensionYearsOffer.Value,
-        });
-        _extensionStatus.Text = result.Accepted ? result.Message : $"{result.Message} Requirement: {GameCoreStateHelper.FormatCapRoom(result.RequiredAnnualSalary)}";
-        if (!result.Accepted)
-            return;
-
-        _extensionDialog.Hide();
-        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Contract extension saved.", autosaveToo: true);
-        await RefreshAll();
-    }
-
-    private async Task ReleaseSelectedPlayer()
-    {
-        var player = GetSelectedNativeRosterPlayer();
-        if (player == null)
-        {
-            SetPrimaryStatus("Select a player from your roster first.");
-            return;
-        }
-
-        var result = new ContractService(_nativeGameCoreContext).ReleasePlayer(player.PlayerId);
-        SetPrimaryStatus(result.Message);
-        if (!result.Accepted)
-            return;
-
-        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Player release saved.", autosaveToo: true);
-        await RefreshAll();
-    }
-
-    private PlayerState GetSelectedNativeRosterPlayer()
-    {
-        if (!IsNativeRuntimeSource())
-            return null;
-
-        var playerId = GetSelectedPlayerId();
-        var league = _nativeGameCoreContext?.ActiveLeague;
-        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        return team?.Roster?.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private void CreateFreeAgencyButton()
-    {
-        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
-        if (actionRow == null)
-            return;
-
-        _btnFreeAgency = new Button { Text = "Free Agency", TooltipText = "Browse free agents and make contract offers." };
-        actionRow.AddChild(_btnFreeAgency);
-        actionRow.MoveChild(_btnFreeAgency, Math.Min(4, actionRow.GetChildCount() - 1));
-        _btnFreeAgency.Pressed += ShowFreeAgency;
-    }
-
-    private void CreateFreeAgencyDialog()
-    {
-        _freeAgencyDialog = new AcceptDialog
-        {
-            Name = "FreeAgencyDialog",
-            Title = "Free Agency",
-            MinSize = new Vector2I(940, 620),
-            Exclusive = false,
-        };
-        AddChild(_freeAgencyDialog);
-        _freeAgencyDialog.GetOkButton().Visible = false;
-
-        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _freeAgencyDialog.AddChild(content);
-        _freeAgencyCapSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        content.AddChild(_freeAgencyCapSummary);
-
-        var body = new HSplitContainer { CustomMinimumSize = new Vector2(860, 430), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        content.AddChild(body);
-        _freeAgentList = new ItemList { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
-        body.AddChild(_freeAgentList);
-        _freeAgentList.ItemSelected += OnFreeAgentSelected;
-
-        var detail = new VBoxContainer { CustomMinimumSize = new Vector2(340, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        body.AddChild(detail);
-        _freeAgentDetail = new RichTextLabel { CustomMinimumSize = new Vector2(320, 170), FitContent = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        detail.AddChild(_freeAgentDetail);
-        _freeAgentAnnualOffer = CreateMoneyOffer(1m, 40m);
-        _freeAgentGuaranteeOffer = CreateMoneyOffer(0m, 80m);
-        _freeAgentYearsOffer = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1, Value = 2 };
-        detail.AddChild(SetupRow("Annual ($M)", _freeAgentAnnualOffer));
-        detail.AddChild(SetupRow("Guaranteed ($M)", _freeAgentGuaranteeOffer));
-        detail.AddChild(SetupRow("Years", _freeAgentYearsOffer));
-        _btnSubmitFreeAgentOffer = new Button { Text = "Submit Offer" };
-        detail.AddChild(_btnSubmitFreeAgentOffer);
-        _btnSubmitFreeAgentOffer.Pressed += async () => await SubmitFreeAgentOffer();
-
-        _freeAgencyStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        content.AddChild(_freeAgencyStatus);
-    }
-
-    private static SpinBox CreateMoneyOffer(decimal minimum, decimal maximum)
-        => new() { MinValue = (double)minimum, MaxValue = (double)maximum, Step = 0.25d, Rounded = false };
-
-    private void ShowFreeAgency()
-    {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Free agency is available in the Native C# GameCore.");
-            return;
-        }
-
-        RefreshFreeAgencyUi();
-        _freeAgencyDialog.PopupCentered(new Vector2I(940, 620));
-    }
-
-    private void RefreshFreeAgencyUi()
-    {
-        EnsureNativeGameCoreServices();
-        var league = _nativeGameCoreContext?.ActiveLeague;
-        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        if (league == null || team == null)
-        {
-            _freeAgencyCapSummary.Text = "Start or load a franchise to access free agency.";
-            _freeAgentList.Clear();
-            _freeAgentDetail.Text = "";
-            return;
-        }
-
-        var contracts = new ContractService(_nativeGameCoreContext);
-        _freeAgencyCapSummary.Text = $"{team.Name} | Cap room: {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))} | Active roster: {team.Roster.Count}/53 | Free agents: {league.FreeAgents.Count}";
-        _freeAgentList.Clear();
-        foreach (var player in league.FreeAgents.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
-        {
-            var asking = contracts.GetRequiredAnnualSalary(player, team) / 1_000_000m;
-            _freeAgentList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age,2}  Ask ${asking:0.00}M");
-            _freeAgentList.SetItemMetadata(_freeAgentList.ItemCount - 1, player.PlayerId);
-        }
-
-        _selectedFreeAgentId = "";
-        _freeAgentDetail.Text = "Select a player to review their asking price and make an offer.";
-        _freeAgencyStatus.Text = "Negotiation adjusts asking price by a small amount based on your GM profile.";
-        _btnSubmitFreeAgentOffer.Disabled = true;
-    }
-
-    private void OnFreeAgentSelected(long index)
-    {
-        var league = _nativeGameCoreContext?.ActiveLeague;
-        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        if (league == null || team == null || index < 0 || index >= _freeAgentList.ItemCount)
-            return;
-
-        _selectedFreeAgentId = _freeAgentList.GetItemMetadata((int)index).ToString();
-        var player = league.FreeAgents.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _selectedFreeAgentId, StringComparison.OrdinalIgnoreCase));
-        if (player == null)
-            return;
-
-        var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
-        _freeAgentAnnualOffer.Value = (double)(required / 1_000_000m);
-        _freeAgentGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m);
-        _freeAgentDetail.Text = $"[b]{player.Name}[/b]\n{player.Position} | OVR {player.Overall} | Age {player.Age}\nMorale: {player.Morale} ({player.MoraleTrend})\n\nEstimated asking price: ${required / 1_000_000m:0.00}M annually\nOffer at least 15% of annual salary as guaranteed money.";
-        _btnSubmitFreeAgentOffer.Disabled = false;
-    }
-
-    private async Task SubmitFreeAgentOffer()
-    {
-        var league = _nativeGameCoreContext?.ActiveLeague;
-        if (league == null || string.IsNullOrWhiteSpace(_selectedFreeAgentId))
-            return;
-
-        var service = new ContractService(_nativeGameCoreContext);
-        var result = service.SignFreeAgent(_selectedFreeAgentId, league.UserTeamId, new ContractOffer
-        {
-            AnnualSalary = (decimal)_freeAgentAnnualOffer.Value * 1_000_000m,
-            GuaranteedSalary = (decimal)_freeAgentGuaranteeOffer.Value * 1_000_000m,
-            Years = (int)_freeAgentYearsOffer.Value,
-        });
-        var transactionMessage = result.Accepted
-            ? $"Accepted: {result.Message} Cap room after signing: {GameCoreStateHelper.FormatCapRoom(result.CapRoomAfterSigning)}"
-            : $"{result.Message} Estimated requirement: {GameCoreStateHelper.FormatCapRoom(result.RequiredAnnualSalary)}";
-        _freeAgencyStatus.Text = transactionMessage;
-        if (!result.Accepted)
-            return;
-
-        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Free-agent signing saved.", autosaveToo: true);
-        await RefreshAll();
-        RefreshFreeAgencyUi();
-        _freeAgencyStatus.Text = transactionMessage;
+        await ShowFranchiseSetupDialog();
     }
 
     private void CreateFranchiseSetupDialog()
     {
-        _franchiseSetupDialog = new AcceptDialog { Name = "FranchiseSetupDialog", Title = "Start a Franchise", MinSize = new Vector2I(660, 580), Exclusive = true };
+        _franchiseSetupDialog = new AcceptDialog
+        {
+            Name = "FranchiseSetupDialog",
+            Title = "Start a Franchise",
+            MinSize = new Vector2I(680, 640),
+            Exclusive = true
+        };
         AddChild(_franchiseSetupDialog);
-        _franchiseSetupDialog.GetOkButton().Text = "Choose Team";
-        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(600, 450) };
+        _franchiseSetupDialog.GetOkButton().Text = "Create Franchise";
+
+        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(620, 500) };
+        _franchiseSetupDialog.AddChild(scroll);
         var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        _franchiseSetupDialog.AddChild(scroll); scroll.AddChild(content);
-        content.AddChild(new Label { Text = "Choose a reusable GM profile and starting world before selecting your franchise.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        scroll.AddChild(content);
+        content.AddChild(new Label
+        {
+            Text = "Create a reusable GM profile, choose a fictional football world, then select your team.",
+            AutowrapMode = TextServer.AutowrapMode.WordSmart
+        });
+
+        content.AddChild(SetupSectionLabel("GM Profile"));
         _setupProfileSelect = new OptionButton();
-        _setupGmName = new LineEdit { Text = "User GM", PlaceholderText = "GM name" };
-        content.AddChild(SetupRow("Saved Profile", _setupProfileSelect));
-        content.AddChild(SetupRow("GM Name", _setupGmName));
-        content.AddChild(new Label { Text = "Management Attributes (maximum 220 points)" });
-        _setupNegotiation = SetupAttribute(); _setupPlayerManagement = SetupAttribute(); _setupScouting = SetupAttribute(); _setupLeadership = SetupAttribute();
-        content.AddChild(SetupRow("Negotiation", _setupNegotiation));
-        content.AddChild(SetupRow("Player Management", _setupPlayerManagement));
-        content.AddChild(SetupRow("Scouting Judgment", _setupScouting));
-        content.AddChild(SetupRow("Leadership", _setupLeadership));
-        _setupBudget = new Label(); content.AddChild(_setupBudget);
-        _setupOutfit = SetupOptions("Team Polo", "Suit", "Hoodie");
-        content.AddChild(SetupRow("Game Day Outfit", _setupOutfit));
-        _setupRosterSource = SetupOptions("Standard Roster", "Generated Roster");
-        content.AddChild(SetupRow("Starting World", _setupRosterSource));
-        content.AddChild(new Label { Text = "Standard uses the fixed fictional world seed. Generated creates a new, saved seed for this franchise.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
-        _setupStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_setupStatus);
+        content.AddChild(SetupLabeledRow("Profile", _setupProfileSelect));
+        _setupGmName = new LineEdit { PlaceholderText = "GM name", Text = "User GM" };
+        content.AddChild(SetupLabeledRow("Name", _setupGmName));
+
+        content.AddChild(SetupSectionLabel("Management Attributes"));
+        content.AddChild(new Label { Text = "Distribute up to 220 points. Attributes create small management bonuses, never guaranteed outcomes." });
+        _setupNegotiation = SetupAttributeSpinBox();
+        _setupPlayerManagement = SetupAttributeSpinBox();
+        _setupScoutingJudgment = SetupAttributeSpinBox();
+        _setupLeadership = SetupAttributeSpinBox();
+        content.AddChild(SetupLabeledRow("Negotiation", _setupNegotiation));
+        content.AddChild(SetupLabeledRow("Player Management", _setupPlayerManagement));
+        content.AddChild(SetupLabeledRow("Scouting Judgment", _setupScoutingJudgment));
+        content.AddChild(SetupLabeledRow("Leadership", _setupLeadership));
+        _setupAttributeBudget = new Label();
+        content.AddChild(_setupAttributeBudget);
+
+        content.AddChild(SetupSectionLabel("Character Design"));
+        _setupPronouns = SetupOption("They/Them", "She/Her", "He/Him");
+        _setupHairStyle = SetupOption("Short", "Long", "Curly", "Bald");
+        _setupHairColor = SetupOption("Brown", "Black", "Blonde", "Red", "Gray");
+        _setupSkinTone = SetupOption("Light", "Medium", "Dark");
+        _setupOutfit = SetupOption("Team Polo", "Suit", "Hoodie");
+        content.AddChild(SetupLabeledRow("Pronouns", _setupPronouns));
+        content.AddChild(SetupLabeledRow("Hair Style", _setupHairStyle));
+        content.AddChild(SetupLabeledRow("Hair Color", _setupHairColor));
+        content.AddChild(SetupLabeledRow("Skin Tone", _setupSkinTone));
+        content.AddChild(SetupLabeledRow("Game Day Outfit", _setupOutfit));
+
+        content.AddChild(SetupSectionLabel("Starting World"));
+        _setupRosterSource = SetupOption("Standard Roster", "Generated Roster");
+        content.AddChild(SetupLabeledRow("Roster Source", _setupRosterSource));
+        _setupRosterDescription = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_setupRosterDescription);
+        _setupStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_setupStatus);
+
         _setupProfileSelect.ItemSelected += OnSetupProfileSelected;
-        _setupNegotiation.ValueChanged += _ => UpdateSetupBudget(); _setupPlayerManagement.ValueChanged += _ => UpdateSetupBudget();
-        _setupScouting.ValueChanged += _ => UpdateSetupBudget(); _setupLeadership.ValueChanged += _ => UpdateSetupBudget();
-        UpdateSetupBudget();
+        _setupRosterSource.ItemSelected += _ => UpdateSetupRosterDescription();
+        _setupNegotiation.ValueChanged += _ => UpdateSetupAttributeBudget();
+        _setupPlayerManagement.ValueChanged += _ => UpdateSetupAttributeBudget();
+        _setupScoutingJudgment.ValueChanged += _ => UpdateSetupAttributeBudget();
+        _setupLeadership.ValueChanged += _ => UpdateSetupAttributeBudget();
+        _franchiseSetupDialog.Confirmed += async () => await CreateConfiguredFranchise();
+        UpdateSetupAttributeBudget();
+        UpdateSetupRosterDescription();
     }
 
-    private static HBoxContainer SetupRow(string label, Control input)
+    private static Label SetupSectionLabel(string text)
+        => new() { Text = text, ThemeTypeVariation = "HeaderSmall" };
+
+    private static HBoxContainer SetupLabeledRow(string label, Control input)
     {
         var row = new HBoxContainer();
-        row.AddChild(new Label { Text = label, CustomMinimumSize = new Vector2(190, 0), VerticalAlignment = VerticalAlignment.Center });
-        input.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; row.AddChild(input); return row;
-    }
-    private static SpinBox SetupAttribute() => new() { MinValue = 20, MaxValue = 80, Step = 1, Value = 50 };
-    private static OptionButton SetupOptions(params string[] options) { var select = new OptionButton(); foreach (var option in options) select.AddItem(option); return select; }
-    private void UpdateSetupBudget()
-    {
-        var total = (int)_setupNegotiation.Value + (int)_setupPlayerManagement.Value + (int)_setupScouting.Value + (int)_setupLeadership.Value;
-        _setupBudget.Text = total <= GmAttributes.MaximumTotal ? $"Attribute total: {total}/{GmAttributes.MaximumTotal}" : $"Attribute total: {total}/{GmAttributes.MaximumTotal} - reduce attributes.";
-    }
-    private async Task ShowFranchiseSetupDialog()
-    {
-        _setupProfiles = new GmProfileStore().LoadAll().ToList();
-        _setupProfileSelect.Clear(); _setupProfileSelect.AddItem("Create New Profile");
-        foreach (var profile in _setupProfiles) _setupProfileSelect.AddItem(profile.Name);
-        _setupProfileSelect.Select(0); _setupStatus.Text = ""; UpdateSetupBudget();
-        _franchiseSetupDialog.PopupCentered(new Vector2I(660, 580)); _franchiseSetupDialog.GrabFocus(); _setupGmName.GrabFocus();
-        await Task.CompletedTask;
-    }
-    private void OnSetupProfileSelected(long index)
-    {
-        if (index <= 0 || index > _setupProfiles.Count) return;
-        var profile = _setupProfiles[(int)index - 1]; _setupGmName.Text = profile.Name;
-        _setupNegotiation.Value = profile.Attributes.Negotiation; _setupPlayerManagement.Value = profile.Attributes.PlayerManagement;
-        _setupScouting.Value = profile.Attributes.ScoutingJudgment; _setupLeadership.Value = profile.Attributes.Leadership;
-        SelectSetupOption(_setupOutfit, profile.Appearance.Outfit); UpdateSetupBudget();
-    }
-    private static void SelectSetupOption(OptionButton select, string value) { for (var i = 0; i < select.ItemCount; i++) if (string.Equals(select.GetItemText(i), value, StringComparison.OrdinalIgnoreCase)) { select.Select(i); return; } }
-    private async Task CreateConfiguredNativeFranchise()
-    {
-        var attributes = new GmAttributes { Negotiation = (int)_setupNegotiation.Value, PlayerManagement = (int)_setupPlayerManagement.Value, ScoutingJudgment = (int)_setupScouting.Value, Leadership = (int)_setupLeadership.Value };
-        if (string.IsNullOrWhiteSpace(_setupGmName.Text)) { _setupStatus.Text = "Enter a GM name."; return; }
-        try { attributes.Validate(); } catch (ArgumentException error) { _setupStatus.Text = error.Message; return; }
-        var profile = _setupProfileSelect.Selected > 0 && _setupProfileSelect.Selected <= _setupProfiles.Count ? _setupProfiles[_setupProfileSelect.Selected - 1] : new GmProfile();
-        profile.Name = _setupGmName.Text.Trim(); profile.Attributes = attributes; profile.Appearance.Outfit = _setupOutfit.GetItemText(_setupOutfit.Selected); new GmProfileStore().Save(profile);
-        var world = _setupRosterSource.Selected == 0 ? WorldDefinition.Standard() : WorldDefinition.Generated(unchecked((ulong)DateTime.UtcNow.Ticks ^ (ulong)Guid.NewGuid().GetHashCode()));
-        _franchiseSetupDialog.Hide(); SetNewGameButtonsDisabled(true);
-        try { await StartFreshNativeLeague(world, profile); } finally { SetNewGameButtonsDisabled(false); }
+        var title = new Label { Text = label, CustomMinimumSize = new Vector2(190, 0), VerticalAlignment = VerticalAlignment.Center };
+        input.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        row.AddChild(title);
+        row.AddChild(input);
+        return row;
     }
 
-    private async Task NewGame()
+    private static SpinBox SetupAttributeSpinBox()
+        => new() { MinValue = 20, MaxValue = 80, Step = 1, Value = 50, AllowGreater = false, AllowLesser = false };
+
+    private static OptionButton SetupOption(params string[] options)
     {
-        if (IsNativeRuntimeSource())
+        var select = new OptionButton();
+        foreach (var option in options)
+            select.AddItem(option);
+        select.Select(0);
+        return select;
+    }
+
+    private async Task ShowFranchiseSetupDialog()
+    {
+        await LoadSetupProfiles();
+        _setupStatus.Text = "";
+        UpdateSetupAttributeBudget();
+        UpdateSetupRosterDescription();
+        _franchiseSetupDialog.PopupCentered(new Vector2I(680, 620));
+        _franchiseSetupDialog.GrabFocus();
+        _setupGmName.GrabFocus();
+    }
+
+    private async Task LoadSetupProfiles()
+    {
+        var (status, body) = await GetWithTimeoutAsync("/gm_profiles", REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
         {
-            if (HasExistingNativeSave())
-            {
-                if (_newGameConfirmDialog != null)
-                    _newGameConfirmDialog.PopupCentered();
-                else
-                    await ConfirmNativeNewGame();
-            }
-            else
-            {
-                await ShowFranchiseSetupDialog();
-            }
+            _setupStatus.Text = "Unable to load saved GM profiles. You can still create a new one.";
             return;
         }
 
+        var parsed = Json.ParseString(body);
+        var payload = parsed.VariantType == Variant.Type.Dictionary ? parsed.AsGodotDictionary() : null;
+        _setupProfiles = payload == null ? new Godot.Collections.Array() : TryExtractArray(payload, "profiles") ?? new Godot.Collections.Array();
+        _setupProfileSelectionBusy = true;
+        _setupProfileSelect.Clear();
+        _setupProfileSelect.AddItem("Create New Profile");
+        foreach (var item in _setupProfiles)
+        {
+            if (item.VariantType != Variant.Type.Dictionary)
+                continue;
+            var profile = item.AsGodotDictionary();
+            _setupProfileSelect.AddItem(FmtString(GetFirstNonNil(profile, "name"), "GM Profile"));
+        }
+        _setupProfileSelect.Select(0);
+        _setupProfileSelectionBusy = false;
+    }
+
+    private void OnSetupProfileSelected(long index)
+    {
+        if (_setupProfileSelectionBusy || index <= 0 || index > _setupProfiles.Count)
+            return;
+
+        var profileValue = (Variant)_setupProfiles[(int)index - 1];
+        if (!TryGetDictionary(profileValue, out var profile))
+            return;
+        _setupGmName.Text = FmtString(GetFirstNonNil(profile, "name"), "User GM");
+        var attributes = TryExtractObject(profile, "attributes");
+        if (attributes != null)
+        {
+            _setupNegotiation.Value = GetIntValue(GetFirstNonNil(attributes, "negotiation"), 50);
+            _setupPlayerManagement.Value = GetIntValue(GetFirstNonNil(attributes, "playerManagement", "player_management"), 50);
+            _setupScoutingJudgment.Value = GetIntValue(GetFirstNonNil(attributes, "scoutingJudgment", "scouting_judgment"), 50);
+            _setupLeadership.Value = GetIntValue(GetFirstNonNil(attributes, "leadership"), 50);
+        }
+        var appearance = TryExtractObject(profile, "appearance");
+        if (appearance != null)
+        {
+            SelectSetupOption(_setupPronouns, FmtString(GetFirstNonNil(appearance, "pronouns"), "They/Them"));
+            SelectSetupOption(_setupHairStyle, FmtString(GetFirstNonNil(appearance, "hairStyle", "hair_style"), "Short"));
+            SelectSetupOption(_setupHairColor, FmtString(GetFirstNonNil(appearance, "hairColor", "hair_color"), "Brown"));
+            SelectSetupOption(_setupSkinTone, FmtString(GetFirstNonNil(appearance, "skinTone", "skin_tone"), "Medium"));
+            SelectSetupOption(_setupOutfit, FmtString(GetFirstNonNil(appearance, "outfit"), "Team Polo"));
+        }
+    }
+
+    private static void SelectSetupOption(OptionButton select, string value)
+    {
+        for (var index = 0; index < select.ItemCount; index++)
+        {
+            if (string.Equals(select.GetItemText(index), value, StringComparison.OrdinalIgnoreCase))
+            {
+                select.Select(index);
+                return;
+            }
+        }
+    }
+
+    private void UpdateSetupAttributeBudget()
+    {
+        if (_setupAttributeBudget == null)
+            return;
+        var total = (int)(_setupNegotiation?.Value ?? 0) + (int)(_setupPlayerManagement?.Value ?? 0) +
+                    (int)(_setupScoutingJudgment?.Value ?? 0) + (int)(_setupLeadership?.Value ?? 0);
+        _setupAttributeBudget.Text = total <= 220
+            ? $"Attribute total: {total}/220"
+            : $"Attribute total: {total}/220 - reduce attributes before continuing.";
+    }
+
+    private void UpdateSetupRosterDescription()
+    {
+        if (_setupRosterDescription == null)
+            return;
+        _setupRosterDescription.Text = _setupRosterSource.Selected == 0
+            ? "Standard Roster uses the fixed fictional world seed. Every Standard start begins with the same league population."
+            : "Generated Roster uses a new stored world seed for this franchise. Full player, coach, and college-world generation arrives with the roster slice.";
+    }
+
+    private async Task CreateConfiguredFranchise()
+    {
+        var total = (int)_setupNegotiation.Value + (int)_setupPlayerManagement.Value + (int)_setupScoutingJudgment.Value + (int)_setupLeadership.Value;
+        if (string.IsNullOrWhiteSpace(_setupGmName.Text))
+        {
+            _setupStatus.Text = "Enter a GM name before creating a franchise.";
+            return;
+        }
+        if (total > 220)
+        {
+            _setupStatus.Text = "Reduce the attribute total to 220 or less.";
+            return;
+        }
+
+        var selectedProfileId = "";
+        if (_setupProfileSelect.Selected > 0 && _setupProfileSelect.Selected <= _setupProfiles.Count)
+        {
+            var existing = (Godot.Collections.Dictionary)_setupProfiles[_setupProfileSelect.Selected - 1];
+            selectedProfileId = FmtString(GetFirstNonNil(existing, "id"), "");
+        }
+        var profilePayload = new Godot.Collections.Dictionary
+        {
+            { "gm_profile_id", selectedProfileId }, { "name", _setupGmName.Text.Trim() },
+            { "negotiation", (int)_setupNegotiation.Value }, { "player_management", (int)_setupPlayerManagement.Value },
+            { "scouting_judgment", (int)_setupScoutingJudgment.Value }, { "leadership", (int)_setupLeadership.Value },
+            { "pronouns", SelectedSetupText(_setupPronouns) }, { "hair_style", SelectedSetupText(_setupHairStyle) },
+            { "hair_color", SelectedSetupText(_setupHairColor) }, { "skin_tone", SelectedSetupText(_setupSkinTone) }, { "outfit", SelectedSetupText(_setupOutfit) }
+        };
+        _setupStatus.Text = "Saving GM profile...";
+        var (profileStatus, profileBody) = await PostWithTimeoutAsync("/gm_profiles", Json.Stringify(profilePayload), REQUEST_TIMEOUT_MS);
+        if (profileStatus < 200 || profileStatus >= 300)
+        {
+            _setupStatus.Text = "Unable to save the GM profile.";
+            SetStateDumpText(profileBody);
+            return;
+        }
+        var profileParsed = Json.ParseString(profileBody);
+        var profileResponse = profileParsed.VariantType == Variant.Type.Dictionary ? profileParsed.AsGodotDictionary() : null;
+        var savedProfile = profileResponse == null ? null : TryExtractObject(profileResponse, "profile");
+        var savedProfileId = savedProfile == null ? "" : FmtString(GetFirstNonNil(savedProfile, "id"), "");
+        if (string.IsNullOrWhiteSpace(savedProfileId))
+        {
+            _setupStatus.Text = "GM profile response was incomplete.";
+            return;
+        }
+
+        _franchiseSetupDialog.Hide();
+        await StartConfiguredFranchise(savedProfileId, _setupRosterSource.Selected == 0 ? "standard" : "generated");
+    }
+
+    private static string SelectedSetupText(OptionButton select)
+        => select.Selected >= 0 ? select.GetItemText(select.Selected) : "";
+
+    private async Task StartConfiguredFranchise(string profileId, string rosterSource)
+    {
         SetNewGameButtonsDisabled(true);
-        var (status, body) = await PostWithTimeoutAsync("/new_game", "{}", REQUEST_TIMEOUT_MS);
+        var request = new Godot.Collections.Dictionary { { "gm_profile_id", profileId }, { "roster_source", rosterSource } };
+        var (status, body) = await PostWithTimeoutAsync("/new_game", Json.Stringify(request), REQUEST_TIMEOUT_MS);
 
         if (status < 200 || status >= 300)
         {
@@ -2777,34 +1821,6 @@ public partial class DashboardController : Control
         PrepareNewGameTeamPicker();
         ShowNewGameTeamPicker();
     }
-
-    private bool HasExistingNativeSave()
-    {
-        var saveService = GetNativeGameCoreSaveService();
-        return saveService.SaveExists() || saveService.SaveExists(GameCoreSaveService.NamedSaveFileName);
-    }
-
-    private async Task ConfirmNativeNewGame()
-    {
-        await ShowFranchiseSetupDialog();
-    }
-
-    private async Task StartFreshNativeLeague(WorldDefinition world = null, GmProfile profile = null)
-    {
-        EnsureNativeGameCoreServices();
-        _nativeGameCoreContext.ActiveLeague = null;
-        new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath(), world, profile);
-        _nativeStartupState = NativeStartupState.Ready;
-        ResetDashboardPreviewUiState();
-        ResetClientCachesForNewGame();
-        await RefreshAll();
-        PrepareNewGameTeamPicker();
-        ShowNewGameTeamPicker();
-        SetPrimaryStatus("Choose a franchise to begin.");
-    }
-
-    private static string GetTeamSeedPath()
-        => ProjectSettings.GlobalizePath("res://Assets/data_seed/teams.json");
 
     private async Task<bool> RefreshStateSummaryForNewGame()
     {
@@ -2867,8 +1883,7 @@ public partial class DashboardController : Control
 
             var display = BuildTeamPickDisplay(team);
             _teamPickIndexToId.Add(teamId);
-            var abbreviation = team.ContainsKey("abbreviation") ? team["abbreviation"].ToString() : "";
-            _teamPickList.AddItem(display, LoadTeamLogo(abbreviation));
+            _teamPickList.AddItem(display);
         }
 
         if (_teamPickIndexToId.Count == 0)
@@ -2934,36 +1949,6 @@ public partial class DashboardController : Control
 
     private async Task SetUserTeamForNewGame(string teamId)
     {
-        if (IsNativeRuntimeSource())
-        {
-            EnsureNativeGameCoreServices();
-            var league = _nativeGameCoreContext?.ActiveLeague;
-            var team = league?.Teams.FirstOrDefault(candidate =>
-                string.Equals(candidate.TeamId, teamId, StringComparison.OrdinalIgnoreCase));
-            if (team == null)
-            {
-                _gmTeamLabel = "(error)";
-                RenderFrontOfficeLabel();
-                SetPrimaryStatus("Unable to select that franchise.");
-                return;
-            }
-
-            league.UserTeamId = team.TeamId;
-            ResetClientCachesForNewGame();
-            var saveResult = await SaveCurrentNativeGame(
-                GameCoreSaveService.NamedSaveFileName,
-                $"Franchise started with {team.Name}.",
-                autosaveToo: true);
-            if (!saveResult.Ok)
-                return;
-
-            HideStartupPanel();
-            await RefreshAll();
-            await TrySelectTeamInRoster(team.TeamId);
-            SetPrimaryStatus($"Franchise started with {team.Name}.");
-            return;
-        }
-
         var payload = new Godot.Collections.Dictionary
         {
             { "team_id", teamId }
@@ -3051,53 +2036,14 @@ public partial class DashboardController : Control
         return string.IsNullOrWhiteSpace(abbr) ? name : $"{name} ({abbr})";
     }
 
-    private static Texture2D LoadTeamLogo(string abbreviation)
-    {
-        if (string.IsNullOrWhiteSpace(abbreviation))
-            return null;
-
-        return ResourceLoader.Load<Texture2D>($"res://Assets/team_logos/{abbreviation.Trim().ToUpperInvariant()}.png");
-    }
-
     private void SetNewGameButtonsDisabled(bool disabled)
     {
         if (_btnNewGame != null)
             _btnNewGame.Disabled = disabled;
-        if (_btnStartupNewGame != null)
-            _btnStartupNewGame.Disabled = disabled;
     }
 
     private async Task ResetSave()
     {
-        if (IsNativeRuntimeSource())
-        {
-            if (_btnResetSave != null)
-                _btnResetSave.Disabled = true;
-
-            try
-            {
-                var saveService = GetNativeGameCoreSaveService();
-                saveService.Delete();
-                saveService.Delete(GameCoreSaveService.NamedSaveFileName);
-                EnsureNativeGameCoreServices();
-                _nativeGameCoreContext.ActiveLeague = null;
-                new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath());
-                _nativeStartupState = NativeStartupState.Ready;
-                ResetDashboardPreviewUiState();
-                ResetClientCachesForNewGame();
-                HideStartupPanel();
-                await RefreshAll();
-                SetPrimaryStatus("Native save reset. Started new native league.");
-            }
-            finally
-            {
-                if (_btnResetSave != null)
-                    _btnResetSave.Disabled = false;
-            }
-
-            return;
-        }
-
         _btnResetSave.Disabled = true;
         var (status, body) = await PostWithTimeoutAsync("/reset_save", "{}", REQUEST_TIMEOUT_MS);
         _btnResetSave.Disabled = false;
@@ -3197,14 +2143,77 @@ public partial class DashboardController : Control
             return;
         }
 
-        RefreshNativeRosterTab();
-        await Task.CompletedTask;
+        SetRosterSummaryPlaceholder();
+        ShowRosterMessage("Loading roster...");
+
+        var (status, body) = await GetWithTimeoutAsync("/team_roster", REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
+        {
+            ClearRosterTab("Roster unavailable");
+            SetStateDumpText(body);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            ClearRosterTab("Roster unavailable");
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        if (parsed.VariantType != Variant.Type.Dictionary)
+        {
+            ClearRosterTab("Roster unavailable");
+            return;
+        }
+
+        var payload = parsed.AsGodotDictionary();
+        var okVar = GetFirstNonNil(payload, "ok", "success");
+        if (!IsNil(okVar) && !GetBoolValue(okVar, true))
+        {
+            var error = FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Roster unavailable");
+            ClearRosterTab(string.IsNullOrWhiteSpace(error) ? "Roster unavailable" : error);
+            return;
+        }
+
+        RenderRosterSnapshot(payload);
     }
 
     private async Task RefreshDepthChartView()
     {
-        RefreshNativeDepthChartView();
-        await Task.CompletedTask;
+        SetDepthChartPlaceholder();
+
+        var (status, body) = await GetWithTimeoutAsync("/team_depth_chart", REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
+        {
+            ClearDepthChartView("Depth chart unavailable");
+            SetStateDumpText(body);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            ClearDepthChartView("Depth chart unavailable");
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        if (parsed.VariantType != Variant.Type.Dictionary)
+        {
+            ClearDepthChartView("Depth chart unavailable");
+            return;
+        }
+
+        var payload = parsed.AsGodotDictionary();
+        var okVar = GetFirstNonNil(payload, "ok", "success");
+        if (!IsNil(okVar) && !GetBoolValue(okVar, true))
+        {
+            var error = FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Depth chart unavailable");
+            ClearDepthChartView(string.IsNullOrWhiteSpace(error) ? "Depth chart unavailable" : error);
+            return;
+        }
+
+        RenderDepthChartSnapshot(payload);
     }
 
     private async Task AutoFillDepthChart()
@@ -3214,43 +2223,6 @@ public partial class DashboardController : Control
 
         SetDepthChartRequestBusy(true, "Auto-filling...");
         SetDepthChartActionStatus("Auto-filling...");
-
-        if (IsNativeRuntimeSource())
-        {
-            try
-            {
-                EnsureNativeGameCoreServices();
-                var response = _nativeDepthChartService.AutoFillDepthChart(ResolveNativeRosterDepthChartTeamId());
-                if (response == null || !response.Ok)
-                {
-                    var error = string.IsNullOrWhiteSpace(response?.Error) ? "Unable to auto-fill depth chart." : response.Error;
-                    SetDepthChartActionStatus(error);
-                    SetPrimaryStatus(error);
-                    return;
-                }
-
-                RenderDepthChartSnapshot(ConvertDepthChartResponseToPayload(response));
-                await SaveNativeAutosave("Native autosave updated.");
-                await RefreshDashboardState();
-                await RefreshInbox();
-                await RefreshLeagueHub();
-                _dashboardRefreshPendingFromDepthChartEdit = false;
-                SetDepthChartActionStatus("Depth chart auto-filled.");
-                SetPrimaryStatus("Depth chart auto-filled.");
-            }
-            catch (Exception ex)
-            {
-                var nativeError = $"Native C# auto-fill failed: {InlineMessage(ex.Message)}";
-                SetDepthChartActionStatus("Unable to auto-fill depth chart.");
-                SetPrimaryStatus(nativeError);
-            }
-            finally
-            {
-                SetDepthChartRequestBusy(false);
-            }
-
-            return;
-        }
 
         var request = new Godot.Collections.Dictionary();
         if (!string.IsNullOrWhiteSpace(_currentTeamId))
@@ -3320,806 +2292,6 @@ public partial class DashboardController : Control
         if (refreshed)
             await RefreshInbox();
         _dashboardRefreshPendingFromDepthChartEdit = false;
-    }
-
-    private GameCoreContext GetOrCreateNativeGameCoreContext()
-    {
-        _nativeGameCoreContext ??= new GameCoreContext();
-        return _nativeGameCoreContext;
-    }
-
-    private GameCoreSaveService GetNativeGameCoreSaveService()
-        => _nativeGameCoreSaveService ??= new GameCoreSaveService();
-
-    private void EnsureNativeGameCoreServices()
-    {
-        var context = GetOrCreateNativeGameCoreContext();
-        _nativeRosterService ??= new RosterService(context);
-        _nativeDepthChartService ??= new DepthChartService(context);
-        _nativeScheduleService ??= new ScheduleService(context);
-        _nativeStandingsService ??= new StandingsService(context);
-        _nativeDashboardService ??= new DashboardService(context);
-        _nativeContinueService ??= new ContinueService(context);
-        _nativeGameDayService ??= new GameDayService(context);
-    }
-
-    private async Task<GameCoreSaveResult> SaveCurrentNativeGame(string saveName, string successMessage, bool autosaveToo)
-    {
-        if (!IsNativeRuntimeSource())
-        {
-            return new GameCoreSaveResult
-            {
-                Ok = false,
-                Message = "Native save/load is only available in Native C# GameCore.",
-            };
-        }
-
-        EnsureNativeGameCoreServices();
-        var saveService = GetNativeGameCoreSaveService();
-        var saveResult = saveService.Save(_nativeGameCoreContext, saveName);
-        if (!saveResult.Ok)
-        {
-            SetPrimaryStatus("Unable to save native game.");
-            SetDebugOutputStatus("Native save failed.");
-            SetStateDumpText(saveResult.Message);
-            return saveResult;
-        }
-
-        if (autosaveToo)
-        {
-            var autosaveResult = saveService.Save(_nativeGameCoreContext);
-            if (!autosaveResult.Ok)
-            {
-                SetPrimaryStatus("Unable to save native game.");
-                SetDebugOutputStatus("Native autosave failed.");
-                SetStateDumpText(autosaveResult.Message);
-                return autosaveResult;
-            }
-        }
-
-        var statusMessage = string.IsNullOrWhiteSpace(successMessage) ? saveResult.Message : successMessage;
-        SetPrimaryStatus(statusMessage);
-        SetDebugOutputStatus(statusMessage);
-        SetStateDumpText(statusMessage);
-        await Task.CompletedTask;
-        return saveResult;
-    }
-
-    private async Task<bool> SaveNativeAutosave(string successMessage)
-    {
-        var result = await SaveCurrentNativeGame(null, successMessage, autosaveToo: false);
-        return result.Ok;
-    }
-
-    private async Task SaveNativeGame()
-    {
-        if (_btnSaveNativeGame != null)
-            _btnSaveNativeGame.Disabled = true;
-        if (_btnSaveGame != null)
-            _btnSaveGame.Disabled = true;
-
-        try
-        {
-            await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Native game saved.", autosaveToo: true);
-        }
-        finally
-        {
-            UpdateNativeSaveLoadButtons();
-        }
-    }
-
-    private async Task LoadNativeGame()
-    {
-        if (_btnLoadNativeGame != null)
-            _btnLoadNativeGame.Disabled = true;
-        if (_btnStartupLoadGame != null)
-            _btnStartupLoadGame.Disabled = true;
-
-        try
-        {
-            await LoadNativeGameInternal(preferNamedSave: true, successMessage: "Native game loaded.");
-        }
-        finally
-        {
-            UpdateNativeSaveLoadButtons();
-            RefreshStartupPanelButtons();
-        }
-    }
-
-    private async Task ContinueNativeStartup()
-    {
-        if (!IsNativeRuntimeSource())
-            return;
-
-        if (_btnStartupContinue != null)
-            _btnStartupContinue.Disabled = true;
-
-        try
-        {
-            await LoadNativeGameInternal(preferNamedSave: false, successMessage: "Loaded native save.");
-        }
-        finally
-        {
-            RefreshStartupPanelButtons();
-        }
-    }
-
-    private async Task LoadNativeGameInternal(bool preferNamedSave, string successMessage)
-    {
-        EnsureNativeGameCoreServices();
-
-        GameCoreLoadResult loadResult;
-        if (preferNamedSave)
-        {
-            loadResult = GetNativeGameCoreSaveService().Load(GameCoreSaveService.NamedSaveFileName);
-            if (loadResult.SaveMissing)
-                loadResult = GetNativeGameCoreSaveService().Load();
-        }
-        else
-        {
-            loadResult = GetNativeGameCoreSaveService().Load();
-        }
-
-        if (!loadResult.Ok || loadResult.League == null)
-        {
-            _nativeStartupState = loadResult.SaveMissing
-                ? NativeStartupState.MissingAutosave
-                : NativeStartupState.CorruptAutosave;
-            _nativeGameCoreContext.ActiveLeague = null;
-            SetPrimaryStatus(loadResult.SaveMissing ? "No native save found." : "Unable to load native save.");
-            SetStateDumpText(loadResult.Message);
-            ShowStartupPanel(loadResult);
-            return;
-        }
-
-        _nativeGameCoreContext.ActiveLeague = loadResult.League;
-        _nativeStartupState = NativeStartupState.Ready;
-        ResetDashboardPreviewUiState();
-        ResetClientCachesForNewGame();
-        HideStartupPanel();
-        _pendingNativeStatusMessage = successMessage;
-        await RefreshAll();
-        SetPrimaryStatus(successMessage);
-    }
-
-    private void RefreshStartupPanelButtons()
-    {
-        if (_startupPanel == null || !_startupPanel.Visible)
-            return;
-
-        var autosaveResult = _nativeStartupState == NativeStartupState.CorruptAutosave
-            ? new GameCoreLoadResult { Ok = false, SaveMissing = false, Message = "Unable to load native save." }
-            : null;
-        ShowStartupPanel(autosaveResult);
-    }
-
-    private string ResolveNativeRosterDepthChartTeamId()
-    {
-        EnsureNativeGameCoreServices();
-
-        var league = _nativeGameCoreContext?.ActiveLeague;
-        if (league?.Teams == null || league.Teams.Count == 0)
-            return null;
-
-        if (!string.IsNullOrWhiteSpace(_currentTeamId))
-        {
-            foreach (var team in league.Teams)
-            {
-                if (string.Equals(team.TeamId, _currentTeamId, StringComparison.OrdinalIgnoreCase))
-                    return team.TeamId;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(_userTeamId))
-        {
-            foreach (var team in league.Teams)
-            {
-                if (string.Equals(team.TeamId, _userTeamId, StringComparison.OrdinalIgnoreCase))
-                    return team.TeamId;
-            }
-        }
-
-        return null;
-    }
-
-    private void RefreshNativeRosterTab()
-    {
-        SetRosterSummaryPlaceholder();
-        ShowRosterMessage("Loading roster...");
-
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeRosterService.GetTeamRoster(ResolveNativeRosterDepthChartTeamId());
-            if (response == null || !response.Ok)
-            {
-                ClearRosterTab(string.IsNullOrWhiteSpace(response?.Error) ? "Roster unavailable" : response.Error);
-                return;
-            }
-
-            RenderRosterSnapshot(ConvertRosterResponseToPayload(response));
-        }
-        catch (Exception ex)
-        {
-            ClearRosterTab("Roster unavailable");
-            SetPrimaryStatus($"Native C# roster failed: {InlineMessage(ex.Message)}");
-        }
-    }
-
-    private void RefreshNativeDepthChartView()
-    {
-        SetDepthChartPlaceholder();
-
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeDepthChartService.GetTeamDepthChart(ResolveNativeRosterDepthChartTeamId());
-            if (response == null || !response.Ok)
-            {
-                ClearDepthChartView(string.IsNullOrWhiteSpace(response?.Error) ? "Depth chart unavailable" : response.Error);
-                return;
-            }
-
-            RenderDepthChartSnapshot(ConvertDepthChartResponseToPayload(response));
-        }
-        catch (Exception ex)
-        {
-            ClearDepthChartView("Depth chart unavailable");
-            SetPrimaryStatus($"Native C# depth chart failed: {InlineMessage(ex.Message)}");
-        }
-    }
-
-    private Godot.Collections.Dictionary ConvertRosterResponseToPayload(TeamRosterResponse response)
-    {
-        var payload = new Godot.Collections.Dictionary
-        {
-            ["ok"] = response?.Ok ?? false,
-            ["error"] = response?.Error ?? "",
-            ["team"] = ConvertTeamIdentityToDictionary(response?.Team),
-            ["roster_status"] = new Godot.Collections.Dictionary
-            {
-                ["is_valid"] = response?.RosterStatus?.IsValid ?? false,
-                ["roster_size"] = response?.RosterStatus?.RosterSize ?? 0,
-                ["roster_limit"] = response?.RosterStatus?.RosterLimit ?? 0,
-                ["required_cuts"] = response?.RosterStatus?.RequiredCuts ?? 0,
-                ["open_slots"] = response?.RosterStatus?.OpenSlots ?? 0,
-                ["injured_count"] = response?.RosterStatus?.InjuredCount ?? 0,
-                ["issues"] = ConvertStringListToArray(response?.RosterStatus?.Issues),
-            },
-            ["position_counts"] = new Godot.Collections.Array(),
-            ["players"] = new Godot.Collections.Array(),
-        };
-
-        var positionCounts = (Godot.Collections.Array)payload["position_counts"];
-        if (response?.PositionCounts != null)
-        {
-            foreach (var count in response.PositionCounts)
-            {
-                positionCounts.Add(new Godot.Collections.Dictionary
-                {
-                    ["position"] = count?.Position ?? "",
-                    ["count"] = count?.Count ?? 0,
-                });
-            }
-        }
-
-        var players = (Godot.Collections.Array)payload["players"];
-        if (response?.Players != null)
-        {
-            foreach (var player in response.Players)
-            {
-                players.Add(new Godot.Collections.Dictionary
-                {
-                    ["player_id"] = player?.PlayerId ?? "",
-                    ["name"] = player?.Name ?? "",
-                    ["position"] = player?.Position ?? "",
-                    ["overall"] = player?.Overall ?? 0,
-                    ["age"] = player?.Age ?? 0,
-                    ["status"] = player?.Status ?? "",
-                    ["injury"] = player?.Injury ?? "",
-                    ["depth_role"] = player?.DepthRole ?? "",
-                });
-            }
-        }
-
-        return payload;
-    }
-
-    private Godot.Collections.Dictionary ConvertDepthChartResponseToPayload(TeamDepthChartResponse response)
-    {
-        var payload = new Godot.Collections.Dictionary
-        {
-            ["ok"] = response?.Ok ?? false,
-            ["error"] = response?.Error ?? "",
-            ["team"] = ConvertTeamIdentityToDictionary(response?.Team),
-            ["depth_chart_status"] = new Godot.Collections.Dictionary
-            {
-                ["is_valid"] = response?.DepthChartStatus?.IsValid ?? false,
-                ["issues"] = ConvertStringListToArray(response?.DepthChartStatus?.Issues),
-            },
-            ["positions"] = new Godot.Collections.Array(),
-        };
-
-        var positions = (Godot.Collections.Array)payload["positions"];
-        if (response?.Positions != null)
-        {
-            foreach (var position in response.Positions)
-            {
-                var positionRow = new Godot.Collections.Dictionary
-                {
-                    ["position"] = position?.Position ?? "",
-                    ["required_starters"] = position?.RequiredStarters ?? 0,
-                    ["players"] = new Godot.Collections.Array(),
-                };
-
-                var players = (Godot.Collections.Array)positionRow["players"];
-                if (position?.Players != null)
-                {
-                    foreach (var player in position.Players)
-                    {
-                        players.Add(new Godot.Collections.Dictionary
-                        {
-                            ["player_id"] = player?.PlayerId ?? "",
-                            ["name"] = player?.Name ?? "",
-                            ["overall"] = player?.Overall ?? 0,
-                            ["role"] = player?.Role ?? "",
-                            ["status"] = player?.Status ?? "",
-                            ["injury"] = player?.Injury ?? "",
-                        });
-                    }
-                }
-
-                positions.Add(positionRow);
-            }
-        }
-
-        return payload;
-    }
-
-    private void RefreshNativeStandingsView()
-    {
-        ShowStandingsMessage("Standings: loading...");
-
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeStandingsService.GetStandings();
-            if (response == null || !response.Ok)
-            {
-                ShowStandingsMessage(string.IsNullOrWhiteSpace(response?.Error) ? "Unable to load standings." : response.Error);
-                return;
-            }
-
-            PopulateStandingsTree(ConvertStandingsResponseToArray(response));
-        }
-        catch (Exception ex)
-        {
-            ShowStandingsMessage("Unable to load standings.");
-            SetPrimaryStatus($"Native C# standings failed: {InlineMessage(ex.Message)}");
-        }
-    }
-
-    private void RefreshNativeScheduleView(string teamId, int selectionVersion = -1)
-    {
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-
-        ShowScheduleMessage("Schedule: loading...");
-
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeScheduleService.GetTeamSchedule(ResolveNativeScheduleTeamId(teamId));
-            if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-                return;
-
-            if (response == null || !response.Ok)
-            {
-                ShowScheduleMessage(string.IsNullOrWhiteSpace(response?.Error) ? "Unable to load schedule." : response.Error);
-                return;
-            }
-
-            PopulateScheduleList(ConvertScheduleResponseToArray(response), teamId);
-        }
-        catch (Exception ex)
-        {
-            ShowScheduleMessage("Unable to load schedule.");
-            SetPrimaryStatus($"Native C# schedule failed: {InlineMessage(ex.Message)}");
-        }
-    }
-
-    private string ResolveNativeScheduleTeamId(string requestedTeamId)
-    {
-        EnsureNativeGameCoreServices();
-        var league = _nativeGameCoreContext?.ActiveLeague;
-        if (league?.Teams == null || league.Teams.Count == 0)
-            return null;
-
-        if (!string.IsNullOrWhiteSpace(requestedTeamId))
-        {
-            foreach (var team in league.Teams)
-            {
-                if (string.Equals(team.TeamId, requestedTeamId, StringComparison.OrdinalIgnoreCase))
-                    return team.TeamId;
-            }
-        }
-
-        return ResolveNativeRosterDepthChartTeamId();
-    }
-
-    private Godot.Collections.Array ConvertStandingsResponseToArray(StandingsResponse response)
-    {
-        var standings = new Godot.Collections.Array();
-        if (response?.Standings == null)
-            return standings;
-
-        foreach (var row in response.Standings)
-        {
-            standings.Add(new Godot.Collections.Dictionary
-            {
-                ["team_id"] = row?.TeamId ?? "",
-                ["abbreviation"] = row?.Abbreviation ?? "",
-                ["team_name"] = row?.TeamName ?? "",
-                ["wins"] = row?.Wins ?? 0,
-                ["losses"] = row?.Losses ?? 0,
-                ["ties"] = row?.Ties ?? 0,
-                ["points_for"] = row?.PointsFor ?? 0,
-                ["points_against"] = row?.PointsAgainst ?? 0,
-                ["win_pct"] = row?.WinPct ?? 0d,
-                ["division"] = row?.Division ?? "",
-                ["conference"] = row?.Conference ?? "",
-            });
-        }
-
-        return standings;
-    }
-
-    private Godot.Collections.Array ConvertScheduleResponseToArray(TeamScheduleResponse response)
-    {
-        var schedule = new Godot.Collections.Array();
-        if (response?.Schedule == null)
-            return schedule;
-
-        foreach (var game in response.Schedule)
-        {
-            schedule.Add(new Godot.Collections.Dictionary
-            {
-                ["game_id"] = game?.GameId ?? "",
-                ["week"] = game?.Week ?? 0,
-                ["absolute_week"] = game?.AbsoluteWeek ?? 0,
-                ["phase_week"] = game?.PhaseWeek ?? 0,
-                ["phase"] = game?.Phase ?? "",
-                ["display_week"] = game?.DisplayWeek ?? "",
-                ["game_type"] = game?.GameType ?? "",
-                ["week_label"] = game?.WeekLabel ?? "",
-                ["opponent"] = game?.Opponent ?? "",
-                ["home_away"] = game?.HomeAway ?? "",
-                ["status"] = game?.Status ?? "",
-                ["home_team"] = game?.HomeTeam ?? "",
-                ["away_team"] = game?.AwayTeam ?? "",
-                ["home_score"] = game?.HomeScore.HasValue == true ? game.HomeScore.Value : "",
-                ["away_score"] = game?.AwayScore.HasValue == true ? game.AwayScore.Value : "",
-                ["winner"] = game?.Winner ?? "",
-            });
-        }
-
-        return schedule;
-    }
-
-    private static Godot.Collections.Dictionary ConvertTeamIdentityToDictionary(TeamIdentityDto team)
-    {
-        return new Godot.Collections.Dictionary
-        {
-            ["team_id"] = team?.TeamId ?? "",
-            ["name"] = team?.Name ?? "",
-            ["abbreviation"] = team?.Abbreviation ?? "",
-        };
-    }
-
-    private static Godot.Collections.Array ConvertStringListToArray(IEnumerable<string> values)
-    {
-        var output = new Godot.Collections.Array();
-        if (values == null)
-            return output;
-
-        foreach (var value in values)
-            output.Add(value ?? "");
-
-        return output;
-    }
-
-    private void ApplyNativeContinueStatus(ContinueResultDto result)
-    {
-        var stopReason = result?.StopReason ?? "";
-        var daysAdvanced = result?.DaysAdvanced ?? 0;
-        var message = string.IsNullOrWhiteSpace(stopReason)
-            ? $"Advanced {daysAdvanced} day(s)."
-            : $"Paused: {FormatContinueStopReason(stopReason)}";
-        if (string.Equals(stopReason, "max_days_reached", StringComparison.OrdinalIgnoreCase))
-            message += $" after {daysAdvanced} day(s).";
-
-        _inboxEmptyDetailMessage = string.Equals(stopReason, "game_day", StringComparison.OrdinalIgnoreCase)
-            ? "Game day reached."
-            : "No urgent messages.";
-
-        if (_continueStatus != null)
-            _continueStatus.Text = message;
-    }
-
-    private Godot.Collections.Dictionary ConvertNativeGameDayState(GameDayStateDto game)
-    {
-        return new Godot.Collections.Dictionary
-        {
-            ["game_id"] = game?.GameId ?? "",
-            ["week"] = game?.Week ?? 0,
-            ["absolute_week"] = game?.AbsoluteWeek ?? 0,
-            ["phase_week"] = game?.PhaseWeek ?? 0,
-            ["phase"] = game?.Phase ?? "",
-            ["game_type"] = game?.GameType ?? "",
-            ["week_label"] = game?.WeekLabel ?? "",
-            ["home_team"] = game?.HomeTeam ?? "",
-            ["away_team"] = game?.AwayTeam ?? "",
-            ["opponent"] = game?.Opponent ?? "",
-            ["opponent_abbreviation"] = game?.OpponentAbbreviation ?? "",
-            ["home_away"] = game?.HomeAway ?? "",
-            ["status"] = game?.Status ?? "",
-        };
-    }
-
-    private Godot.Collections.Dictionary BuildNativeGameResultDictionary(GameResultDto result)
-    {
-        var payload = new Godot.Collections.Dictionary
-        {
-            ["game_id"] = result?.GameId ?? "",
-            ["week"] = result?.Week ?? 0,
-            ["absolute_week"] = result?.AbsoluteWeek ?? 0,
-            ["phase_week"] = result?.PhaseWeek ?? 0,
-            ["phase"] = result?.Phase ?? "",
-            ["game_type"] = result?.GameType ?? "",
-            ["week_label"] = result?.WeekLabel ?? "",
-            ["home_team"] = result?.HomeTeam ?? "",
-            ["away_team"] = result?.AwayTeam ?? "",
-            ["home_score"] = result?.HomeScore ?? 0,
-            ["away_score"] = result?.AwayScore ?? 0,
-            ["winner"] = result?.Winner ?? "",
-            ["summary"] = result?.Summary ?? "",
-        };
-
-        var boxScore = new Godot.Collections.Dictionary
-        {
-            ["final"] = new Godot.Collections.Dictionary
-            {
-                ["away"] = result?.AwayScore ?? 0,
-                ["home"] = result?.HomeScore ?? 0,
-            },
-            ["quarter_scores"] = new Godot.Collections.Dictionary
-            {
-                ["away"] = new Godot.Collections.Array { 0, 0, 0, result?.AwayScore ?? 0 },
-                ["home"] = new Godot.Collections.Array { 0, 0, 0, result?.HomeScore ?? 0 },
-            },
-        };
-
-        var teamStats = new Godot.Collections.Dictionary();
-        if (result?.BoxScore != null)
-        {
-            foreach (var pair in result.BoxScore)
-            {
-                if (pair.Value is Dictionary<string, int> stats)
-                {
-                    foreach (var stat in stats)
-                        teamStats[stat.Key] = stat.Value;
-                }
-                else if (pair.Value != null && string.Equals(pair.Key, "final", StringComparison.OrdinalIgnoreCase))
-                {
-                    boxScore["final_text"] = pair.Value.ToString() ?? "";
-                }
-            }
-        }
-        boxScore["team_stats"] = teamStats;
-        payload["box_score"] = boxScore;
-        return payload;
-    }
-
-    private bool TryShowNativeGameResult(string gameId, string fallbackError, string statusText)
-    {
-        if (string.IsNullOrWhiteSpace(gameId))
-            return false;
-
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeGameDayService.GetGameResult(gameId);
-            if (response?.Ok != true || response.Result == null)
-                return false;
-
-            var result = BuildNativeGameResultDictionary(response.Result);
-            _gameCache[gameId] = result.Duplicate(true);
-            ShowPostGameRecapFromResult(result, statusText);
-            SetPrimaryStatus(statusText);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            SetPrimaryStatus($"{fallbackError} {InlineMessage(ex.Message)}");
-            return false;
-        }
-    }
-
-    private void RefreshNativeResultsView(string weekKey)
-    {
-        EnsureNativeGameCoreServices();
-        var league = GetOrCreateNativeGameCoreContext().ActiveLeague;
-        if (league == null)
-        {
-            ShowResultsMessage("Results unavailable.");
-            return;
-        }
-
-        var weekKeys = new List<string>();
-        _resultsWeekLabels.Clear();
-        foreach (var result in league.Results)
-        {
-            var key = BuildNativeResultWeekKey(
-                result.GameType,
-                result.AbsoluteWeek > 0 ? result.AbsoluteWeek : result.Week);
-            if (string.IsNullOrWhiteSpace(key) || weekKeys.Contains(key))
-                continue;
-            weekKeys.Add(key);
-            _resultsWeekLabels[key] = string.IsNullOrWhiteSpace(result.WeekLabel)
-                ? FormatWeekKeyHeader(key)
-                : result.WeekLabel;
-        }
-
-        weekKeys.Sort(CompareWeekKeys);
-        _availableResultsWeekKeys.Clear();
-        _availableResultsWeekKeys.AddRange(weekKeys);
-        _completedResultsWeekKeys.Clear();
-        foreach (var key in weekKeys)
-            _completedResultsWeekKeys.Add(key);
-
-        var selectedKey = string.IsNullOrWhiteSpace(weekKey)
-            ? GetPreferredResultsWeekKey(weekKeys, weekKeys)
-            : weekKey;
-        SetupResultsWeekOptions(weekKeys, selectedKey);
-
-        var results = new Godot.Collections.Array();
-        foreach (var result in league.Results)
-        {
-            var key = BuildNativeResultWeekKey(
-                result.GameType,
-                result.AbsoluteWeek > 0 ? result.AbsoluteWeek : result.Week);
-            if (!string.IsNullOrWhiteSpace(selectedKey) && !string.Equals(key, selectedKey, StringComparison.OrdinalIgnoreCase))
-                continue;
-            var payload = BuildNativeGameResultDictionary(GameCoreStateHelper.ToGameResultDto(result));
-            results.Add(payload);
-            var gameId = FmtString(GetFirstNonNil(payload, "game_id"), "");
-            if (!string.IsNullOrWhiteSpace(gameId))
-                _gameCache[gameId] = payload.Duplicate(true);
-        }
-
-        PopulateResultsList(results);
-    }
-
-    private string BuildNativeResultWeekKey(string gameType, int week)
-    {
-        var season = (gameType ?? "").Trim().ToLowerInvariant();
-        season = season switch
-        {
-            "preseason" => "preseason",
-            "regular_season" => "regular",
-            "playoffs" => "playoffs",
-            "postseason" => "playoffs",
-            _ => string.IsNullOrWhiteSpace(season) ? "regular" : season,
-        };
-        return $"{season}:{week}";
-    }
-
-    internal static int CompareWeekKeys(string left, string right)
-    {
-        (var leftSeasonRank, var leftWeek) = ParseWeekKeyParts(left);
-        (var rightSeasonRank, var rightWeek) = ParseWeekKeyParts(right);
-        var seasonCompare = leftSeasonRank.CompareTo(rightSeasonRank);
-        if (seasonCompare != 0)
-            return seasonCompare;
-        return leftWeek.CompareTo(rightWeek);
-    }
-
-    private static (int seasonRank, int week) ParseWeekKeyParts(string weekKey)
-    {
-        if (string.IsNullOrWhiteSpace(weekKey))
-            return (int.MaxValue, int.MaxValue);
-
-        var parts = weekKey.Split(':', 2);
-        var seasonRank = parts[0].Trim().ToLowerInvariant() switch
-        {
-            "preseason" => 0,
-            "regular" => 1,
-            "playoffs" => 2,
-            _ => 3,
-        };
-        var week = 0;
-        if (parts.Length == 2)
-            int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out week);
-        return (seasonRank, week);
-    }
-
-    private void RefreshNativeInjuryReport(string teamId, int selectionVersion)
-    {
-        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
-            return;
-
-        ShowInjuriesMessage("Injury report: loading...");
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeRosterService.GetTeamRoster(ResolveNativeScheduleTeamId(teamId));
-            if (response == null || !response.Ok)
-            {
-                ShowInjuriesMessage(string.IsNullOrWhiteSpace(response?.Error) ? "Injury report unavailable." : response.Error);
-                return;
-            }
-
-            var entries = new Godot.Collections.Array();
-            if (response.Players != null)
-            {
-                foreach (var player in response.Players)
-                {
-                    if (string.IsNullOrWhiteSpace(player?.Injury))
-                        continue;
-                    entries.Add(new Godot.Collections.Dictionary
-                    {
-                        ["name"] = player?.Name ?? "",
-                        ["position"] = player?.Position ?? "",
-                        ["injury_status"] = player?.Status ?? "",
-                        ["injury_name"] = player?.Injury ?? "",
-                        ["return_date"] = "",
-                        ["days_remaining"] = "",
-                        ["ir"] = string.Equals(player?.Status, "ir", StringComparison.OrdinalIgnoreCase),
-                    });
-                }
-            }
-
-            PopulateInjuryTree(entries);
-        }
-        catch (Exception ex)
-        {
-            ShowInjuriesMessage("Injury report unavailable.");
-            SetPrimaryStatus($"Native injuries failed: {InlineMessage(ex.Message)}");
-        }
-    }
-
-    private async Task RefreshHistoryAsync()
-    {
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeHistoryView();
-            await Task.CompletedTask;
-            return;
-        }
-
-        ShowHistoryMessage("League history is only available in native mode.");
-        await Task.CompletedTask;
-    }
-
-    private void RefreshNativeHistoryView()
-    {
-        try
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeDashboardService.GetLeagueHistory();
-            if (response == null || !response.Ok)
-            {
-                ShowHistoryMessage(string.IsNullOrWhiteSpace(response?.Error) ? "League history unavailable." : response.Error);
-                return;
-            }
-
-            PopulateHistoryView(response.Seasons ?? new List<LeagueHistorySeasonDto>());
-        }
-        catch (Exception ex)
-        {
-            ShowHistoryMessage("League history unavailable.");
-            SetPrimaryStatus($"Native league history failed: {InlineMessage(ex.Message)}");
-        }
     }
 
     private void RenderRosterSnapshot(Godot.Collections.Dictionary payload)
@@ -4429,48 +2601,6 @@ public partial class DashboardController : Control
         SetDepthChartRequestBusy(true);
         SetDepthChartActionStatus("Updating depth chart...");
 
-        if (IsNativeRuntimeSource())
-        {
-            try
-            {
-                EnsureNativeGameCoreServices();
-                var response = _nativeDepthChartService.UpdateDepthChart(
-                    action,
-                    _selectedDepthChartPosition,
-                    _selectedDepthChartPlayerId,
-                    ResolveNativeRosterDepthChartTeamId());
-
-                if (response == null || !response.Ok)
-                {
-                    var error = string.IsNullOrWhiteSpace(response?.Error) ? "Unable to update depth chart." : response.Error;
-                    SetDepthChartActionStatus(error);
-                    SetPrimaryStatus(error);
-                    return;
-                }
-
-                RenderDepthChartSnapshot(ConvertDepthChartResponseToPayload(response));
-                await SaveNativeAutosave("Native autosave updated.");
-                await RefreshDashboardState();
-                await RefreshInbox();
-                await RefreshLeagueHub();
-                _dashboardRefreshPendingFromDepthChartEdit = false;
-                SetDepthChartActionStatus("Depth chart updated.");
-                SetPrimaryStatus("Depth chart updated.");
-            }
-            catch (Exception ex)
-            {
-                var nativeError = $"Native C# depth chart update failed: {InlineMessage(ex.Message)}";
-                SetDepthChartActionStatus("Unable to update depth chart.");
-                SetPrimaryStatus(nativeError);
-            }
-            finally
-            {
-                SetDepthChartRequestBusy(false);
-            }
-
-            return;
-        }
-
         var request = new Godot.Collections.Dictionary
         {
             ["position"] = _selectedDepthChartPosition,
@@ -4576,21 +2706,12 @@ public partial class DashboardController : Control
         if (positionCounts == null || positionCounts.Count == 0)
             return "";
 
-        var sortedRows = new List<Godot.Collections.Dictionary>();
+        var parts = new List<string>();
         for (var i = 0; i < positionCounts.Count; i++)
         {
-            if (TryGetDictionary((Variant)positionCounts[i], out var row))
-                sortedRows.Add(row);
-        }
+            if (!TryGetDictionary((Variant)positionCounts[i], out var row))
+                continue;
 
-        sortedRows.Sort((left, right) => FootballPositionOrder.Compare(
-            SafeString(left, "position", ""),
-            SafeString(right, "position", "")));
-
-        var parts = new List<string>();
-        for (var i = 0; i < sortedRows.Count; i++)
-        {
-            var row = sortedRows[i];
             var position = SafeString(row, "position", "");
             var count = SafeIntDisplay(row, "count");
             if (!string.IsNullOrWhiteSpace(position))
@@ -4681,40 +2802,6 @@ public partial class DashboardController : Control
 
     private async Task ContinueUntilPause()
     {
-        if (IsNativeRuntimeSource())
-        {
-            SetContinueButtonBusy(true);
-            SetPrimaryStatus("Simulating season...");
-            try
-            {
-                EnsureNativeGameCoreServices();
-                var response = _nativeContinueService.Continue(CONTINUE_MAX_DAYS);
-                if (response == null || !response.Ok)
-                {
-                    var error = string.IsNullOrWhiteSpace(response?.Error) ? "Continue failed." : response.Error;
-                    SetPrimaryStatus(error);
-                    return;
-                }
-
-                ApplyNativeContinueStatus(response.Result);
-                if (response.Result != null && response.Result.Advanced)
-                    await SaveNativeAutosave("Native autosave updated.");
-                await RefreshDashboardState();
-                await RefreshStateSummary();
-                await RefreshInbox();
-                await RefreshLeagueHub();
-            }
-            catch (Exception ex)
-            {
-                SetPrimaryStatus($"Native continue failed: {InlineMessage(ex.Message)}");
-            }
-            finally
-            {
-                SetContinueButtonBusy(false);
-            }
-            return;
-        }
-
         SetContinueButtonBusy(true);
         SetPrimaryStatus("Simulating season...");
         var payload = new Godot.Collections.Dictionary
@@ -4746,65 +2833,103 @@ public partial class DashboardController : Control
             return;
 
         _simUntilSelect.Clear();
-        var nativeMilestones = new[] { 1, 5, LeagueBootstrapService.RegularSeasonWeeks };
-        var addedWeeks = new HashSet<int>();
-        foreach (var milestone in nativeMilestones)
-        {
-            if (milestone <= 0 || !addedWeeks.Add(milestone))
-                continue;
-            _simUntilSelect.AddItem($"Regular Season Week {milestone}", milestone);
-        }
-        _simUntilSelect.AddItem("Playoffs", 1001);
-        _simUntilSelect.AddItem("Offseason Pending", 1002);
-        _simUntilSelect.AddItem("Free Agency Pending", 1003);
-        _simUntilSelect.AddItem("Draft Pending", 1004);
-        _simUntilSelect.AddItem("Training Camp Pending", 1005);
+        _simUntilSelect.AddItem("Loading calendar targets...");
         if (_simUntilSelect.ItemCount > 0)
             _simUntilSelect.Select(0);
     }
 
+    private void ApplySimUntilMilestonesFromStateSummary(Godot.Collections.Dictionary dict)
+    {
+        if (_simUntilSelect == null)
+            return;
+
+        var milestones = TryExtractArray(dict, "milestones");
+        if (milestones == null || milestones.Count == 0)
+            return;
+        var calendar = TryExtractObject(dict, "calendar");
+        var currentDateText = FmtString(calendar == null ? default(Variant) : GetFirstNonNil(calendar, "current_date"), "");
+        DateTime.TryParseExact(currentDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var currentDate);
+        var nextMilestone = TryExtractObject(dict, "next_milestone");
+        var nextMilestoneId = FmtString(nextMilestone == null ? default(Variant) : GetFirstNonNil(nextMilestone, "id"), "");
+
+        var previousSelection = GetSelectedSimUntilMilestoneId();
+        if (!string.IsNullOrWhiteSpace(previousSelection))
+            _selectedSimUntilMilestoneId = previousSelection;
+
+        _simUntilMilestonesById.Clear();
+        _simUntilSelect.Clear();
+
+        var selectedIndex = -1;
+        for (var index = 0; index < milestones.Count; index++)
+        {
+            if (!TryGetDictionary((Variant)milestones[index], out var milestone))
+                continue;
+
+            var milestoneId = FmtString(GetFirstNonNil(milestone, "id"), "");
+            if (string.IsNullOrWhiteSpace(milestoneId))
+                continue;
+            var milestoneDateText = FmtString(GetFirstNonNil(milestone, "date"), "");
+            if (DateTime.TryParseExact(milestoneDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var milestoneDate)
+                && currentDate != default
+                && milestoneDate.Date < currentDate.Date)
+                continue;
+
+            var label = BuildSimUntilMilestoneLabel(milestone);
+            _simUntilSelect.AddItem(label);
+            var optionIndex = _simUntilSelect.ItemCount - 1;
+            _simUntilSelect.SetItemMetadata(optionIndex, milestoneId);
+            _simUntilMilestonesById[milestoneId] = milestone;
+
+            if (string.Equals(milestoneId, _selectedSimUntilMilestoneId, StringComparison.OrdinalIgnoreCase))
+                selectedIndex = optionIndex;
+            else if (selectedIndex < 0 && string.Equals(milestoneId, nextMilestoneId, StringComparison.OrdinalIgnoreCase))
+                selectedIndex = optionIndex;
+        }
+
+        if (_simUntilSelect.ItemCount == 0)
+        {
+            _simUntilSelect.AddItem("Calendar targets unavailable");
+            _selectedSimUntilMilestoneId = "";
+            _btnSimUntil?.SetDeferred("disabled", true);
+            return;
+        }
+
+        if (selectedIndex < 0)
+            selectedIndex = 0;
+
+        _simUntilSelect.Select(selectedIndex);
+        _selectedSimUntilMilestoneId = GetSelectedSimUntilMilestoneId();
+        if (_btnSimUntil != null)
+            _btnSimUntil.Disabled = false;
+    }
+
+    private string BuildSimUntilMilestoneLabel(Godot.Collections.Dictionary milestone)
+    {
+        var label = FmtString(GetFirstNonNil(milestone, "label"), "League milestone");
+        var date = FormatCalendarDate(
+            FmtString(GetFirstNonNil(milestone, "day_of_week"), ""),
+            FmtString(GetFirstNonNil(milestone, "date"), "")
+        );
+        return string.IsNullOrWhiteSpace(date) ? label : $"{label} - {date}";
+    }
+
+    private string GetSelectedSimUntilMilestoneId()
+    {
+        if (_simUntilSelect == null || _simUntilSelect.Selected < 0)
+            return "";
+
+        var metadata = _simUntilSelect.GetItemMetadata(_simUntilSelect.Selected);
+        return FmtString(metadata, "");
+    }
+
     private Godot.Collections.Dictionary BuildSimUntilPayload()
     {
-        var selectedId = _simUntilSelect != null ? _simUntilSelect.GetSelectedId() : 1;
-        if (selectedId == 1001)
-        {
-            return new Godot.Collections.Dictionary
-            {
-                { "target_type", "playoffs_start" }
-            };
-        }
-        if (selectedId == 1002)
-        {
-            return new Godot.Collections.Dictionary
-            {
-                { "target_type", "offseason_start" }
-            };
-        }
-        if (selectedId == 1003)
-        {
-            return new Godot.Collections.Dictionary
-            {
-                { "target_type", "free_agency" }
-            };
-        }
-        if (selectedId == 1004)
-        {
-            return new Godot.Collections.Dictionary
-            {
-                { "target_type", "draft" }
-            };
-        }
-        if (selectedId == 1005)
-        {
-            return new Godot.Collections.Dictionary
-            {
-                { "target_type", "training_camp" }
-            };
-        }
+        var selectedMilestoneId = GetSelectedSimUntilMilestoneId();
+        _selectedSimUntilMilestoneId = selectedMilestoneId;
         return new Godot.Collections.Dictionary
         {
-            { "target_type", "regular_season_week" },
-            { "target_week", selectedId }
+            { "target_type", "milestone" },
+            { "target_milestone_id", selectedMilestoneId }
         };
     }
 
@@ -4813,21 +2938,6 @@ public partial class DashboardController : Control
         if (_btnSimUntil != null)
             _btnSimUntil.Disabled = true;
         SetPrimaryStatus("Simulating to selected milestone...");
-
-        if (IsNativeRuntimeSource())
-        {
-            try
-            {
-                await RunNativeSimUntilSelectedMilestone();
-            }
-            finally
-            {
-                if (_btnSimUntil != null)
-                    _btnSimUntil.Disabled = false;
-            }
-
-            return;
-        }
 
         var json = Json.Stringify(BuildSimUntilPayload());
         var (status, body) = await PostWithTimeoutAsync("/sim_until", json, SIM_UNTIL_TIMEOUT_MS);
@@ -4846,122 +2956,6 @@ public partial class DashboardController : Control
         await RefreshStateSummary();
         await RefreshInbox();
         await RefreshLeagueHub();
-    }
-
-    private async Task RunNativeSimUntilSelectedMilestone()
-    {
-        EnsureNativeGameCoreServices();
-        var selectedId = _simUntilSelect != null ? _simUntilSelect.GetSelectedId() : 1;
-        var league = GetOrCreateNativeGameCoreContext().ActiveLeague;
-        if (league == null)
-        {
-            SetPrimaryStatus("No active league loaded.");
-            return;
-        }
-
-        var resultsBefore = league.Results?.Count ?? 0;
-        var (targetType, targetWeek) = GetNativeSimUntilTarget(selectedId);
-        var response = _nativeContinueService.ContinueUntil(targetType, targetWeek, CONTINUE_MAX_DAYS, maxIterations: 256);
-        if (response == null || !response.Ok)
-        {
-            var error = string.IsNullOrWhiteSpace(response?.Error) ? "Sim Until failed." : response.Error;
-            SetPrimaryStatus(error);
-            return;
-        }
-
-        var lastResult = response.Result;
-        if (lastResult != null && lastResult.Advanced)
-            await SaveNativeAutosave("Native autosave updated.");
-
-        ApplyNativeContinueStatus(lastResult);
-        await RefreshDashboardState();
-        await RefreshStateSummary();
-        await RefreshInbox();
-        await RefreshLeagueHub();
-
-        var gamesSimulated = lastResult != null && lastResult.GamesSimulated > 0
-            ? lastResult.GamesSimulated
-            : Math.Max(0, (league.Results?.Count ?? 0) - resultsBefore);
-        var targetLabel = GetNativeSimUntilTargetLabel(selectedId);
-        var stopReason = lastResult?.StopReason ?? "";
-        if (string.Equals(stopReason, "reached_requested_week", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stopReason, "reached_playoffs", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stopReason, "reached_offseason", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stopReason, "reached_free_agency", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stopReason, "reached_draft", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(stopReason, "reached_training_camp", StringComparison.OrdinalIgnoreCase))
-        {
-            SetPrimaryStatus($"{targetLabel} reached ({gamesSimulated} games, {lastResult?.WeeksAdvanced ?? 0} weeks).");
-            return;
-        }
-
-        if (string.Equals(stopReason, "postseason_pending", StringComparison.OrdinalIgnoreCase))
-        {
-            SetPrimaryStatus($"Paused at postseason pending ({gamesSimulated} games).");
-            return;
-        }
-
-        if (lastResult != null && !string.IsNullOrWhiteSpace(stopReason))
-        {
-            SetPrimaryStatus($"Paused: {FormatContinueStopReason(stopReason)}");
-            return;
-        }
-
-        SetPrimaryStatus($"Sim Until complete ({gamesSimulated} games).");
-    }
-
-    private static (string TargetType, int TargetWeek) GetNativeSimUntilTarget(int selectedId)
-    {
-        return selectedId switch
-        {
-            1001 => ("playoffs_start", 0),
-            1002 => ("offseason_start", 0),
-            1003 => ("free_agency", 0),
-            1004 => ("draft", 0),
-            1005 => ("training_camp", 0),
-            _ => ("regular_season_week", selectedId),
-        };
-    }
-
-    private bool HasReachedNativeSimUntilTarget(GridironGM.GameCore.Models.LeagueState league, int selectedId)
-    {
-        if (league?.Calendar == null)
-            return false;
-
-        if (selectedId == 1001)
-            return string.Equals(ScheduleService.GetPhaseForWeek(league.Calendar.Week), ScheduleService.PostseasonPendingPhase, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(ScheduleService.GetPhaseForWeek(league.Calendar.Week), ScheduleService.SeasonCompletePhase, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(ScheduleService.GetPhaseForWeek(league.Calendar.Week), ScheduleService.OffseasonPendingPhase, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(ScheduleService.GetPhaseForWeek(league.Calendar.Week), "Offseason", StringComparison.OrdinalIgnoreCase);
-        if (selectedId == 1002)
-            return ScheduleService.IsOffseasonPlaceholderPhase(ScheduleService.GetPhaseForWeek(league.Calendar.Week))
-                || string.Equals(ScheduleService.GetPhaseForWeek(league.Calendar.Week), "Offseason", StringComparison.OrdinalIgnoreCase);
-        if (selectedId == 1003)
-            return HasReachedOffseasonPlaceholderTarget(league, ScheduleService.FreeAgencyPendingPhase);
-        if (selectedId == 1004)
-            return HasReachedOffseasonPlaceholderTarget(league, ScheduleService.DraftPendingPhase);
-        if (selectedId == 1005)
-            return HasReachedOffseasonPlaceholderTarget(league, ScheduleService.TrainingCampPendingPhase);
-
-        var phase = ScheduleService.GetPhaseForWeek(league.Calendar.Week);
-        var phaseWeek = ScheduleService.GetPhaseWeek(league.Calendar.Week);
-        if (!string.Equals(phase, "Regular Season", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        return phaseWeek >= selectedId;
-    }
-
-    private static string GetNativeSimUntilTargetLabel(int selectedId)
-    {
-        return selectedId switch
-        {
-            1001 => "Playoffs",
-            1002 => "Offseason Pending",
-            1003 => "Free Agency Pending",
-            1004 => "Draft Pending",
-            1005 => "Training Camp Pending",
-            _ => $"Regular Season Week {selectedId}",
-        };
     }
 
     private void UpdateSimUntilStatus(string body)
@@ -4984,10 +2978,20 @@ public partial class DashboardController : Control
         }
 
         var games = GetIntValue(GetFirstNonNil(dict, "games_simulated", "gamesSimulated"), 0);
+        var stopReason = FmtString(GetFirstNonNil(dict, "stop_reason", "stopReason"), "");
+        var seasonYear = GetIntValue(GetFirstNonNil(dict, "season_year", "seasonYear"), 0);
         var stoppedAt = TryExtractObject(dict, "stopped_at", "stoppedAt");
         var label = stoppedAt != null
             ? FmtString(GetFirstNonNil(stoppedAt, "week_label", "weekLabel"), "")
             : "";
+        if (string.Equals(stopReason, "new_league_year_started", StringComparison.OrdinalIgnoreCase))
+        {
+            SetPrimaryStatus(seasonYear > 0
+                ? $"{seasonYear} season started ({games} games)."
+                : $"New league year started ({games} games).");
+            return;
+        }
+
         SetPrimaryStatus(string.IsNullOrWhiteSpace(label)
             ? $"Sim Until complete ({games} games)."
             : $"{label} reached ({games} games).");
@@ -5005,19 +3009,152 @@ public partial class DashboardController : Control
         await RefreshResultsAsync(GetSelectedResultsWeekKey());
         await RefreshScheduleAsync(_currentTeamId);
         await RefreshInjuryReportAsync(_currentTeamId);
-        await RefreshHistoryAsync();
+        await RefreshLeagueHistoryAsync();
+    }
+
+    private async Task RefreshLeagueHistoryAsync()
+    {
+        ShowHistoryMessage("League history: loading...");
+        var (status, body) = await GetWithTimeoutAsync("/league_history", REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
+        {
+            var summary = SummarizeRequestError("/league_history", status, body);
+            ShowHistoryMessage($"(error) {summary}");
+            SetStateDumpText(body);
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        if (parsed.VariantType == Variant.Type.Dictionary)
+        {
+            var payload = parsed.AsGodotDictionary();
+            var ok = GetBoolValue(GetFirstNonNil(payload, "ok", "success"), true);
+            if (!ok)
+            {
+                var error = CleanStatusMessage(
+                    FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Unable to load league history."),
+                    "Unable to load league history.");
+                ShowHistoryMessage(error);
+                return;
+            }
+        }
+
+        var history = ExtractArrayPayload(parsed, "history", "seasons", "items");
+        if (history == null)
+        {
+            ShowHistoryMessage("(error) invalid league history payload");
+            return;
+        }
+
+        PopulateHistoryTree(history);
     }
 
     private async Task RefreshStandingsAsync()
     {
-        RefreshNativeStandingsView();
-        await Task.CompletedTask;
+        ShowStandingsMessage("Standings: loading...");
+        var (status, body) = await GetWithTimeoutAsync("/standings", REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
+        {
+            var summary = SummarizeRequestError("/standings", status, body);
+            ShowStandingsMessage($"(error) {summary}");
+            SetStateDumpText(body);
+            SetServerError(summary);
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        if (parsed.VariantType == Variant.Type.Dictionary)
+        {
+            var payload = parsed.AsGodotDictionary();
+            var ok = GetBoolValue(GetFirstNonNil(payload, "ok", "success"), true);
+            if (!ok)
+            {
+                var error = CleanStatusMessage(
+                    FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Unable to load standings."),
+                    "Unable to load standings.");
+                ShowStandingsMessage(error);
+                return;
+            }
+        }
+        Godot.Collections.Dictionary standingsPayload = null;
+        if (parsed.VariantType == Variant.Type.Dictionary)
+        {
+            var parsedDict = parsed.AsGodotDictionary();
+            standingsPayload = TryExtractObject(parsedDict, "standings") ?? parsedDict;
+        }
+
+        var standings = ExtractStandingsArray(parsed);
+        if (standings == null && standingsPayload == null)
+        {
+            SetStateDumpText(body);
+            ShowStandingsMessage("(error) invalid standings payload");
+            return;
+        }
+
+        PopulateStandingsTree(standingsPayload, standings);
     }
 
     private async Task RefreshResultsAsync(string weekKey)
     {
-        RefreshNativeResultsView(weekKey);
-        await Task.CompletedTask;
+        var selectedIndex = _resultsWeekSelect != null ? _resultsWeekSelect.Selected : -1;
+        var requestedLabel = string.IsNullOrWhiteSpace(weekKey) ? "auto" : weekKey;
+        GD.Print($"Results refresh week={requestedLabel} (selectedIndex={selectedIndex})");
+        ShowResultsMessage("Results: loading...");
+        var path = string.IsNullOrWhiteSpace(weekKey)
+            ? "/results"
+            : $"/results?week_key={Uri.EscapeDataString(weekKey)}";
+        var (status, body) = await GetWithTimeoutAsync(path, REQUEST_TIMEOUT_MS);
+        if (status < 200 || status >= 300)
+        {
+            var summary = SummarizeRequestError(path, status, body);
+            ShowResultsMessage($"(error) {summary}");
+            SetStateDumpText(body);
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        Godot.Collections.Dictionary payload = null;
+        if (parsed.VariantType == Variant.Type.Dictionary)
+            payload = parsed.AsGodotDictionary();
+        var results = ExtractArrayPayload(parsed, "results", "games", "matchups");
+        if (results == null)
+        {
+            ShowResultsMessage("(error)");
+            return;
+        }
+
+        var payloadWeekKey = "";
+        var availableWeekKeys = new List<string>();
+        var availableWeekLabels = new List<string>();
+        var completedWeekKeys = new List<string>();
+        var completedWeekLabels = new List<string>();
+        if (payload != null)
+        {
+            payloadWeekKey = FmtString(GetFirstNonNil(payload, "week_key", "selected_week_key", "selectedWeekKey"), "");
+            availableWeekKeys = ParseStringList(TryExtractArray(payload, "available_week_keys", "availableWeekKeys"));
+            availableWeekLabels = ParseStringList(TryExtractArray(payload, "available_week_labels", "availableWeekLabels"));
+            completedWeekKeys = ParseStringList(TryExtractArray(payload, "completed_week_keys", "completedWeekKeys"));
+            completedWeekLabels = ParseStringList(TryExtractArray(payload, "completed_week_labels", "completedWeekLabels"));
+        }
+
+        _availableResultsWeekKeys.Clear();
+        _availableResultsWeekKeys.AddRange(availableWeekKeys);
+        _resultsWeekLabels.Clear();
+        for (var i = 0; i < availableWeekKeys.Count; i++)
+        {
+            var key = availableWeekKeys[i];
+            var label = i < availableWeekLabels.Count ? availableWeekLabels[i] : "";
+            if (!string.IsNullOrWhiteSpace(key))
+                _resultsWeekLabels[key] = label;
+        }
+        _completedResultsWeekKeys.Clear();
+        for (var i = 0; i < completedWeekKeys.Count; i++)
+            _completedResultsWeekKeys.Add(completedWeekKeys[i]);
+        SetupResultsWeekOptions(availableWeekKeys, payloadWeekKey);
+        if (!string.IsNullOrWhiteSpace(payloadWeekKey))
+            _selectedResultsWeekKey = payloadWeekKey;
+
+        PopulateResultsList(results);
     }
 
     private async Task RefreshScheduleAsync(string teamId, int selectionVersion = -1)
@@ -5031,8 +3168,43 @@ public partial class DashboardController : Control
             return;
         }
 
-        RefreshNativeScheduleView(teamId, selectionVersion);
-        await Task.CompletedTask;
+        ShowScheduleMessage("Schedule: loading...");
+        var (status, body) = await GetWithTimeoutAsync($"/team_schedule?team_id={teamId}", REQUEST_TIMEOUT_MS);
+        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
+            return;
+        if (status < 200 || status >= 300)
+        {
+            ShowScheduleMessage($"(error) HTTP {status}");
+            SetStateDumpText(body);
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
+            return;
+        if (parsed.VariantType == Variant.Type.Dictionary)
+        {
+            var payload = parsed.AsGodotDictionary();
+            var ok = GetBoolValue(GetFirstNonNil(payload, "ok", "success"), true);
+            if (!ok)
+            {
+                var error = CleanStatusMessage(
+                    FmtString(GetFirstNonNil(payload, "error", "message", "detail"), "Unable to load schedule."),
+                    "Unable to load schedule.");
+                ShowScheduleMessage(error);
+                return;
+            }
+        }
+        var schedule = ExtractArrayPayload(parsed, "schedule", "games", "matchups");
+        if (schedule == null)
+        {
+            ShowScheduleMessage("(error)");
+            return;
+        }
+
+        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
+            return;
+        PopulateScheduleList(schedule, teamId);
     }
 
     private async Task RefreshInjuryReportAsync(string teamId, int selectionVersion = -1)
@@ -5046,8 +3218,30 @@ public partial class DashboardController : Control
             return;
         }
 
-        RefreshNativeInjuryReport(teamId, selectionVersion);
-        await Task.CompletedTask;
+        ShowInjuriesMessage("Injury report: loading...");
+        var (status, body) = await GetWithTimeoutAsync($"/injury_report?team_id={teamId}", REQUEST_TIMEOUT_MS);
+        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
+            return;
+        if (status < 200 || status >= 300)
+        {
+            ShowInjuriesMessage($"(error) HTTP {status}");
+            SetStateDumpText(body);
+            return;
+        }
+
+        var parsed = Json.ParseString(body);
+        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
+            return;
+        var injuries = ExtractArrayPayload(parsed, "entries", "injuries", "injury_report");
+        if (injuries == null)
+        {
+            ShowInjuriesMessage("(error)");
+            return;
+        }
+
+        if (selectionVersion > 0 && selectionVersion != _teamSelectionVersion)
+            return;
+        PopulateInjuryTree(injuries);
     }
 
     private void OnResultsWeekSelected(long index)
@@ -5100,28 +3294,17 @@ public partial class DashboardController : Control
             return;
         }
 
-        if (IsPostseasonPendingMessage(selectedMessage))
+        if (IsRosterNoticeMessage(selectedMessage))
         {
-            await ContinueUntilPause();
+            _depthChartViewActive = false;
+            await SelectMainTab(ROSTER_TAB_INDEX);
             return;
         }
 
-        if (IsSeasonCompleteMessage(selectedMessage))
+        if (IsDepthChartNoticeMessage(selectedMessage))
         {
-            await SelectMainTab(LEAGUE_TAB_INDEX);
-            return;
-        }
-
-        if (IsOffseasonPendingMessage(selectedMessage))
-        {
-            var type = FmtString(GetFirstNonNil(selectedMessage, "type"), "");
-            if (string.Equals(type, ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
-            {
-                SetPrimaryStatus("Training camp systems are not implemented yet.");
-                return;
-            }
-
-            await ContinueUntilPause();
+            _depthChartViewActive = true;
+            await SelectMainTab(ROSTER_TAB_INDEX);
             return;
         }
 
@@ -5140,16 +3323,14 @@ public partial class DashboardController : Control
         if (string.IsNullOrWhiteSpace(_selectedSimGameId))
             return;
 
-        if (_overviewActionButton != null)
-            _overviewActionButton.Disabled = true;
+        _btnSimGame.Disabled = true;
         var payload = new Godot.Collections.Dictionary
         {
             { "game_id", _selectedSimGameId }
         };
         var json = Json.Stringify(payload);
         var (status, body) = await PostWithTimeoutAsync("/simulate_user_game", json, REQUEST_TIMEOUT_MS);
-        if (_overviewActionButton != null)
-            _overviewActionButton.Disabled = false;
+        _btnSimGame.Disabled = false;
 
         if (status < 200 || status >= 300)
         {
@@ -5164,17 +3345,6 @@ public partial class DashboardController : Control
 
     private bool OpenGameDayPopupFromDashboardData()
     {
-        if (IsNativeRuntimeSource())
-        {
-            EnsureNativeGameCoreServices();
-            var response = _nativeGameDayService.GetCurrentGameDayState();
-            if (response?.Ok == true && response.Game != null)
-            {
-                _activeGameDayGame = ConvertNativeGameDayState(response.Game);
-                return OpenGameDayPopup(_activeGameDayGame);
-            }
-        }
-
         _activeGameDayGame = _dashboardNextGame?.Duplicate(true) ?? new Godot.Collections.Dictionary();
         return OpenGameDayPopup(_activeGameDayGame);
     }
@@ -5294,53 +3464,6 @@ public partial class DashboardController : Control
 
     private async Task OnGameDaySimPressed()
     {
-        if (IsNativeRuntimeSource())
-        {
-            var nativeGameId = FmtString(GetFirstNonNil(_activeGameDayGame, "game_id"), "");
-            if (string.IsNullOrWhiteSpace(nativeGameId))
-                nativeGameId = FmtString(GetFirstNonNil(_dashboardNextGame, "game_id"), "");
-            if (_btnGameDaySim != null)
-                _btnGameDaySim.Disabled = true;
-            if (_lblGameDayStatus != null)
-                _lblGameDayStatus.Text = "Simulating game...";
-            SetPrimaryStatus("Simulating current game...");
-            try
-            {
-                EnsureNativeGameCoreServices();
-                var response = _nativeGameDayService.SimulateCurrentUserGame(nativeGameId);
-                if (response?.Ok != true || response.Result == null)
-                {
-                    var error = string.IsNullOrWhiteSpace(response?.Error) ? "Sim Game failed." : response.Error;
-                    if (_lblGameDayStatus != null)
-                        _lblGameDayStatus.Text = error;
-                    SetPrimaryStatus(error);
-                    return;
-                }
-
-                CloseGameDayPopup();
-                _activeGameDayGame = new Godot.Collections.Dictionary();
-                ShowPostGameRecapFromResult(BuildNativeGameResultDictionary(response.Result));
-                await SaveNativeAutosave("Native autosave updated.");
-                SetPrimaryStatus("Game complete.");
-                await RefreshDashboardState();
-                await RefreshStateSummary();
-                await RefreshInbox();
-                await RefreshLeagueHub();
-            }
-            catch (Exception ex)
-            {
-                if (_lblGameDayStatus != null)
-                    _lblGameDayStatus.Text = "Unable to complete game.";
-                SetPrimaryStatus($"Native Sim Game failed: {InlineMessage(ex.Message)}");
-            }
-            finally
-            {
-                if (_btnGameDaySim != null)
-                    _btnGameDaySim.Disabled = false;
-            }
-            return;
-        }
-
         var gameId = FmtString(GetFirstNonNil(_activeGameDayGame, "game_id"), "");
         if (string.IsNullOrWhiteSpace(gameId))
             gameId = FmtString(GetFirstNonNil(_dashboardNextGame, "game_id"), "");
@@ -5399,23 +3522,6 @@ public partial class DashboardController : Control
             SetPrimaryStatus("No game result is available.");
             if (_lblScheduleActionStatus != null)
                 _lblScheduleActionStatus.Text = "No game result is available.";
-            return;
-        }
-
-        if (IsNativeRuntimeSource())
-        {
-            if (TryShowNativeGameResult(gameId, "Game result not found.", "Loaded game result."))
-            {
-                SetPrimaryStatus("Viewing game recap.");
-                if (_lblScheduleActionStatus != null)
-                    _lblScheduleActionStatus.Text = "Completed game loaded.";
-            }
-            else
-            {
-                SetPrimaryStatus("Unable to load game result.");
-                if (_lblScheduleActionStatus != null)
-                    _lblScheduleActionStatus.Text = "Unable to load game result.";
-            }
             return;
         }
 
@@ -5551,10 +3657,6 @@ public partial class DashboardController : Control
 
     private static string BuildCompactGameInfoLine(Godot.Collections.Dictionary result)
     {
-        var weekLabel = FmtString(GetFirstNonNil(result, "week_label", "weekLabel"), "");
-        if (!string.IsNullOrWhiteSpace(weekLabel))
-            return weekLabel;
-
         var gameType = HumanizeStatus(FmtString(GetFirstNonNil(result, "game_type", "season_type", "season_phase"), ""));
         var week = FmtInt(GetFirstNonNil(result, "week", "season_week", "calendar_week"), "");
         if (string.IsNullOrWhiteSpace(gameType))
@@ -5632,8 +3734,7 @@ public partial class DashboardController : Control
         if (string.IsNullOrWhiteSpace(_selectedInboxMessageId))
             return;
 
-        if (_overviewActionButton != null)
-            _overviewActionButton.Disabled = true;
+        _btnAcknowledge.Disabled = true;
         var payload = new Godot.Collections.Dictionary
         {
             { "message_id", _selectedInboxMessageId }
@@ -5643,8 +3744,7 @@ public partial class DashboardController : Control
             payload["team_id"] = teamId;
         var json = Json.Stringify(payload);
         var (status, body) = await PostWithTimeoutAsync("/inbox/mark_read", json, REQUEST_TIMEOUT_MS);
-        if (_overviewActionButton != null)
-            _overviewActionButton.Disabled = false;
+        _btnAcknowledge.Disabled = false;
 
         if (status < 200 || status >= 300)
         {
@@ -5693,15 +3793,20 @@ public partial class DashboardController : Control
         var data = result ?? dict;
         var stopReason = FmtString(GetFirstNonNil(data, "stop_reason", "reason"), "");
         var daysAdvanced = GetIntValue(GetFirstNonNil(data, "days_advanced"), 0);
+        var seasonYear = GetIntValue(GetFirstNonNil(data, "season_year", "seasonYear"), 0);
 
-        var message = string.IsNullOrWhiteSpace(stopReason)
-            ? $"Advanced {daysAdvanced} day(s)."
-            : $"Paused: {FormatContinueStopReason(stopReason)}";
+        var message = string.Equals(stopReason, "new_league_year_started", StringComparison.OrdinalIgnoreCase)
+            ? (seasonYear > 0 ? $"{seasonYear} season started." : "New league year started.")
+            : string.IsNullOrWhiteSpace(stopReason)
+                ? $"Advanced {daysAdvanced} day(s)."
+                : $"Paused: {FormatContinueStopReason(stopReason)}";
         if (string.Equals(stopReason, "max_days_reached", StringComparison.OrdinalIgnoreCase))
             message += $" after {daysAdvanced} day(s).";
 
         _inboxEmptyDetailMessage = string.Equals(stopReason, "game_day", StringComparison.OrdinalIgnoreCase)
             ? "Game day reached."
+            : string.Equals(stopReason, "calendar_event", StringComparison.OrdinalIgnoreCase)
+                ? "League calendar event reached."
             : "No urgent messages.";
 
         if (_continueStatus != null)
@@ -5714,31 +3819,12 @@ public partial class DashboardController : Control
         return stopReason switch
         {
             "game_day" => "Game day reached",
-            "week_advanced" => "Week advanced",
+            "calendar_event" => "League calendar event reached",
             "season_phase_changed" => "Season phase changed",
-            "reached_requested_week" => "Requested week reached",
-            "reached_playoffs" => "Playoffs reached",
-            "reached_offseason" => "Offseason Pending reached",
-            "reached_free_agency" => "Free Agency Pending reached",
-            "reached_draft" => "Draft Pending reached",
-            "reached_training_camp" => "Training Camp Pending reached",
-            "offseason_pending" => "Offseason pending",
-            "staff_carousel_pending" => "Staff Carousel pending",
-            "retirement_pending" => "Retirement pending",
-            "exclusive_negotiation_pending" => "Exclusive Negotiation pending",
-            "franchise_tag_pending" => "Franchise Tag pending",
-            "league_year_pending" => "League Year pending",
-            "free_agency_pending" => "Free Agency pending",
-            "draft_prep_pending" => "Draft Prep pending",
-            "draft_pending" => "Draft pending",
-            "rookie_signing_pending" => "Rookie Signing pending",
-            "training_camp_pending" => "Training Camp pending",
-            "postseason_pending" => "Postseason pending",
-            "required_user_action" => "Required user action",
+            "new_league_year_started" => "New league year started",
             "roster_invalid" => "Roster invalid",
             "depth_chart_invalid" => "Depth chart invalid",
             "max_days_reached" => "Max days reached",
-            "max_iterations_reached" => "Iteration limit reached",
             "user_stop_requested" => "Stop requested",
             "no_active_league" => "No active league loaded",
             _ => string.IsNullOrWhiteSpace(stopReason) ? "Simulation paused" : stopReason.Replace('_', ' ')
@@ -6202,19 +4288,29 @@ public partial class DashboardController : Control
     private void SetupStandingsTree()
     {
         ConfigureStandingsTree(_standingsTree);
-        ConfigureOverviewStandingsSnapshot();
+        ConfigureStandingsTree(_standingsSummaryTree);
     }
 
-    private void ConfigureOverviewStandingsSnapshot()
+    private void SetupHistoryTree()
     {
-        if (_overviewStandingsSnapshot == null)
+        if (_historyTree == null)
             return;
 
-        _overviewStandingsSnapshot.BbcodeEnabled = false;
-        _overviewStandingsSnapshot.FitContent = true;
-        _overviewStandingsSnapshot.ScrollActive = false;
-        _overviewStandingsSnapshot.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-        _overviewStandingsSnapshot.CustomMinimumSize = new Vector2(0, 108);
+        _historyTree.HideRoot = true;
+        _historyTree.ColumnTitlesVisible = true;
+        _historyTree.Columns = 5;
+        _historyTree.SetColumnTitle(0, "Season");
+        _historyTree.SetColumnCustomMinimumWidth(0, 70);
+        _historyTree.SetColumnTitle(1, "Champion");
+        _historyTree.SetColumnExpand(1, true);
+        _historyTree.SetColumnCustomMinimumWidth(1, 180);
+        _historyTree.SetColumnTitle(2, "Runner-Up");
+        _historyTree.SetColumnExpand(2, true);
+        _historyTree.SetColumnCustomMinimumWidth(2, 180);
+        _historyTree.SetColumnTitle(3, "Score");
+        _historyTree.SetColumnCustomMinimumWidth(3, 72);
+        _historyTree.SetColumnTitle(4, "Final");
+        _historyTree.SetColumnCustomMinimumWidth(4, 60);
     }
 
     private void SetupInjuriesTree()
@@ -6248,39 +4344,6 @@ public partial class DashboardController : Control
         ConfigureBoxScoreTree(_boxScoreTeamStatsTree);
     }
 
-    private void SetupHistoryView()
-    {
-        if (_historyDetailText == null)
-            return;
-
-        _historyDetailText.BbcodeEnabled = false;
-        _historyDetailText.FitContent = true;
-        _historyDetailText.ScrollActive = false;
-        _historyDetailText.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-    }
-
-    private void SetupScheduleTree()
-    {
-        if (_scheduleList == null)
-            return;
-
-        _scheduleList.HideRoot = true;
-        _scheduleList.ColumnTitlesVisible = true;
-        _scheduleList.Columns = 5;
-        _scheduleList.SetColumnTitle(0, "Status");
-        _scheduleList.SetColumnCustomMinimumWidth(0, 96);
-        _scheduleList.SetColumnTitle(1, "Matchup");
-        _scheduleList.SetColumnExpand(1, true);
-        _scheduleList.SetColumnCustomMinimumWidth(1, 180);
-        _scheduleList.SetColumnTitle(2, "Week");
-        _scheduleList.SetColumnCustomMinimumWidth(2, 148);
-        _scheduleList.SetColumnTitle(3, "Result");
-        _scheduleList.SetColumnCustomMinimumWidth(3, 126);
-        _scheduleList.SetColumnTitle(4, "Action");
-        _scheduleList.SetColumnCustomMinimumWidth(4, 108);
-        _scheduleList.AllowReselect = true;
-    }
-
     private static void ConfigureBoxScoreTree(Tree tree)
     {
         if (tree == null)
@@ -6297,18 +4360,20 @@ public partial class DashboardController : Control
 
         tree.HideRoot = true;
         tree.ColumnTitlesVisible = true;
-        tree.Columns = 5;
+        tree.Columns = 6;
         tree.SetColumnTitle(0, "Team");
         tree.SetColumnExpand(0, true);
         tree.SetColumnCustomMinimumWidth(0, 168);
-        tree.SetColumnTitle(1, "W-L-T");
-        tree.SetColumnCustomMinimumWidth(1, 70);
-        tree.SetColumnTitle(2, "PF");
-        tree.SetColumnCustomMinimumWidth(2, 44);
-        tree.SetColumnTitle(3, "PA");
+        tree.SetColumnTitle(1, "Spot");
+        tree.SetColumnCustomMinimumWidth(1, 86);
+        tree.SetColumnTitle(2, "W-L-T");
+        tree.SetColumnCustomMinimumWidth(2, 70);
+        tree.SetColumnTitle(3, "PF");
         tree.SetColumnCustomMinimumWidth(3, 44);
-        tree.SetColumnTitle(4, "Win %");
-        tree.SetColumnCustomMinimumWidth(4, 62);
+        tree.SetColumnTitle(4, "PA");
+        tree.SetColumnCustomMinimumWidth(4, 44);
+        tree.SetColumnTitle(5, "Win %");
+        tree.SetColumnCustomMinimumWidth(5, 62);
     }
 
     private void SetupResultsWeekOptions(List<string> availableWeekKeys, string selectedWeekKey)
@@ -6380,25 +4445,82 @@ public partial class DashboardController : Control
     }
 
     internal static string GetPreferredResultsWeekKey(
-        System.Collections.Generic.IEnumerable<string> availableWeekKeys,
-        System.Collections.Generic.IEnumerable<string> completedWeekKeys)
+        IEnumerable<string> availableWeekKeys,
+        IEnumerable<string> completedWeekKeys)
     {
-        var available = (availableWeekKeys ?? System.Linq.Enumerable.Empty<string>())
-            .Where(key => !string.IsNullOrWhiteSpace(key))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var available = new List<string>();
+        var seenAvailable = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (availableWeekKeys != null)
+        {
+            foreach (var key in availableWeekKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key) || !seenAvailable.Add(key))
+                    continue;
+                available.Add(key);
+            }
+        }
+
         if (available.Count == 0)
             return "";
 
-        var completed = (completedWeekKeys ?? System.Linq.Enumerable.Empty<string>())
-            .Where(key => !string.IsNullOrWhiteSpace(key))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Where(key => available.Contains(key, StringComparer.OrdinalIgnoreCase))
-            .ToList();
+        var completed = new List<string>();
+        var seenCompleted = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (completedWeekKeys != null)
+        {
+            foreach (var key in completedWeekKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key) || !seenCompleted.Add(key))
+                    continue;
+                if (ContainsWeekKey(available, key))
+                    completed.Add(key);
+            }
+        }
 
         var candidates = completed.Count > 0 ? completed : available;
         candidates.Sort(CompareWeekKeys);
         return candidates[candidates.Count - 1];
+    }
+
+    internal static int CompareWeekKeys(string left, string right)
+    {
+        var leftParts = ParseWeekKeyParts(left);
+        var rightParts = ParseWeekKeyParts(right);
+        var seasonCompare = leftParts.seasonRank.CompareTo(rightParts.seasonRank);
+        if (seasonCompare != 0)
+            return seasonCompare;
+        return leftParts.week.CompareTo(rightParts.week);
+    }
+
+    private static (int seasonRank, int week) ParseWeekKeyParts(string weekKey)
+    {
+        if (string.IsNullOrWhiteSpace(weekKey))
+            return (int.MaxValue, int.MaxValue);
+
+        var parts = weekKey.Split(':', 2);
+        var seasonRank = parts[0].Trim().ToLowerInvariant() switch
+        {
+            "preseason" => 0,
+            "regular" => 1,
+            "postseason" => 2,
+            _ => 3
+        };
+
+        var week = int.MaxValue;
+        if (parts.Length == 2)
+            _ = int.TryParse(parts[1], out week);
+
+        return (seasonRank, week);
+    }
+
+    private static bool ContainsWeekKey(IEnumerable<string> weekKeys, string candidate)
+    {
+        foreach (var weekKey in weekKeys)
+        {
+            if (string.Equals(weekKey, candidate, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     private int FindResultsWeekIndex(string weekKey)
@@ -6441,7 +4563,18 @@ public partial class DashboardController : Control
     private void ShowStandingsMessage(string message)
     {
         ShowStandingsMessage(_standingsTree, message);
-        ShowOverviewStandingsMessage(message);
+        ShowStandingsMessage(_standingsSummaryTree, message);
+    }
+
+    private void ShowHistoryMessage(string message)
+    {
+        if (_historyTree == null)
+            return;
+
+        _historyTree.Clear();
+        var root = _historyTree.CreateItem();
+        var item = _historyTree.CreateItem(root);
+        item.SetText(0, message);
     }
 
     private static void ShowStandingsMessage(Tree tree, string message)
@@ -6453,14 +4586,6 @@ public partial class DashboardController : Control
         var root = tree.CreateItem();
         var item = tree.CreateItem(root);
         item.SetText(0, message);
-    }
-
-    private void ShowOverviewStandingsMessage(string message)
-    {
-        if (_overviewStandingsSnapshot == null)
-            return;
-
-        _overviewStandingsSnapshot.Text = string.IsNullOrWhiteSpace(message) ? "Standings unavailable." : message;
     }
 
     private void ShowResultsMessage(string message)
@@ -6503,26 +4628,14 @@ public partial class DashboardController : Control
 
     private void ShowScheduleMessage(string message)
     {
-        ClearScheduleSelectionState();
+        _scheduleGames = new Godot.Collections.Array();
+        _selectedScheduleGame = null;
         if (_scheduleList == null)
             return;
 
         _scheduleList.Clear();
-        var root = _scheduleList.CreateItem();
-        var item = _scheduleList.CreateItem(root);
-        item.SetText(0, message);
+        _scheduleList.AddItem(message);
         UpdateScheduleActionUi(null);
-    }
-
-    private void ClearScheduleSelectionState()
-    {
-        _scheduleGames = new Godot.Collections.Array();
-        _selectedScheduleGame = null;
-        if (_scheduleList != null)
-        {
-            _scheduleList.DeselectAll();
-            _scheduleList.Clear();
-        }
     }
 
     private void ShowInjuriesMessage(string message)
@@ -6534,223 +4647,6 @@ public partial class DashboardController : Control
         var root = _injuriesTree.CreateItem();
         var item = _injuriesTree.CreateItem(root);
         item.SetText(0, message);
-    }
-
-    private void ShowHistoryMessage(string message)
-    {
-        _leagueHistorySeasons.Clear();
-        _selectedHistorySeasonYear = null;
-
-        if (_historySeasonList != null)
-        {
-            _suppressHistorySelectionEvents = true;
-            _historySeasonList.Clear();
-            _historySeasonList.AddItem(string.IsNullOrWhiteSpace(message) ? "No completed seasons yet." : message);
-            _historySeasonList.DeselectAll();
-            _suppressHistorySelectionEvents = false;
-        }
-
-        if (_historyDetailText != null)
-            _historyDetailText.Text = string.IsNullOrWhiteSpace(message) ? "No completed seasons yet." : message;
-    }
-
-    private void PopulateHistoryView(List<LeagueHistorySeasonDto> seasons)
-    {
-        _leagueHistorySeasons.Clear();
-        if (seasons != null)
-            _leagueHistorySeasons.AddRange(seasons.Where(season => season != null));
-
-        if (_leagueHistorySeasons.Count == 0)
-        {
-            ShowHistoryMessage("No completed seasons yet.");
-            return;
-        }
-
-        if (_historySeasonList == null)
-            return;
-
-        _suppressHistorySelectionEvents = true;
-        _historySeasonList.Clear();
-        for (var i = 0; i < _leagueHistorySeasons.Count; i++)
-            _historySeasonList.AddItem(BuildHistorySeasonListLabel(_leagueHistorySeasons[i]));
-
-        var selectedIndex = 0;
-        if (_selectedHistorySeasonYear.HasValue)
-        {
-            var existingIndex = _leagueHistorySeasons.FindIndex(season => season.SeasonYear == _selectedHistorySeasonYear.Value);
-            if (existingIndex >= 0)
-                selectedIndex = existingIndex;
-        }
-
-        _historySeasonList.Select(selectedIndex);
-        _historySeasonList.EnsureCurrentIsVisible();
-        _suppressHistorySelectionEvents = false;
-        RenderHistorySeasonByIndex(selectedIndex);
-    }
-
-    private void OnHistorySeasonSelected(long index)
-    {
-        if (_suppressHistorySelectionEvents)
-            return;
-
-        RenderHistorySeasonByIndex((int)index);
-    }
-
-    private void RenderHistorySeasonByIndex(int index)
-    {
-        if (index < 0 || index >= _leagueHistorySeasons.Count)
-        {
-            ShowHistoryMessage("No completed seasons yet.");
-            return;
-        }
-
-        var season = _leagueHistorySeasons[index];
-        _selectedHistorySeasonYear = season.SeasonYear;
-        if (_historyDetailText != null)
-            _historyDetailText.Text = BuildHistoryDetailText(season);
-    }
-
-    private static string BuildHistorySeasonListLabel(LeagueHistorySeasonDto season)
-    {
-        if (season == null)
-            return "Unknown Season";
-
-        var champion = string.IsNullOrWhiteSpace(season.ChampionTeamName) ? "Champion TBD" : season.ChampionTeamName;
-        return $"{season.SeasonYear} - {champion}";
-    }
-
-    private string BuildHistoryDetailText(LeagueHistorySeasonDto season)
-    {
-        if (season == null)
-            return "No completed seasons yet.";
-
-        var lines = new List<string>
-        {
-            $"{season.SeasonYear} Season History",
-            $"Completed: {FallbackText(season.CompletedPhaseLabel, "Season Complete")}",
-            $"League Champion: {FallbackText(season.ChampionTeamName, "TBD")}",
-            $"Runner-Up: {FallbackText(season.RunnerUpTeamName, "TBD")}",
-            $"{FallbackText(season.ChampionshipGameLabel, "League Championship")}: {FallbackText(season.ChampionTeamName, "TBD")} {season.ChampionshipWinnerScore}, {FallbackText(season.RunnerUpTeamName, "TBD")} {season.ChampionshipRunnerUpScore}",
-            $"Regular-season games: {season.TotalRegularSeasonGames}",
-            $"Playoff games: {season.TotalPlayoffGames}",
-        };
-
-        if (!string.IsNullOrWhiteSpace(season.GeneratedAtLabel))
-            lines.Add($"Archived: {season.GeneratedAtLabel}");
-
-        lines.Add("");
-        lines.Add("Champion Summary");
-        lines.Add($"Winner: {FallbackText(season.ChampionTeamName, "TBD")}");
-        lines.Add($"Runner-Up: {FallbackText(season.RunnerUpTeamName, "TBD")}");
-
-        lines.Add("");
-        lines.Add("Final Standings");
-        if (season.TeamRecords == null || season.TeamRecords.Count == 0)
-        {
-            lines.Add("No team records available.");
-        }
-        else
-        {
-            var currentGroup = "";
-            foreach (var record in season.TeamRecords)
-            {
-                var group = $"{FallbackText(record.Conference, "Conference")} - {FallbackText(record.Division, "Division")}";
-                if (!string.Equals(currentGroup, group, StringComparison.Ordinal))
-                {
-                    if (!string.IsNullOrWhiteSpace(currentGroup))
-                        lines.Add("");
-                    lines.Add(group);
-                    currentGroup = group;
-                }
-
-                var abbr = string.IsNullOrWhiteSpace(record.Abbreviation) ? "" : $" ({record.Abbreviation})";
-                lines.Add($"{record.TeamName}{abbr}: {FormatRecord(record.Wins, record.Losses, record.Ties)} | PF {record.PointsFor} | PA {record.PointsAgainst} | Win% {record.WinPercentage:0.000}");
-            }
-        }
-
-        lines.Add("");
-        lines.Add("Playoff Seeds");
-        if (season.PlayoffSeeds == null || season.PlayoffSeeds.Count == 0)
-        {
-            lines.Add("No playoff seeds available.");
-        }
-        else
-        {
-            foreach (var conferenceGroup in season.PlayoffSeeds.GroupBy(seed => FallbackText(seed.Conference, "League"), StringComparer.OrdinalIgnoreCase))
-            {
-                lines.Add(conferenceGroup.Key);
-                foreach (var seed in conferenceGroup.OrderBy(entry => entry.Seed))
-                {
-                    var divisionWinnerTag = seed.IsDivisionWinner ? " [Division Winner]" : "";
-                    lines.Add($"#{seed.Seed} {FallbackText(seed.TeamName, "TBD")} ({FallbackText(seed.Division, "Division")}){divisionWinnerTag}");
-                }
-                lines.Add("");
-            }
-
-            if (lines.Count > 0 && lines[^1] == "")
-                lines.RemoveAt(lines.Count - 1);
-        }
-
-        lines.Add("");
-        lines.Add("Playoff Results");
-        AppendHistoryRound(lines, season, "Wild Card");
-        AppendHistoryRound(lines, season, "Divisional");
-        AppendHistoryRound(lines, season, "Conference Championship");
-        AppendHistoryRound(lines, season, "League Championship");
-
-        return string.Join("\n", lines);
-    }
-
-    private static void AppendHistoryRound(List<string> lines, LeagueHistorySeasonDto season, string roundName)
-    {
-        lines.Add(roundName);
-        var games = (season?.PlayoffResults ?? new List<LeagueHistoryPlayoffResultDto>())
-            .Where(result => string.Equals(NormalizeHistoryRound(result.Round), roundName, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(result => result.Conference, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(result => result.HomeTeamName, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        if (games.Count == 0)
-        {
-            lines.Add("No results recorded.");
-            lines.Add("");
-            return;
-        }
-
-        foreach (var game in games)
-        {
-            var prefix = string.IsNullOrWhiteSpace(game.Conference) || string.Equals(roundName, "League Championship", StringComparison.OrdinalIgnoreCase)
-                ? ""
-                : $"{game.Conference}: ";
-            lines.Add($"{prefix}{FallbackText(game.WinnerTeamName, "TBD")} {game.HomeScore}-{game.AwayScore} over {FallbackText(game.LoserTeamName, "TBD")} ({FallbackText(game.AwayTeamName, "TBD")} at {FallbackText(game.HomeTeamName, "TBD")})");
-        }
-
-        lines.Add("");
-    }
-
-    private static string NormalizeHistoryRound(string round)
-    {
-        return (round ?? "").Trim().ToLowerInvariant() switch
-        {
-            "wild card" => "Wild Card",
-            "divisional" => "Divisional",
-            "divisional round" => "Divisional",
-            "conference championship" => "Conference Championship",
-            "league championship" => "League Championship",
-            _ => FallbackText(round, "Unknown Round"),
-        };
-    }
-
-    private static string FormatRecord(int wins, int losses, int ties)
-    {
-        return ties > 0
-            ? $"{wins}-{losses}-{ties}"
-            : $"{wins}-{losses}";
-    }
-
-    private static string FallbackText(string value, string fallback)
-    {
-        return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
     }
 
     private Godot.Collections.Array ExtractArrayPayload(Variant parsed, params string[] keys)
@@ -6809,140 +4705,13 @@ public partial class DashboardController : Control
         return null;
     }
 
-    private void PopulateStandingsTree(Godot.Collections.Array standings)
+    private void PopulateStandingsTree(Godot.Collections.Dictionary standingsPayload, Godot.Collections.Array standings)
     {
-        PopulateStandingsTree(_standingsTree, standings);
-        PopulateOverviewStandingsSnapshot(standings);
+        PopulateStandingsTree(_standingsTree, standingsPayload, standings);
+        PopulateStandingsTree(_standingsSummaryTree, standingsPayload, standings);
     }
 
-    private void PopulateOverviewStandingsSnapshot(Godot.Collections.Array standings)
-    {
-        if (_overviewStandingsSnapshot == null)
-            return;
-
-        var snapshot = BuildOverviewStandingsSnapshot(standings);
-        if (snapshot == null || snapshot.Count == 0)
-        {
-            _overviewStandingsSnapshot.Text = "No standings data yet.";
-            return;
-        }
-
-        var lines = new List<string>();
-        for (var i = 0; i < snapshot.Count; i++)
-        {
-            var rowVar = (Variant)snapshot[i];
-            if (!TryGetDictionary(rowVar, out var record))
-                continue;
-
-            var teamName = GetStandingsTeamName(record);
-            var wins = FmtInt(GetRecordValue(record, "wins", "w", "win"), "0");
-            var losses = FmtInt(GetRecordValue(record, "losses", "l", "loss"), "0");
-            var ties = FmtInt(GetRecordValue(record, "ties", "t", "tie"), "0");
-            var pointsFor = FmtInt(GetRecordValue(record, "points_for", "pf"), "0");
-            var pointsAgainst = FmtInt(GetRecordValue(record, "points_against", "pa"), "0");
-            var pctVar = GetRecordValue(record, "win_pct", "pct", "win_percentage", "percentage");
-            var pctValue = GetFloatValue(pctVar, -1f);
-            var pctText = pctValue >= 0f ? pctValue.ToString("0.000", CultureInfo.InvariantCulture) : "0.000";
-            lines.Add($"{teamName}   {wins}-{losses}-{ties}   PF {pointsFor} / PA {pointsAgainst}   {pctText}");
-        }
-
-        _overviewStandingsSnapshot.Text = lines.Count > 0
-            ? string.Join("\n", lines)
-            : "No standings data yet.";
-    }
-
-    private Godot.Collections.Array BuildOverviewStandingsSnapshot(Godot.Collections.Array standings)
-    {
-        var snapshot = new Godot.Collections.Array();
-        if (standings == null || standings.Count == 0)
-            return snapshot;
-
-        var userTeamId = !string.IsNullOrWhiteSpace(_userTeamId) ? _userTeamId : _currentTeamId;
-        Godot.Collections.Dictionary userRow = null;
-        var division = "";
-        var conference = "";
-
-        for (var i = 0; i < standings.Count; i++)
-        {
-            var rowVar = (Variant)standings[i];
-            if (!TryGetDictionary(rowVar, out var record))
-                continue;
-
-            var teamId = FmtString(GetFirstNonNil(record, "team_id", "teamId"), "");
-            if (!string.Equals(teamId, userTeamId, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            userRow = record;
-            division = FmtString(GetFirstNonNil(record, "division"), "");
-            conference = FmtString(GetFirstNonNil(record, "conference"), "");
-            break;
-        }
-
-        AddStandingsSnapshotRows(snapshot, standings, row =>
-        {
-            if (!TryGetDictionary(row, out var record))
-                return false;
-            return !string.IsNullOrWhiteSpace(division)
-                && string.Equals(FmtString(GetFirstNonNil(record, "division"), ""), division, StringComparison.OrdinalIgnoreCase);
-        });
-
-        if (snapshot.Count < 5)
-        {
-            AddStandingsSnapshotRows(snapshot, standings, row =>
-            {
-                if (!TryGetDictionary(row, out var record))
-                    return false;
-                return !string.IsNullOrWhiteSpace(conference)
-                    && string.Equals(FmtString(GetFirstNonNil(record, "conference"), ""), conference, StringComparison.OrdinalIgnoreCase);
-            });
-        }
-
-        if (snapshot.Count < 5)
-            AddStandingsSnapshotRows(snapshot, standings, _ => true);
-
-        if (snapshot.Count == 0 && userRow != null)
-            snapshot.Add(userRow);
-
-        return snapshot;
-    }
-
-    private static void AddStandingsSnapshotRows(
-        Godot.Collections.Array target,
-        Godot.Collections.Array source,
-        Func<Variant, bool> includeRow)
-    {
-        if (target == null || source == null || includeRow == null)
-            return;
-
-        for (var i = 0; i < source.Count && target.Count < 5; i++)
-        {
-            var rowVar = (Variant)source[i];
-            if (!includeRow(rowVar))
-                continue;
-            if (!TryGetDictionary(rowVar, out var record))
-                continue;
-
-            var teamId = FmtString(GetFirstNonNil(record, "team_id", "teamId"), "");
-            var alreadyIncluded = false;
-            for (var existingIndex = 0; existingIndex < target.Count; existingIndex++)
-            {
-                var existingVar = (Variant)target[existingIndex];
-                if (!TryGetDictionary(existingVar, out var existingRecord))
-                    continue;
-                var existingTeamId = FmtString(GetFirstNonNil(existingRecord, "team_id", "teamId"), "");
-                if (string.Equals(existingTeamId, teamId, StringComparison.OrdinalIgnoreCase))
-                {
-                    alreadyIncluded = true;
-                    break;
-                }
-            }
-
-            if (!alreadyIncluded)
-                target.Add(record);
-        }
-    }
-
-    private void PopulateStandingsTree(Tree tree, Godot.Collections.Array standings)
+    private void PopulateStandingsTree(Tree tree, Godot.Collections.Dictionary standingsPayload, Godot.Collections.Array standings)
     {
         if (tree == null)
             return;
@@ -6955,6 +4724,16 @@ public partial class DashboardController : Control
             var emptyItem = tree.CreateItem(root);
             emptyItem.SetText(0, "No standings data.");
             return;
+        }
+
+        if (standingsPayload != null && standingsPayload.ContainsKey("divisions"))
+        {
+            var divisionsVar = (Variant)standingsPayload["divisions"];
+            if (TryGetArray(divisionsVar, out var divisions) && divisions.Count > 0)
+            {
+                PopulateStandingsTreeByDivision(tree, root, divisions);
+                return;
+            }
         }
 
         for (var i = 0; i < standings.Count; i++)
@@ -6974,12 +4753,14 @@ public partial class DashboardController : Control
             var pointsForVar = GetRecordValue(record, "points_for", "pf");
             var pointsAgainstVar = GetRecordValue(record, "points_against", "pa");
             var pctVar = GetRecordValue(record, "win_pct", "pct", "win_percentage", "percentage");
+            var spotVar = GetRecordValue(record, "spot_label", "status_label", "spot", "status");
 
             var winsText = FmtInt(winsVar, "?");
             var lossesText = FmtInt(lossesVar, "?");
             var tiesText = FmtInt(tiesVar, "0");
             var pointsForText = FmtInt(pointsForVar, "0");
             var pointsAgainstText = FmtInt(pointsAgainstVar, "0");
+            var spotText = FmtString(spotVar, "");
             var pctText = "";
 
             var pctValue = GetFloatValue(pctVar, -1f);
@@ -7004,11 +4785,96 @@ public partial class DashboardController : Control
 
             var item = tree.CreateItem(root);
             item.SetText(0, teamName);
-            item.SetText(1, $"{(string.IsNullOrWhiteSpace(winsText) ? "?" : winsText)}-{(string.IsNullOrWhiteSpace(lossesText) ? "?" : lossesText)}-{(string.IsNullOrWhiteSpace(tiesText) ? "0" : tiesText)}");
-            item.SetText(2, string.IsNullOrWhiteSpace(pointsForText) ? "0" : pointsForText);
-            item.SetText(3, string.IsNullOrWhiteSpace(pointsAgainstText) ? "0" : pointsAgainstText);
-            item.SetText(4, string.IsNullOrWhiteSpace(pctText) ? "?" : pctText);
+            item.SetText(1, spotText);
+            item.SetText(2, $"{(string.IsNullOrWhiteSpace(winsText) ? "?" : winsText)}-{(string.IsNullOrWhiteSpace(lossesText) ? "?" : lossesText)}-{(string.IsNullOrWhiteSpace(tiesText) ? "0" : tiesText)}");
+            item.SetText(3, string.IsNullOrWhiteSpace(pointsForText) ? "0" : pointsForText);
+            item.SetText(4, string.IsNullOrWhiteSpace(pointsAgainstText) ? "0" : pointsAgainstText);
+            item.SetText(5, string.IsNullOrWhiteSpace(pctText) ? "?" : pctText);
         }
+    }
+
+    private void PopulateStandingsTreeByDivision(Tree tree, TreeItem root, Godot.Collections.Array divisions)
+    {
+        string currentConference = "";
+        for (var i = 0; i < divisions.Count; i++)
+        {
+            if (!TryGetDictionary((Variant)divisions[i], out var divisionGroup))
+                continue;
+
+            var conference = FmtString(GetFirstNonNil(divisionGroup, "conference"), "");
+            var division = FmtString(GetFirstNonNil(divisionGroup, "division"), "");
+            if (!string.Equals(currentConference, conference, StringComparison.OrdinalIgnoreCase))
+            {
+                currentConference = conference;
+                var conferenceHeader = tree.CreateItem(root);
+                conferenceHeader.SetText(0, $"{conference} Conference");
+                conferenceHeader.SetSelectable(0, false);
+            }
+
+            var divisionHeader = tree.CreateItem(root);
+            divisionHeader.SetText(0, $"{division} Division");
+            divisionHeader.SetSelectable(0, false);
+
+            var rows = ExtractArrayPayload((Variant)divisionGroup, "rows", "standings", "teams", "records");
+            if (rows == null)
+                continue;
+
+            for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+            {
+                if (!TryGetDictionary((Variant)rows[rowIndex], out var record))
+                    continue;
+
+                var item = tree.CreateItem(root);
+                PopulateStandingsRow(item, record);
+            }
+        }
+    }
+
+    private void PopulateStandingsRow(TreeItem item, Godot.Collections.Dictionary record)
+    {
+        var teamName = GetStandingsTeamName(record);
+        var winsVar = GetRecordValue(record, "wins", "w", "win");
+        var lossesVar = GetRecordValue(record, "losses", "l", "loss");
+        var tiesVar = GetRecordValue(record, "ties", "t", "tie");
+        var pointsForVar = GetRecordValue(record, "points_for", "pf");
+        var pointsAgainstVar = GetRecordValue(record, "points_against", "pa");
+        var pctVar = GetRecordValue(record, "win_pct", "pct", "win_percentage", "percentage");
+        var spotVar = GetRecordValue(record, "spot_label", "status_label", "spot", "status");
+
+        var winsText = FmtInt(winsVar, "?");
+        var lossesText = FmtInt(lossesVar, "?");
+        var tiesText = FmtInt(tiesVar, "0");
+        var pointsForText = FmtInt(pointsForVar, "0");
+        var pointsAgainstText = FmtInt(pointsAgainstVar, "0");
+        var spotText = FmtString(spotVar, "");
+        var pctText = "";
+
+        var pctValue = GetFloatValue(pctVar, -1f);
+        if (pctValue >= 0f)
+            pctText = pctValue.ToString("0.000", CultureInfo.InvariantCulture);
+
+        if (string.IsNullOrWhiteSpace(pctText))
+        {
+            var wins = GetIntValue(winsVar, -1);
+            var losses = GetIntValue(lossesVar, -1);
+            var ties = GetIntValue(tiesVar, 0);
+            var total = wins + losses + ties;
+            if (wins >= 0 && losses >= 0 && total > 0)
+            {
+                var pct = (wins + (0.5f * ties)) / total;
+                pctText = pct.ToString("0.000", CultureInfo.InvariantCulture);
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(teamName))
+            teamName = "Team";
+
+        item.SetText(0, teamName);
+        item.SetText(1, spotText);
+        item.SetText(2, $"{(string.IsNullOrWhiteSpace(winsText) ? "?" : winsText)}-{(string.IsNullOrWhiteSpace(lossesText) ? "?" : lossesText)}-{(string.IsNullOrWhiteSpace(tiesText) ? "0" : tiesText)}");
+        item.SetText(3, string.IsNullOrWhiteSpace(pointsForText) ? "0" : pointsForText);
+        item.SetText(4, string.IsNullOrWhiteSpace(pointsAgainstText) ? "0" : pointsAgainstText);
+        item.SetText(5, string.IsNullOrWhiteSpace(pctText) ? "?" : pctText);
     }
 
     private void PopulateResultsList(Godot.Collections.Array results)
@@ -7047,6 +4913,51 @@ public partial class DashboardController : Control
             if (!string.IsNullOrWhiteSpace(gameId))
                 metadata["game_id"] = gameId;
             _resultsList.SetItemMetadata(index, metadata);
+        }
+    }
+
+    private void PopulateHistoryTree(Godot.Collections.Array history)
+    {
+        if (_historyTree == null)
+            return;
+
+        _historyTree.Clear();
+        var root = _historyTree.CreateItem();
+        if (history == null || history.Count == 0)
+        {
+            var item = _historyTree.CreateItem(root);
+            item.SetText(0, "No completed seasons yet.");
+            return;
+        }
+
+        for (var i = 0; i < history.Count; i++)
+        {
+            var seasonVar = (Variant)history[i];
+            if (!TryGetDictionary(seasonVar, out var season))
+                continue;
+
+            var item = _historyTree.CreateItem(root);
+            var seasonYear = FmtString(GetFirstNonNil(season, "season_year", "seasonYear"), "");
+            var champion = FmtString(GetFirstNonNil(season, "champion_display_name", "championDisplayName", "champion_team_id", "championTeamId"), "");
+            var runnerUp = FmtString(GetFirstNonNil(season, "runner_up_display_name", "runnerUpDisplayName", "runner_up_team_id", "runnerUpTeamId"), "");
+            var championScore = FmtInt(GetFirstNonNil(season, "champion_score", "championScore"), "");
+            var runnerUpScore = FmtInt(GetFirstNonNil(season, "runner_up_score", "runnerUpScore"), "");
+            var finalWeek = FmtInt(GetFirstNonNil(season, "championship_week", "championshipWeek"), "");
+
+            item.SetText(0, string.IsNullOrWhiteSpace(seasonYear) ? "Season" : seasonYear);
+            item.SetText(1, string.IsNullOrWhiteSpace(champion) ? "-" : champion);
+            item.SetText(2, string.IsNullOrWhiteSpace(runnerUp) ? "-" : runnerUp);
+            item.SetText(3,
+                string.IsNullOrWhiteSpace(championScore) || string.IsNullOrWhiteSpace(runnerUpScore)
+                    ? "-"
+                    : $"{championScore}-{runnerUpScore}");
+            item.SetText(4, string.IsNullOrWhiteSpace(finalWeek) ? "Title" : $"Wk {finalWeek}");
+        }
+
+        if (root.GetChildCount() == 0)
+        {
+            var item = _historyTree.CreateItem(root);
+            item.SetText(0, "No completed seasons yet.");
         }
     }
 
@@ -7100,15 +5011,6 @@ public partial class DashboardController : Control
         if (_gameCache.TryGetValue(gameId, out var cachedGame))
         {
             ShowBoxScoreForGame(cachedGame);
-            return;
-        }
-
-        if (IsNativeRuntimeSource())
-        {
-            if (TryShowNativeGameResult(gameId, "Unable to load game result.", "Loaded game result."))
-                return;
-
-            SetStateDumpText("Box score unavailable.");
             return;
         }
 
@@ -7295,11 +5197,9 @@ public partial class DashboardController : Control
             return;
 
         _scheduleList.Clear();
-        var root = _scheduleList.CreateItem();
         if (games == null || games.Count == 0)
         {
-            var emptyItem = _scheduleList.CreateItem(root);
-            emptyItem.SetText(0, "No schedule.");
+            _scheduleList.AddItem("No schedule.");
             UpdateScheduleActionUi(null);
             return;
         }
@@ -7309,129 +5209,79 @@ public partial class DashboardController : Control
             var gameVar = (Variant)games[i];
             if (!TryGetDictionary(gameVar, out var game))
             {
-                var errorItem = _scheduleList.CreateItem(root);
-                errorItem.SetText(0, "(error)");
-                errorItem.SetMetadata(0, i);
+                var errorIndex = _scheduleList.AddItem("(error)");
+                _scheduleList.SetItemMetadata(errorIndex, new Godot.Collections.Dictionary { { "index", i } });
                 continue;
             }
 
-            var item = _scheduleList.CreateItem(root);
-            item.SetMetadata(0, i);
-            item.SetText(0, GetScheduleStatusLabel(game));
-            item.SetText(1, BuildScheduleMatchupText(game, teamId));
-            item.SetText(2, GetScheduleWeekText(game));
-            item.SetText(3, GetScheduleResultText(game));
-            item.SetText(4, GetScheduleActionLabel(game));
+            var line = FormatScheduleRow(game, teamId);
+            if (string.IsNullOrWhiteSpace(line))
+                line = "Upcoming matchup";
+            var itemIndex = _scheduleList.AddItem(line);
+            _scheduleList.SetItemMetadata(itemIndex, new Godot.Collections.Dictionary { { "index", i } });
         }
         UpdateScheduleActionUi(null);
     }
 
-    private static string GetScheduleStatusLabel(Godot.Collections.Dictionary game)
+    private string FormatScheduleRow(Godot.Collections.Dictionary game, string focusTeamId)
     {
         if (game == null)
-            return "";
+            return "Upcoming matchup";
 
         var status = FmtString(GetFirstNonNil(game, "status"), "upcoming").Trim().ToLowerInvariant();
-        return status switch
-        {
-            "final" => "Final",
-            "game_day" => "Game Ready",
-            _ => "Upcoming",
-        };
-    }
-
-    private string BuildScheduleMatchupText(Godot.Collections.Dictionary game, string focusTeamId)
-    {
-        if (game == null)
-            return "";
+        var gameType = HumanizeStatus(FmtString(GetFirstNonNil(game, "game_type", "season_type"), ""));
+        var weekValue = FmtString(GetFirstNonNil(game, "week", "season_week", "calendar_week"), "");
+        var weekLine = string.IsNullOrWhiteSpace(gameType)
+            ? $"Week {weekValue}"
+            : string.IsNullOrWhiteSpace(weekValue) ? gameType : $"{gameType} Week {weekValue}";
 
         var homeTeam = FmtString(GetFirstNonNil(game, "home_team", "home", "home_abbr"), "");
         var awayTeam = FmtString(GetFirstNonNil(game, "away_team", "away", "away_abbr"), "");
         var opponent = ResolveScheduleOpponent(game, focusTeamId, GetScheduleIsHome(game, focusTeamId));
         var homeAway = FmtString(GetFirstNonNil(game, "home_away", "homeAway"), "").Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(opponent))
-            opponent = "Opponent";
-
-        var status = FmtString(GetFirstNonNil(game, "status"), "upcoming").Trim().ToLowerInvariant();
-        if (status == "final")
-        {
-            if (string.IsNullOrWhiteSpace(homeTeam))
-                homeTeam = "HOME";
-            if (string.IsNullOrWhiteSpace(awayTeam))
-                awayTeam = "AWAY";
-            return $"{homeTeam} vs {awayTeam}";
-        }
-
-        return homeAway == "away" || homeAway == "@"
+        var locationText = homeAway == "away" || homeAway == "@"
             ? $"at {opponent}"
             : $"vs {opponent}";
-    }
+        var opponentRecord = FmtString(GetFirstNonNil(game, "opponent_record"), "");
+        var opponentSpot = FmtString(GetFirstNonNil(game, "opponent_spot_label", "opponent_status_label"), "");
+        var opponentContext = string.IsNullOrWhiteSpace(opponentRecord)
+            ? opponentSpot
+            : string.IsNullOrWhiteSpace(opponentSpot) ? opponentRecord : $"{opponentRecord}, {opponentSpot}";
 
-    private static string GetScheduleWeekText(Godot.Collections.Dictionary game)
-    {
-        if (game == null)
-            return "";
-
-        var weekLabel = FmtString(GetFirstNonNil(game, "week_label", "weekLabel"), "");
-        if (!string.IsNullOrWhiteSpace(weekLabel))
-            return weekLabel;
-
-        var gameType = HumanizeStatus(FmtString(GetFirstNonNil(game, "game_type", "season_type"), ""));
-        var weekValue = FmtString(GetFirstNonNil(game, "phase_week", "phaseWeek", "week", "season_week", "calendar_week"), "");
-        return string.IsNullOrWhiteSpace(gameType)
-            ? $"Week {weekValue}"
-            : string.IsNullOrWhiteSpace(weekValue) ? gameType : $"{gameType} Week {weekValue}";
-    }
-
-    private static string GetScheduleResultText(Godot.Collections.Dictionary game)
-    {
-        if (game == null)
-            return "";
-
-        var status = FmtString(GetFirstNonNil(game, "status"), "upcoming").Trim().ToLowerInvariant();
         if (status == "final")
         {
             var homeScore = FmtInt(GetFirstNonNil(game, "home_score"), "-");
             var awayScore = FmtInt(GetFirstNonNil(game, "away_score"), "-");
-            var homeTeam = FmtString(GetFirstNonNil(game, "home_team", "home", "home_abbr"), "HOME");
-            var awayTeam = FmtString(GetFirstNonNil(game, "away_team", "away", "away_abbr"), "AWAY");
-            return $"{homeTeam} {homeScore} - {awayTeam} {awayScore}";
+            return $"Final: {homeTeam} {homeScore} - {awayTeam} {awayScore}\n{weekLine}\nView Recap";
         }
 
-        return "-";
+        if (status == "game_day")
+            return string.IsNullOrWhiteSpace(opponentContext)
+                ? $"Game Ready: {awayTeam} at {homeTeam}\n{weekLine}\nView Matchup"
+                : $"Game Ready: {awayTeam} at {homeTeam}\n{weekLine} | {opponentContext}\nView Matchup";
+
+        return string.IsNullOrWhiteSpace(opponentContext)
+            ? $"Upcoming: {locationText}\n{weekLine}\nPreview later"
+            : $"Upcoming: {locationText}\n{weekLine} | {opponentContext}\nPreview later";
     }
 
-    private static string GetScheduleActionLabel(Godot.Collections.Dictionary game)
+    private void OnScheduleItemSelected(long index)
     {
-        if (game == null)
-            return "";
-
-        var status = FmtString(GetFirstNonNil(game, "status"), "upcoming").Trim().ToLowerInvariant();
-        return status switch
-        {
-            "final" => "View Recap",
-            "game_day" => "View Matchup",
-            _ => "Preview later",
-        };
-    }
-
-    private void OnScheduleItemSelected()
-    {
-        if (_scheduleList == null)
+        var itemIndex = (int)index;
+        if (_scheduleList == null || itemIndex < 0 || itemIndex >= _scheduleList.ItemCount)
         {
             UpdateScheduleActionUi(null);
             return;
         }
 
-        var selected = _scheduleList.GetSelected();
-        if (selected == null)
+        var meta = _scheduleList.GetItemMetadata(itemIndex);
+        if (!TryGetDictionary(meta, out var metaDict) || !metaDict.ContainsKey("index"))
         {
             UpdateScheduleActionUi(null);
             return;
         }
 
-        var metadata = selected.GetMetadata(0);
-        var scheduleIndex = GetIntValue(metadata, -1);
+        var scheduleIndex = GetIntValue((Variant)metaDict["index"], -1);
         if (scheduleIndex < 0 || _scheduleGames == null || scheduleIndex >= _scheduleGames.Count)
         {
             UpdateScheduleActionUi(null);
@@ -7715,7 +5565,7 @@ public partial class DashboardController : Control
             if (season == "preseason")
                 return $"Preseason Week {weekNum}";
             if (season == "regular")
-                return $"Regular Season Week {weekNum}";
+                return $"Week {weekNum}";
             if (season == "postseason" || season == "playoffs")
                 return $"Postseason Week {weekNum}";
         }
@@ -7917,10 +5767,6 @@ public partial class DashboardController : Control
         if (game == null)
             return "";
 
-        var directWeekLabel = FmtString(GetFirstNonNil(game, "week_label", "weekLabel"), "");
-        if (!string.IsNullOrWhiteSpace(directWeekLabel))
-            return directWeekLabel;
-
         var seasonType = FmtString(GetFirstNonNil(game, "season_type", "seasonType", "season"), "");
         var seasonWeek = GetIntValue(GetFirstNonNil(game, "season_week", "seasonWeek"), 0);
         if (!string.IsNullOrWhiteSpace(seasonType) && seasonWeek > 0)
@@ -7929,7 +5775,7 @@ public partial class DashboardController : Control
             if (normalized == "preseason")
                 return $"Preseason Week {seasonWeek}";
             if (normalized == "regular")
-                return $"Regular Season Week {seasonWeek}";
+                return $"Week {seasonWeek}";
             if (normalized == "postseason" || normalized == "playoffs")
                 return $"Postseason Week {seasonWeek}";
             return $"{seasonType} Week {seasonWeek}";
@@ -7939,7 +5785,7 @@ public partial class DashboardController : Control
         if (!string.IsNullOrWhiteSpace(weekKey))
             return FormatWeekKeyHeader(weekKey);
 
-        var calendarWeek = FmtInt(GetFirstNonNil(game, "phase_week", "phaseWeek", "calendar_week", "calendarWeek", "week", "week_num", "week_number"), "");
+        var calendarWeek = FmtInt(GetFirstNonNil(game, "calendar_week", "calendarWeek", "week", "week_num", "week_number"), "");
         if (!string.IsNullOrWhiteSpace(calendarWeek))
             return $"Week {calendarWeek}";
 
@@ -8943,15 +6789,16 @@ public partial class DashboardController : Control
             if (!TryGetDictionary(itemVar, out var item))
                 continue;
 
+            var providedId = FmtString(GetFirstNonNil(item, "id", "message_id"), "");
             var message = new Godot.Collections.Dictionary
             {
-                { "id", $"{FmtString(GetFirstNonNil(item, "type"), "action")}_{i}" },
+                { "id", string.IsNullOrWhiteSpace(providedId) ? $"{FmtString(GetFirstNonNil(item, "type"), "action")}_{i}" : providedId },
                 { "type", FmtString(GetFirstNonNil(item, "type"), "") },
                 { "title", FmtString(GetFirstNonNil(item, "title"), "Action Required") },
                 { "message", FmtString(GetFirstNonNil(item, "description"), "") },
                 { "severity", FmtString(GetFirstNonNil(item, "severity"), "info") },
                 { "primary_action", FmtString(GetFirstNonNil(item, "primary_action", "primaryAction"), "") },
-                { "requires_ack", false },
+                { "requires_ack", GetBoolValue(GetFirstNonNil(item, "requires_ack", "requires_acknowledge", "needs_ack"), false) },
                 { "read", false },
             };
             messages.Add(message);
@@ -8961,38 +6808,63 @@ public partial class DashboardController : Control
 
     private void UpdateInboxList()
     {
+        if (_inboxList == null)
+            return;
+
         var selectedMessageId = _selectedInboxMessageId;
-        if (_overviewActionHeader != null)
-            _overviewActionHeader.Text = "Action Required";
+        _inboxList.Clear();
 
-        if (_inboxMessages == null || _inboxMessages.Count == 0)
+        for (var i = 0; i < _inboxMessages.Count; i++)
         {
-            ClearInboxDetail("No urgent actions.", _inboxEmptyDetailMessage);
+            var messageVar = (Variant)_inboxMessages[i];
+            if (!TryGetDictionary(messageVar, out var message))
+                continue;
+
+            var messageId = GetMessageId(message);
+            var subject = GetMessageSubject(message);
+            var description = GetMessageBody(message);
+            var severityPrefix = GetInboxSeverityPrefix(message);
+            var display = string.IsNullOrWhiteSpace(description)
+                ? $"{severityPrefix}{subject}"
+                : $"{severityPrefix}{subject} - {description}";
+
+            var index = _inboxList.AddItem(display);
+            if (!string.IsNullOrWhiteSpace(messageId))
+                _inboxList.SetItemMetadata(index, messageId);
+        }
+
+        if (_lblInboxHeader != null)
+            _lblInboxHeader.Text = _inboxList.ItemCount > 0 ? "Action Required" : "Inbox";
+
+        if (_inboxList.ItemCount == 0)
+        {
+            ClearInboxDetail("No urgent messages.", _inboxEmptyDetailMessage);
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(selectedMessageId))
-        {
-            var selectedMessage = FindInboxMessage(selectedMessageId);
-            if (selectedMessage != null)
-            {
-                _selectedInboxMessageId = selectedMessageId;
-                _selectedInboxActionItem = selectedMessage;
-                UpdateInboxDetail(selectedMessage);
-                return;
-            }
-        }
-
-        var firstVar = (Variant)_inboxMessages[0];
-        if (!TryGetDictionary(firstVar, out var firstMessage))
-        {
-            ClearInboxDetail("No urgent actions.", _inboxEmptyDetailMessage);
+        if (!string.IsNullOrWhiteSpace(selectedMessageId) && TrySelectInboxMessage(selectedMessageId))
             return;
-        }
 
-        _selectedInboxMessageId = GetMessageId(firstMessage);
-        _selectedInboxActionItem = firstMessage;
-        UpdateInboxDetail(firstMessage);
+        _inboxList.Select(0);
+        var firstId = FmtString(_inboxList.GetItemMetadata(0), "");
+        _selectedInboxMessageId = firstId;
+        _selectedInboxActionItem = FindInboxMessage(firstId);
+        UpdateInboxDetail(_selectedInboxActionItem);
+    }
+
+    private void OnInboxItemSelected(long index)
+    {
+        var itemIndex = (int)index;
+        if (itemIndex < 0 || itemIndex >= _inboxList.ItemCount)
+            return;
+
+        var metadata = _inboxList.GetItemMetadata(itemIndex);
+        var messageId = FmtString(metadata, "");
+        _selectedInboxMessageId = messageId;
+
+        var message = FindInboxMessage(messageId);
+        _selectedInboxActionItem = message;
+        UpdateInboxDetail(message);
     }
 
     private Godot.Collections.Dictionary FindInboxMessage(string messageId)
@@ -9019,13 +6891,18 @@ public partial class DashboardController : Control
         if (string.IsNullOrWhiteSpace(messageId))
             return false;
 
-        var message = FindInboxMessage(messageId);
-        if (message != null)
+        for (var i = 0; i < _inboxList.ItemCount; i++)
         {
-            _selectedInboxMessageId = messageId;
-            _selectedInboxActionItem = message;
-            UpdateInboxDetail(message);
-            return true;
+            var metadata = _inboxList.GetItemMetadata(i);
+            var currentId = FmtString(metadata, "");
+            if (string.Equals(currentId, messageId, StringComparison.OrdinalIgnoreCase))
+            {
+                _inboxList.Select(i);
+                _selectedInboxMessageId = messageId;
+                _selectedInboxActionItem = FindInboxMessage(messageId);
+                UpdateInboxDetail(_selectedInboxActionItem);
+                return true;
+            }
         }
 
         return false;
@@ -9039,45 +6916,37 @@ public partial class DashboardController : Control
             return;
         }
 
-        var subject = FormatOverviewActionSubject(GetMessageSubject(message));
+        var subject = GetMessageSubject(message);
         var severityPrefix = GetInboxSeverityPrefix(message);
         var subjectText = $"{severityPrefix}{subject}".Trim();
-        if (_overviewActionTitle != null)
-            _overviewActionTitle.Text = string.IsNullOrWhiteSpace(subjectText) ? "Message" : subjectText;
-        if (_overviewActionHeader != null)
-            _overviewActionHeader.Text = "Action Required";
+        if (_lblInboxSubject != null)
+            _lblInboxSubject.Text = string.IsNullOrWhiteSpace(subjectText) ? "Message" : subjectText;
 
         var body = GetMessageBody(message);
         var primaryAction = FmtString(GetFirstNonNil(message, "primary_action", "primaryAction"), "");
-        if (_overviewActionBody != null)
-        {
-            _overviewActionBody.FitContent = true;
-            _overviewActionBody.CustomMinimumSize = new Vector2(0, 72);
-            _overviewActionBody.Text = string.IsNullOrWhiteSpace(body) ? "No message body available." : body;
-        }
-        if (_overviewActionSuggested != null)
-        {
-            _overviewActionSuggested.Visible = true;
-            _overviewActionSuggested.Text = string.IsNullOrWhiteSpace(primaryAction)
-                ? "Suggested action: review this item."
-                : $"Suggested action: {primaryAction}";
-        }
+        if (!string.IsNullOrWhiteSpace(primaryAction))
+            body = string.IsNullOrWhiteSpace(body) ? $"Suggested action: {primaryAction}" : $"{body}\n\nSuggested action: {primaryAction}";
+        if (_rtlInboxBody != null)
+            _rtlInboxBody.Text = string.IsNullOrWhiteSpace(body) ? "No message body available." : body;
 
         _selectedSimGameId = "";
 
-        if (_overviewActionButton != null)
+        if (_btnSimGame != null)
         {
             var canUsePrimaryAction = IsGameDayMessage(message)
                 || IsRosterInvalidMessage(message)
                 || IsDepthChartInvalidMessage(message)
-                || IsPostseasonPendingMessage(message)
-                || IsSeasonCompleteMessage(message)
-                || IsOffseasonPendingMessage(message);
-            var primaryActionLabel = ResolveInboxPrimaryActionLabel(message);
-            _overviewActionButton.Visible = canUsePrimaryAction;
-            _overviewActionButton.Disabled = !canUsePrimaryAction;
-            _overviewActionButton.Text = primaryActionLabel;
-            _overviewActionButton.TooltipText = "";
+                || IsRosterNoticeMessage(message)
+                || IsDepthChartNoticeMessage(message);
+            var primaryActionLabel = FmtString(GetFirstNonNil(message, "primary_action", "primaryAction"), "");
+            _btnSimGame.Visible = canUsePrimaryAction;
+            _btnSimGame.Disabled = !canUsePrimaryAction;
+            _btnSimGame.Text = string.IsNullOrWhiteSpace(primaryActionLabel) ? "View Matchup" : primaryActionLabel;
+        }
+        if (_btnAcknowledge != null)
+        {
+            _btnAcknowledge.Visible = false;
+            _btnAcknowledge.Disabled = true;
         }
     }
 
@@ -9090,29 +6959,6 @@ public partial class DashboardController : Control
             "warning" => "! ",
             _ => "",
         };
-    }
-
-    private string ResolveInboxHeaderText()
-    {
-        if (_selectedInboxActionItem != null)
-        {
-            var selectedSubject = GetMessageSubject(_selectedInboxActionItem);
-            if (!string.IsNullOrWhiteSpace(selectedSubject))
-                return selectedSubject;
-        }
-
-        if (_inboxMessages != null && _inboxMessages.Count > 0)
-        {
-            var messageVar = (Variant)_inboxMessages[0];
-            if (TryGetDictionary(messageVar, out var message))
-            {
-                var subject = GetMessageSubject(message);
-                if (!string.IsNullOrWhiteSpace(subject))
-                    return subject;
-            }
-        }
-
-        return "Action Required";
     }
 
     private static bool IsGameDayMessage(Godot.Collections.Dictionary message)
@@ -9142,118 +6988,42 @@ public partial class DashboardController : Control
         return string.Equals(type, "depth_chart_invalid", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsPostseasonPendingMessage(Godot.Collections.Dictionary message)
+    private static bool IsRosterNoticeMessage(Godot.Collections.Dictionary message)
     {
         if (message == null)
             return false;
 
         var type = FmtString(GetFirstNonNil(message, "type"), "");
-        return string.Equals(type, "postseason_pending", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(type, "roster_notice", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsSeasonCompleteMessage(Godot.Collections.Dictionary message)
+    private static bool IsDepthChartNoticeMessage(Godot.Collections.Dictionary message)
     {
         if (message == null)
             return false;
 
         var type = FmtString(GetFirstNonNil(message, "type"), "");
-        return string.Equals(type, "season_complete", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(type, "depth_chart_notice", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsOffseasonPendingMessage(Godot.Collections.Dictionary message)
-    {
-        if (message == null)
-            return false;
-
-        var type = FmtString(GetFirstNonNil(message, "type"), "");
-        return string.Equals(type, ScheduleService.OffseasonPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.StaffCarouselPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.RetirementPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.ExclusiveNegotiationPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.FranchiseTagPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.LeagueYearPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.DraftPrepPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.DraftPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.RookieSigningPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(type, ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string ResolveInboxPrimaryActionLabel(Godot.Collections.Dictionary message)
-    {
-        var configuredLabel = FmtString(GetFirstNonNil(message, "primary_action", "primaryAction"), "");
-        if (!string.IsNullOrWhiteSpace(configuredLabel))
-        {
-            if (IsPostseasonPendingMessage(message) || IsSeasonCompleteMessage(message))
-                return "Continue";
-            if (IsOffseasonPendingMessage(message))
-                return string.Equals(FmtString(GetFirstNonNil(message, "type"), ""), ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-                    ? "Continue"
-                    : configuredLabel;
-            return configuredLabel;
-        }
-
-        if (IsGameDayMessage(message))
-            return "View Matchup";
-        if (IsRosterInvalidMessage(message))
-            return "View Roster";
-        if (IsDepthChartInvalidMessage(message))
-            return "View Depth Chart";
-        if (IsPostseasonPendingMessage(message))
-            return "Continue";
-        if (IsSeasonCompleteMessage(message))
-            return "League";
-        if (IsOffseasonPendingMessage(message))
-            return "Continue";
-        return "Primary Action";
-    }
-
-    private static bool HasReachedOffseasonPlaceholderTarget(GridironGM.GameCore.Models.LeagueState league, string targetPhase)
-    {
-        var currentPhase = ScheduleService.GetPhaseForWeek(league.Calendar.Week);
-        var currentWeek = ScheduleService.GetOffseasonPlaceholderAbsoluteWeek(currentPhase);
-        var targetWeek = ScheduleService.GetOffseasonPlaceholderAbsoluteWeek(targetPhase);
-        return currentWeek > 0 && targetWeek > 0 && currentWeek >= targetWeek;
-    }
-
-    private static string FormatOverviewActionSubject(string subject)
-    {
-        if (string.IsNullOrWhiteSpace(subject))
-            return "Message";
-
-        const string prefix = "Action Required:";
-        var cleaned = subject.Trim();
-        if (cleaned.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            cleaned = cleaned[prefix.Length..].Trim();
-        return string.IsNullOrWhiteSpace(cleaned) ? subject.Trim() : cleaned;
-    }
-
-    private void ClearInboxDetail(string subject = "No urgent actions.", string body = "")
+    private void ClearInboxDetail(string subject = "Select a message.", string body = "")
     {
         _selectedInboxMessageId = "";
         _selectedInboxActionItem = null;
         _selectedSimGameId = "";
-        if (_overviewActionHeader != null)
-            _overviewActionHeader.Text = "Action Required";
-        if (_overviewActionTitle != null)
-            _overviewActionTitle.Text = subject;
-        if (_overviewActionSuggested != null)
+        if (_lblInboxSubject != null)
+            _lblInboxSubject.Text = subject;
+        if (_rtlInboxBody != null)
+            _rtlInboxBody.Text = body;
+        if (_btnSimGame != null)
         {
-            _overviewActionSuggested.Text = "";
-            _overviewActionSuggested.Visible = false;
+            _btnSimGame.Visible = false;
+            _btnSimGame.Disabled = true;
         }
-        if (_overviewActionBody != null)
+        if (_btnAcknowledge != null)
         {
-            _overviewActionBody.FitContent = true;
-            _overviewActionBody.CustomMinimumSize = new Vector2(0, 64);
-            _overviewActionBody.Text = body;
-        }
-        if (_overviewActionButton != null)
-        {
-            _overviewActionButton.Visible = false;
-            _overviewActionButton.Disabled = true;
-            _overviewActionButton.Text = "Continue";
-            _overviewActionButton.TooltipText = "";
+            _btnAcknowledge.Visible = false;
+            _btnAcknowledge.Disabled = true;
         }
     }
 
@@ -9512,7 +7282,47 @@ public partial class DashboardController : Control
 
     private static int GetPositionSortOrder(string pos)
     {
-        return FootballPositionOrder.GetSortOrder(pos);
+        if (string.IsNullOrWhiteSpace(pos))
+            return int.MaxValue;
+
+        switch (pos.Trim().ToUpperInvariant())
+        {
+            case "QB":
+                return 0;
+            case "RB":
+                return 1;
+            case "WR":
+                return 2;
+            case "TE":
+                return 3;
+            case "LT":
+                return 4;
+            case "LG":
+                return 5;
+            case "C":
+                return 6;
+            case "RG":
+                return 7;
+            case "RT":
+                return 8;
+            case "EDGE":
+            case "DE":
+                return 9;
+            case "DT":
+                return 10;
+            case "LB":
+                return 11;
+            case "CB":
+                return 12;
+            case "S":
+                return 13;
+            case "K":
+                return 14;
+            case "P":
+                return 15;
+            default:
+                return int.MaxValue;
+        }
     }
 
     private static int GetPosFilterIndex(string value)
@@ -9828,7 +7638,7 @@ public partial class DashboardController : Control
 
         players.Sort((a, b) =>
         {
-            var positionCompare = FootballPositionOrder.Compare(a.Position, b.Position);
+            var positionCompare = StringComparer.OrdinalIgnoreCase.Compare(a.Position, b.Position);
             if (positionCompare != 0)
                 return positionCompare;
 
@@ -10093,5 +7903,4 @@ public partial class DashboardController : Control
         public Func<PlayerRow, IComparable> SortGetter { get; }
         public bool Sortable { get; }
     }
-
 }

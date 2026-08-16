@@ -392,6 +392,13 @@ class _Handler(BaseHTTPRequestHandler):
                 team_id = query.get("team_id", [None])[0]
                 self._send_json(200, self.facade.get_team_depth_chart(team_id))
                 return
+            if path == "/team_finances":
+                team_id = query.get("team_id", [None])[0]
+                self._send_json(200, self.facade.get_team_finances(team_id))
+                return
+            if path == "/free_agents":
+                self._send_json(200, self.facade.get_free_agents())
+                return
             if path == "/game_result":
                 game_id = query.get("game_id", [None])[0]
                 self._send_json(200, self.facade.get_game_result(game_id))
@@ -618,6 +625,22 @@ class _Handler(BaseHTTPRequestHandler):
                     return
                 with self.lock:
                     self._send_json(200, self.facade.review_user_roster())
+                return
+            if self.path == "/transactions/sign_free_agent":
+                payload = self._read_optional_json_body()
+                if payload.get("__invalid_json__"):
+                    self._send_json(400, {"ok": False, "error": "invalid_json"})
+                    return
+                with self.lock:
+                    self._send_json(200, self.facade.sign_free_agent(payload.get("player_id", ""), payload.get("contract", {}), payload.get("team_id")))
+                return
+            if self.path == "/transactions/release_player":
+                payload = self._read_optional_json_body()
+                if payload.get("__invalid_json__"):
+                    self._send_json(400, {"ok": False, "error": "invalid_json"})
+                    return
+                with self.lock:
+                    self._send_json(200, self.facade.release_player(payload.get("player_id", ""), payload.get("team_id")))
                 return
             if self.path == "/decisions/resolve":
                 payload = self._read_json()

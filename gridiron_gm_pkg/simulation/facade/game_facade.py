@@ -1843,6 +1843,41 @@ class GameFacade:
 
         return {"ok": True, **self._compact_depth_chart_payload(team, resolved_team_id)}
 
+    def get_team_finances(self, team_id: str | None = None) -> Dict[str, Any]:
+        if not self.has_active_game():
+            return {"ok": False, "error": "No active league loaded."}
+        resolved_team_id = team_id or getattr(self.league, "controlled_team_id", None) or getattr(self.league, "user_team_id", None)
+        team = self._team_for_key(resolved_team_id)
+        if team is None:
+            return {"ok": False, "error": "team_not_found"}
+        from gridiron_gm_pkg.simulation.rules.contract_rules import cap_summary, validate_team_finances
+
+        return {"ok": True, "team_id": str(getattr(team, "id", "")), "summary": cap_summary(team), "errors": validate_team_finances(team)}
+
+    def get_free_agents(self) -> Dict[str, Any]:
+        if not self.has_active_game():
+            return {"ok": False, "error": "No active league loaded."}
+        players = []
+        for player in getattr(self.league, "free_agents", []) or []:
+            players.append({"player_id": str(getattr(player, "id", "")), "name": str(getattr(player, "name", "")), "position": str(getattr(player, "position", "")), "overall": self._safe_int(getattr(player, "overall", 0), 0)})
+        return {"ok": True, "players": players}
+
+    def sign_free_agent(self, player_id: str, contract: Dict[str, Any], team_id: str | None = None) -> Dict[str, Any]:
+        if not self.has_active_game():
+            return {"ok": False, "error": "No active league loaded."}
+        resolved_team_id = team_id or getattr(self.league, "controlled_team_id", None) or getattr(self.league, "user_team_id", None)
+        from gridiron_gm_pkg.simulation.rules.transactions import sign_free_agent
+
+        return sign_free_agent(self.league, resolved_team_id, player_id, contract)
+
+    def release_player(self, player_id: str, team_id: str | None = None) -> Dict[str, Any]:
+        if not self.has_active_game():
+            return {"ok": False, "error": "No active league loaded."}
+        resolved_team_id = team_id or getattr(self.league, "controlled_team_id", None) or getattr(self.league, "user_team_id", None)
+        from gridiron_gm_pkg.simulation.rules.transactions import release_player
+
+        return release_player(self.league, resolved_team_id, player_id)
+
     def auto_fill_depth_chart(self, team_id: str | None = None) -> Dict[str, Any]:
         if not self.has_active_game():
             return {"ok": False, "error": "No active league loaded."}
@@ -2629,7 +2664,10 @@ class GameFacade:
                 str(item["abbreviation"] or item["team_name"] or item["team_id"]),
             )
         )
-        return {"ok": True, "standings": standings_payload}
+        # ``teams`` is the established public API key.  Keep ``standings`` as
+        # the internal/dashboard alias while callers migrate to the canonical
+        # response shape.
+        return {"ok": True, "teams": standings_payload, "standings": standings_payload}
 
     def _build_fallback_standings_records(self) -> Dict[str, Dict[str, int]]:
         records: Dict[str, Dict[str, int]] = {}
@@ -2648,6 +2686,12 @@ class GameFacade:
         results_by_week = self._get_results_by_week()
         for _, result in self._iter_results_entries(results_by_week):
             if not isinstance(result, dict):
+                continue
+            season_type = str(result.get("season_type") or result.get("season_phase") or "").strip().lower()
+            # Standings are regular-season records.  Preseason and playoff
+            # results remain available in the game log but must not affect W-L
+            # totals, points for, or ordering.
+            if season_type and season_type not in {"regular", "regular_season"}:
                 continue
             home_id = self._resolve_team_id(self._result_team_value(result, "home")) or str(self._result_team_value(result, "home") or "")
             away_id = self._resolve_team_id(self._result_team_value(result, "away")) or str(self._result_team_value(result, "away") or "")

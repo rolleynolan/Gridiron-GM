@@ -32,6 +32,7 @@ class LeagueManager:
         self.standings = {}
         self.week_in_progress = False
         self.schedule = {}
+        self.transaction_log = []
         self.id_to_team = {}  # Use team.id as universal key
         self.id_to_abbr = {}  # For display
         self.abbr_to_id = {}  # For legacy conversion
@@ -196,6 +197,7 @@ class LeagueManager:
             "standings": self.standings,
             "schedule": self.schedule,
             "results_by_week": getattr(self, "results_by_week", {}),
+            "transaction_log": list(getattr(self, "transaction_log", []) or []),
             "controlled_team_id": self.controlled_team_id,
             "user_gm": self.user_gm.to_dict() if hasattr(self.user_gm, "to_dict") else self.user_gm,
             "time_engine": {
@@ -210,6 +212,7 @@ class LeagueManager:
                 "last_agenda_date": self._serialize_date(self.last_agenda_date),
                 "simulated_games": sorted(self.simulated_games) if isinstance(self.simulated_games, set) else list(self.simulated_games or []),
                 "last_weekly_decay": getattr(self, "last_weekly_decay", None),
+                "last_season_progression": getattr(self, "last_season_progression", None),
             },
         }
 
@@ -272,6 +275,7 @@ class LeagueManager:
             new_schedule[week] = new_games
         league.schedule = new_schedule
         league.results_by_week = data.get("results_by_week", {})
+        league.transaction_log = [item for item in data.get("transaction_log", []) if isinstance(item, dict)]
         if "calendar" in data:
             league.calendar = Calendar.deserialize(data["calendar"])
         time_engine = data.get("time_engine", {})
@@ -315,6 +319,7 @@ class LeagueManager:
         ]
         league.last_agenda_date = time_engine.get("last_agenda_date")
         league.last_weekly_decay = time_engine.get("last_weekly_decay")
+        league.last_season_progression = time_engine.get("last_season_progression")
         simulated = time_engine.get("simulated_games", [])
         league.simulated_games = set(simulated) if isinstance(simulated, list) else set()
         if unknown_conference_found:

@@ -1,18 +1,22 @@
 # Gridiron GM
 
-This is the master working folder for Gridiron GM.
+Gridiron GM is a single-player American-football franchise simulation.
 
-## Active game
+## Active runtime
 
-`Godot/` is the active Godot/C# game. It is the only runtime that should be developed or shipped.
+`Godot/` is the active game and the only runtime that should be developed, built, tested, or shipped.
 
-## Folder guide
+## Project layout
 
-- `Godot/Assets/` holds imported league, city, logo, font, and supporting data assets used by the active game.
-- `Reference/Python/` holds the retired Python implementation for behavior reference only. Do not run, change, test, or ship it unless the project direction explicitly changes.
-- `Saves/` is for local save files. Saves are intentionally excluded from Git.
-- `Archive/Porting-Notes/` preserves older C# migration notes; the root planning files are authoritative.
+- `Godot/` contains the native Godot/C# runtime, simulation, save flow, and tests.
+- `gridiron_gm/`, `gridiron_gm_pkg/`, `scripts/`, and `tests/` are legacy Python-era reference material retained only where still useful for behavior lookup during the native rewrite.
+- `BLUEPRINT.md`, `ROADMAP.md`, and `AI_INSTRUCTIONS.md` are the planning and execution authorities for the project.
 
-## Project planning
+## Validation
 
-Read `AI_INSTRUCTIONS.md`, `ROADMAP.md`, and `BLUEPRINT.md` before making project changes.
+Current native validation commands:
+
+```powershell
+dotnet build 'Godot/Gridiron GM.csproj'
+dotnet test 'Godot/Tests/GridironGM.Domain.Tests.csproj'
+```

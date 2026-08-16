@@ -6,7 +6,7 @@
     <RootNamespace>GridironGM</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <!-- This is an accidental duplicate created during consolidation. -->
-    <Compile Remove="Godot\**\*.cs" />
+    <Compile Remove=".godot\**\*.cs" />
+    <Compile Remove="Tests\**\*.cs" />
   </ItemGroup>
 </Project>

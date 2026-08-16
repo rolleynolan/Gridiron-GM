@@ -567,12 +567,12 @@ class SeasonManager:
             print("No champion was crowned this season.")
 
     def apply_season_progression(self):
-        """No-op in the core-loop build.
+        """Run the explicit, once-per-season player development update."""
+        from gridiron_gm_pkg.simulation.systems.player.season_progression import (
+            apply_season_progression,
+        )
 
-        Performance-based player development has been moved to
-        design_docs/player_development_system.txt.
-        """
-        return None
+        return apply_season_progression(self.league, self.calendar.current_year)
 
     def handle_offseason(self):
         print("=== Offseason: Healing injuries and resetting league ===")
@@ -585,9 +585,6 @@ class SeasonManager:
                 player.games_remaining = 0
                 if hasattr(player, "injuries"):
                     player.injuries.clear()
-                # Optional: retire old/severely injured players
-                if hasattr(player, "age") and player.age >= 38:
-                    player.retired = True
         # Reset standings, playoff bracket, and schedule for new season
         self.standings_manager.reset_for_new_season()
         self.playoff_bracket = {}
