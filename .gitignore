@@ -4,13 +4,33 @@ __pycache__/
 **/*.pyc
 *.egg-info/
 .pytest_cache/
-zz_tmp_test/
-.ggm-tmp/
-data/
-backend.log
+
+# Godot-generated files
+.godot/
+.mono/
+bin/
+obj/
 /Godot/.godot/
 /Godot/**/bin/
 /Godot/**/obj/
+
+# Local saves and transient output
+Saves/
+data/
+backend.log
+*.log
+*.tmp
+.ggm-tmp/
+.test_tmp/
+pytest-temp*/
+zz_tmp*/
 /gridiron_gm_pkg/data/saves/
 /dna_output/
 /tmp*/
+
+# Editor and operating-system files
+.vs/
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini

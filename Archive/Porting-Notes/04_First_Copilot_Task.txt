@@ -1,0 +1,76 @@
+First Copilot Task - Create C# GameCore Scaffolding Only
+
+Goal:
+Start the Python-to-C# migration by creating a native C# GameCore scaffold inside the Godot project. Do not port all gameplay systems yet. Do not remove Python backend. Do not change existing UI flows yet.
+
+Important:
+- Python backend remains the reference implementation.
+- Existing Godot dashboard/backend flow must continue to build and run.
+- Do not delete BackendProcessManager, APIclient, RpcClient, or existing endpoints.
+- Do not rewrite DashboardController in this task.
+- Do not add new gameplay features.
+- Focus on structure, DTOs, and a minimal in-memory vertical-slice seed.
+
+Files/folders to create:
+Godot/Scripts/GameCore/
+  Models/
+  DTOs/
+  Services/
+  Utilities/
+
+Create initial model classes:
+- LeagueState
+- TeamState
+- PlayerState
+- CalendarState
+- GameScheduleEntry
+- GameResultState
+- BoxScoreState
+
+Create DTO classes matching compact contracts:
+- DashboardStateResponse
+- DashboardDto
+- TeamSummaryDto
+- CalendarSummaryDto
+- NextGameDto
+- TeamStatusDto
+- ActionItemDto
+- RecentResultDto
+- TeamRosterResponse
+- RosterStatusDto
+- PositionCountDto
+- PlayerRowDto
+- TeamDepthChartResponse
+- DepthChartStatusDto
+- DepthChartPositionDto
+- DepthChartPlayerDto
+- StandingsResponse
+- StandingRowDto
+- TeamScheduleResponse
+- ScheduleGameRowDto
+- GameResultResponse
+- GameResultDto
+- ContinueResponse
+- ContinueResultDto
+- ContinueEventDto
+
+Create initial services:
+- GameCoreContext
+- LeagueBootstrapService
+- DashboardService
+- RosterService
+- DepthChartService
+
+Minimum behavior for this task:
+1. GameCoreContext can hold an active LeagueState or null.
+2. LeagueBootstrapService can create a small in-memory test league with a user team, a few teams, and basic players.
+3. DashboardService.GetDashboardState() returns a compact dashboard response from the C# in-memory league.
+4. RosterService.GetTeamRoster() returns compact roster data.
+5. DepthChartService.GetTeamDepthChart() returns compact depth chart data from roster fallback.
+6. No UI needs to call these services yet unless there is a very safe debug-only proof call.
+
+Build requirement:
+- dotnet build "Godot/Gridiron GM.csproj" must pass.
+
+Expected result:
+The Godot project now contains a clean native C# GameCore scaffold that mirrors the current compact API contracts, while the existing Python-backed game still works unchanged.

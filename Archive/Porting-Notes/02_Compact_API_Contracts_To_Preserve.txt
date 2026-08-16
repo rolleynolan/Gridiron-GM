@@ -1,0 +1,93 @@
+Gridiron GM - Compact Contracts to Preserve During C# Port
+
+Rule:
+Godot UI should continue to receive the same compact shapes during migration. This avoids rewriting UI and simulation at the same time.
+
+Core contracts to recreate first:
+
+1. GET /dashboard_state equivalent
+Returns:
+- ok
+- dashboard.team
+- dashboard.calendar
+- dashboard.next_game
+- dashboard.team_status
+- dashboard.action_items
+- dashboard.recent_results
+
+2. POST /continue equivalent
+Returns:
+- ok
+- result.advanced
+- result.stop_reason
+- result.days_advanced
+- result.events_processed
+
+3. GET /team_roster equivalent
+Returns:
+- ok
+- team
+- roster_status
+- position_counts
+- players[] compact rows
+
+4. GET /team_depth_chart equivalent
+Returns:
+- ok
+- team
+- depth_chart_status
+- positions[]
+
+5. POST /auto_fill_depth_chart equivalent
+Returns:
+- ok
+- message
+- depth_chart
+
+6. POST /update_depth_chart equivalent
+Inputs:
+- optional team_id
+- position
+- player_id
+- action: move_up, move_down, set_starter
+Returns:
+- ok
+- message
+- depth_chart
+
+7. GET /team_schedule equivalent
+Returns:
+- ok
+- schedule[] compact rows with status final/game_day/upcoming
+
+8. GET /game_result?game_id=... equivalent
+Returns:
+- ok
+- result compact final score and box_score
+
+9. POST /simulate_user_game equivalent
+Returns:
+- ok
+- result compact final score and box_score
+
+10. GET /standings equivalent
+Returns:
+- ok
+- standings[] compact team rows
+
+Error shapes to preserve:
+- { "ok": false, "error": "No active league loaded." }
+- { "ok": false, "error": "Missing game_id." }
+- { "ok": false, "error": "Game result not found." }
+- { "ok": false, "error": "Missing position, player_id, or action." }
+- { "ok": false, "error": "Invalid depth chart action." }
+
+C# implementation note:
+These do not need to remain HTTP endpoints after the port. They can become service methods returning DTO classes with the same shape.
+
+Example target calls:
+- GameCore.Services.Dashboard.GetDashboardState()
+- GameCore.Services.Time.Continue(maxDays)
+- GameCore.Services.Roster.GetTeamRoster(teamId)
+- GameCore.Services.DepthChart.UpdateDepthChart(request)
+- GameCore.Services.GameSimulation.SimulateUserGame(gameId)

@@ -4406,7 +4406,7 @@ public partial class DashboardController : Control
 
         var targetWeek = !string.IsNullOrWhiteSpace(selectedWeekKey) ? selectedWeekKey : previousWeek;
         if (string.IsNullOrWhiteSpace(targetWeek) || !availableWeekKeys.Contains(targetWeek))
-            targetWeek = availableWeekKeys[0];
+            targetWeek = GetPreferredResultsWeekKey(availableWeekKeys, _completedResultsWeekKeys);
 
         var targetIndex = FindResultsWeekIndex(targetWeek);
         if (targetIndex < 0 && _resultsWeekSelect.ItemCount > 0)
@@ -4439,9 +4439,88 @@ public partial class DashboardController : Control
             return _selectedResultsWeekKey;
 
         if (_availableResultsWeekKeys.Count > 0)
-            return _availableResultsWeekKeys[0];
+            return GetPreferredResultsWeekKey(_availableResultsWeekKeys, _completedResultsWeekKeys);
 
         return "";
+    }
+
+    internal static string GetPreferredResultsWeekKey(
+        IEnumerable<string> availableWeekKeys,
+        IEnumerable<string> completedWeekKeys)
+    {
+        var available = new List<string>();
+        var seenAvailable = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (availableWeekKeys != null)
+        {
+            foreach (var key in availableWeekKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key) || !seenAvailable.Add(key))
+                    continue;
+                available.Add(key);
+            }
+        }
+
+        if (available.Count == 0)
+            return "";
+
+        var completed = new List<string>();
+        var seenCompleted = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (completedWeekKeys != null)
+        {
+            foreach (var key in completedWeekKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key) || !seenCompleted.Add(key))
+                    continue;
+                if (ContainsWeekKey(available, key))
+                    completed.Add(key);
+            }
+        }
+
+        var candidates = completed.Count > 0 ? completed : available;
+        candidates.Sort(CompareWeekKeys);
+        return candidates[candidates.Count - 1];
+    }
+
+    internal static int CompareWeekKeys(string left, string right)
+    {
+        var leftParts = ParseWeekKeyParts(left);
+        var rightParts = ParseWeekKeyParts(right);
+        var seasonCompare = leftParts.seasonRank.CompareTo(rightParts.seasonRank);
+        if (seasonCompare != 0)
+            return seasonCompare;
+        return leftParts.week.CompareTo(rightParts.week);
+    }
+
+    private static (int seasonRank, int week) ParseWeekKeyParts(string weekKey)
+    {
+        if (string.IsNullOrWhiteSpace(weekKey))
+            return (int.MaxValue, int.MaxValue);
+
+        var parts = weekKey.Split(':', 2);
+        var seasonRank = parts[0].Trim().ToLowerInvariant() switch
+        {
+            "preseason" => 0,
+            "regular" => 1,
+            "postseason" => 2,
+            _ => 3
+        };
+
+        var week = int.MaxValue;
+        if (parts.Length == 2)
+            _ = int.TryParse(parts[1], out week);
+
+        return (seasonRank, week);
+    }
+
+    private static bool ContainsWeekKey(IEnumerable<string> weekKeys, string candidate)
+    {
+        foreach (var weekKey in weekKeys)
+        {
+            if (string.Equals(weekKey, candidate, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     private int FindResultsWeekIndex(string weekKey)
@@ -7825,5 +7904,3 @@ public partial class DashboardController : Control
         public bool Sortable { get; }
     }
 }
-
-
