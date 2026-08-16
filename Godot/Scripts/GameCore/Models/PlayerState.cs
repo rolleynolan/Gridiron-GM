@@ -9,4 +9,7 @@ public sealed class PlayerState
     public int Age { get; set; }
     public string Status { get; set; } = "Active";
     public string Injury { get; set; } = "";
+    public int Morale { get; set; } = 50;
+    public string MoraleTrend { get; set; } = "Stable";
+    public PlayerContractState Contract { get; set; } = new();
 }

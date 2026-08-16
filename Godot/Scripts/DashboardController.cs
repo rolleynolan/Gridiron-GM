@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using GridironGM.GameCore.DTOs;
+using GridironGM.GameCore.Models;
 using GridironGM.GameCore.Services;
 using GridironGM.GameCore.Utilities;
 
@@ -75,6 +76,44 @@ public partial class DashboardController : Control
     private ItemList _teamPickList;
     private Label _lblPickTeamText;
     private Label _lblPickTeamHint;
+    private AcceptDialog _franchiseSetupDialog;
+    private OptionButton _setupProfileSelect;
+    private LineEdit _setupGmName;
+    private SpinBox _setupNegotiation;
+    private SpinBox _setupPlayerManagement;
+    private SpinBox _setupScouting;
+    private SpinBox _setupLeadership;
+    private OptionButton _setupRosterSource;
+    private OptionButton _setupOutfit;
+    private Label _setupBudget;
+    private Label _setupStatus;
+    private List<GmProfile> _setupProfiles = new();
+    private Button _btnFreeAgency;
+    private AcceptDialog _freeAgencyDialog;
+    private Label _freeAgencyCapSummary;
+    private ItemList _freeAgentList;
+    private RichTextLabel _freeAgentDetail;
+    private SpinBox _freeAgentAnnualOffer;
+    private SpinBox _freeAgentGuaranteeOffer;
+    private SpinBox _freeAgentYearsOffer;
+    private Button _btnSubmitFreeAgentOffer;
+    private Label _freeAgencyStatus;
+    private string _selectedFreeAgentId = "";
+    private Button _btnReleaseSelectedPlayer;
+    private Button _btnOfferExtension;
+    private AcceptDialog _extensionDialog;
+    private Label _extensionPlayerLabel;
+    private SpinBox _extensionAnnualOffer;
+    private SpinBox _extensionGuaranteeOffer;
+    private SpinBox _extensionYearsOffer;
+    private Label _extensionStatus;
+    private string _extensionPlayerId = "";
+    private Button _btnDraftBoard;
+    private AcceptDialog _draftBoardDialog;
+    private ItemList _draftProspectList;
+    private Label _draftStatus;
+    private Button _btnMakeDraftPick;
+    private string _selectedDraftProspectId = "";
     private PopupMenu _popupColumns;
     private Label _lblPlayerHeader;
     private RichTextLabel _rtlScoutSummary;
@@ -389,6 +428,15 @@ public partial class DashboardController : Control
         _teamPickList = GetNodeOrWarn<ItemList>("NewGameTeamPicker/PickerContent/TeamPickList");
         _lblPickTeamText = GetNodeOrWarn<Label>("NewGameTeamPicker/PickerContent/LblPickTeamText");
         _lblPickTeamHint = GetNodeOrWarn<Label>("NewGameTeamPicker/PickerContent/LblPickTeamHint");
+        if (_newGameTeamPicker != null)
+            _newGameTeamPicker.MinSize = new Vector2I(640, 480);
+        if (_teamPickList != null)
+            _teamPickList.CustomMinimumSize = new Vector2(560, 300);
+        CreateFranchiseSetupDialog();
+        CreateFreeAgencyDialog();
+        CreateFreeAgencyButton();
+        CreateRosterContractControls();
+        CreateDraftBoard();
 
         // NEW nodes (make sure you added these nodes under MainTabs)
         _teamList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/TeamList");
@@ -489,6 +537,8 @@ public partial class DashboardController : Control
             _btnStartupExit.Pressed += OnStartupExitPressed;
         if (_newGameConfirmDialog != null)
             _newGameConfirmDialog.Confirmed += async () => await ConfirmNativeNewGame();
+        if (_franchiseSetupDialog != null)
+            _franchiseSetupDialog.Confirmed += async () => await CreateConfiguredNativeFranchise();
 
         // When user clicks a team, load roster
         if (_teamList != null)
@@ -1523,12 +1573,20 @@ public partial class DashboardController : Control
             : string.IsNullOrWhiteSpace(teamName) ? "No team selected" : teamName;
         var rosterText = _dashboardRosterSize.HasValue ? _dashboardRosterSize.Value.ToString(CultureInfo.InvariantCulture) : "N/A";
         var injuryText = _dashboardInjuryCount.HasValue ? _dashboardInjuryCount.Value.ToString(CultureInfo.InvariantCulture) : "N/A";
+        var franchise = _nativeGameCoreContext?.ActiveLeague?.FranchiseMetadata;
+        var gmName = string.IsNullOrWhiteSpace(franchise?.GmProfileSnapshot?.Name) ? "User GM" : franchise.GmProfileSnapshot.Name;
+        var world = franchise?.World;
+        var worldText = world == null
+            ? "Standard roster"
+            : $"{world.Source} roster (seed {world.Seed})";
 
         _rtlTeamSummary.Text =
             $"{displayName}\n" +
             $"Record: {record}\n" +
             $"Cap Room: {_dashboardCapRoom}\n" +
-            $"Roster: {rosterText}   Injuries: {injuryText}";
+            $"Roster: {rosterText}   Injuries: {injuryText}\n" +
+            $"GM: {gmName}\n" +
+            $"World: {worldText}";
     }
 
     private void RenderRecentResultsCard()
@@ -2327,6 +2385,360 @@ public partial class DashboardController : Control
         await RefreshLeagueHub();
     }
 
+    private void CreateDraftBoard()
+    {
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
+        if (actionRow == null) return;
+        _btnDraftBoard = new Button { Text = "Draft Board" };
+        actionRow.AddChild(_btnDraftBoard);
+        _btnDraftBoard.Pressed += ShowDraftBoard;
+        _draftBoardDialog = new AcceptDialog { Title = "Draft Board", MinSize = new Vector2I(820, 560) };
+        AddChild(_draftBoardDialog); _draftBoardDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _draftBoardDialog.AddChild(content);
+        _draftStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_draftStatus);
+        _draftProspectList = new ItemList { CustomMinimumSize = new Vector2(760, 380), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(_draftProspectList);
+        _draftProspectList.ItemSelected += index => { _selectedDraftProspectId = _draftProspectList.GetItemMetadata((int)index).ToString(); UpdateDraftStatus(); };
+        _btnMakeDraftPick = new Button { Text = "Make Pick", Disabled = true }; content.AddChild(_btnMakeDraftPick);
+        _btnMakeDraftPick.Pressed += MakeDraftPick;
+    }
+
+    private void ShowDraftBoard() { RefreshDraftBoard(); _draftBoardDialog.PopupCentered(new Vector2I(820, 560)); }
+    private void RefreshDraftBoard()
+    {
+        EnsureNativeGameCoreServices(); var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null) { _draftStatus.Text = "Start or load a franchise to view the draft board."; return; }
+        var draft = new DraftService(_nativeGameCoreContext); draft.PrepareDraftBoard(); _draftProspectList.Clear();
+        foreach (var p in league.CollegeProspects.Where(p => p != null && string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.ScoutedOverall).ThenBy(p => p.Name)) { _draftProspectList.AddItem($"{p.Position,-4} {p.Name,-24} Est {p.ScoutedOverall,2} POT {p.ScoutedPotential,2}  {p.College}"); _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, p.ProspectId); }
+        _selectedDraftProspectId = ""; UpdateDraftStatus();
+    }
+    private void UpdateDraftStatus()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague; var pick = league?.Draft?.Picks?.FirstOrDefault(p => string.Equals(p.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(p.ProspectId));
+        var canPick = pick != null && string.Equals(league?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(_selectedDraftProspectId);
+        _btnMakeDraftPick.Disabled = !canPick; _draftStatus.Text = pick == null ? "No remaining pick for your team." : $"Next pick: Round {pick.Round}, Pick {pick.PickInRound}. { (canPick ? "Select this prospect." : "Draft picks are available during Draft Pending.") }";
+    }
+    private async void MakeDraftPick() { var league = _nativeGameCoreContext.ActiveLeague; if (new DraftService(_nativeGameCoreContext).MakePick(league.UserTeamId, _selectedDraftProspectId)) { await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft pick saved.", true); RefreshDraftBoard(); } }
+
+    private void CreateRosterContractControls()
+    {
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterModeRow");
+        if (actionRow == null)
+            return;
+
+        _btnOfferExtension = new Button { Text = "Offer Extension" };
+        _btnReleaseSelectedPlayer = new Button { Text = "Release Selected" };
+        actionRow.AddChild(_btnOfferExtension);
+        actionRow.AddChild(_btnReleaseSelectedPlayer);
+        _btnOfferExtension.Pressed += ShowExtensionOffer;
+        _btnReleaseSelectedPlayer.Pressed += async () => await ReleaseSelectedPlayer();
+
+        _extensionDialog = new AcceptDialog { Title = "Offer Contract Extension", MinSize = new Vector2I(480, 300) };
+        AddChild(_extensionDialog);
+        _extensionDialog.GetOkButton().Text = "Submit Offer";
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _extensionDialog.AddChild(content);
+        _extensionPlayerLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_extensionPlayerLabel);
+        _extensionAnnualOffer = CreateMoneyOffer(1m, 40m);
+        _extensionGuaranteeOffer = CreateMoneyOffer(0m, 80m);
+        _extensionYearsOffer = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1, Value = 2 };
+        content.AddChild(SetupRow("Annual ($M)", _extensionAnnualOffer));
+        content.AddChild(SetupRow("Guaranteed ($M)", _extensionGuaranteeOffer));
+        content.AddChild(SetupRow("Years", _extensionYearsOffer));
+        _extensionStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_extensionStatus);
+        _extensionDialog.Confirmed += async () => await SubmitExtensionOffer();
+    }
+
+    private void ShowExtensionOffer()
+    {
+        var player = GetSelectedNativeRosterPlayer();
+        if (player == null)
+        {
+            SetPrimaryStatus("Select a player from your roster first.");
+            return;
+        }
+
+        var league = _nativeGameCoreContext.ActiveLeague;
+        var team = league.Teams.First(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
+        _extensionPlayerId = player.PlayerId;
+        _extensionAnnualOffer.Value = (double)(required / 1_000_000m);
+        _extensionGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m);
+        _extensionYearsOffer.Value = 2;
+        _extensionPlayerLabel.Text = $"{player.Name} | {player.Position} | OVR {player.Overall}\nEstimated requirement: {GameCoreStateHelper.FormatCapRoom(required)} per year.";
+        _extensionStatus.Text = "";
+        _extensionDialog.PopupCentered(new Vector2I(480, 300));
+    }
+
+    private async Task SubmitExtensionOffer()
+    {
+        if (string.IsNullOrWhiteSpace(_extensionPlayerId))
+            return;
+
+        var result = new ContractService(_nativeGameCoreContext).ReSignPlayer(_extensionPlayerId, null, new ContractOffer
+        {
+            AnnualSalary = (decimal)_extensionAnnualOffer.Value * 1_000_000m,
+            GuaranteedSalary = (decimal)_extensionGuaranteeOffer.Value * 1_000_000m,
+            Years = (int)_extensionYearsOffer.Value,
+        });
+        _extensionStatus.Text = result.Accepted ? result.Message : $"{result.Message} Requirement: {GameCoreStateHelper.FormatCapRoom(result.RequiredAnnualSalary)}";
+        if (!result.Accepted)
+            return;
+
+        _extensionDialog.Hide();
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Contract extension saved.", autosaveToo: true);
+        await RefreshAll();
+    }
+
+    private async Task ReleaseSelectedPlayer()
+    {
+        var player = GetSelectedNativeRosterPlayer();
+        if (player == null)
+        {
+            SetPrimaryStatus("Select a player from your roster first.");
+            return;
+        }
+
+        var result = new ContractService(_nativeGameCoreContext).ReleasePlayer(player.PlayerId);
+        SetPrimaryStatus(result.Message);
+        if (!result.Accepted)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Player release saved.", autosaveToo: true);
+        await RefreshAll();
+    }
+
+    private PlayerState GetSelectedNativeRosterPlayer()
+    {
+        if (!IsNativeRuntimeSource())
+            return null;
+
+        var playerId = GetSelectedPlayerId();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        return team?.Roster?.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void CreateFreeAgencyButton()
+    {
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
+        if (actionRow == null)
+            return;
+
+        _btnFreeAgency = new Button { Text = "Free Agency", TooltipText = "Browse free agents and make contract offers." };
+        actionRow.AddChild(_btnFreeAgency);
+        actionRow.MoveChild(_btnFreeAgency, Math.Min(4, actionRow.GetChildCount() - 1));
+        _btnFreeAgency.Pressed += ShowFreeAgency;
+    }
+
+    private void CreateFreeAgencyDialog()
+    {
+        _freeAgencyDialog = new AcceptDialog
+        {
+            Name = "FreeAgencyDialog",
+            Title = "Free Agency",
+            MinSize = new Vector2I(940, 620),
+            Exclusive = false,
+        };
+        AddChild(_freeAgencyDialog);
+        _freeAgencyDialog.GetOkButton().Visible = false;
+
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _freeAgencyDialog.AddChild(content);
+        _freeAgencyCapSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_freeAgencyCapSummary);
+
+        var body = new HSplitContainer { CustomMinimumSize = new Vector2(860, 430), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(body);
+        _freeAgentList = new ItemList { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        body.AddChild(_freeAgentList);
+        _freeAgentList.ItemSelected += OnFreeAgentSelected;
+
+        var detail = new VBoxContainer { CustomMinimumSize = new Vector2(340, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        body.AddChild(detail);
+        _freeAgentDetail = new RichTextLabel { CustomMinimumSize = new Vector2(320, 170), FitContent = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        detail.AddChild(_freeAgentDetail);
+        _freeAgentAnnualOffer = CreateMoneyOffer(1m, 40m);
+        _freeAgentGuaranteeOffer = CreateMoneyOffer(0m, 80m);
+        _freeAgentYearsOffer = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1, Value = 2 };
+        detail.AddChild(SetupRow("Annual ($M)", _freeAgentAnnualOffer));
+        detail.AddChild(SetupRow("Guaranteed ($M)", _freeAgentGuaranteeOffer));
+        detail.AddChild(SetupRow("Years", _freeAgentYearsOffer));
+        _btnSubmitFreeAgentOffer = new Button { Text = "Submit Offer" };
+        detail.AddChild(_btnSubmitFreeAgentOffer);
+        _btnSubmitFreeAgentOffer.Pressed += async () => await SubmitFreeAgentOffer();
+
+        _freeAgencyStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_freeAgencyStatus);
+    }
+
+    private static SpinBox CreateMoneyOffer(decimal minimum, decimal maximum)
+        => new() { MinValue = (double)minimum, MaxValue = (double)maximum, Step = 0.25d, Rounded = false };
+
+    private void ShowFreeAgency()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Free agency is available in the Native C# GameCore.");
+            return;
+        }
+
+        RefreshFreeAgencyUi();
+        _freeAgencyDialog.PopupCentered(new Vector2I(940, 620));
+    }
+
+    private void RefreshFreeAgencyUi()
+    {
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null)
+        {
+            _freeAgencyCapSummary.Text = "Start or load a franchise to access free agency.";
+            _freeAgentList.Clear();
+            _freeAgentDetail.Text = "";
+            return;
+        }
+
+        var contracts = new ContractService(_nativeGameCoreContext);
+        _freeAgencyCapSummary.Text = $"{team.Name} | Cap room: {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))} | Active roster: {team.Roster.Count}/53 | Free agents: {league.FreeAgents.Count}";
+        _freeAgentList.Clear();
+        foreach (var player in league.FreeAgents.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var asking = contracts.GetRequiredAnnualSalary(player, team) / 1_000_000m;
+            _freeAgentList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age,2}  Ask ${asking:0.00}M");
+            _freeAgentList.SetItemMetadata(_freeAgentList.ItemCount - 1, player.PlayerId);
+        }
+
+        _selectedFreeAgentId = "";
+        _freeAgentDetail.Text = "Select a player to review their asking price and make an offer.";
+        _freeAgencyStatus.Text = "Negotiation adjusts asking price by a small amount based on your GM profile.";
+        _btnSubmitFreeAgentOffer.Disabled = true;
+    }
+
+    private void OnFreeAgentSelected(long index)
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null || index < 0 || index >= _freeAgentList.ItemCount)
+            return;
+
+        _selectedFreeAgentId = _freeAgentList.GetItemMetadata((int)index).ToString();
+        var player = league.FreeAgents.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _selectedFreeAgentId, StringComparison.OrdinalIgnoreCase));
+        if (player == null)
+            return;
+
+        var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
+        _freeAgentAnnualOffer.Value = (double)(required / 1_000_000m);
+        _freeAgentGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m);
+        _freeAgentDetail.Text = $"[b]{player.Name}[/b]\n{player.Position} | OVR {player.Overall} | Age {player.Age}\nMorale: {player.Morale} ({player.MoraleTrend})\n\nEstimated asking price: ${required / 1_000_000m:0.00}M annually\nOffer at least 15% of annual salary as guaranteed money.";
+        _btnSubmitFreeAgentOffer.Disabled = false;
+    }
+
+    private async Task SubmitFreeAgentOffer()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null || string.IsNullOrWhiteSpace(_selectedFreeAgentId))
+            return;
+
+        var service = new ContractService(_nativeGameCoreContext);
+        var result = service.SignFreeAgent(_selectedFreeAgentId, league.UserTeamId, new ContractOffer
+        {
+            AnnualSalary = (decimal)_freeAgentAnnualOffer.Value * 1_000_000m,
+            GuaranteedSalary = (decimal)_freeAgentGuaranteeOffer.Value * 1_000_000m,
+            Years = (int)_freeAgentYearsOffer.Value,
+        });
+        var transactionMessage = result.Accepted
+            ? $"Accepted: {result.Message} Cap room after signing: {GameCoreStateHelper.FormatCapRoom(result.CapRoomAfterSigning)}"
+            : $"{result.Message} Estimated requirement: {GameCoreStateHelper.FormatCapRoom(result.RequiredAnnualSalary)}";
+        _freeAgencyStatus.Text = transactionMessage;
+        if (!result.Accepted)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Free-agent signing saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshFreeAgencyUi();
+        _freeAgencyStatus.Text = transactionMessage;
+    }
+
+    private void CreateFranchiseSetupDialog()
+    {
+        _franchiseSetupDialog = new AcceptDialog { Name = "FranchiseSetupDialog", Title = "Start a Franchise", MinSize = new Vector2I(660, 580), Exclusive = true };
+        AddChild(_franchiseSetupDialog);
+        _franchiseSetupDialog.GetOkButton().Text = "Choose Team";
+        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(600, 450) };
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _franchiseSetupDialog.AddChild(scroll); scroll.AddChild(content);
+        content.AddChild(new Label { Text = "Choose a reusable GM profile and starting world before selecting your franchise.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        _setupProfileSelect = new OptionButton();
+        _setupGmName = new LineEdit { Text = "User GM", PlaceholderText = "GM name" };
+        content.AddChild(SetupRow("Saved Profile", _setupProfileSelect));
+        content.AddChild(SetupRow("GM Name", _setupGmName));
+        content.AddChild(new Label { Text = "Management Attributes (maximum 220 points)" });
+        _setupNegotiation = SetupAttribute(); _setupPlayerManagement = SetupAttribute(); _setupScouting = SetupAttribute(); _setupLeadership = SetupAttribute();
+        content.AddChild(SetupRow("Negotiation", _setupNegotiation));
+        content.AddChild(SetupRow("Player Management", _setupPlayerManagement));
+        content.AddChild(SetupRow("Scouting Judgment", _setupScouting));
+        content.AddChild(SetupRow("Leadership", _setupLeadership));
+        _setupBudget = new Label(); content.AddChild(_setupBudget);
+        _setupOutfit = SetupOptions("Team Polo", "Suit", "Hoodie");
+        content.AddChild(SetupRow("Game Day Outfit", _setupOutfit));
+        _setupRosterSource = SetupOptions("Standard Roster", "Generated Roster");
+        content.AddChild(SetupRow("Starting World", _setupRosterSource));
+        content.AddChild(new Label { Text = "Standard uses the fixed fictional world seed. Generated creates a new, saved seed for this franchise.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        _setupStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_setupStatus);
+        _setupProfileSelect.ItemSelected += OnSetupProfileSelected;
+        _setupNegotiation.ValueChanged += _ => UpdateSetupBudget(); _setupPlayerManagement.ValueChanged += _ => UpdateSetupBudget();
+        _setupScouting.ValueChanged += _ => UpdateSetupBudget(); _setupLeadership.ValueChanged += _ => UpdateSetupBudget();
+        UpdateSetupBudget();
+    }
+
+    private static HBoxContainer SetupRow(string label, Control input)
+    {
+        var row = new HBoxContainer();
+        row.AddChild(new Label { Text = label, CustomMinimumSize = new Vector2(190, 0), VerticalAlignment = VerticalAlignment.Center });
+        input.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; row.AddChild(input); return row;
+    }
+    private static SpinBox SetupAttribute() => new() { MinValue = 20, MaxValue = 80, Step = 1, Value = 50 };
+    private static OptionButton SetupOptions(params string[] options) { var select = new OptionButton(); foreach (var option in options) select.AddItem(option); return select; }
+    private void UpdateSetupBudget()
+    {
+        var total = (int)_setupNegotiation.Value + (int)_setupPlayerManagement.Value + (int)_setupScouting.Value + (int)_setupLeadership.Value;
+        _setupBudget.Text = total <= GmAttributes.MaximumTotal ? $"Attribute total: {total}/{GmAttributes.MaximumTotal}" : $"Attribute total: {total}/{GmAttributes.MaximumTotal} - reduce attributes.";
+    }
+    private async Task ShowFranchiseSetupDialog()
+    {
+        _setupProfiles = new GmProfileStore().LoadAll().ToList();
+        _setupProfileSelect.Clear(); _setupProfileSelect.AddItem("Create New Profile");
+        foreach (var profile in _setupProfiles) _setupProfileSelect.AddItem(profile.Name);
+        _setupProfileSelect.Select(0); _setupStatus.Text = ""; UpdateSetupBudget();
+        _franchiseSetupDialog.PopupCentered(new Vector2I(660, 580)); _franchiseSetupDialog.GrabFocus(); _setupGmName.GrabFocus();
+        await Task.CompletedTask;
+    }
+    private void OnSetupProfileSelected(long index)
+    {
+        if (index <= 0 || index > _setupProfiles.Count) return;
+        var profile = _setupProfiles[(int)index - 1]; _setupGmName.Text = profile.Name;
+        _setupNegotiation.Value = profile.Attributes.Negotiation; _setupPlayerManagement.Value = profile.Attributes.PlayerManagement;
+        _setupScouting.Value = profile.Attributes.ScoutingJudgment; _setupLeadership.Value = profile.Attributes.Leadership;
+        SelectSetupOption(_setupOutfit, profile.Appearance.Outfit); UpdateSetupBudget();
+    }
+    private static void SelectSetupOption(OptionButton select, string value) { for (var i = 0; i < select.ItemCount; i++) if (string.Equals(select.GetItemText(i), value, StringComparison.OrdinalIgnoreCase)) { select.Select(i); return; } }
+    private async Task CreateConfiguredNativeFranchise()
+    {
+        var attributes = new GmAttributes { Negotiation = (int)_setupNegotiation.Value, PlayerManagement = (int)_setupPlayerManagement.Value, ScoutingJudgment = (int)_setupScouting.Value, Leadership = (int)_setupLeadership.Value };
+        if (string.IsNullOrWhiteSpace(_setupGmName.Text)) { _setupStatus.Text = "Enter a GM name."; return; }
+        try { attributes.Validate(); } catch (ArgumentException error) { _setupStatus.Text = error.Message; return; }
+        var profile = _setupProfileSelect.Selected > 0 && _setupProfileSelect.Selected <= _setupProfiles.Count ? _setupProfiles[_setupProfileSelect.Selected - 1] : new GmProfile();
+        profile.Name = _setupGmName.Text.Trim(); profile.Attributes = attributes; profile.Appearance.Outfit = _setupOutfit.GetItemText(_setupOutfit.Selected); new GmProfileStore().Save(profile);
+        var world = _setupRosterSource.Selected == 0 ? WorldDefinition.Standard() : WorldDefinition.Generated(unchecked((ulong)DateTime.UtcNow.Ticks ^ (ulong)Guid.NewGuid().GetHashCode()));
+        _franchiseSetupDialog.Hide(); SetNewGameButtonsDisabled(true);
+        try { await StartFreshNativeLeague(world, profile); } finally { SetNewGameButtonsDisabled(false); }
+    }
+
     private async Task NewGame()
     {
         if (IsNativeRuntimeSource())
@@ -2340,7 +2752,7 @@ public partial class DashboardController : Control
             }
             else
             {
-                await ConfirmNativeNewGame();
+                await ShowFranchiseSetupDialog();
             }
             return;
         }
@@ -2374,22 +2786,14 @@ public partial class DashboardController : Control
 
     private async Task ConfirmNativeNewGame()
     {
-        SetNewGameButtonsDisabled(true);
-        try
-        {
-            await StartFreshNativeLeague();
-        }
-        finally
-        {
-            SetNewGameButtonsDisabled(false);
-        }
+        await ShowFranchiseSetupDialog();
     }
 
-    private async Task StartFreshNativeLeague()
+    private async Task StartFreshNativeLeague(WorldDefinition world = null, GmProfile profile = null)
     {
         EnsureNativeGameCoreServices();
         _nativeGameCoreContext.ActiveLeague = null;
-        new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath());
+        new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath(), world, profile);
         _nativeStartupState = NativeStartupState.Ready;
         ResetDashboardPreviewUiState();
         ResetClientCachesForNewGame();
@@ -2484,7 +2888,8 @@ public partial class DashboardController : Control
 
         _awaitingNewGameTeamPick = true;
         _handledNewGameTeamPick = false;
-        _newGameTeamPicker.PopupCenteredRatio(0.4f);
+        _newGameTeamPicker.PopupCentered(new Vector2I(640, 480));
+        _newGameTeamPicker.GrabFocus();
     }
 
     private async Task OnNewGameTeamPickerConfirmed()

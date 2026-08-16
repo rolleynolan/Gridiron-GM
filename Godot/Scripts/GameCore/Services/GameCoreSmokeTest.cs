@@ -33,6 +33,7 @@ public static class GameCoreSmokeTest
             var gameDayService = new GameDayService(context);
             var standingsService = new StandingsService(context);
             var scheduleService = new ScheduleService(context);
+            var contractService = new ContractService(context);
             var saveService = new GameCoreSaveService();
             const string smokeSaveName = "native_smoke_test_save.json";
 
@@ -40,6 +41,18 @@ public static class GameCoreSmokeTest
             var league = bootstrap.CreateTestLeague(teamSeedPath);
             Require(league != null && context.ActiveLeague != null && league.Teams.Count == LeagueBootstrapService.TeamCount, $"Bootstrap should create {LeagueBootstrapService.TeamCount} teams.");
             Require(league.Results.Count == 0, "Fresh bootstrap should not seed completed results.");
+            Require(league.SalaryCap == LeagueState.DefaultSalaryCap, "Fresh league should use the configured salary cap.");
+            Require(league.Teams.All(team => team.Roster.All(player => player.Contract != null && player.Contract.AnnualSalary > 0m && player.Contract.YearsRemaining > 0)), "Every rostered player should begin with an active contract.");
+            Require(league.Teams.All(team => team.Roster.All(player => player.Morale >= 0 && player.Morale <= 100)), "Every rostered player should begin with valid morale.");
+            Require(league.Teams.All(team => Math.Abs(contractService.GetCapRoom(team) - team.CapRoom) < 1m), "Team cap room should match active contract commitments.");
+            Require(league.FreeAgents.Count == 192 && league.FreeAgents.All(player => string.Equals(player.Status, "Free Agent", StringComparison.OrdinalIgnoreCase)), "Fresh league should include a free-agent pool.");
+            Require(league.Teams.All(team => team.Coaches != null && team.Coaches.Count == LeagueBootstrapService.CoachesPerTeam), "Each team should start with a complete coaching staff.");
+            Require(league.CollegeProspects.Count == LeagueBootstrapService.StartingProspectCount, "Fresh world should include the full starting college prospect class.");
+            Require(league.FranchiseMetadata.World.Source == RosterSource.Standard && league.FranchiseMetadata.World.Seed == WorldDefinition.StandardSeed, "Default new game should use the fixed Standard roster seed.");
+            var matchingWorld = new LeagueBootstrapService(new GameCoreContext()).CreateTestLeague(teamSeedPath, WorldDefinition.Standard());
+            var generatedWorld = new LeagueBootstrapService(new GameCoreContext()).CreateTestLeague(teamSeedPath, WorldDefinition.Generated(987654321UL));
+            Require(string.Equals(SnapshotWorldPopulation(league), SnapshotWorldPopulation(matchingWorld), StringComparison.Ordinal), "Standard roster generation should be repeatable.");
+            Require(!string.Equals(SnapshotWorldPopulation(league), SnapshotWorldPopulation(generatedWorld), StringComparison.Ordinal), "Generated roster seed should produce a different starting world.");
             if (!string.IsNullOrWhiteSpace(teamSeedPath))
             {
                 Require(league.Teams.Any(team => string.Equals(team.Name, "Chicago Cyclones", StringComparison.Ordinal)), "Seeded team data did not load Chicago Cyclones.");
@@ -57,6 +70,32 @@ public static class GameCoreSmokeTest
             Require(firstRegularSeasonGame.PhaseWeek == 1, $"First regular-season game should display as week 1, got {firstRegularSeasonGame.PhaseWeek}.");
             Require(string.Equals(firstRegularSeasonGame.WeekLabel, "Regular Season Week 1", StringComparison.Ordinal), $"Unexpected first regular-season label: {firstRegularSeasonGame.WeekLabel}");
             ValidateLeagueScheduleStructure(league, scheduleService);
+            Pass(result, currentStep);
+
+            currentStep = "Contract negotiation foundation";
+            var contractContext = new GameCoreContext();
+            var contractLeague = new LeagueBootstrapService(contractContext).CreateTestLeague(teamSeedPath);
+            var contractTestService = new ContractService(contractContext);
+            var contractTeam = contractLeague.Teams.OrderByDescending(contractTestService.GetCapRoom).First();
+            var contractPlayer = contractLeague.FreeAgents.First();
+            var requiredSalary = contractTestService.GetRequiredAnnualSalary(contractPlayer, contractTeam);
+            var declined = contractTestService.SignFreeAgent(contractPlayer.PlayerId, contractTeam.TeamId, new ContractOffer
+            {
+                AnnualSalary = requiredSalary * 0.5m,
+                GuaranteedSalary = 0m,
+                Years = 2,
+            });
+            Require(declined.Ok && !declined.Accepted, "Low free-agent offer should be declined without a transaction.");
+            var rosterCountBeforeSigning = contractTeam.Roster.Count;
+            var accepted = contractTestService.SignFreeAgent(contractPlayer.PlayerId, contractTeam.TeamId, new ContractOffer
+            {
+                AnnualSalary = requiredSalary * 1.15m,
+                GuaranteedSalary = requiredSalary * 0.30m,
+                Years = 2,
+            });
+            Require(accepted.Ok && accepted.Accepted, accepted.Message);
+            Require(contractTeam.Roster.Count == rosterCountBeforeSigning + 1 && !contractLeague.FreeAgents.Any(player => player.PlayerId == contractPlayer.PlayerId), "Accepted free agent should move into the signing team's roster.");
+            Require(Math.Abs(contractTestService.GetCapRoom(contractTeam) - contractTeam.CapRoom) < 1m, "Signing should refresh the team's cap room.");
             Pass(result, currentStep);
 
             currentStep = "Dashboard state";
@@ -450,6 +489,12 @@ public static class GameCoreSmokeTest
             var loadedDepthChartService = new DepthChartService(loadedContext);
             var loadedStandingsService = new StandingsService(loadedContext);
             Require(loadedContext.ActiveLeague.Results.Count == context.ActiveLeague.Results.Count, "Loaded league result count does not match saved league.");
+            Require(loadedContext.ActiveLeague.SalaryCap == context.ActiveLeague.SalaryCap, "Loaded league did not preserve the salary cap.");
+            Require(loadedContext.ActiveLeague.FreeAgents.Count == context.ActiveLeague.FreeAgents.Count, "Loaded league did not preserve free agents.");
+            Require(loadedContext.ActiveLeague.Teams.All(team => team.Roster.All(player => player.Contract != null && player.Morale >= 0 && player.Morale <= 100)), "Loaded league did not preserve player contract and morale data.");
+            Require(loadedContext.ActiveLeague.CollegeProspects.Count == context.ActiveLeague.CollegeProspects.Count, "Loaded league did not preserve college prospects.");
+            Require(loadedContext.ActiveLeague.Teams.All(team => team.Coaches.Count == LeagueBootstrapService.CoachesPerTeam), "Loaded league did not preserve coaching staffs.");
+            Require(loadedContext.ActiveLeague.FranchiseMetadata.World.Seed == context.ActiveLeague.FranchiseMetadata.World.Seed, "Loaded league did not preserve the world seed.");
             var loadedStandings = loadedStandingsService.GetStandings();
             Require(loadedStandings.Ok, loadedStandings.Error);
             var loadedUserStanding = loadedStandings.Standings.FirstOrDefault(row => string.Equals(row.TeamId, loadedContext.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase));
@@ -537,6 +582,13 @@ public static class GameCoreSmokeTest
     private static void Pass(GameCoreSmokeTestResult result, string step)
     {
         result.Steps.Add($"PASS {step}");
+    }
+
+    private static string SnapshotWorldPopulation(LeagueState league)
+    {
+        var coaches = string.Join("|", league.Teams.SelectMany(team => team.Coaches).Select(coach => $"{coach.Name}:{coach.Overall}"));
+        var prospects = string.Join("|", league.CollegeProspects.Take(24).Select(prospect => $"{prospect.Name}:{prospect.Position}:{prospect.Overall}:{prospect.Potential}"));
+        return $"{coaches}#{prospects}";
     }
 
     private static void ValidateSimUntilBehavior()
