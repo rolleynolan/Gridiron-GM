@@ -1,5 +1,14 @@
 __pycache__/
+**/__pycache__/
 *.py[cod]
+**/*.pyc
 *.egg-info/
 .pytest_cache/
+zz_tmp_test/
+.ggm-tmp/
 data/
+backend.log
+/Godot/.godot/
+/gridiron_gm_pkg/data/saves/
+/dna_output/
+/tmp*/

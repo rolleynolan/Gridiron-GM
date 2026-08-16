@@ -1,12 +1,9 @@
 import datetime
+import random
 from uuid import uuid4
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict, is_dataclass
 from typing import List, Dict, Optional
 from gridiron_gm_pkg.simulation.systems.player.player_dna import PlayerDNA
-<<<<<<< HEAD
-=======
-from gridiron_gm_pkg.engine.free_agency.free_agent_profile import FreeAgentProfile
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
 # Generic attributes shared by all players
 CORE_ATTRIBUTES = [
@@ -21,13 +18,67 @@ CORE_ATTRIBUTES = [
     "balance",
     "discipline",
     "consistency",
-<<<<<<< HEAD
-=======
-    "tackling",
-    "catching",
-    "return_skill",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 ]
+
+
+def generate_pot(
+    position: str,
+    age: int,
+    league_level: str = "pro",
+    rng: random.Random | None = None,
+) -> int:
+    rng = rng or random
+    pos = (position or "").upper()
+    if pos in {"QB"}:
+        weights = [0.1, 0.4, 0.35, 0.15]
+    elif pos in {"K", "P"}:
+        weights = [0.3, 0.45, 0.2, 0.05]
+    elif pos in {"RB", "WR", "TE", "CB", "S"}:
+        weights = [0.12, 0.45, 0.3, 0.13]
+    else:
+        weights = [0.15, 0.5, 0.25, 0.1]
+
+    if league_level == "college":
+        weights = [max(0.05, w - 0.02) for w in weights]
+        weights[-1] += 0.06
+        weights[-2] += 0.02
+
+    if age <= 21:
+        weights[0] = max(0.02, weights[0] - 0.05)
+        weights[1] = max(0.05, weights[1] - 0.05)
+        weights[2] += 0.05
+        weights[3] += 0.05
+    elif age >= 23:
+        weights[0] += 0.05
+        weights[1] += 0.05
+        weights[2] = max(0.05, weights[2] - 0.05)
+        weights[3] = max(0.02, weights[3] - 0.05)
+
+    total = sum(weights)
+    weights = [w / total for w in weights]
+    roll = rng.random()
+    thresholds = [weights[0], weights[0] + weights[1], weights[0] + weights[1] + weights[2]]
+    if roll < thresholds[0]:
+        low, high = 60, 69
+    elif roll < thresholds[1]:
+        low, high = 70, 79
+    elif roll < thresholds[2]:
+        low, high = 80, 89
+    else:
+        low, high = 90, 99
+    return int(rng.randint(low, high))
+
+
+def ensure_pot(player, league_level: str = "pro") -> bool:
+    pot = getattr(player, "pot", None)
+    if pot is not None:
+        return False
+    pot = generate_pot(getattr(player, "position", ""), getattr(player, "age", 22), league_level)
+    overall = getattr(player, "overall", 0)
+    pot = max(int(round(pot)), int(round(overall)))
+    pot = min(pot, 99)
+    setattr(player, "pot", pot)
+    return True
 
 
 @dataclass
@@ -48,6 +99,17 @@ class Contract:
     years: int
     salary_per_year: int
     bonuses: Dict[str, int] = field(default_factory=dict)
+    guaranteed: int = 0
+    contract_type: str = "veteran"
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "years": self.years,
+            "salary_per_year": self.salary_per_year,
+            "bonuses": dict(self.bonuses),
+            "guaranteed": self.guaranteed,
+            "contract_type": self.contract_type,
+        }
 
 
 class Player:
@@ -145,23 +207,25 @@ class Player:
         self._set_core_attr("discipline", value)
 
     @property
+    def discipline_rating(self) -> int:
+        return self.resolve_discipline_rating()
+
+    @discipline_rating.setter
+    def discipline_rating(self, value: int) -> None:
+        self.discipline = value
+
+    @property
     def consistency(self) -> Optional[int]:
         return self._get_core_attr("consistency")
 
     @consistency.setter
     def consistency(self, value: int) -> None:
         self._set_core_attr("consistency", value)
-<<<<<<< HEAD
-=======
 
     @property
-    def return_skill(self) -> Optional[int]:
-        return self._get_core_attr("return_skill")
+    def position_specific(self) -> Dict[str, int]:
+        return getattr(self, "attributes", AttributeSet()).position_specific
 
-    @return_skill.setter
-    def return_skill(self, value: int) -> None:
-        self._set_core_attr("return_skill", value)
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     def __init__(
         self,
         name,
@@ -173,6 +237,7 @@ class Player:
         jersey_number,
         overall,
         potential=None,
+        is_college: bool = False,
     ):
         self.id = str(uuid4())
         self.name = name
@@ -183,13 +248,18 @@ class Player:
         self.birth_location = birth_location
         self.jersey_number = jersey_number
         self.overall = overall
-        self.potential = None
+        self.potential = overall if potential is None else potential
+        if potential is None:
+            pot_value = generate_pot(self.position, self.age)
+        else:
+            pot_value = potential
+        pot_value = max(int(round(pot_value)), int(round(self.overall)))
+        self.pot = min(pot_value, 99)
 
         # Initialize attribute containers
         core_attrs = self.init_core_attributes()
         pos_attrs = self.init_position_attributes()
 
-        self.position_specific = pos_attrs
         self.attributes = AttributeSet(core=core_attrs, position_specific=pos_attrs)
 
         # --- Off-field attributes
@@ -211,27 +281,23 @@ class Player:
         self.drafted_by = None
         self.draft_round = None
         self.draft_pick = None
-<<<<<<< HEAD
-=======
-        self.draft_class_year = None
-        self.is_draft_eligible = False
-        self.rookie = False
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
         self.injuries = []
         self.injury_history = []
+        # Legacy fields (ignored for gameplay logic; kept for backward compatibility)
         self.weeks_out = 0
         self.retired_due_to_injury = False
         self.retired = False
         self.on_injured_reserve = False
         self.is_injured = False
+        self.injury_status = "healthy"
+        self.injury_name = None
+        self.injury_start_date = None
+        self.injury_end_date = None
+        self.injury_severity = None
         # Track active temporary penalties from injuries
         self.active_injury_effects = {}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         self.traits = {
             "training": [],
             "gameday": [],
@@ -264,8 +330,7 @@ class Player:
         self.progress_history = {}
 
         # --- Procedural DNA profile ---
-        self.dna = PlayerDNA.generate_random_dna(self.position)
-<<<<<<< HEAD
+        self.dna = PlayerDNA.generate_random_dna(self.position, is_college=is_college)
 
         relevant = self.get_relevant_attribute_names()
         self.hidden_caps = {}
@@ -284,36 +349,43 @@ class Player:
                 self.attributes.core[attr] = cur
             else:
                 self.attributes.position_specific[attr] = cur
-=======
-        self.mutations = [m.name.lower() for m in self.dna.mutations]
+        self.normalize_ratings()
+        self.attribute_xp = {}
+        from gridiron_gm_pkg.simulation.systems.player.attribute_xp import sync_xp_from_rating
 
-        self.generate_caps()
+        sync_xp_from_rating(self)
 
-        # Profile used when the player is a free agent
-        self.free_agent_profile = FreeAgentProfile(self)
+    def _compute_overall(self) -> int:
+        attrs = getattr(self, "attributes", None)
+        if attrs is None:
+            return int(round(getattr(self, "overall", 0)))
+        values = []
+        for container in (attrs.core, attrs.position_specific):
+            for val in container.values():
+                if isinstance(val, (int, float)):
+                    values.append(val)
+        if not values:
+            return int(round(getattr(self, "overall", 0)))
+        return int(round(sum(values) / len(values)))
 
-    def decrement_contract_year(self) -> None:
-        """Reduce remaining years on contract and flag expiration."""
-        if not self.contract:
-            return
-        years_left = self.contract.get("years_left")
-        if years_left is None:
-            years_left = self.contract.get("years", 0)
-        years_left = max(0, years_left - 1)
-        self.contract["years_left"] = years_left
-        self.contract["expiring"] = years_left == 0
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+    def normalize_ratings(self) -> None:
+        attrs = getattr(self, "attributes", None)
+        if attrs is not None:
+            for container in (attrs.core, attrs.position_specific):
+                for key, val in list(container.items()):
+                    if isinstance(val, (int, float)):
+                        container[key] = max(0, min(99, int(round(val))))
+        self.overall = max(0, min(99, self._compute_overall()))
+        pot_value = getattr(self, "pot", None)
+        if not isinstance(pot_value, (int, float)):
+            pot_value = self.overall
+        pot_value = max(0, min(99, int(round(pot_value))))
+        self.pot = max(pot_value, self.overall)
 
     def init_core_attributes(self):
         """Return baseline attribute mapping common to all players."""
         core = {attr: None for attr in CORE_ATTRIBUTES}
         core["stamina"] = 80
-<<<<<<< HEAD
-=======
-        core["tackling"] = 40
-        core["catching"] = 40
-        core["return_skill"] = 20
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         return core
 
     def init_position_attributes(self):
@@ -323,10 +395,6 @@ class Player:
         if position in ["QB"]:
             attrs = [
                 "throw_power",
-<<<<<<< HEAD
-=======
-                "throw_velocity",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 "throw_accuracy_short",
                 "throw_accuracy_mid",
                 "throw_accuracy_deep",
@@ -346,12 +414,7 @@ class Player:
                 "trucking",
                 "carry_security",
                 "pass_block",
-<<<<<<< HEAD
                 "route_running",
-=======
-                "route_running_short",
-                "throw_power",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 "catching",
             ]
         elif position in ["WR"]:
@@ -365,14 +428,6 @@ class Player:
                 "route_running_deep",
                 "separation",
                 "run_blocking",
-<<<<<<< HEAD
-=======
-                "carry_security",
-                "elusiveness",
-                "break_tackle",
-                "trucking",
-
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             ]
         elif position in ["TE"]:
             attrs = [
@@ -393,11 +448,7 @@ class Player:
                 "run_block",
                 "impact_blocking",
                 "block_shed_resistance",
-<<<<<<< HEAD
                 "footwork_ol",
-=======
-                "block_footwork",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
                 "lead_blocking",
             ]
         elif position in ["EDGE", "DE"]:
@@ -478,38 +529,13 @@ class Player:
     def get_all_attributes(self) -> Dict[str, int]:
         """Return combined core and position-specific attribute mapping."""
         attrs = {}
-        attrs.update(self.attributes.core)
-        attrs.update(self.attributes.position_specific)
+        attrs.update(getattr(self, "attributes", AttributeSet()).core)
+        attrs.update(getattr(self, "attributes", AttributeSet()).position_specific)
         return attrs
 
     def get_relevant_attribute_names(self) -> List[str]:
-<<<<<<< HEAD
         """Return list of all attribute names used for this player."""
         return list(self.get_all_attributes().keys())
-=======
-        """Return list of attribute names relevant to this player's position."""
-        names = list(self.attributes.core.keys()) + list(self.position_specific.keys())
-        for base in ["tackling", "catching"]:
-            if base not in names:
-                names.append(base)
-        return names
-
-    def generate_caps(self) -> None:
-        """Initialize hidden and scouted caps using the player's DNA."""
-        relevant = self.get_relevant_attribute_names()
-        self.hidden_caps = {}
-        self.scouted_potential = {}
-        for attr in relevant:
-            cap_info = self.dna.attribute_caps.get(attr, {}) if hasattr(self, "dna") else {}
-            cur = cap_info.get("current", 20)
-            hard_cap = cap_info.get("hard_cap", 20)
-            self.hidden_caps[attr] = hard_cap
-            self.scouted_potential[attr] = self.dna.scouted_caps.get(attr, hard_cap) if hasattr(self, "dna") else hard_cap
-            if attr in self.attributes.core:
-                self.attributes.core[attr] = cur
-            else:
-                self.attributes.position_specific[attr] = cur
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     def add_trait(self, category, trait):
         if category in self.traits:
@@ -524,7 +550,9 @@ class Player:
             base += 0.05
 
         # Adjust fatigue rate based on stamina (lower stamina increases fatigue)
-        base *= (100 - self.stamina) / 100
+        stamina = self.stamina if self.stamina is not None else 80
+        base *= (100 - stamina) / 100
+        return max(0.01, float(base))
 
     def fatigue_threshold(self):
         """Return the fatigue level at which the player is considered tired."""
@@ -554,12 +582,30 @@ class Player:
             self.sub_cooldown -= 1
 
     def add_injury(self, injury):
-        self.injuries.append(injury)
-        self.injury_history.append(injury)
-        self.weeks_out = injury.weeks_out
-        self.is_injured = True
+        """Legacy hook for old injury objects; converts to status-based fields."""
+        from gridiron_gm_pkg.simulation.systems.player.injury_status import apply_simple_injury
+
+        name = getattr(injury, "name", None) or str(injury)
+        weeks_out = getattr(injury, "weeks_out", None)
+        severity = getattr(injury, "severity", None)
+        if weeks_out:
+            duration_days = max(1, int(weeks_out) * 7)
+            apply_simple_injury(self, datetime.date.today(), duration_days, name, severity=severity)
+        else:
+            self.injury_status = "out"
+            self.injury_name = name
+            self.injury_start_date = datetime.date.today()
+            self.injury_end_date = None
+            self.injury_severity = None
+        if isinstance(self.injuries, list):
+            self.injuries.append(name)
+        if isinstance(self.injury_history, list):
+            self.injury_history.append(name)
+        self.weeks_out = 0
+        self.is_injured = False
 
     def recover_one_week(self):
+        """Legacy no-op for the deprecated weeks_out injury model."""
         if self.weeks_out > 0:
             if "Quick Recovery" in self.traits.get("physical", []):
                 self.weeks_out = max(1, int((self.weeks_out - 1) * 0.90))
@@ -570,16 +616,70 @@ class Player:
                 self.is_injured = False
 
     def get_effective_attribute(self, attr: str):
-        """Return attribute value adjusted for any active injury effects."""
+        """Return the attribute value factoring in active injury penalties."""
+        attrs = getattr(self, "attributes", None)
         base = None
-        if attr in self.position_specific:
-            base = self.position_specific.get(attr)
-        elif hasattr(self, attr):
-            base = getattr(self, attr)
-        impact = self.active_injury_effects.get(attr, 0)
+        if attrs is not None and attr in attrs.core:
+            base = attrs.core.get(attr)
+        elif attrs is not None and attr in attrs.position_specific:
+            base = attrs.position_specific.get(attr)
+        else:
+            base = getattr(self, attr, None)
+
         if base is None:
-            return None
-        return base + impact
+            base = 0
+
+        effects = getattr(self, "active_injury_effects", {})
+        penalty = 0
+        if isinstance(effects, dict):
+            penalty = effects.get(attr, 0)
+        else:
+            for eff in effects:
+                if isinstance(eff, dict) and eff.get("attribute") == attr:
+                    penalty += eff.get("change", 0)
+
+        return base + penalty
+
+    def resolve_discipline_rating(self, default: int = 50) -> int:
+        """Return a backward-compatible discipline rating for mixed save formats."""
+        candidates = []
+        direct = self.__dict__.get("discipline_rating")
+        if direct is not None:
+            candidates.append(direct)
+        discipline = self.__dict__.get("discipline")
+        if discipline is not None:
+            candidates.append(discipline)
+
+        attrs = getattr(self, "attributes", None)
+        if attrs is not None:
+            core = getattr(attrs, "core", None)
+            if isinstance(core, dict):
+                candidates.append(core.get("discipline"))
+            ratings = getattr(attrs, "ratings", None)
+            if isinstance(ratings, dict):
+                candidates.append(ratings.get("discipline"))
+
+        raw_attrs = self.__dict__.get("attributes")
+        if isinstance(raw_attrs, dict):
+            core = raw_attrs.get("core")
+            if isinstance(core, dict):
+                candidates.append(core.get("discipline"))
+            ratings = raw_attrs.get("ratings")
+            if isinstance(ratings, dict):
+                candidates.append(ratings.get("discipline"))
+
+        ratings = getattr(self, "ratings", None)
+        if isinstance(ratings, dict):
+            candidates.append(ratings.get("discipline"))
+
+        for value in candidates:
+            if value is None:
+                continue
+            try:
+                return max(0, min(99, int(round(float(value)))))
+            except (TypeError, ValueError):
+                continue
+        return max(0, min(99, int(default)))
 
     def update_career_stats_from_season(self, year, game_world=None) -> List[str]:
         """Aggregate a season's totals into ``career_stats`` and check milestones.
@@ -650,99 +750,118 @@ class Player:
             self.overall += 2
         if "Lazy" in self.traits["training"]:
             self.overall -= 1
-        # Ensure overall remains within valid bounds
-        self.overall = max(0, min(self.overall, 100))
+        self.normalize_ratings()
 
-    def get_effective_attribute(self, attr: str):
-        """Return the attribute value factoring in active injury penalties."""
-        if attr in self.attributes.core:
-            base = self.attributes.core.get(attr)
-        elif attr in self.attributes.position_specific:
-            base = self.attributes.position_specific.get(attr)
-        else:
-            base = getattr(self, attr, None)
-
-        if base is None:
-            return None
-
-        effects = getattr(self, "active_injury_effects", {})
-        penalty = 0
-        if isinstance(effects, dict):
-            penalty = effects.get(attr, 0)
-        else:
-            for eff in effects:
-                if isinstance(eff, dict) and eff.get("attribute") == attr:
-                    penalty += eff.get("change", 0)
-
-        return base + penalty
+    def _serialize_value(self, value):
+        if value is None or isinstance(value, (str, int, float, bool)):
+            return value
+        if isinstance(value, (datetime.date, datetime.datetime)):
+            return value.isoformat()
+        if isinstance(value, dict):
+            serialized = {}
+            for key, item in value.items():
+                if isinstance(key, (str, int, float, bool)) or key is None:
+                    key_out = key
+                else:
+                    key_out = str(key)
+                serialized[key_out] = self._serialize_value(item)
+            return serialized
+        if isinstance(value, (list, tuple, set)):
+            return [self._serialize_value(item) for item in value]
+        if hasattr(value, "to_dict"):
+            try:
+                payload = value.to_dict()
+            except Exception:
+                payload = None
+            if payload is not None:
+                return self._serialize_value(payload)
+        if is_dataclass(value) and not isinstance(value, type):
+            try:
+                payload = asdict(value)
+            except Exception:
+                payload = None
+            if payload is not None:
+                return self._serialize_value(payload)
+        try:
+            return str(value)
+        except Exception:
+            return "<unprintable>"
 
     def to_dict(self):
+        contract_payload = None
+        contract = getattr(self, "contract", None)
+        if contract is not None:
+            if hasattr(contract, "to_dict"):
+                try:
+                    contract_payload = contract.to_dict()
+                except Exception:
+                    contract_payload = None
+            if contract_payload is None and is_dataclass(contract) and not isinstance(contract, type):
+                try:
+                    contract_payload = asdict(contract)
+                except Exception:
+                    contract_payload = None
+            if contract_payload is None:
+                contract_payload = str(contract)
         return {
             "id": self.id,
             "name": self.name,
             "position": self.position,
             "age": self.age,
-            "dob": self.dob.isoformat() if hasattr(self.dob, "isoformat") else self.dob,
+            "dob": self._serialize_value(self.dob),
             "college": self.college,
             "birth_location": self.birth_location,
             "jersey_number": self.jersey_number,
             "overall": self.overall,
             "potential": self.potential,
+            "pot": self.pot,
             "fatigue": self.fatigue,
-            "skills": self.skills,
-            "traits": self.traits,
-            "notes": self.notes,
-            "contract": self.contract,
+            "skills": self._serialize_value(self.skills),
+            "traits": self._serialize_value(self.traits),
+            "notes": self._serialize_value(self.notes),
+            "contract": self._serialize_value(contract_payload),
             "experience": self.experience,
-            "injuries": [i for i in self.injuries],
-<<<<<<< HEAD
-=======
-            "injury_history": [i for i in self.injury_history],
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
-            "weeks_out": self.weeks_out,
+            "injuries": self._serialize_value(self.injuries),
+            "injury_status": getattr(self, "injury_status", "healthy"),
+            "injury_name": self._serialize_value(getattr(self, "injury_name", None)),
+            "injury_start_date": self._serialize_value(getattr(self, "injury_start_date", None)),
+            "injury_end_date": self._serialize_value(getattr(self, "injury_end_date", None)),
             "retired_due_to_injury": self.retired_due_to_injury,
             "retired": self.retired,
             "morale": self.morale,
-            "playtime_history": self.playtime_history,
-            "career_stats": self.career_stats,
-            "season_stats": self.season_stats,
+            "playtime_history": self._serialize_value(self.playtime_history),
+            "career_stats": self._serialize_value(self.career_stats),
+            "season_stats": self._serialize_value(self.season_stats),
             "on_injured_reserve": self.on_injured_reserve,
-            "is_injured": self.is_injured,
             "snaps": self.snaps,
-            "snap_counts": self.snap_counts,
-            "milestones_hit": list(self.milestones_hit),
+            "snap_counts": self._serialize_value(self.snap_counts),
+            "milestones_hit": self._serialize_value(list(self.milestones_hit)),
             "motivation": self.motivation,
             "loyalty": self.loyalty,
             "ambition": self.ambition,
             "greed": self.greed,
             "passion": self.passion,
             "resilience": self.resilience,
-            "position_specific": self.position_specific,
-            "attributes": {
-                "core": self.attributes.core,
-                "position_specific": self.attributes.position_specific,
-            },
-            "active_injury_effects": self.active_injury_effects,
+            "position_specific": self._serialize_value(self.position_specific),
+            "attributes": self._serialize_value(
+                {
+                    "core": self.attributes.core,
+                    "position_specific": self.attributes.position_specific,
+                }
+            ),
+            "attribute_xp": self._serialize_value(getattr(self, "attribute_xp", {})),
+            "active_injury_effects": self._serialize_value(self.active_injury_effects),
+            "injury_severity": self._serialize_value(getattr(self, "injury_severity", None)),
             "rookie_year": self.rookie_year,
             "drafted_by": self.drafted_by,
             "draft_round": self.draft_round,
             "draft_pick": self.draft_pick,
-<<<<<<< HEAD
-=======
-            "draft_class_year": self.draft_class_year,
-            "is_draft_eligible": self.is_draft_eligible,
-            "rookie": self.rookie,
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
-            "hidden_caps": self.hidden_caps,
-            "scouted_potential": self.scouted_potential,
-            "last_attribute_values": self.last_attribute_values,
-            "no_growth_years": self.no_growth_years,
-            "progress_history": self.progress_history,
-            "dna": self.dna.to_dict() if hasattr(self, "dna") else None,
-<<<<<<< HEAD
-=======
-            "mutations": self.mutations,
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+            "hidden_caps": self._serialize_value(self.hidden_caps),
+            "scouted_potential": self._serialize_value(self.scouted_potential),
+            "last_attribute_values": self._serialize_value(self.last_attribute_values),
+            "no_growth_years": self._serialize_value(self.no_growth_years),
+            "progress_history": self._serialize_value(self.progress_history),
+            "dna": self._serialize_value(self.dna.to_dict() if hasattr(self, "dna") else None),
         }
 
     @staticmethod
@@ -763,24 +882,49 @@ class Player:
             potential=data.get("potential"),
         )
         player.fatigue = data.get("fatigue", 0)
+        pot_value = data.get("pot")
+        if pot_value is None:
+            pot_value = data.get("potential")
+        if pot_value is None:
+            pot_value = data.get("pot_rating")
         player.skills = data.get("skills", {})
         player.traits = data.get(
             "traits", {"training": [], "mental": [], "gameday": [], "media": []}
         )
         player.notes = data.get("notes", [])
         player.contract = data.get("contract", None)
-<<<<<<< HEAD
         player.experience = data.get("experience", 0)
         player.injuries = data.get("injuries", [])
-=======
-        if player.contract is not None:
-            if "years_left" not in player.contract:
-                player.contract["years_left"] = player.contract.get("years", 0)
-            player.contract.setdefault("expiring", player.contract.get("years_left", 0) == 0)
-        player.experience = data.get("experience", 0)
-        player.injuries = data.get("injuries", [])
-        player.injury_history = data.get("injury_history", [])
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+        from gridiron_gm_pkg.simulation.systems.player.injury_status import normalize_injury_status
+
+        status = data.get("injury_status", "healthy")
+        player.injury_status = normalize_injury_status(status)
+        player.injury_name = data.get("injury_name")
+        injury_start_date = data.get("injury_start_date")
+        if isinstance(injury_start_date, str):
+            try:
+                injury_start_date = datetime.date.fromisoformat(injury_start_date)
+            except ValueError:
+                injury_start_date = None
+        elif isinstance(injury_start_date, datetime.datetime):
+            injury_start_date = injury_start_date.date()
+        player.injury_start_date = injury_start_date
+        injury_end_date = data.get("injury_end_date")
+        if isinstance(injury_end_date, str):
+            try:
+                injury_end_date = datetime.date.fromisoformat(injury_end_date)
+            except ValueError:
+                injury_end_date = None
+        elif isinstance(injury_end_date, datetime.datetime):
+            injury_end_date = injury_end_date.date()
+        player.injury_end_date = injury_end_date
+        injury_severity = data.get("injury_severity")
+        if injury_severity is not None:
+            try:
+                injury_severity = int(injury_severity)
+            except (TypeError, ValueError):
+                injury_severity = None
+        player.injury_severity = injury_severity
         player.weeks_out = data.get("weeks_out", 0)
         player.retired_due_to_injury = data.get("retired_due_to_injury", False)
         player.retired = data.get("retired", False)
@@ -790,16 +934,6 @@ class Player:
         player.season_stats = data.get("season_stats", {})
         player.on_injured_reserve = data.get("on_injured_reserve", False)
         player.is_injured = data.get("is_injured", False)
-<<<<<<< HEAD
-=======
-        player.rookie_year = data.get("rookie_year")
-        player.drafted_by = data.get("drafted_by")
-        player.draft_round = data.get("draft_round")
-        player.draft_pick = data.get("draft_pick")
-        player.draft_class_year = data.get("draft_class_year")
-        player.is_draft_eligible = data.get("is_draft_eligible", False)
-        player.rookie = data.get("rookie", False)
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
         player.snap_counts = data.get("snap_counts", {})
         player.milestones_hit = set(data.get("milestones_hit", []))
         player.active_injury_effects = data.get("active_injury_effects", [])
@@ -813,8 +947,8 @@ class Player:
         player.greed = data.get("greed")
         player.passion = data.get("passion")
         player.resilience = data.get("resilience")
-        player.position_specific = data.get(
-            "position_specific", player.position_specific
+        player.attributes.position_specific = data.get(
+            "position_specific", player.attributes.position_specific
         )
         player.active_injury_effects = data.get("active_injury_effects", {})
         player.hidden_caps = data.get("hidden_caps", {})
@@ -827,14 +961,13 @@ class Player:
             core = attrs_data.get("core", {})
             pos = attrs_data.get("position_specific", {})
             player.attributes = AttributeSet(core=core, position_specific=pos)
-            player.position_specific = pos
         else:
-            player.position_specific = data.get(
-                "position_specific", player.position_specific
+            player.attributes.position_specific = data.get(
+                "position_specific", player.attributes.position_specific
             )
             player.attributes = AttributeSet(
                 core=player.init_core_attributes(),
-                position_specific=player.position_specific,
+                position_specific=player.attributes.position_specific,
             )
 
         dna_data = data.get("dna")
@@ -842,7 +975,15 @@ class Player:
             player.dna = PlayerDNA.from_dict(dna_data)
         else:
             player.dna = PlayerDNA.generate_random_dna(player.position)
-<<<<<<< HEAD
+        if pot_value is None:
+            if hasattr(player.dna, "potential"):
+                pot_value = getattr(player.dna, "potential")
+            elif hasattr(player.dna, "pot"):
+                pot_value = getattr(player.dna, "pot")
+        if pot_value is None:
+            pot_value = generate_pot(player.position, player.age)
+        pot_value = max(int(round(pot_value)), int(round(getattr(player, "overall", 0))))
+        player.pot = min(pot_value, 99)
         if not player.hidden_caps:
             player.hidden_caps = {}
             for attr in player.get_relevant_attribute_names():
@@ -856,15 +997,23 @@ class Player:
                 attr: player.dna.scouted_caps.get(attr, player.hidden_caps.get(attr, 20))
                 for attr in player.get_relevant_attribute_names()
             }
-=======
-        player.mutations = data.get(
-            "mutations",
-            [m.name.lower() for m in getattr(player.dna, "mutations", [])],
+        player.normalize_ratings()
+        xp_payload = data.get("attribute_xp", {})
+        xp_map = {}
+        if isinstance(xp_payload, dict):
+            for key, val in xp_payload.items():
+                try:
+                    xp_map[str(key)] = int(round(val))
+                except (TypeError, ValueError):
+                    continue
+        player.attribute_xp = xp_map
+        from gridiron_gm_pkg.simulation.systems.player.attribute_xp import (
+            apply_xp_to_player,
+            sync_xp_from_rating,
         )
-        if not player.hidden_caps or not player.scouted_potential:
-            player.generate_caps()
-        player.free_agent_profile = FreeAgentProfile(player)
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+
+        sync_xp_from_rating(player)
+        apply_xp_to_player(player)
         return player
 
 
@@ -879,4 +1028,4 @@ def ensure_player_objects(team):
             new_roster.append(Player.from_dict(p))
         else:
             new_roster.append(p)
-    team.roster = new_roster
+    team.roster[:] = new_roster

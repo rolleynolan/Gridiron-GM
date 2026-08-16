@@ -41,6 +41,38 @@ PENALTIES = {
 # Minimum penalty chance floor (to avoid zero-penalty games)
 MIN_PENALTY_CHANCE = 0.0013  # +30% (was 0.001)
 
+
+def resolve_player_discipline_rating(player: Player, default: int = 50) -> int:
+    resolver = getattr(player, "resolve_discipline_rating", None)
+    if callable(resolver):
+        return resolver(default=default)
+
+    candidates = [
+        getattr(player, "discipline_rating", None),
+        getattr(player, "discipline", None),
+    ]
+    attributes = getattr(player, "attributes", None)
+    if hasattr(attributes, "core"):
+        core = getattr(attributes, "core", None)
+        if isinstance(core, dict):
+            candidates.append(core.get("discipline"))
+    if isinstance(attributes, dict):
+        core = attributes.get("core")
+        if isinstance(core, dict):
+            candidates.append(core.get("discipline"))
+    ratings = getattr(player, "ratings", None)
+    if isinstance(ratings, dict):
+        candidates.append(ratings.get("discipline"))
+
+    for value in candidates:
+        if value is None:
+            continue
+        try:
+            return max(0, min(99, int(round(float(value)))))
+        except (TypeError, ValueError):
+            continue
+    return max(0, min(99, int(default)))
+
 def simulate_penalty(player: Player, discipline_modifier: float = 0.0) -> str | None:
     for penalty, data in PENALTIES.items():
         if player.position not in data["positions"]:
@@ -51,7 +83,8 @@ def simulate_penalty(player: Player, discipline_modifier: float = 0.0) -> str | 
         else:
             base_chance = max(data.get("base_chance", MIN_PENALTY_CHANCE), MIN_PENALTY_CHANCE)
         trait_modifier = -0.01 if "Disciplined" in player.traits else 0.01 if "Hot-Headed" in player.traits else 0
-        discipline_penalty = (50 - player.discipline_rating) / 500
+        discipline_rating = resolve_player_discipline_rating(player)
+        discipline_penalty = (50 - discipline_rating) / 500
         discipline_penalty = max(discipline_penalty, -0.04)
         final_chance = max(base_chance + trait_modifier + discipline_penalty + discipline_modifier, MIN_PENALTY_CHANCE)
         roll = random.random()

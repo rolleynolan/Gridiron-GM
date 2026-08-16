@@ -8,37 +8,6 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, List, Optional
 
-<<<<<<< HEAD
-=======
-from gridiron_gm_pkg.simulation.systems.player import attribute_generator
-
-# === Position-based peak age ranges ===
-# These ranges roughly correspond to when players at each position
-# typically reach their athletic prime. They are used to generate
-# a growth arc tailored to the player's position.
-POSITION_PEAK_RANGES = {
-    "QB": (22, 32),
-    "RB": (22, 27),
-    "WR": (22, 28),
-    "TE": (22, 30),
-    "OL": (22, 32),
-    "DL": (22, 30),
-    "LB": (22, 31),
-    "DB": (22, 30),
-    "K": (22, 35),
-    "P": (22, 35),
-}
-
-
-@dataclass
-class GrowthArc:
-    """Age-based windows for a player's rise, peak and decline."""
-
-    peak_start_age: int
-    peak_end_age: int
-    decline_start_age: int
-
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 # === TRAITS (Behavioral Modifiers) ===
 TRAIT_POOL = [
     "Leader",
@@ -77,26 +46,6 @@ def assign_mutations() -> List[MutationType]:
     return random.sample(list(MutationType), 2)
 
 
-<<<<<<< HEAD
-=======
-def generate_growth_arc(position: str | None) -> GrowthArc:
-    """Create a positional growth arc describing rise, peak and decline ages."""
-    min_age, max_age = POSITION_PEAK_RANGES.get(position, (24, 30))
-    center = (min_age + max_age) / 2
-    base_peak_start = int(np.clip(random.normalvariate(center, 1.5), min_age, max_age))
-
-    peak_length = random.randint(3, 6)
-    peak_end = base_peak_start + peak_length
-    decline_start = peak_end + random.randint(1, 4)
-
-    return GrowthArc(
-        peak_start_age=base_peak_start,
-        peak_end_age=peak_end,
-        decline_start_age=decline_start,
-    )
-
-
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 def generate_dev_speed() -> float:
     """Generate development speed using a bell curve distribution."""
     value = random.normalvariate(0.65, 0.1)
@@ -137,40 +86,147 @@ ATTRIBUTE_DECAY_TYPE = {
     "throw_power": "skill",
     "throw_accuracy": "skill",
     "lead_blocking": "skill",
-<<<<<<< HEAD
-=======
-    "return_skill": "skill",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     # Mental
     "awareness": "mental",
     "iq": "mental",
     "vision": "mental",
     "play_recognition": "mental",
 }
+
+DEFAULT_CORE_ATTRIBUTES = [
+    "speed",
+    "acceleration",
+    "agility",
+    "strength",
+    "awareness",
+    "iq",
+    "stamina",
+    "toughness",
+    "balance",
+    "discipline",
+    "consistency",
+]
+
+PHYSICAL_ATTRIBUTE_NAMES = {
+    "speed",
+    "acceleration",
+    "agility",
+    "strength",
+    "stamina",
+    "toughness",
+    "balance",
+    "throw_power",
+    "kick_power",
+    "hang_time",
+    "trucking",
+    "break_tackle",
+    "hit_power",
+    "elusiveness",
+    "block_shed_resistance",
+    "impact_blocking",
+}
+
+PHYSICAL_TOKENS = (
+    "speed",
+    "acceleration",
+    "agility",
+    "strength",
+    "stamina",
+    "toughness",
+    "balance",
+    "power",
+    "jump",
+    "hang_time",
+    "trucking",
+    "break_tackle",
+    "hit_power",
+    "pursuit",
+)
+
+
+def _clamp_rating(value: float) -> int:
+    return max(0, min(99, int(round(value))))
+
+
+def _is_physical_attribute(attr: str) -> bool:
+    lower = str(attr).lower()
+    if lower in PHYSICAL_ATTRIBUTE_NAMES:
+        return True
+    return any(token in lower for token in PHYSICAL_TOKENS)
+
+
+def _get_relevant_attribute_names(position: str | None) -> List[str]:
+    try:
+        from gridiron_gm_pkg.simulation.entities import player as player_module
+    except Exception:
+        return list(DEFAULT_CORE_ATTRIBUTES)
+
+    dummy = type("DummyPlayer", (), {})()
+    dummy.position = position or ""
+    core_attrs = player_module.Player.init_core_attributes(dummy)
+    pos_attrs = player_module.Player.init_position_attributes(dummy)
+    ordered = list(core_attrs.keys()) + list(pos_attrs.keys())
+    seen = set()
+    relevant: List[str] = []
+    for name in ordered:
+        if name not in seen:
+            seen.add(name)
+            relevant.append(name)
+    return relevant
+
+
+def _sample_current(attr_type: str, is_college: bool, rng: random.Random) -> int:
+    if attr_type == "physical":
+        low, high, mode = (62, 90, 74) if is_college else (68, 92, 80)
+    else:
+        low, high, mode = (52, 88, 63) if is_college else (58, 90, 70)
+    return int(round(rng.triangular(low, high, mode)))
+
+
+def _sample_gap(attr_type: str, is_college: bool, rng: random.Random) -> int:
+    if attr_type == "physical":
+        low, high, mode = (0, 10, 3) if is_college else (0, 8, 2)
+        gap = int(round(rng.triangular(low, high, mode)))
+        if rng.random() < (0.03 if is_college else 0.02):
+            gap += rng.randint(2, 4)
+    else:
+        low, high, mode = (3, 22, 9) if is_college else (2, 18, 7)
+        gap = int(round(rng.triangular(low, high, mode)))
+        if rng.random() < (0.06 if is_college else 0.04):
+            gap += rng.randint(3, 7)
+    return max(0, gap)
 # === Mutation utility functions ===
 # === ATTRIBUTE CAPS STRUCTURE ===
-def generate_attribute_caps(dev_focus: Dict[str, float]) -> Dict[str, Dict]:
+def generate_attribute_caps(
+    dev_focus: Dict[str, float],
+    attributes: Optional[List[str]] = None,
+    is_college: bool = False,
+    rng: random.Random | None = None,
+) -> Dict[str, Dict]:
+    _ = dev_focus
+    rng = rng or random
+    attributes = attributes or _get_relevant_attribute_names(None)
     caps: Dict[str, Dict] = {}
-    for attr in [
-        "speed",
-        "strength",
-        "awareness",
-        "agility",
-        "tackle",
-        "catching",
-        "route_running_short",
-<<<<<<< HEAD
-=======
-        "return_skill",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
-    ]:
-        base = random.randint(70, 90)
-        soft_cap = int(base + random.randint(2, 5))
-        hard_cap = int(soft_cap + random.randint(2, 5))
+    for attr in attributes:
+        attr_type = "physical" if _is_physical_attribute(attr) else "mental"
+        current = _sample_current(attr_type, is_college, rng)
+        if is_college and attr_type != "physical":
+            current -= rng.randint(0, 4)
+        current = _clamp_rating(current)
+        gap = _sample_gap(attr_type, is_college, rng)
+        hard_cap = _clamp_rating(current + gap)
+        if hard_cap < current:
+            hard_cap = current
+        if hard_cap == current:
+            soft_cap = current
+        else:
+            soft_span = hard_cap - current
+            soft_gap = int(round(rng.triangular(0, soft_span, max(1.0, soft_span * 0.6))))
+            soft_cap = min(hard_cap, current + max(0, soft_gap))
         caps[attr] = {
-            "current": base,
-            "soft_cap": min(soft_cap, 98),
-            "hard_cap": min(hard_cap, 99),
+            "current": current,
+            "soft_cap": soft_cap,
+            "hard_cap": hard_cap,
             "breakout_history": [],
         }
     return caps
@@ -186,10 +242,6 @@ class PlayerDNA:
     peak_value: float = field(init=False)
     stability: float = field(init=False)
     career_arc: List[float] = field(init=False)
-<<<<<<< HEAD
-=======
-    growth_arc: GrowthArc = field(init=False)
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
     regression_profile: Dict[str, any] = field(init=False)
     attribute_decay_type: Dict[str, str] = field(init=False)
@@ -199,11 +251,7 @@ class PlayerDNA:
     mutations: List[MutationType] = field(init=False)
     attribute_caps: Dict[str, Dict] = field(init=False)
     scouted_caps: Dict[str, int] = field(init=False)
-<<<<<<< HEAD
-=======
-    injury_multiplier: float = field(init=False)
-    recovery_speed_bonus: float = field(init=False)
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+    growth_curve: str = field(init=False)
 
     def __post_init__(self) -> None:
         self.rise_duration = random.randint(1, 6)
@@ -212,10 +260,6 @@ class PlayerDNA:
         self.peak_value = round(random.uniform(0.85, 1.0), 2)
         self.stability = round(random.uniform(0.01, 0.05), 3)
         self.career_arc = self.generate_procedural_arc()
-<<<<<<< HEAD
-=======
-        self.growth_arc = generate_growth_arc(None)
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 
         self.regression_profile = DEFAULT_REGRESSION_PROFILE.copy()
         self.attribute_decay_type = ATTRIBUTE_DECAY_TYPE
@@ -225,11 +269,7 @@ class PlayerDNA:
         self.mutations = assign_mutations()
         self.attribute_caps = generate_attribute_caps(self.dev_focus)
         self.scouted_caps = self._generate_scouted_caps()
-<<<<<<< HEAD
-=======
-        self.injury_multiplier = 1.0
-        self.recovery_speed_bonus = 0.0
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+        self.growth_curve = "normal"
 
     def generate_procedural_arc(self, total_years: int = 25) -> List[float]:
         """Return an annual multiplier curve representing the player's career trajectory."""
@@ -257,11 +297,13 @@ class PlayerDNA:
         count = random.choices([0, 1, 2, 3], weights=[0.1, 0.4, 0.35, 0.15])[0]
         return random.sample(TRAIT_POOL, count)
 
-    def _generate_scouted_caps(self) -> Dict[str, int]:
-        offset = lambda cap: cap + random.randint(-5, 10)
-        return {
-            attr: offset(caps["hard_cap"]) for attr, caps in self.attribute_caps.items()
-        }
+    def _generate_scouted_caps(self, rng: random.Random | None = None) -> Dict[str, int]:
+        rng = rng or random
+
+        def offset(cap: int) -> int:
+            return _clamp_rating(cap + rng.randint(-5, 10))
+
+        return {attr: offset(int(caps["hard_cap"])) for attr, caps in self.attribute_caps.items()}
 
     # --- Mutation effects ---------------------------------------------------
     def _apply_mutation_boost(self, attribute_name: str, base_growth: float) -> float:
@@ -342,14 +384,6 @@ class PlayerDNA:
             "peak_value": self.peak_value,
             "stability": self.stability,
             "career_arc": self.career_arc,
-<<<<<<< HEAD
-=======
-            "growth_arc": {
-                "peak_start_age": self.growth_arc.peak_start_age,
-                "peak_end_age": self.growth_arc.peak_end_age,
-                "decline_start_age": self.growth_arc.decline_start_age,
-            },
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "regression_profile": self.regression_profile,
             "attribute_decay_type": self.attribute_decay_type,
             "dev_speed": self.dev_speed,
@@ -358,11 +392,7 @@ class PlayerDNA:
             "mutations": [m.name for m in self.mutations],
             "attribute_caps": self.attribute_caps,
             "scouted_caps": self.scouted_caps,
-<<<<<<< HEAD
-=======
-            "injury_multiplier": self.injury_multiplier,
-            "recovery_speed_bonus": self.recovery_speed_bonus,
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+            "growth_curve": self.growth_curve,
         }
 
     @classmethod
@@ -375,10 +405,6 @@ class PlayerDNA:
             "peak_value",
             "stability",
             "career_arc",
-<<<<<<< HEAD
-=======
-            "growth_arc",
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
             "regression_profile",
             "attribute_decay_type",
             "dev_speed",
@@ -386,61 +412,26 @@ class PlayerDNA:
             "traits",
             "attribute_caps",
             "scouted_caps",
-<<<<<<< HEAD
+            "growth_curve",
         ]:
             setattr(obj, field_name, data.get(field_name))
         obj.mutations = [MutationType[m] for m in data.get("mutations", [])]
-=======
-            "injury_multiplier",
-            "recovery_speed_bonus",
-        ]:
-            setattr(obj, field_name, data.get(field_name))
-        obj.mutations = [MutationType[m] for m in data.get("mutations", [])]
-        arc_data = data.get("growth_arc") or {}
-        obj.growth_arc = GrowthArc(
-            arc_data.get("peak_start_age", 0),
-            arc_data.get("peak_end_age", 0),
-            arc_data.get("decline_start_age", 0),
-        )
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
+        if not getattr(obj, "growth_curve", None):
+            obj.growth_curve = "normal"
         return obj
 
     # Convenience factory used by Player for compatibility
     @staticmethod
-<<<<<<< HEAD
-    def generate_random_dna(position: str | None = None) -> "PlayerDNA":
-        _ = position  # position is unused but kept for API compatibility
-        return PlayerDNA()
-=======
-    def generate_random_dna(position: str | None = None, level: str = "pro") -> "PlayerDNA":
+    def generate_random_dna(
+        position: str | None = None,
+        is_college: bool = False,
+        rng: random.Random | None = None,
+    ) -> "PlayerDNA":
+        rng = rng or random
         dna = PlayerDNA()
-        dna.growth_arc = generate_growth_arc(position)
-        if position:
-            attrs, caps = attribute_generator.generate_attributes_for_position(position)
-            attr_caps: Dict[str, Dict] = {}
-            for attr, val in attrs.items():
-                hard_cap = caps.get(attr, val)
-                attr_type = ATTRIBUTE_DECAY_TYPE.get(attr, "skill")
-
-                if level == "pro":
-                    if random.random() < 0.02:
-                        hard_cap = 99
-                    else:
-                        hard_cap = min(99, max(hard_cap, caps.get(attr, hard_cap)))
-                elif level == "college":
-                    if attr_type == "physical":
-                        hard_cap = min(99, max(hard_cap, random.randint(85, 99)))
-                    else:
-                        hard_cap = min(90, hard_cap)
-
-                soft_cap = min(hard_cap, max(val + random.randint(2, 5), val))
-                attr_caps[attr] = {
-                    "current": val,
-                    "soft_cap": soft_cap,
-                    "hard_cap": hard_cap,
-                    "breakout_history": [],
-                }
-            dna.attribute_caps = attr_caps
-            dna.scouted_caps = dna._generate_scouted_caps()
+        relevant = _get_relevant_attribute_names(position)
+        dna.attribute_caps = generate_attribute_caps(
+            dna.dev_focus, relevant, is_college=is_college, rng=rng
+        )
+        dna.scouted_caps = dna._generate_scouted_caps(rng=rng)
         return dna
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802

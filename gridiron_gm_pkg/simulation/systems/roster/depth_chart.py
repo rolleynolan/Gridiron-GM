@@ -1,9 +1,10 @@
-<<<<<<< HEAD
 from typing import List, Dict, Any, Tuple
+
+from gridiron_gm_pkg.simulation.systems.player.injury_status import is_available_for_game
 
 def get_healthy_players(players: List[Any]) -> List[Any]:
     """Return only players who are not marked as injured."""
-    return [p for p in players if not getattr(p, "is_injured", False)]
+    return [p for p in players if is_available_for_game(p)]
 
 class DepthChartManager:
     """
@@ -14,23 +15,6 @@ class DepthChartManager:
         self.team = team
         self.depth_chart = self._initialize_chart()
 
-=======
-from typing import List, Dict, Any, Tuple
-
-def get_healthy_players(players: List[Any]) -> List[Any]:
-    """Return only players who are not marked as injured."""
-    return [p for p in players if not getattr(p, "is_injured", False)]
-
-class DepthChartManager:
-    """
-    Handles a team's depth chart (player ordering by position),
-    starter assignment, and retrieval for simulation or UI.
-    """
-    def __init__(self, team: Dict[str, Any]):
-        self.team = team
-        self.depth_chart = self._initialize_chart()
-
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
     def _initialize_chart(self) -> Dict[str, List[Any]]:
         base_chart = {
             "QB": [], "RB": [], "WR": [], "TE": [],
@@ -52,7 +36,6 @@ class DepthChartManager:
                 base_chart[pos] = players
 
         return base_chart
-<<<<<<< HEAD
 
     def get_starters_by_scheme(self, scheme: Dict[str, int]) -> Dict[str, List[Any]]:
         """
@@ -76,31 +59,6 @@ class DepthChartManager:
                 print(f"  {i+1}. {name} (OVR: {overall})")
 
 
-=======
-
-    def get_starters_by_scheme(self, scheme: Dict[str, int]) -> Dict[str, List[Any]]:
-        """
-        Returns dictionary of starters for each position by scheme (e.g., {'RB':2, 'WR':3}).
-        """
-        starters = {}
-        for pos, count in scheme.items():
-            starters[pos] = self.depth_chart.get(pos, [])[:count]
-        return starters
-
-    def auto_assign_depth_chart(self) -> None:
-        self.depth_chart = self._initialize_chart()
-
-    def print_depth_chart(self) -> None:
-        print(f"Depth Chart for {getattr(self.team, 'team_name', 'Unknown Team')}")
-        for position, players in self.depth_chart.items():
-            print(f"{position}:")
-            for i, player in enumerate(players):
-                name = getattr(player, "name", "Unknown")
-                overall = getattr(player, "overall", 0)
-                print(f"  {i+1}. {name} (OVR: {overall})")
-
-
->>>>>>> 79cffd4b947bd107948f6d67c5add907b1462802
 def generate_depth_chart(team: Any) -> Dict[str, List[Any]]:
     """Generate a depth chart from a team or list of players.
 
@@ -132,4 +90,3 @@ def generate_depth_chart(team: Any) -> Dict[str, List[Any]]:
         depth_chart[pos].sort(key=lambda p: getattr(p, "overall", 0), reverse=True)
 
     return depth_chart
-

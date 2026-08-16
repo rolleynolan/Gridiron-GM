@@ -16,7 +16,7 @@ def test_player_age_increases_on_birthday(tmp_path):
     league = LeagueManager()
     team = Team("Testers", "City", "TST")
     league.add_team(team)
-    # Allow FreeAgencyManager to access free_agents via dict-style get
+    # Keep dict-style access available for legacy-loaded league compatibility.
     LeagueManager.get = lambda self, key, default=None: getattr(self, key, default)
     LeagueManager.__getitem__ = lambda self, key: getattr(self, key)
 
@@ -43,5 +43,4 @@ def test_player_age_increases_on_birthday(tmp_path):
 
     sm.advance_day()
     assert p2.age == 23
-
 
