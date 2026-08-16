@@ -188,9 +188,13 @@ public sealed class GameCoreSaveService
             throw new InvalidDataException("Save file did not contain a native league.");
 
         league.SaveVersion = league.SaveVersion <= 0 ? 1 : league.SaveVersion;
+        league.SalaryCap = league.SalaryCap <= 0m ? LeagueState.DefaultSalaryCap : league.SalaryCap;
         var isLegacySave = league.SaveVersion < LeagueState.CurrentSaveVersion;
         league.Calendar ??= new CalendarState();
         league.Teams ??= new List<TeamState>();
+        league.FreeAgents ??= new List<PlayerState>();
+        league.CollegeProspects ??= new List<CollegeProspectState>();
+        league.Draft ??= new DraftState();
         league.Schedule ??= new List<ScheduledGame>();
         league.Results ??= new List<GameResult>();
         league.PlayoffBracket ??= new PlayoffBracket();
@@ -198,6 +202,21 @@ public sealed class GameCoreSaveService
         league.RetirementHistory ??= new List<SeasonRetirementRecord>();
         league.LastContinueResult ??= new ContinueResult();
         league.LastContinueResult.EventsProcessed ??= new List<ContinueEvent>();
+        league.FranchiseMetadata ??= new FranchiseMetadata();
+        league.FranchiseMetadata.World ??= WorldDefinition.Standard();
+        league.FranchiseMetadata.GmProfileSnapshot ??= new GmProfile();
+        league.FranchiseMetadata.GmProfileSnapshot.Attributes ??= new GmAttributes();
+        league.FranchiseMetadata.GmProfileSnapshot.Appearance ??= new CharacterDesign();
+
+        foreach (var team in league.Teams)
+        {
+            if (team == null)
+                continue;
+
+            team.Roster ??= new List<PlayerState>();
+            team.Coaches ??= new List<CoachState>();
+            team.DepthChart ??= new Dictionary<string, List<string>>();
+        }
 
         league.PlayoffBracket.GeneratedAtPhaseLabel ??= "";
         league.PlayoffBracket.ConferenceBrackets ??= new List<PlayoffConferenceBracket>();
@@ -399,8 +418,43 @@ public sealed class GameCoreSaveService
                 player.Position ??= "";
                 player.Status = string.IsNullOrWhiteSpace(player.Status) ? "Active" : player.Status;
                 player.Injury ??= "";
+                player.Morale = Math.Clamp(player.Morale, 0, 100);
+                player.MoraleTrend = string.IsNullOrWhiteSpace(player.MoraleTrend) ? "Stable" : player.MoraleTrend;
+                player.Contract ??= new PlayerContractState();
+                player.Contract.ContractType = string.IsNullOrWhiteSpace(player.Contract.ContractType) ? "Standard" : player.Contract.ContractType;
             }
         }
+
+        foreach (var player in league.FreeAgents)
+        {
+            if (player == null)
+                continue;
+
+            player.PlayerId ??= "";
+            player.Name ??= "";
+            player.Position ??= "";
+            player.Status = string.IsNullOrWhiteSpace(player.Status) ? "Free Agent" : player.Status;
+            player.Injury ??= "";
+            player.Morale = Math.Clamp(player.Morale, 0, 100);
+            player.MoraleTrend = string.IsNullOrWhiteSpace(player.MoraleTrend) ? "Stable" : player.MoraleTrend;
+            player.Contract ??= new PlayerContractState { ContractType = "Free Agent" };
+            player.Contract.ContractType = string.IsNullOrWhiteSpace(player.Contract.ContractType) ? "Free Agent" : player.Contract.ContractType;
+        }
+
+        foreach (var prospect in league.CollegeProspects)
+        {
+            if (prospect == null)
+                continue;
+            prospect.ProspectId ??= "";
+            prospect.Name ??= "";
+            prospect.Position ??= "";
+            prospect.College ??= "";
+            prospect.DraftedByTeamId ??= "";
+        }
+        league.Draft.Picks ??= new List<DraftPickState>();
+
+        if (isLegacySave)
+            ContractService.MigrateLegacyContracts(league);
 
         foreach (var game in league.Schedule)
         {

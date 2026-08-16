@@ -742,6 +742,17 @@ public sealed class ContinueService
 
         var priorAbsoluteWeek = league.Calendar.AbsoluteWeek;
         var events = new List<ContinueEvent>();
+        if (string.Equals(currentPhaseKey, ScheduleService.OffseasonPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var expiredContracts = new ContractService(_context).ProcessContractExpirations();
+            events.Add(new ContinueEvent
+            {
+                Type = "contracts_processed",
+                Description = expiredContracts > 0
+                    ? $"{expiredContracts} contracts expired and players entered free agency."
+                    : "Contract years were processed for the offseason.",
+            });
+        }
         if (string.Equals(currentPhaseKey, ScheduleService.RetirementPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
         {
             var retirementResult = _retirementService.GenerateRetirementsForCurrentSeason(league);

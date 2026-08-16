@@ -20,6 +20,8 @@ public sealed class LeagueBootstrapService
     public const int RegularSeasonGamesPerTeam = 17;
     public const int RegularSeasonGameCount = (TeamCount * RegularSeasonGamesPerTeam) / 2;
     public const int ExpectedScheduleGameCount = (PreseasonWeeks * PreseasonGamesPerWeek) + RegularSeasonGameCount;
+    public const int CoachesPerTeam = 5;
+    public const int StartingProspectCount = 320;
 
     private static readonly (string Position, int Count, int BaseOverall)[] RosterPlan =
     {
@@ -41,20 +43,12 @@ public sealed class LeagueBootstrapService
         ("P", 1, 68),
     };
 
-    private static readonly string[] FirstNames =
+    private static readonly string[] CoachRoles = { "Head Coach", "Offensive Coordinator", "Defensive Coordinator", "Special Teams Coordinator", "Director of Player Personnel" };
+    private static readonly string[] Colleges = { "North Valley", "Lakeshore State", "Western Tech", "Coastal University", "Pine Ridge", "Metro State", "Red River", "Summit College", "Atlantic State", "Prairie A&M", "Canyon University", "Great Lakes" };
+    private static readonly (string Position, int BaseOverall)[] ProspectPlan =
     {
-        "Evan", "Mason", "Noah", "Jalen", "Theo", "Cole", "Avery", "Brett",
-        "Dylan", "Owen", "Grant", "Luca", "Rhett", "Miles", "Parker", "Cal",
-        "Jace", "Ty", "Zane", "Nico", "Gavin", "Eli", "Milo", "Roman",
-        "Hudson", "Carter", "Logan", "Declan", "Brooks", "Wyatt", "Sawyer", "Blake",
-    };
-
-    private static readonly string[] LastNames =
-    {
-        "Cross", "Pike", "Vale", "Frost", "Hart", "Mercer", "Stone", "North",
-        "Reed", "Hale", "Wells", "Knox", "Shaw", "Gage", "Finn", "Ward",
-        "Voss", "Boone", "Ellis", "Lane", "Price", "York", "Grant", "Rowe",
-        "Bishop", "Sutton", "Drake", "Rhodes", "Bennett", "Holland", "Keller", "Maddox",
+        ("QB", 68), ("RB", 66), ("WR", 67), ("TE", 65), ("LT", 64), ("LG", 63), ("C", 64), ("RG", 63), ("RT", 64),
+        ("EDGE", 67), ("DT", 65), ("LB", 66), ("CB", 67), ("S", 65), ("K", 60), ("P", 59),
     };
 
     private readonly GameCoreContext _context;
@@ -100,9 +94,13 @@ public sealed class LeagueBootstrapService
         _context = context;
     }
 
-    public LeagueState CreateTestLeague(string teamSeedPath = null)
+    public LeagueState CreateTestLeague(string teamSeedPath = null, WorldDefinition world = null, GmProfile profile = null)
     {
-        var teams = CreateLeagueTeams(teamSeedPath);
+        world ??= WorldDefinition.Standard();
+        profile ??= new GmProfile();
+        profile.Validate();
+        var namePools = NamePoolService.Load(teamSeedPath);
+        var teams = CreateLeagueTeams(teamSeedPath, world.Seed, namePools);
         var userTeam = teams[0];
 
         var league = new LeagueState
@@ -112,6 +110,7 @@ public sealed class LeagueBootstrapService
             SaveVersion = LeagueState.CurrentSaveVersion,
             SeasonYear = 2026,
             UserTeamId = userTeam.TeamId,
+            FranchiseMetadata = new FranchiseMetadata { World = world, GmProfileSnapshot = profile.Snapshot() },
             Calendar = new CalendarState
             {
                 Year = 2026,
@@ -124,6 +123,8 @@ public sealed class LeagueBootstrapService
                 WeekLabel = ScheduleService.BuildCalendarWeekLabel(1),
             },
             Teams = teams,
+            FreeAgents = BuildFreeAgents(world.Seed, namePools),
+            CollegeProspects = BuildCollegeProspects(world.Seed, 2027, namePools),
             Schedule = new List<ScheduledGame>(),
             Results = new List<GameResult>(),
             PlayoffBracket = new PlayoffBracket(),
@@ -135,6 +136,7 @@ public sealed class LeagueBootstrapService
         };
 
         league.Schedule = BuildDeterministicSchedule(league.Teams);
+        new ContractService(_context).RefreshCapRoom(league);
         _context.ActiveLeague = league;
         new ScheduleService(_context).RefreshStatuses(league);
         return league;
@@ -199,7 +201,7 @@ public sealed class LeagueBootstrapService
         return schedule;
     }
 
-    private static List<TeamState> CreateLeagueTeams(string teamSeedPath)
+    private static List<TeamState> CreateLeagueTeams(string teamSeedPath, ulong worldSeed, GeneratedNamePools namePools)
     {
         var seeds = LoadTeamSeeds(teamSeedPath);
         return seeds
@@ -210,7 +212,8 @@ public sealed class LeagueBootstrapService
                 seed.Division,
                 seed.Conference,
                 seed.CapRoom,
-                seed.SeedOffset))
+                seed.SeedOffset + (int)(worldSeed % 997),
+                namePools))
             .ToList();
     }
 
@@ -397,9 +400,11 @@ public sealed class LeagueBootstrapService
         string division,
         string conference,
         decimal capRoom,
-        int seedOffset)
+        int seedOffset,
+        GeneratedNamePools namePools)
     {
-        var roster = BuildRoster(teamId, abbreviation, seedOffset);
+        var roster = BuildRoster(teamId, abbreviation, seedOffset, namePools);
+        AssignStartingContracts(roster, LeagueState.DefaultSalaryCap - capRoom, seedOffset, 2026);
         return new TeamState
         {
             TeamId = teamId,
@@ -412,11 +417,136 @@ public sealed class LeagueBootstrapService
             Ties = 0,
             CapRoom = capRoom,
             Roster = roster,
+            Coaches = BuildCoaches(teamId, seedOffset, namePools),
             DepthChart = BuildDepthChart(roster),
         };
     }
 
-    private static List<PlayerState> BuildRoster(string teamId, string abbreviation, int seedOffset)
+    private static List<CoachState> BuildCoaches(string teamId, int seedOffset, GeneratedNamePools namePools)
+    {
+        var coaches = new List<CoachState>(CoachesPerTeam);
+        for (var index = 0; index < CoachesPerTeam; index++)
+        {
+            var value = StableValue(seedOffset, index, 43);
+            coaches.Add(new CoachState
+            {
+                CoachId = $"{teamId}-coach-{index + 1}",
+                Name = BuildName(namePools, value, StableValue(seedOffset, index, 59)),
+                Role = CoachRoles[index],
+                Overall = 58 + (value % 29),
+                Age = 34 + ((value / 7) % 27),
+            });
+        }
+
+        return coaches;
+    }
+
+    private static List<CollegeProspectState> BuildCollegeProspects(ulong worldSeed, int draftClassYear, GeneratedNamePools namePools)
+    {
+        var prospects = new List<CollegeProspectState>(StartingProspectCount);
+        var seed = (int)(worldSeed % int.MaxValue);
+        for (var index = 0; index < StartingProspectCount; index++)
+        {
+            var (position, baseOverall) = ProspectPlan[index % ProspectPlan.Length];
+            var value = StableValue(seed, index, 97);
+            var overall = Math.Clamp(baseOverall + ((value % 17) - 8), 52, 79);
+            prospects.Add(new CollegeProspectState
+            {
+                ProspectId = $"draft-{draftClassYear}-{index + 1:D3}",
+                Name = BuildName(namePools, value, StableValue(seed, index, 113)),
+                Position = position,
+                College = Colleges[(value / 13) % Colleges.Length],
+                Overall = overall,
+                Potential = Math.Clamp(overall + 4 + ((value / 29) % 18), overall, 95),
+                Age = 20 + ((value / 31) % 3),
+                DraftClassYear = draftClassYear,
+            });
+        }
+
+        return prospects
+            .OrderByDescending(prospect => prospect.Overall)
+            .ThenByDescending(prospect => prospect.Potential)
+            .ThenBy(prospect => prospect.Name, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static List<PlayerState> BuildFreeAgents(ulong worldSeed, GeneratedNamePools namePools)
+    {
+        var players = new List<PlayerState>();
+        var seed = (int)(worldSeed % int.MaxValue);
+        for (var index = 0; index < 192; index++)
+        {
+            var (position, _, baseOverall) = RosterPlan[index % RosterPlan.Length];
+            var value = StableValue(seed, index, 131);
+            players.Add(new PlayerState
+            {
+                PlayerId = $"fa-{index + 1:D3}",
+                Name = BuildName(namePools, value, StableValue(seed, index, 137)),
+                Position = position,
+                Overall = Math.Clamp(baseOverall - 7 + ((value % 15) - 7), 52, 77),
+                Age = 23 + ((value / 11) % 11),
+                Status = "Free Agent",
+                Injury = "",
+                Morale = 42 + ((value / 17) % 19),
+                MoraleTrend = "Stable",
+                Contract = new PlayerContractState { ContractType = "Free Agent" },
+            });
+        }
+
+        return players.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.Ordinal).ToList();
+    }
+
+    private static void AssignStartingContracts(IReadOnlyList<PlayerState> roster, decimal targetCommitments, int seedOffset, int seasonYear)
+    {
+        var weightedPlayers = roster.Select((player, index) => new
+        {
+            Player = player,
+            Index = index,
+            Weight = Math.Max(1, (player.Overall - 45) * (player.Overall - 45)),
+        }).ToList();
+        var totalWeight = weightedPlayers.Sum(entry => entry.Weight);
+        var assigned = 0m;
+        for (var listIndex = 0; listIndex < weightedPlayers.Count; listIndex++)
+        {
+            var entry = weightedPlayers[listIndex];
+            var annualSalary = listIndex == weightedPlayers.Count - 1
+                ? targetCommitments - assigned
+                : Math.Round(targetCommitments * entry.Weight / totalWeight, 0, MidpointRounding.AwayFromZero);
+            assigned += annualSalary;
+            entry.Player.Morale = 45 + (StableValue(seedOffset, entry.Index, 149) % 22);
+            entry.Player.MoraleTrend = "Stable";
+            entry.Player.Contract = new PlayerContractState
+            {
+                AnnualSalary = annualSalary,
+                GuaranteedSalary = Math.Round(annualSalary * (0.25m + (StableValue(seedOffset, entry.Index, 151) % 26) / 100m), 0),
+                YearsRemaining = 1 + (StableValue(seedOffset, entry.Index, 157) % 4),
+                SignedSeason = seasonYear,
+                ContractType = "Standard",
+            };
+        }
+    }
+
+    private static string BuildName(GeneratedNamePools namePools, int firstSeed, int lastSeed)
+        => $"{namePools.MaleFirstNames[PositiveIndex(firstSeed, namePools.MaleFirstNames.Count)]} {namePools.LastNames[PositiveIndex(lastSeed, namePools.LastNames.Count)]}";
+
+    private static int PositiveIndex(int value, int count)
+        => (int)((uint)value % (uint)count);
+
+    private static int StableValue(int seed, int index, int salt)
+    {
+        unchecked
+        {
+            var value = (uint)seed;
+            value ^= (uint)(index + 1) * 0x9E3779B9u;
+            value ^= (uint)salt * 0x85EBCA6Bu;
+            value ^= value >> 16;
+            value *= 0x7FEB352Du;
+            value ^= value >> 15;
+            return (int)(value & 0x7FFFFFFF);
+        }
+    }
+
+    private static List<PlayerState> BuildRoster(string teamId, string abbreviation, int seedOffset, GeneratedNamePools namePools)
     {
         var roster = new List<PlayerState>();
         var positionUsage = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -432,9 +562,10 @@ public sealed class LeagueBootstrapService
                     : 1;
 
                 var playerSeed = seedOffset + (rosterIndex * 7) + (depthIndex * 3);
-                var firstName = FirstNames[playerSeed % FirstNames.Length];
-                var lastName = LastNames[(playerSeed + rosterIndex + teamId.Length) % LastNames.Length];
-                var name = $"{firstName} {lastName}";
+                var name = BuildName(
+                    namePools,
+                    StableValue(playerSeed, rosterIndex, 71),
+                    StableValue(playerSeed, depthIndex + teamId.Length, 83));
                 var overall = Math.Max(58, Math.Min(84, baseOverall - (depthIndex * 2) + ((playerSeed % 5) - 2)));
                 var age = 22 + ((playerSeed + depthIndex) % 10);
 
