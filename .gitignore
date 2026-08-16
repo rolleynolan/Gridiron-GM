@@ -9,6 +9,8 @@ zz_tmp_test/
 data/
 backend.log
 /Godot/.godot/
+/Godot/**/bin/
+/Godot/**/obj/
 /gridiron_gm_pkg/data/saves/
 /dna_output/
 /tmp*/
