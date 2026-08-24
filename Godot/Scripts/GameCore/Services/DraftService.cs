@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using GridironGM.GameCore.Models;
 
@@ -7,21 +6,27 @@ namespace GridironGM.GameCore.Services;
 
 public sealed class DraftService
 {
+    public const int DraftRounds = 7;
     private readonly GameCoreContext _context;
+
     public DraftService(GameCoreContext context) => _context = context;
+
+    public string LastMessage { get; private set; } = "";
 
     public void PrepareDraftBoard()
     {
         var league = _context.ActiveLeague;
-        if (league == null || league.Draft.DraftYear == league.SeasonYear)
+        if (league == null)
             return;
 
-        var standings = new StandingsService(_context).BuildStandings(league)
-            .OrderBy(standing => standing.WinPct).ThenBy(standing => standing.PointDifferential).ThenBy(standing => standing.TeamId, StringComparer.Ordinal).ToList();
+        if (league.Draft?.DraftYear == league.SeasonYear)
+        {
+            EnsureDraftRounds(league, BuildDraftOrder(league));
+            return;
+        }
+
         league.Draft = new DraftState { DraftYear = league.SeasonYear };
-        for (var round = 1; round <= 3; round++)
-            for (var index = 0; index < standings.Count; index++)
-                league.Draft.Picks.Add(new DraftPickState { OverallPick = ((round - 1) * standings.Count) + index + 1, Round = round, PickInRound = index + 1, TeamId = standings[index].TeamId });
+        EnsureDraftRounds(league, BuildDraftOrder(league));
 
         var scouting = league.FranchiseMetadata?.GmProfileSnapshot?.Attributes?.ScoutingJudgment ?? 50;
         foreach (var prospect in league.CollegeProspects.Where(prospect => prospect != null && prospect.DraftClassYear == league.SeasonYear + 1))
@@ -33,13 +38,137 @@ public sealed class DraftService
         }
     }
 
-    public bool MakePick(string teamId, string prospectId)
+    private System.Collections.Generic.List<TeamStanding> BuildDraftOrder(LeagueState league)
+    {
+        return new StandingsService(_context).BuildStandings(league)
+            .OrderBy(standing => standing.WinPct)
+            .ThenBy(standing => standing.PointDifferential)
+            .ThenBy(standing => standing.TeamId, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static void EnsureDraftRounds(LeagueState league, System.Collections.Generic.IReadOnlyList<TeamStanding> standings)
+    {
+        league.Draft.Picks ??= new System.Collections.Generic.List<DraftPickState>();
+        for (var round = 1; round <= DraftRounds; round++)
+        {
+            for (var index = 0; index < standings.Count; index++)
+            {
+                var overallPick = ((round - 1) * standings.Count) + index + 1;
+                if (league.Draft.Picks.Any(pick => pick != null && pick.OverallPick == overallPick))
+                    continue;
+                league.Draft.Picks.Add(new DraftPickState
+                {
+                    OverallPick = overallPick,
+                    Round = round,
+                    PickInRound = index + 1,
+                    TeamId = standings[index].TeamId,
+                });
+            }
+        }
+    }
+
+    public DraftPickState GetCurrentPick()
     {
         var league = _context.ActiveLeague;
         PrepareDraftBoard();
-        var pick = league?.Draft.Picks.FirstOrDefault(item => string.Equals(item.TeamId, teamId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(item.ProspectId));
-        var prospect = league?.CollegeProspects.FirstOrDefault(item => string.Equals(item.ProspectId, prospectId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(item.DraftedByTeamId));
-        if (pick == null || prospect == null) return false;
-        pick.ProspectId = prospect.ProspectId; prospect.DraftedByTeamId = pick.TeamId; return true;
+        return league?.Draft?.Picks?
+            .Where(pick => pick != null && string.IsNullOrWhiteSpace(pick.ProspectId))
+            .OrderBy(pick => pick.OverallPick)
+            .FirstOrDefault();
+    }
+
+    public bool AdvanceCpuPicksUntilUserTurn()
+    {
+        var league = _context.ActiveLeague;
+        if (league == null || !string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        PrepareDraftBoard();
+        while (true)
+        {
+            var pick = GetCurrentPick();
+            if (pick == null)
+            {
+                CompleteDraft(league);
+                return true;
+            }
+            if (string.Equals(pick.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase))
+            {
+                LastMessage = $"Your pick: round {pick.Round}, pick {pick.PickInRound}.";
+                return false;
+            }
+
+            var prospect = SelectCpuProspect(league, pick);
+            var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase));
+            var error = "";
+            if (prospect == null || team == null || !new TransactionService(_context).DraftRookie(pick, prospect, team, out error))
+            {
+                LastMessage = string.IsNullOrWhiteSpace(error) ? "CPU draft selection could not be completed." : error;
+                return false;
+            }
+        }
+    }
+
+    public bool MakePick(string teamId, string prospectId)
+    {
+        var league = _context.ActiveLeague;
+        if (league == null)
+        {
+            LastMessage = "No active league loaded.";
+            return false;
+        }
+        if (!string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase))
+        {
+            LastMessage = "Draft picks are available during Draft Pending.";
+            return false;
+        }
+
+        AdvanceCpuPicksUntilUserTurn();
+        var pick = GetCurrentPick();
+        if (pick == null || !string.Equals(pick.TeamId, teamId ?? league.UserTeamId, StringComparison.OrdinalIgnoreCase))
+        {
+            LastMessage = "It is not this team's turn to pick.";
+            return false;
+        }
+        var prospect = league.CollegeProspects.FirstOrDefault(candidate => string.Equals(candidate?.ProspectId, prospectId, StringComparison.OrdinalIgnoreCase));
+        var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase));
+        var error = "";
+        if (prospect == null || team == null || !new TransactionService(_context).DraftRookie(pick, prospect, team, out error))
+        {
+            LastMessage = string.IsNullOrWhiteSpace(error) ? "Draft selection could not be completed." : error;
+            return false;
+        }
+
+        LastMessage = $"Selected {prospect.Name} in round {pick.Round}, pick {pick.PickInRound}.";
+        AdvanceCpuPicksUntilUserTurn();
+        return true;
+    }
+
+    private static CollegeProspectState SelectCpuProspect(LeagueState league, DraftPickState pick)
+    {
+        var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase));
+        return league.CollegeProspects
+            .Where(prospect => prospect != null && string.IsNullOrWhiteSpace(prospect.DraftedByTeamId))
+            .OrderByDescending(prospect => GetCpuValue(prospect, team))
+            .ThenByDescending(prospect => prospect.Potential)
+            .ThenBy(prospect => prospect.ProspectId, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault();
+    }
+
+    private static int GetCpuValue(CollegeProspectState prospect, TeamState team)
+    {
+        var positionCount = team?.Roster?.Count(player => string.Equals(player?.Position, prospect.Position, StringComparison.OrdinalIgnoreCase)) ?? 0;
+        var needBonus = positionCount switch { 0 => 12, 1 => 8, 2 => 4, _ => 0 };
+        return prospect.Overall * 3 + prospect.Potential + needBonus;
+    }
+
+    private static void CompleteDraft(LeagueState league)
+    {
+        league.Draft.IsCompleted = true;
+        league.Calendar.AbsoluteWeek = ScheduleService.GetOffseasonPlaceholderAbsoluteWeek(ScheduleService.RookieSigningPendingPhase);
+        league.Calendar.Week = league.Calendar.AbsoluteWeek;
+        league.Calendar.DayIndex = 0;
+        ScheduleService.NormalizeCalendar(league.Calendar);
     }
 }

@@ -86,6 +86,11 @@ public static class GameCoreSmokeTest
                 Years = 2,
             });
             Require(declined.Ok && !declined.Accepted, "Low free-agent offer should be declined without a transaction.");
+            Require(contractLeague.Transactions.Count == 0, "Declined offers must not create a transaction record.");
+            var releasedPlayer = contractTeam.Roster.First();
+            var released = contractTestService.ReleasePlayer(releasedPlayer.PlayerId, contractTeam.TeamId);
+            Require(released.Ok && released.Accepted, released.Message);
+            Require(contractLeague.Transactions.Count == 1 && string.Equals(contractLeague.Transactions[0].Type, "player_released", StringComparison.Ordinal), "Release should create a transaction record.");
             var rosterCountBeforeSigning = contractTeam.Roster.Count;
             var accepted = contractTestService.SignFreeAgent(contractPlayer.PlayerId, contractTeam.TeamId, new ContractOffer
             {
@@ -96,6 +101,7 @@ public static class GameCoreSmokeTest
             Require(accepted.Ok && accepted.Accepted, accepted.Message);
             Require(contractTeam.Roster.Count == rosterCountBeforeSigning + 1 && !contractLeague.FreeAgents.Any(player => player.PlayerId == contractPlayer.PlayerId), "Accepted free agent should move into the signing team's roster.");
             Require(Math.Abs(contractTestService.GetCapRoom(contractTeam) - contractTeam.CapRoom) < 1m, "Signing should refresh the team's cap room.");
+            Require(contractLeague.Transactions.Count == 2 && string.Equals(contractLeague.Transactions[1].Type, "free_agent_signed", StringComparison.Ordinal), "Accepted signing should create a transaction record.");
             Pass(result, currentStep);
 
             currentStep = "Dashboard state";
@@ -414,18 +420,74 @@ public static class GameCoreSmokeTest
             ValidateOffseasonPlaceholderDashboard(dashboard.Dashboard, ScheduleService.OffseasonPendingPhase);
             ValidateOffseasonInvariants(context.ActiveLeague, championTeamId, runnerUpTeamId, seasonHistoryCount, scheduleCount, regularSeasonResultCount, playoffResultCount, retirementHistoryCount, retiredPlayerCount);
 
-            currentStep = "Advance offseason placeholders";
+            currentStep = "Advance offseason and free agency";
             foreach (var expectedPhase in BuildExpectedOffseasonPlaceholderPhases().Skip(1))
             {
+                if (string.Equals(expectedPhase, ScheduleService.RookieSigningPendingPhase, StringComparison.Ordinal)
+                    && string.Equals(context.ActiveLeague.Calendar.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase))
+                {
+                    dashboard = dashboardService.GetDashboardState();
+                    Require(dashboard.Ok, dashboard.Error);
+                    ValidateOffseasonPlaceholderDashboard(dashboard.Dashboard, expectedPhase);
+                    continue;
+                }
+
                 var phaseAdvance = continueService.Continue();
                 Require(phaseAdvance.Ok, phaseAdvance.Error);
-                Require(string.Equals(phaseAdvance.Result.StopReason, ScheduleService.GetOffseasonPhaseKey(expectedPhase), StringComparison.OrdinalIgnoreCase), $"Expected {ScheduleService.GetOffseasonPhaseKey(expectedPhase)} while advancing offseason placeholders, got {phaseAdvance.Result.StopReason}.");
+                var expectedStopReason = string.Equals(expectedPhase, ScheduleService.FreeAgencyPendingPhase, StringComparison.OrdinalIgnoreCase)
+                    ? "free_agency_open"
+                    : ScheduleService.GetOffseasonPhaseKey(expectedPhase);
+                Require(string.Equals(phaseAdvance.Result.StopReason, expectedStopReason, StringComparison.OrdinalIgnoreCase), $"Expected {expectedStopReason} while advancing offseason, got {phaseAdvance.Result.StopReason}.");
                 Require(phaseAdvance.Result.GamesSimulated == 0, $"Advancing to {expectedPhase} should not simulate games.");
                 Require(string.Equals(context.ActiveLeague.Calendar.Phase, expectedPhase, StringComparison.OrdinalIgnoreCase), $"Expected offseason phase {expectedPhase}, got {context.ActiveLeague.Calendar.Phase}.");
 
                 dashboard = dashboardService.GetDashboardState();
                 Require(dashboard.Ok, dashboard.Error);
                 ValidateOffseasonPlaceholderDashboard(dashboard.Dashboard, expectedPhase);
+
+                if (string.Equals(expectedPhase, ScheduleService.StaffCarouselPendingPhase, StringComparison.Ordinal))
+                    Require(context.ActiveLeague.LastContractExpirationSeason == context.ActiveLeague.SeasonYear, "Contract expirations should process once at offseason start.");
+
+                if (string.Equals(expectedPhase, ScheduleService.FreeAgencyPendingPhase, StringComparison.Ordinal))
+                {
+                    var userTeam = context.ActiveLeague.Teams.First(team => string.Equals(team.TeamId, context.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase));
+                    var offseasonReleasedPlayer = userTeam.Roster.First();
+                    var releaseResult = contractService.ReleasePlayer(offseasonReleasedPlayer.PlayerId, userTeam.TeamId);
+                    Require(releaseResult.Ok && releaseResult.Accepted, releaseResult.Message);
+                    var freeAgent = context.ActiveLeague.FreeAgents.OrderBy(player => contractService.GetRequiredAnnualSalary(player, userTeam)).First();
+                    var requirement = contractService.GetRequiredAnnualSalary(freeAgent, userTeam);
+                    var signingResult = contractService.SignFreeAgent(freeAgent.PlayerId, userTeam.TeamId, new ContractOffer
+                    {
+                        AnnualSalary = requirement * 1.15m,
+                        GuaranteedSalary = requirement * 0.30m,
+                        Years = 2,
+                    });
+                    Require(signingResult.Ok && signingResult.Accepted, signingResult.Message);
+                    Require(context.ActiveLeague.Transactions.Any(transaction => string.Equals(transaction.Type, "free_agent_signed", StringComparison.OrdinalIgnoreCase)), "Offseason free-agent signing should be recorded.");
+                }
+
+                if (string.Equals(expectedPhase, ScheduleService.DraftPendingPhase, StringComparison.Ordinal))
+                {
+                    var draftService = new DraftService(context);
+                    var draftSelectionCount = 0;
+                    while (string.Equals(context.ActiveLeague.Calendar.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var currentPick = draftService.GetCurrentPick();
+                        Require(currentPick != null && string.Equals(currentPick.TeamId, context.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase), "Draft should stop only when the user team is on the clock.");
+                        var prospect = context.ActiveLeague.CollegeProspects.First(candidate => candidate != null && string.IsNullOrWhiteSpace(candidate.DraftedByTeamId));
+                        Require(draftService.MakePick(context.ActiveLeague.UserTeamId, prospect.ProspectId), draftService.LastMessage);
+                        draftSelectionCount++;
+                        Require(draftSelectionCount <= DraftService.DraftRounds, "User draft selections exceeded the configured round count.");
+                    }
+
+                    var expectedPickCount = context.ActiveLeague.Teams.Count * DraftService.DraftRounds;
+                    Require(draftSelectionCount == DraftService.DraftRounds, "User team should receive one selection in every round.");
+                    Require(context.ActiveLeague.Draft.IsCompleted && context.ActiveLeague.Draft.Picks.Count == expectedPickCount, "Draft should complete all seven rounds for every team.");
+                    Require(context.ActiveLeague.Draft.Picks.All(pick => !string.IsNullOrWhiteSpace(pick.ProspectId) && !string.IsNullOrWhiteSpace(pick.PlayerId)), "Every completed draft pick should own a prospect and rookie player id.");
+                    Require(context.ActiveLeague.Transactions.Count(transaction => string.Equals(transaction.Type, "draft_pick_made", StringComparison.OrdinalIgnoreCase)) == expectedPickCount, "Every draft pick should create a transaction record.");
+                    Require(context.ActiveLeague.Teams.All(team => team.Roster.Count(player => player.Contract?.ContractType == "Rookie Draft Contract") == DraftService.DraftRounds), "Every team should receive seven rostered rookies.");
+                    Require(string.Equals(context.ActiveLeague.Calendar.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase), "Completed draft should transition to rookie signing.");
+                }
 
                 if (string.Equals(expectedPhase, ScheduleService.RetirementPendingPhase, StringComparison.Ordinal))
                 {
@@ -491,6 +553,8 @@ public static class GameCoreSmokeTest
             Require(loadedContext.ActiveLeague.Results.Count == context.ActiveLeague.Results.Count, "Loaded league result count does not match saved league.");
             Require(loadedContext.ActiveLeague.SalaryCap == context.ActiveLeague.SalaryCap, "Loaded league did not preserve the salary cap.");
             Require(loadedContext.ActiveLeague.FreeAgents.Count == context.ActiveLeague.FreeAgents.Count, "Loaded league did not preserve free agents.");
+            Require(loadedContext.ActiveLeague.Transactions.Count == context.ActiveLeague.Transactions.Count, "Loaded league did not preserve transaction history.");
+            Require(loadedContext.ActiveLeague.Draft.IsCompleted && loadedContext.ActiveLeague.Draft.Picks.All(pick => !string.IsNullOrWhiteSpace(pick.PlayerId)), "Loaded league did not preserve completed draft state.");
             Require(loadedContext.ActiveLeague.Teams.All(team => team.Roster.All(player => player.Contract != null && player.Morale >= 0 && player.Morale <= 100)), "Loaded league did not preserve player contract and morale data.");
             Require(loadedContext.ActiveLeague.CollegeProspects.Count == context.ActiveLeague.CollegeProspects.Count, "Loaded league did not preserve college prospects.");
             Require(loadedContext.ActiveLeague.Teams.All(team => team.Coaches.Count == LeagueBootstrapService.CoachesPerTeam), "Loaded league did not preserve coaching staffs.");
@@ -518,7 +582,7 @@ public static class GameCoreSmokeTest
             var loadedPostseasonAction = loadedDashboard.Dashboard.ActionItems.FirstOrDefault(item =>
                 string.Equals(item.Type, ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase));
             Require(loadedPostseasonAction != null, "Loaded dashboard should retain the training camp pending action item.");
-            Require(string.Equals(loadedPostseasonAction.Description, "Training camp systems are not implemented yet.", StringComparison.Ordinal), $"Unexpected loaded terminal action description: {loadedPostseasonAction?.Description}");
+            Require(string.Equals(loadedPostseasonAction.Description, "Training camp systems are not available in this build.", StringComparison.Ordinal), $"Unexpected loaded terminal action description: {loadedPostseasonAction?.Description}");
             var loadedHistoryResponse = loadedDashboardService.GetLeagueHistory();
             ValidateLeagueHistoryResponse(loadedContext.ActiveLeague, loadedHistoryResponse);
             Require(string.Equals(SnapshotBracket(loadedContext.ActiveLeague.PlayoffBracket), SnapshotBracket(context.ActiveLeague.PlayoffBracket), StringComparison.Ordinal), "Loaded playoff bracket does not match saved playoff bracket.");
@@ -673,9 +737,22 @@ public static class GameCoreSmokeTest
 
         var trainingCampRun = continueService.ContinueUntil("training_camp");
         Require(trainingCampRun.Ok, trainingCampRun.Error);
-        Require(string.Equals(trainingCampRun.Result.StopReason, "reached_training_camp", StringComparison.OrdinalIgnoreCase), $"Expected reached_training_camp, got {trainingCampRun.Result.StopReason}.");
+        Require(string.Equals(trainingCampRun.Result.StopReason, ScheduleService.DraftPendingPhaseKey, StringComparison.OrdinalIgnoreCase), $"Expected user-controlled draft stop, got {trainingCampRun.Result.StopReason}.");
+        Require(string.Equals(context.ActiveLeague.Calendar.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase), $"Expected {ScheduleService.DraftPendingPhase}, got {context.ActiveLeague.Calendar.Phase}.");
+        Require(trainingCampRun.Result.GamesSimulated == 0, "Draft stop should not simulate games.");
+        var simUntilDraftService = new DraftService(context);
+        while (string.Equals(context.ActiveLeague.Calendar.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase))
+        {
+            var currentPick = simUntilDraftService.GetCurrentPick();
+            Require(currentPick != null && string.Equals(currentPick.TeamId, context.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase), "Draft should wait for the user team's next selection.");
+            var prospect = context.ActiveLeague.CollegeProspects.First(candidate => candidate != null && string.IsNullOrWhiteSpace(candidate.DraftedByTeamId));
+            Require(simUntilDraftService.MakePick(context.ActiveLeague.UserTeamId, prospect.ProspectId), simUntilDraftService.LastMessage);
+        }
+
+        trainingCampRun = continueService.ContinueUntil("training_camp");
+        Require(trainingCampRun.Ok, trainingCampRun.Error);
+        Require(string.Equals(trainingCampRun.Result.StopReason, "reached_training_camp", StringComparison.OrdinalIgnoreCase), $"Expected reached_training_camp after draft completion, got {trainingCampRun.Result.StopReason}.");
         Require(string.Equals(context.ActiveLeague.Calendar.Phase, ScheduleService.TrainingCampPendingPhase, StringComparison.OrdinalIgnoreCase), $"Expected {ScheduleService.TrainingCampPendingPhase}, got {context.ActiveLeague.Calendar.Phase}.");
-        Require(trainingCampRun.Result.GamesSimulated == 0, "Training camp placeholder should not simulate games.");
 
         var duplicateTrainingCampRun = continueService.ContinueUntil("training_camp");
         Require(duplicateTrainingCampRun.Ok, duplicateTrainingCampRun.Error);
@@ -1240,26 +1317,19 @@ public static class GameCoreSmokeTest
 
     private static void ValidateOffseasonPlaceholderDashboard(DashboardDto dashboard, string expectedPhase)
     {
-        Require(dashboard != null, "Dashboard is required for offseason placeholder validation.");
-        Require(dashboard.Calendar != null, "Dashboard calendar is required for offseason placeholder validation.");
-        Require(dashboard.NextGame != null, "Dashboard next-game block is required for offseason placeholder validation.");
+        Require(dashboard != null, "Dashboard is required for offseason validation.");
+        Require(dashboard.Calendar != null, "Dashboard calendar is required for offseason validation.");
+        Require(dashboard.NextGame != null, "Dashboard next-game block is required for offseason validation.");
         Require(string.Equals(dashboard.Calendar.Phase, expectedPhase, StringComparison.Ordinal), $"Dashboard calendar phase should be {expectedPhase}, got {dashboard.Calendar.Phase}.");
         Require(string.Equals(dashboard.Calendar.WeekLabel, expectedPhase, StringComparison.Ordinal), $"Dashboard calendar label should be {expectedPhase}, got {dashboard.Calendar.WeekLabel}.");
         Require(string.Equals(dashboard.NextGame.HeaderNextLabel, $"Next: {expectedPhase}", StringComparison.Ordinal), $"Unexpected offseason header label: {dashboard.NextGame.HeaderNextLabel}");
         Require(string.Equals(dashboard.NextGame.HeaderOpponentLabel, "Next opponent: TBD", StringComparison.Ordinal), $"Unexpected offseason opponent header: {dashboard.NextGame.HeaderOpponentLabel}");
         Require(string.Equals(dashboard.NextGame.Opponent, "TBD", StringComparison.Ordinal), $"Unexpected offseason opponent value: {dashboard.NextGame.Opponent}");
-        Require(string.IsNullOrWhiteSpace(dashboard.NextGame.GameId), $"Offseason placeholder {expectedPhase} should not expose a next game id.");
+        Require(string.IsNullOrWhiteSpace(dashboard.NextGame.GameId), $"Offseason phase {expectedPhase} should not expose a next game id.");
         var actionItem = dashboard.ActionItems.FirstOrDefault(item =>
             string.Equals(item.Type, ScheduleService.GetOffseasonPhaseKey(expectedPhase), StringComparison.OrdinalIgnoreCase));
         Require(actionItem != null, $"Dashboard should expose an action item for {expectedPhase}.");
         Require(string.Equals(actionItem.Title, expectedPhase, StringComparison.Ordinal), $"Unexpected offseason action title for {expectedPhase}: {actionItem?.Title}");
-
-        if (string.Equals(expectedPhase, ScheduleService.TrainingCampPendingPhase, StringComparison.Ordinal))
-        {
-            Require(string.Equals(actionItem.Description, "Training camp systems are not implemented yet.", StringComparison.Ordinal), $"Unexpected training camp placeholder description: {actionItem?.Description}");
-            Require(string.Equals(actionItem.PrimaryAction, "Training camp systems are not implemented yet.", StringComparison.Ordinal), $"Unexpected training camp placeholder action text: {actionItem?.PrimaryAction}");
-            return;
-        }
 
         if (string.Equals(expectedPhase, ScheduleService.RetirementPendingPhase, StringComparison.Ordinal))
         {
@@ -1268,8 +1338,9 @@ public static class GameCoreSmokeTest
             return;
         }
 
-        Require(string.Equals(actionItem.Description, $"{expectedPhase} is not implemented yet. Continue to move through the placeholder offseason flow.", StringComparison.Ordinal), $"Unexpected offseason placeholder description for {expectedPhase}: {actionItem?.Description}");
-        Require(string.Equals(actionItem.PrimaryAction, "Continue to next offseason phase", StringComparison.Ordinal), $"Unexpected offseason placeholder action text for {expectedPhase}: {actionItem?.PrimaryAction}");
+        Require(!string.IsNullOrWhiteSpace(actionItem.Description), $"Offseason action description should explain {expectedPhase}.");
+        if (string.Equals(expectedPhase, ScheduleService.FreeAgencyPendingPhase, StringComparison.Ordinal))
+            Require(string.Equals(actionItem.PrimaryAction, "Open Free Agency", StringComparison.Ordinal), $"Unexpected free-agency action text: {actionItem?.PrimaryAction}");
     }
 
     private static void ValidateOffseasonInvariants(

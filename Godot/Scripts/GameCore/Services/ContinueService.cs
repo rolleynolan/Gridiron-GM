@@ -64,11 +64,11 @@ public sealed class ContinueService
                 new ContinueEvent
                 {
                     Type = ScheduleService.OffseasonPendingPhaseKey,
-                    Description = BuildOffseasonPlaceholderDescription(league, ScheduleService.OffseasonPendingPhase),
+                    Description = BuildOffseasonDescription(league, ScheduleService.OffseasonPendingPhase),
                 });
         }
         if (ScheduleService.IsOffseasonPlaceholderPhase(league.Calendar?.Phase))
-            return ContinueOffseasonPlaceholderPhase(league);
+            return ContinueOffseasonPhase(league);
 
         var roster = _rosterService.GetTeamRoster();
         if (!roster.Ok)
@@ -716,13 +716,13 @@ public sealed class ContinueService
         MoveLeagueToOffseasonPhase(league, ScheduleService.OffseasonPendingPhase);
     }
 
-    private ContinueResponse ContinueOffseasonPlaceholderPhase(LeagueState league)
+    private ContinueResponse ContinueOffseasonPhase(LeagueState league)
     {
         ScheduleService.NormalizeCalendar(league.Calendar);
         var currentPhase = league.Calendar?.Phase ?? "";
         var currentPhaseKey = ScheduleService.GetOffseasonPhaseKey(currentPhase);
         if (string.IsNullOrWhiteSpace(currentPhaseKey))
-            return BuildFailure("invalid_phase", "Offseason continuation is only available during offseason placeholder phases.");
+            return BuildFailure("invalid_phase", "Offseason continuation is only available during offseason phases.");
 
         if (ScheduleService.IsTerminalOffseasonPlaceholderPhase(currentPhase))
         {
@@ -736,12 +736,54 @@ public sealed class ContinueService
                 new ContinueEvent
                 {
                     Type = currentPhaseKey,
-                    Description = BuildOffseasonPlaceholderDescription(league, currentPhase),
+                    Description = BuildOffseasonDescription(league, currentPhase),
                 });
         }
 
         var priorAbsoluteWeek = league.Calendar.AbsoluteWeek;
         var events = new List<ContinueEvent>();
+        if (string.Equals(currentPhaseKey, ScheduleService.DraftPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var draft = new DraftService(_context);
+            var completed = draft.AdvanceCpuPicksUntilUserTurn();
+            if (!completed)
+            {
+                return BuildStop(
+                    league,
+                    false,
+                    ScheduleService.DraftPendingPhaseKey,
+                    0,
+                    0,
+                    0,
+                    new ContinueEvent { Type = ScheduleService.DraftPendingPhaseKey, Description = string.IsNullOrWhiteSpace(draft.LastMessage) ? "Make your current draft selection before continuing." : draft.LastMessage });
+            }
+
+            return BuildStop(
+                league,
+                true,
+                ScheduleService.RookieSigningPendingPhaseKey,
+                0,
+                Math.Max(0, league.Calendar.AbsoluteWeek - priorAbsoluteWeek),
+                0,
+                new ContinueEvent { Type = ScheduleService.RookieSigningPendingPhaseKey, Description = "All draft selections are complete. Rookie contracts have been created." });
+        }
+        if (string.Equals(currentPhaseKey, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var transitionPhase = ScheduleService.GetNextOffseasonPlaceholderPhase(currentPhase);
+            MoveLeagueToOffseasonPhase(league, transitionPhase);
+            return BuildStop(
+                league,
+                true,
+                ScheduleService.GetOffseasonPhaseKey(transitionPhase),
+                0,
+                Math.Max(0, league.Calendar.AbsoluteWeek - priorAbsoluteWeek),
+                0,
+                new ContinueEvent
+                {
+                    Type = ScheduleService.GetOffseasonPhaseKey(transitionPhase),
+                    Description = "Free agency closed. Draft preparation is now active.",
+                });
+        }
         if (string.Equals(currentPhaseKey, ScheduleService.OffseasonPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
         {
             var expiredContracts = new ContractService(_context).ProcessContractExpirations();
@@ -770,15 +812,19 @@ public sealed class ContinueService
         var nextPhase = ScheduleService.GetNextOffseasonPlaceholderPhase(currentPhase);
         MoveLeagueToOffseasonPhase(league, nextPhase);
         var nextPhaseKey = ScheduleService.GetOffseasonPhaseKey(nextPhase);
+        var openingFreeAgency = string.Equals(nextPhaseKey, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
+        var openingDraft = string.Equals(nextPhaseKey, ScheduleService.DraftPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
+        if (openingDraft)
+            new DraftService(_context).AdvanceCpuPicksUntilUserTurn();
         events.Add(new ContinueEvent
         {
-            Type = nextPhaseKey,
-            Description = BuildOffseasonPlaceholderDescription(league, nextPhase),
+            Type = openingFreeAgency ? "free_agency_open" : nextPhaseKey,
+            Description = openingFreeAgency ? "Free agency is open. Review the market and submit offers before continuing to draft preparation." : openingDraft ? "The draft is underway. Make your current selection before continuing." : BuildOffseasonDescription(league, nextPhase),
         });
         return BuildStop(
             league,
             true,
-            nextPhaseKey,
+            openingFreeAgency ? "free_agency_open" : nextPhaseKey,
             0,
             Math.Max(0, league.Calendar.AbsoluteWeek - priorAbsoluteWeek),
             0,
@@ -804,7 +850,7 @@ public sealed class ContinueService
         ScheduleService.NormalizeCalendar(league.Calendar);
     }
 
-    private static string BuildOffseasonPlaceholderDescription(LeagueState league, string phase)
+    private static string BuildOffseasonDescription(LeagueState league, string phase)
     {
         var phaseLabel = ScheduleService.GetOffseasonPhaseLabel(phase);
         if (string.Equals(ScheduleService.GetOffseasonPhaseKey(phaseLabel), ScheduleService.RetirementPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
@@ -816,9 +862,20 @@ public sealed class ContinueService
             return "Retirement decisions pending.";
         }
 
-        return string.Equals(ScheduleService.GetOffseasonPhaseKey(phaseLabel), ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
-            ? "Training camp systems are not implemented yet."
-            : $"{phaseLabel} is not implemented yet. Continue to move through the placeholder offseason flow.";
+        return ScheduleService.GetOffseasonPhaseKey(phaseLabel) switch
+        {
+            ScheduleService.OffseasonPendingPhaseKey => "Process expiring contracts and prepare the offseason market.",
+            ScheduleService.StaffCarouselPendingPhaseKey => "Staff changes are not available in this build. Continue to retirement processing.",
+            ScheduleService.ExclusiveNegotiationPendingPhaseKey => "Contract extensions and releases are available before free agency.",
+            ScheduleService.FranchiseTagPendingPhaseKey => "Franchise tags are not available in this build. Continue to league-year processing.",
+            ScheduleService.LeagueYearPendingPhaseKey => "The new league year is ready to open free agency.",
+            ScheduleService.FreeAgencyPendingPhaseKey => "Free agency is open. Review the market and submit offers.",
+            ScheduleService.DraftPrepPendingPhaseKey => "Draft preparation is active.",
+            ScheduleService.DraftPendingPhaseKey => "The draft is ready for selections.",
+            ScheduleService.RookieSigningPendingPhaseKey => "Rookie signing is pending.",
+            ScheduleService.TrainingCampPendingPhaseKey => "Training camp systems are not available in this build.",
+            _ => phaseLabel,
+        };
     }
 
     public ContinueResponse ContinuePlayoffsOneRound()

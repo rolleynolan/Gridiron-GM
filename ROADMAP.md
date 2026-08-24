@@ -23,7 +23,10 @@ Build one playable C# vertical slice at a time. Do not start a later layer until
 - The native automated smoke run now validates a complete first season flow: league bootstrap, dashboard, roster/depth chart, preseason, regular season, playoffs, season transition, retirements, history, save/load, and cleanup.
 - New franchises load the packaged 32-team seed data and present the included team logos during team selection.
 - The roster, depth chart, standings, results, schedule, and injury-report views now call GameCore directly; remaining dead fallback code is limited to dashboard actions and legacy parsing helpers.
-- The next active implementation slice is to complete native dashboard actions, then remove their unreachable fallback code and legacy parsing helpers.
+- The contract and transaction foundation now validates cap space, active-roster capacity, player-pool ownership, and postseason lockout before committing releases, extensions, free-agent signings, or expirations. Every committed mutation is persisted in the native transaction log.
+- The offseason now processes expiring contracts, retirements, and opens a playable free-agency window before draft preparation. Staff changes, franchise tags, the draft lifecycle, rookie signing, and training camp remain incomplete.
+- The draft now runs seven rounds in strict pick order, advances CPU teams to each user selection, converts selected prospects into rostered rookies with contracts, and records every selection. Existing three-round draft saves are extended safely when opened.
+- The next active implementation slice is roster construction and preseason handoff: offseason roster cuts, a regular-season roster deadline, and a new-season calendar/schedule rollover.
 
 ## 1. C# playable season loop
 
@@ -48,12 +51,16 @@ Build one playable C# vertical slice at a time. Do not start a later layer until
 
 **Complete when:** all player movement is legal, persisted, explained, and cannot create duplicate ownership.
 
+**Current state:** cap-aware signings, releases, extensions, expirations, roster-capacity validation, phase lockout for postseason/season-complete, and persisted transaction records are implemented. Waivers, IR, practice squad, full phase restrictions, duplicate-pool repair, and a transactions screen remain.
+
 ## 4. Draft and complete offseason
 
 - Add prospects, draft order, picks, selections, rookies, undrafted players, roster cuts, and preseason handoff.
 - Add basic scouting ranges, reports, combine/interview data, and a user draft board.
 
 **Complete when:** a franchise can finish a season, draft, sign players, set a legal roster, and start the next year.
+
+**Current state:** seven-round order, user picks, CPU selections, scouting estimates, rookie roster placement, rookie contracts, draft transactions, and save/load support are implemented. Undrafted free agents, roster cuts, and the new-season handoff remain.
 
 ## 5. AI front offices and management depth
 

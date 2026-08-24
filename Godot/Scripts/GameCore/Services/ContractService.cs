@@ -38,126 +38,22 @@ public sealed class ContractService
 
     public ContractTransactionResult SignFreeAgent(string playerId, string teamId, ContractOffer offer)
     {
-        var league = _context.ActiveLeague;
-        if (league == null)
-            return Failure("No active league loaded.");
-
-        var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate.TeamId, teamId ?? league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        var player = league.FreeAgents.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
-        if (team == null || player == null)
-            return Failure("Team or free agent was not found.");
-        if (offer == null || offer.Years < 1 || offer.Years > 5 || offer.AnnualSalary <= 0m || offer.GuaranteedSalary < 0m)
-            return Failure("Offer must include 1-5 years, a positive annual salary, and non-negative guarantees.");
-
-        var requiredSalary = GetRequiredAnnualSalary(player, team);
-        var negotiation = league.FranchiseMetadata?.GmProfileSnapshot?.Attributes?.Negotiation ?? 50;
-        var gmDiscount = Math.Clamp((negotiation - 50) / 600m, -0.05m, 0.05m);
-        var adjustedRequirement = Math.Round(requiredSalary * (1m - gmDiscount), 0, MidpointRounding.AwayFromZero);
-        var capRoom = GetCapRoom(team);
-        if (offer.AnnualSalary > capRoom)
-            return new ContractTransactionResult { Ok = false, Message = "Offer exceeds available cap room.", RequiredAnnualSalary = adjustedRequirement, CapRoomAfterSigning = capRoom };
-        if (offer.AnnualSalary < adjustedRequirement || offer.GuaranteedSalary < offer.AnnualSalary * 0.15m)
-            return new ContractTransactionResult { Ok = true, Accepted = false, Message = "The player declined the offer.", RequiredAnnualSalary = adjustedRequirement, CapRoomAfterSigning = capRoom };
-
-        player.Contract = new PlayerContractState
-        {
-            AnnualSalary = offer.AnnualSalary,
-            GuaranteedSalary = offer.GuaranteedSalary,
-            YearsRemaining = offer.Years,
-            SignedSeason = league.SeasonYear,
-            ContractType = "Free Agent Signing",
-        };
-        player.Status = "Active";
-        player.Morale = Math.Clamp(player.Morale + 6, 0, 100);
-        player.MoraleTrend = "Improving";
-        team.Roster.Add(player);
-        league.FreeAgents.Remove(player);
-        team.CapRoom = GetCapRoom(team);
-
-        return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Free agent signed.", RequiredAnnualSalary = adjustedRequirement, CapRoomAfterSigning = team.CapRoom };
+        return new TransactionService(_context).SignFreeAgent(playerId, teamId, offer, this);
     }
 
     public ContractTransactionResult ReleasePlayer(string playerId, string teamId = null)
     {
-        var league = _context.ActiveLeague;
-        var team = league?.Teams.FirstOrDefault(candidate => string.Equals(candidate.TeamId, teamId ?? league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        var player = team?.Roster.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
-        if (team == null || player == null)
-            return Failure("Team or rostered player was not found.");
-
-        team.Roster.Remove(player);
-        foreach (var depthChart in team.DepthChart.Values)
-            depthChart.RemoveAll(id => string.Equals(id, player.PlayerId, StringComparison.OrdinalIgnoreCase));
-        player.Status = "Free Agent";
-        player.Morale = Math.Clamp(player.Morale - 8, 0, 100);
-        player.MoraleTrend = "Declining";
-        player.Contract = new PlayerContractState { ContractType = "Free Agent" };
-        league.FreeAgents.Add(player);
-        team.CapRoom = GetCapRoom(team);
-        return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Player released to free agency.", CapRoomAfterSigning = team.CapRoom };
+        return new TransactionService(_context).ReleasePlayer(playerId, teamId, this);
     }
 
     public ContractTransactionResult ReSignPlayer(string playerId, string teamId, ContractOffer offer)
     {
-        var league = _context.ActiveLeague;
-        var team = league?.Teams.FirstOrDefault(candidate => string.Equals(candidate.TeamId, teamId ?? league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        var player = team?.Roster.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
-        if (team == null || player == null)
-            return Failure("Team or rostered player was not found.");
-        if (offer == null || offer.Years < 1 || offer.Years > 5 || offer.AnnualSalary <= 0m || offer.GuaranteedSalary < 0m)
-            return Failure("Offer must include 1-5 years, a positive annual salary, and non-negative guarantees.");
-
-        var requiredSalary = GetRequiredAnnualSalary(player, team);
-        var negotiation = league.FranchiseMetadata?.GmProfileSnapshot?.Attributes?.Negotiation ?? 50;
-        var adjustedRequirement = Math.Round(requiredSalary * (1m - Math.Clamp((negotiation - 50) / 600m, -0.05m, 0.05m)), 0, MidpointRounding.AwayFromZero);
-        var capRoomAfterReplacingContract = GetCapRoom(team) + (player.Contract?.AnnualSalary ?? 0m) - offer.AnnualSalary;
-        if (capRoomAfterReplacingContract < 0m)
-            return new ContractTransactionResult { Ok = false, Message = "Offer exceeds available cap room.", RequiredAnnualSalary = adjustedRequirement, CapRoomAfterSigning = GetCapRoom(team) };
-        if (offer.AnnualSalary < adjustedRequirement || offer.GuaranteedSalary < offer.AnnualSalary * 0.15m)
-            return new ContractTransactionResult { Ok = true, Accepted = false, Message = "The player declined the extension.", RequiredAnnualSalary = adjustedRequirement, CapRoomAfterSigning = GetCapRoom(team) };
-
-        player.Contract = new PlayerContractState { AnnualSalary = offer.AnnualSalary, GuaranteedSalary = offer.GuaranteedSalary, YearsRemaining = offer.Years, SignedSeason = league.SeasonYear, ContractType = "Extension" };
-        player.Morale = Math.Clamp(player.Morale + 5, 0, 100);
-        player.MoraleTrend = "Improving";
-        team.CapRoom = GetCapRoom(team);
-        return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Player re-signed.", RequiredAnnualSalary = adjustedRequirement, CapRoomAfterSigning = team.CapRoom };
+        return new TransactionService(_context).ReSignPlayer(playerId, teamId, offer, this);
     }
 
     public int ProcessContractExpirations()
     {
-        var league = _context.ActiveLeague;
-        if (league == null)
-            return 0;
-        if (league.LastContractExpirationSeason == league.SeasonYear)
-            return 0;
-
-        var expired = 0;
-        foreach (var team in league.Teams.Where(team => team != null))
-        {
-            foreach (var player in team.Roster.ToList())
-            {
-                if (player?.Contract == null || player.Contract.YearsRemaining <= 0)
-                    continue;
-
-                player.Contract.YearsRemaining--;
-                if (player.Contract.YearsRemaining > 0)
-                    continue;
-
-                team.Roster.Remove(player);
-                foreach (var depthChart in team.DepthChart.Values)
-                    depthChart.RemoveAll(id => string.Equals(id, player.PlayerId, StringComparison.OrdinalIgnoreCase));
-                player.Status = "Free Agent";
-                player.Contract = new PlayerContractState { ContractType = "Free Agent" };
-                player.Morale = Math.Clamp(player.Morale - 3, 0, 100);
-                player.MoraleTrend = "Declining";
-                league.FreeAgents.Add(player);
-                expired++;
-            }
-        }
-
-        RefreshCapRoom(league);
-        league.LastContractExpirationSeason = league.SeasonYear;
-        return expired;
+        return new TransactionService(_context).ProcessContractExpirations(this);
     }
 
     public void RefreshCapRoom(LeagueState league)

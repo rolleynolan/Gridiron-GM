@@ -200,6 +200,7 @@ public sealed class GameCoreSaveService
         league.PlayoffBracket ??= new PlayoffBracket();
         league.HistoricalSeasons ??= new List<SeasonHistoryRecord>();
         league.RetirementHistory ??= new List<SeasonRetirementRecord>();
+        league.Transactions ??= new List<TransactionRecord>();
         league.LastContinueResult ??= new ContinueResult();
         league.LastContinueResult.EventsProcessed ??= new List<ContinueEvent>();
         league.FranchiseMetadata ??= new FranchiseMetadata();
@@ -390,6 +391,22 @@ public sealed class GameCoreSaveService
             }
         }
 
+        foreach (var transaction in league.Transactions)
+        {
+            if (transaction == null)
+                continue;
+
+            transaction.TransactionId ??= "";
+            transaction.DateLabel ??= "";
+            transaction.Phase ??= "";
+            transaction.Type ??= "";
+            transaction.TeamId ??= "";
+            transaction.TeamName ??= "";
+            transaction.PlayerId ??= "";
+            transaction.PlayerName ??= "";
+            transaction.Details ??= "";
+        }
+
         foreach (var team in league.Teams)
         {
             if (team == null)
@@ -452,6 +469,15 @@ public sealed class GameCoreSaveService
             prospect.DraftedByTeamId ??= "";
         }
         league.Draft.Picks ??= new List<DraftPickState>();
+        foreach (var pick in league.Draft.Picks)
+        {
+            if (pick == null)
+                continue;
+
+            pick.TeamId ??= "";
+            pick.ProspectId ??= "";
+            pick.PlayerId ??= "";
+        }
 
         if (isLegacySave)
             ContractService.MigrateLegacyContracts(league);

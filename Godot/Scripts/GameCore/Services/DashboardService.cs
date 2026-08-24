@@ -273,7 +273,7 @@ public sealed class DashboardService
         var currentPhase = _context.ActiveLeague?.Calendar?.Phase ?? "";
         if (ScheduleService.IsOffseasonPlaceholderPhase(currentPhase))
         {
-            items.Add(BuildOffseasonPlaceholderActionItem(_context.ActiveLeague, currentPhase));
+            items.Add(BuildOffseasonActionItem(_context.ActiveLeague, currentPhase));
 
             var retirementSummary = BuildRetirementSummaryActionItem(_context.ActiveLeague, currentPhase);
             if (retirementSummary != null)
@@ -335,11 +335,10 @@ public sealed class DashboardService
         return dto;
     }
 
-    private static ActionItemDto BuildOffseasonPlaceholderActionItem(LeagueState league, string phase)
+    private static ActionItemDto BuildOffseasonActionItem(LeagueState league, string phase)
     {
         var phaseLabel = ScheduleService.GetOffseasonPhaseLabel(phase);
         var phaseKey = ScheduleService.GetOffseasonPhaseKey(phase);
-        var isTrainingCamp = string.Equals(phaseKey, ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
         var isRetirement = string.Equals(phaseKey, ScheduleService.RetirementPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
         var seasonRetirements = RetirementService.GetSeasonRetirementRecord(league, league?.SeasonYear ?? 0);
         return new ActionItemDto
@@ -350,16 +349,32 @@ public sealed class DashboardService
                 ? seasonRetirements?.Completed == true
                     ? $"{seasonRetirements.RetiredCount} players retired."
                     : "Retirement decisions pending."
-                : isTrainingCamp
-                ? "Training camp systems are not implemented yet."
-                : $"{phaseLabel} is not implemented yet. Continue to move through the placeholder offseason flow.",
+                : BuildOffseasonActionDescription(phaseKey),
             PrimaryAction = isRetirement
                 ? seasonRetirements?.Completed == true
                     ? "Continue to next offseason phase"
                     : "Continue to process retirements"
-                : isTrainingCamp
-                ? "Training camp systems are not implemented yet."
-                : "Continue to next offseason phase",
+                : string.Equals(phaseKey, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
+                    ? "Open Free Agency"
+                    : "Continue to next offseason phase",
+        };
+    }
+
+    private static string BuildOffseasonActionDescription(string phaseKey)
+    {
+        return phaseKey switch
+        {
+            ScheduleService.OffseasonPendingPhaseKey => "Process expiring contracts and prepare the offseason market.",
+            ScheduleService.StaffCarouselPendingPhaseKey => "Staff changes are not available in this build. Continue to retirement processing.",
+            ScheduleService.ExclusiveNegotiationPendingPhaseKey => "Contract extensions and releases are available before free agency.",
+            ScheduleService.FranchiseTagPendingPhaseKey => "Franchise tags are not available in this build. Continue to league-year processing.",
+            ScheduleService.LeagueYearPendingPhaseKey => "The new league year is ready to open free agency.",
+            ScheduleService.FreeAgencyPendingPhaseKey => "Free agency is open. Review the market and submit offers.",
+            ScheduleService.DraftPrepPendingPhaseKey => "Draft preparation is active.",
+            ScheduleService.DraftPendingPhaseKey => "The draft is ready for selections.",
+            ScheduleService.RookieSigningPendingPhaseKey => "Rookie signing is pending.",
+            ScheduleService.TrainingCampPendingPhaseKey => "Training camp systems are not available in this build.",
+            _ => "Continue to the next offseason phase.",
         };
     }
 

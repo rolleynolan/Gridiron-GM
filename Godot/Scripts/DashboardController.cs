@@ -2409,17 +2409,17 @@ public partial class DashboardController : Control
     {
         EnsureNativeGameCoreServices(); var league = _nativeGameCoreContext?.ActiveLeague;
         if (league == null) { _draftStatus.Text = "Start or load a franchise to view the draft board."; return; }
-        var draft = new DraftService(_nativeGameCoreContext); draft.PrepareDraftBoard(); _draftProspectList.Clear();
+        var draft = new DraftService(_nativeGameCoreContext); draft.PrepareDraftBoard(); if (string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase)) draft.AdvanceCpuPicksUntilUserTurn(); _draftProspectList.Clear();
         foreach (var p in league.CollegeProspects.Where(p => p != null && string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.ScoutedOverall).ThenBy(p => p.Name)) { _draftProspectList.AddItem($"{p.Position,-4} {p.Name,-24} Est {p.ScoutedOverall,2} POT {p.ScoutedPotential,2}  {p.College}"); _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, p.ProspectId); }
         _selectedDraftProspectId = ""; UpdateDraftStatus();
     }
     private void UpdateDraftStatus()
     {
-        var league = _nativeGameCoreContext?.ActiveLeague; var pick = league?.Draft?.Picks?.FirstOrDefault(p => string.Equals(p.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(p.ProspectId));
+        var league = _nativeGameCoreContext?.ActiveLeague; var draft = new DraftService(_nativeGameCoreContext); var pick = draft.GetCurrentPick();
         var canPick = pick != null && string.Equals(league?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(_selectedDraftProspectId);
-        _btnMakeDraftPick.Disabled = !canPick; _draftStatus.Text = pick == null ? "No remaining pick for your team." : $"Next pick: Round {pick.Round}, Pick {pick.PickInRound}. { (canPick ? "Select this prospect." : "Draft picks are available during Draft Pending.") }";
+        _btnMakeDraftPick.Disabled = !canPick; _draftStatus.Text = pick == null ? "Draft complete." : string.Equals(pick.TeamId, league?.UserTeamId, StringComparison.OrdinalIgnoreCase) ? $"Your pick: Round {pick.Round}, Pick {pick.PickInRound}. { (canPick ? "Select this prospect." : "Choose a prospect.") }" : $"CPU team is on the clock for Round {pick.Round}, Pick {pick.PickInRound}.";
     }
-    private async void MakeDraftPick() { var league = _nativeGameCoreContext.ActiveLeague; if (new DraftService(_nativeGameCoreContext).MakePick(league.UserTeamId, _selectedDraftProspectId)) { await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft pick saved.", true); RefreshDraftBoard(); } }
+    private async void MakeDraftPick() { var league = _nativeGameCoreContext.ActiveLeague; var draft = new DraftService(_nativeGameCoreContext); if (draft.MakePick(league.UserTeamId, _selectedDraftProspectId)) { await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft pick saved.", true); RefreshDraftBoard(); } else { _draftStatus.Text = draft.LastMessage; } }
 
     private void CreateRosterContractControls()
     {
