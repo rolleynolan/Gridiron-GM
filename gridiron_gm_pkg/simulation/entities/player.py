@@ -99,6 +99,17 @@ class Contract:
     years: int
     salary_per_year: int
     bonuses: Dict[str, int] = field(default_factory=dict)
+    guaranteed: int = 0
+    contract_type: str = "veteran"
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "years": self.years,
+            "salary_per_year": self.salary_per_year,
+            "bonuses": dict(self.bonuses),
+            "guaranteed": self.guaranteed,
+            "contract_type": self.contract_type,
+        }
 
 
 class Player:

@@ -306,7 +306,7 @@ def test_standings_returns_compact_payload_after_new_game():
         assert forbidden_key not in payload_json
 
 
-def test_standings_updates_after_sim_game_and_stays_sorted():
+def test_preseason_game_does_not_change_regular_season_standings():
     facade = GameFacade(save_name="unit_test_standings_after_sim")
     facade.new_game()
     user_team_id = facade.league.user_team_id
@@ -335,7 +335,7 @@ def test_standings_updates_after_sim_game_and_stays_sorted():
     standings = standings_payload["standings"]
     assert standings
     user_row = next(row for row in standings if row["team_id"] == user_team_id)
-    assert user_row["wins"] + user_row["losses"] + user_row["ties"] >= 1
+    assert user_row["wins"] + user_row["losses"] + user_row["ties"] == 0
     assert isinstance(user_row["points_for"], int)
     assert isinstance(user_row["points_against"], int)
     assert isinstance(user_row["win_pct"], float)

@@ -135,6 +135,26 @@ def _apply_fast_patches(monkeypatch):
                     jersey_number=base + 4,
                     overall=66,
                 ),
+                Player(
+                    name=f"{team.abbreviation} K1",
+                    position="K",
+                    age=22,
+                    dob=dob,
+                    college="Test U",
+                    birth_location="USA",
+                    jersey_number=base + 5,
+                    overall=65,
+                ),
+                Player(
+                    name=f"{team.abbreviation} P1",
+                    position="P",
+                    age=22,
+                    dob=dob,
+                    college="Test U",
+                    birth_location="USA",
+                    jersey_number=base + 6,
+                    overall=65,
+                ),
             ]
             for player in players:
                 team.add_player(player)
