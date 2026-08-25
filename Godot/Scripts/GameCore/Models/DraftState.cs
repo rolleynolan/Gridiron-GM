@@ -9,10 +9,13 @@ public sealed class DraftPickState
     public int PickInRound { get; set; }
     public string TeamId { get; set; } = "";
     public string ProspectId { get; set; } = "";
+    public string PlayerId { get; set; } = "";
 }
 
 public sealed class DraftState
 {
     public int DraftYear { get; set; }
+    public bool IsCompleted { get; set; }
     public List<DraftPickState> Picks { get; set; } = new();
+    public List<DraftClassRecapEntry> RecapEntries { get; set; } = new();
 }

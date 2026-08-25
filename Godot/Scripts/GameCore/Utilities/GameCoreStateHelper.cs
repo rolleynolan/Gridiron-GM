@@ -102,6 +102,22 @@ public static class GameCoreStateHelper
         {
             dto.BoxScore["final"] = result.BoxScore.Final;
             dto.BoxScore["team_stats"] = new Dictionary<string, int>(result.BoxScore.TeamStats);
+            dto.BoxScore["player_stats"] = result.BoxScore.PlayerStats.Select(stat => new PlayerGameStats
+            {
+                PlayerId = stat.PlayerId,
+                PlayerName = stat.PlayerName,
+                TeamId = stat.TeamId,
+                Position = stat.Position,
+                PassingYards = stat.PassingYards,
+                PassingTouchdowns = stat.PassingTouchdowns,
+                RushingYards = stat.RushingYards,
+                RushingTouchdowns = stat.RushingTouchdowns,
+                ReceivingYards = stat.ReceivingYards,
+                ReceivingTouchdowns = stat.ReceivingTouchdowns,
+                Tackles = stat.Tackles,
+                Sacks = stat.Sacks,
+                Interceptions = stat.Interceptions,
+            }).ToList();
         }
 
         return dto;

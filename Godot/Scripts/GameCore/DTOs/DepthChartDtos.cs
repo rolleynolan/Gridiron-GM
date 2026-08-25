@@ -31,5 +31,7 @@ public sealed class DepthChartPlayerDto
     public int Overall { get; set; }
     public string Status { get; set; } = "";
     public string Injury { get; set; } = "";
+    public int InjuryDaysRemaining { get; set; }
+    public bool IsAvailable { get; set; }
     public string Role { get; set; } = "";
 }

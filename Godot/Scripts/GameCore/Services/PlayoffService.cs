@@ -228,6 +228,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 3,
                     requireWinner: true);
+                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
                 league.Results.Add(result);
                 simulatedGames++;
             }
@@ -443,6 +444,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 3,
                     requireWinner: true);
+                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
                 league.Results.Add(result);
                 simulatedGames++;
             }
@@ -633,6 +635,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 3,
                     requireWinner: true);
+                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
                 league.Results.Add(result);
                 simulatedGames++;
             }
@@ -814,6 +817,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 0,
                     requireWinner: true);
+                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
                 league.Results.Add(result);
                 simulatedGames++;
             }
@@ -1259,6 +1263,7 @@ public sealed class PlayoffService
         result.Winner = winnerName;
         result.Summary = $"{winnerName} defeated {loserName}, {result.HomeScore}-{result.AwayScore}.";
         result.BoxScore = result.BoxScore ?? new BoxScoreState();
+        PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
         league.Results.Add(result);
     }
 

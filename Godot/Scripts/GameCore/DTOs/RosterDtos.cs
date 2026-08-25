@@ -20,6 +20,8 @@ public sealed class RosterStatusDto
     public int RequiredCuts { get; set; }
     public int OpenSlots { get; set; }
     public int InjuredCount { get; set; }
+    public int InjuredReserveCount { get; set; }
+    public int PracticeSquadCount { get; set; }
     public List<string> Issues { get; set; } = new();
 }
 
@@ -35,8 +37,12 @@ public sealed class PlayerRowDto
     public string Name { get; set; } = "";
     public string Position { get; set; } = "";
     public int Overall { get; set; }
+    public int Potential { get; set; }
     public int Age { get; set; }
+    public int Fatigue { get; set; }
     public string Status { get; set; } = "";
     public string Injury { get; set; } = "";
+    public int InjuryDaysRemaining { get; set; }
+    public bool IsAvailable { get; set; }
     public string DepthRole { get; set; } = "";
 }

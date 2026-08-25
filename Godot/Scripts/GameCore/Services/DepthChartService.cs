@@ -93,7 +93,8 @@ public sealed class DepthChartService
         {
             team.DepthChart[position] = team.Roster
                 .Where(player => string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(player => player.Overall)
+                .OrderByDescending(PlayerInjuryService.IsAvailableForGame)
+                .ThenByDescending(player => player.Overall)
                 .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
                 .Select(player => player.PlayerId)
                 .ToList();
@@ -190,6 +191,12 @@ public sealed class DepthChartService
         }
 
         team.DepthChart[position] = group;
+        if (string.Equals(league.Calendar?.Phase, ScheduleService.TrainingCampPendingPhase, StringComparison.OrdinalIgnoreCase))
+        {
+            team.TrainingCamp ??= new TrainingCampState();
+            if (!team.TrainingCamp.UserAdjustedPositions.Contains(position, StringComparer.OrdinalIgnoreCase))
+                team.TrainingCamp.UserAdjustedPositions.Add(position);
+        }
         return GetTeamDepthChart(team.TeamId);
     }
 
@@ -217,9 +224,12 @@ public sealed class DepthChartService
             var requiredStarters = DepthChartRules.GetRequiredStarters(position);
             var players = new List<DepthChartPlayerDto>();
 
+            var availableIndex = 0;
             for (var index = 0; index < ids.Count; index++)
             {
                 if (!playersById.TryGetValue(ids[index], out var player))
+                    continue;
+                if (!PlayerInjuryService.IsAvailableForGame(player))
                     continue;
 
                 players.Add(new DepthChartPlayerDto
@@ -229,7 +239,9 @@ public sealed class DepthChartService
                     Overall = player.Overall,
                     Status = player.Status,
                     Injury = player.Injury,
-                    Role = index < requiredStarters ? "Starter" : "Backup",
+                    InjuryDaysRemaining = player.CurrentInjury?.DaysRemaining ?? 0,
+                    IsAvailable = true,
+                    Role = availableIndex++ < requiredStarters ? "Starter" : "Backup",
                 });
             }
 
@@ -248,7 +260,8 @@ public sealed class DepthChartService
     {
         var rosterIds = team.Roster
             .Where(player => string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(player => player.Overall)
+            .OrderByDescending(PlayerInjuryService.IsAvailableForGame)
+            .ThenByDescending(player => player.Overall)
             .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
             .Select(player => player.PlayerId)
             .ToList();

@@ -9,7 +9,7 @@ namespace GridironGM.GameCore.Services;
 
 public sealed class RosterService
 {
-    private const int RosterLimit = 53;
+    public const int RosterLimit = 53;
     private readonly GameCoreContext _context;
 
     public RosterService(GameCoreContext context)
@@ -39,6 +39,7 @@ public sealed class RosterService
             };
         }
 
+        var rosterLimit = GetRosterLimit(league);
         var injuries = team.Roster.Count(player => !string.IsNullOrWhiteSpace(player.Injury));
         var positionCounts = team.Roster
             .GroupBy(player => player.Position, StringComparer.OrdinalIgnoreCase)
@@ -64,15 +65,17 @@ public sealed class RosterService
             },
             RosterStatus = new RosterStatusDto
             {
-                IsValid = team.Roster.Count <= RosterLimit,
+                IsValid = team.Roster.Count <= rosterLimit,
                 RosterSize = team.Roster.Count,
-                RosterLimit = RosterLimit,
-                RequiredCuts = Math.Max(0, team.Roster.Count - RosterLimit),
-                OpenSlots = Math.Max(0, RosterLimit - team.Roster.Count),
+                RosterLimit = rosterLimit,
+                RequiredCuts = Math.Max(0, team.Roster.Count - rosterLimit),
+                OpenSlots = Math.Max(0, rosterLimit - team.Roster.Count),
                 InjuredCount = injuries,
-                Issues = team.Roster.Count <= RosterLimit
+                InjuredReserveCount = team.InjuredReserve?.Count ?? 0,
+                PracticeSquadCount = team.PracticeSquad?.Count ?? 0,
+                Issues = team.Roster.Count <= rosterLimit
                     ? new List<string>()
-                    : new List<string> { "Roster exceeds active limit." },
+                    : new List<string> { $"Roster exceeds the {rosterLimit}-player limit for this phase." },
             },
             PositionCounts = positionCounts,
             Players = team.Roster
@@ -86,13 +89,27 @@ public sealed class RosterService
                     Name = player.Name,
                     Position = player.Position,
                     Overall = player.Overall,
+                    Potential = player.Potential,
                     Age = player.Age,
+                    Fatigue = player.Fatigue,
                     Status = player.Status,
                     Injury = player.Injury,
+                    InjuryDaysRemaining = player.CurrentInjury?.DaysRemaining ?? 0,
+                    IsAvailable = PlayerInjuryService.IsAvailableForGame(player),
                     DepthRole = roles.TryGetValue(player.PlayerId, out var role) ? role : "Depth",
                 })
                 .ToList(),
         };
+    }
+
+    private static int GetRosterLimit(LeagueState league)
+    {
+        var phase = league?.Calendar?.Phase ?? "";
+        return string.Equals(phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase)
+               || string.Equals(phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase)
+               || string.Equals(phase, ScheduleService.TrainingCampPendingPhase, StringComparison.OrdinalIgnoreCase)
+            ? 90
+            : RosterLimit;
     }
 
     private static Dictionary<string, string> BuildDepthRoleMap(TeamState team)

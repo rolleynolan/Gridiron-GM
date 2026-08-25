@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bqwdcdvm2hpt0"
+
+[deps]
+
+files=["res://Assets/Data/gridiron_github_issues.Body.translation", "res://Assets/Data/gridiron_github_issues.Labels.translation", "res://Assets/Data/gridiron_github_issues.State.translation"]
+
+source_file="res://Assets/Data/gridiron_github_issues.csv"
+dest_files=["res://Assets/Data/gridiron_github_issues.Body.translation", "res://Assets/Data/gridiron_github_issues.Labels.translation", "res://Assets/Data/gridiron_github_issues.State.translation"]
+
+[params]
+
+compress=true
+delimiter=0

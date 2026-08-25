@@ -12,5 +12,11 @@ public sealed class CollegeProspectState
     public int DraftClassYear { get; set; }
     public int ScoutedOverall { get; set; }
     public int ScoutedPotential { get; set; }
+    public int ScoutingConfidence { get; set; }
+    public int CombineScore { get; set; }
+    public int ProDayScore { get; set; }
+    public string ScoutingReport { get; set; } = "";
+    public string Trait { get; set; } = "";
+    public string InterviewSummary { get; set; } = "";
     public string DraftedByTeamId { get; set; } = "";
 }
