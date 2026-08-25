@@ -19,23 +19,11 @@ public sealed class DraftService
         if (league == null)
             return;
 
-        if (league.Draft?.DraftYear == league.SeasonYear)
-        {
-            EnsureDraftRounds(league, BuildDraftOrder(league));
-            return;
-        }
+        if (league.Draft?.DraftYear != league.SeasonYear)
+            league.Draft = new DraftState { DraftYear = league.SeasonYear };
 
-        league.Draft = new DraftState { DraftYear = league.SeasonYear };
         EnsureDraftRounds(league, BuildDraftOrder(league));
-
-        var scouting = league.FranchiseMetadata?.GmProfileSnapshot?.Attributes?.ScoutingJudgment ?? 50;
-        foreach (var prospect in league.CollegeProspects.Where(prospect => prospect != null && prospect.DraftClassYear == league.SeasonYear + 1))
-        {
-            var error = Math.Max(1, 12 - ((scouting - 20) / 6));
-            var seed = Math.Abs((prospect.ProspectId ?? "").Aggregate(17, (value, character) => unchecked(value * 31 + character)));
-            prospect.ScoutedOverall = Math.Clamp(prospect.Overall + ((seed % (error * 2 + 1)) - error), 40, 99);
-            prospect.ScoutedPotential = Math.Clamp(prospect.Potential + (((seed / 7) % (error * 2 + 1)) - error), prospect.ScoutedOverall, 99);
-        }
+        ProspectEvaluationService.EnsureEvaluations(league, league.CollegeProspects.Where(prospect => prospect != null && prospect.DraftClassYear == league.SeasonYear + 1));
     }
 
     private System.Collections.Generic.List<TeamStanding> BuildDraftOrder(LeagueState league)

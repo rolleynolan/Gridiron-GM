@@ -71,6 +71,8 @@ public sealed class RosterService
                 RequiredCuts = Math.Max(0, team.Roster.Count - rosterLimit),
                 OpenSlots = Math.Max(0, rosterLimit - team.Roster.Count),
                 InjuredCount = injuries,
+                InjuredReserveCount = team.InjuredReserve?.Count ?? 0,
+                PracticeSquadCount = team.PracticeSquad?.Count ?? 0,
                 Issues = team.Roster.Count <= rosterLimit
                     ? new List<string>()
                     : new List<string> { $"Roster exceeds the {rosterLimit}-player limit for this phase." },
@@ -87,9 +89,13 @@ public sealed class RosterService
                     Name = player.Name,
                     Position = player.Position,
                     Overall = player.Overall,
+                    Potential = player.Potential,
                     Age = player.Age,
+                    Fatigue = player.Fatigue,
                     Status = player.Status,
                     Injury = player.Injury,
+                    InjuryDaysRemaining = player.CurrentInjury?.DaysRemaining ?? 0,
+                    IsAvailable = PlayerInjuryService.IsAvailableForGame(player),
                     DepthRole = roles.TryGetValue(player.PlayerId, out var role) ? role : "Depth",
                 })
                 .ToList(),

@@ -201,6 +201,12 @@ public sealed class LeagueBootstrapService
         return schedule;
     }
 
+    public static List<CollegeProspectState> CreateProspectClass(LeagueState league, int draftClassYear)
+    {
+        var seed = (league?.FranchiseMetadata?.World?.Seed ?? WorldDefinition.StandardSeed) + (ulong)Math.Max(0, draftClassYear) * 7919UL;
+        return BuildCollegeProspects(seed, draftClassYear, NamePoolService.Load());
+    }
+
     private static List<TeamState> CreateLeagueTeams(string teamSeedPath, ulong worldSeed, GeneratedNamePools namePools)
     {
         var seeds = LoadTeamSeeds(teamSeedPath);
@@ -484,6 +490,7 @@ public sealed class LeagueBootstrapService
                 Name = BuildName(namePools, value, StableValue(seed, index, 137)),
                 Position = position,
                 Overall = Math.Clamp(baseOverall - 7 + ((value % 15) - 7), 52, 77),
+                Potential = Math.Clamp(baseOverall + 7 + ((value / 7) % 16), 55, 99),
                 Age = 23 + ((value / 11) % 11),
                 Status = "Free Agent",
                 Injury = "",
@@ -575,6 +582,7 @@ public sealed class LeagueBootstrapService
                     Name = name,
                     Position = position,
                     Overall = overall,
+                    Potential = Math.Clamp(overall + 4 + ((playerSeed / 7) % 12), 55, 99),
                     Age = age,
                     Status = "Active",
                     Injury = string.Empty,

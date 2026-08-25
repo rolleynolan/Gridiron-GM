@@ -138,6 +138,9 @@ public sealed class GameDayService
             homeFieldBonus: 3,
             requireWinner: true);
 
+        PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
+        PlayerStatisticsService.ApplyGameFatigue(league, result);
+        PlayerStatisticsService.ApplyRegularSeasonStats(league, result);
         league.Results.Add(result);
         game.HomeScore = result.HomeScore;
         game.AwayScore = result.AwayScore;
@@ -255,7 +258,8 @@ public sealed class GameDayService
     private static int BuildScore(TeamState team, int week, int dayIndex, int bonus)
     {
         var averageOverall = team?.Roster.Count > 0
-            ? (int)Math.Round(team.Roster.Average(player => player.Overall))
+            ? (int)Math.Round(team.Roster.Where(PlayerInjuryService.IsAvailableForGame).DefaultIfEmpty()
+                .Average(player => player == null ? 65 : Math.Max(0, player.Overall - (Math.Clamp(player.Fatigue, 0, 100) / 8))))
             : 65;
 
         return 14 + bonus + (averageOverall % 11) + week + Math.Max(0, dayIndex);
@@ -276,6 +280,84 @@ public sealed class GameDayService
                 ["turnovers_home"] = Math.Abs(homeScore - awayScore) % 3,
                 ["turnovers_away"] = (Math.Abs(homeScore - awayScore) + 1) % 3,
             },
+            PlayerStats = BuildPlayerStats(homeTeam, homeScore)
+                .Concat(BuildPlayerStats(awayTeam, awayScore))
+                .ToList(),
         };
+    }
+
+    private static IEnumerable<PlayerGameStats> BuildPlayerStats(TeamState team, int score)
+    {
+        var players = (team?.Roster ?? new List<PlayerState>())
+            .Where(PlayerInjuryService.IsAvailableForGame)
+            .OrderByDescending(player => player.Overall)
+            .ThenBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var quarterback = players.FirstOrDefault(player => string.Equals(player.Position, "QB", StringComparison.OrdinalIgnoreCase));
+        var runner = players.FirstOrDefault(player => string.Equals(player.Position, "RB", StringComparison.OrdinalIgnoreCase));
+        var receivers = players.Where(player => string.Equals(player.Position, "WR", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(player.Position, "TE", StringComparison.OrdinalIgnoreCase))
+            .Take(2)
+            .ToList();
+        var defenders = players.Where(player => player.Position.EndsWith("B", StringComparison.OrdinalIgnoreCase)
+                || player.Position.EndsWith("E", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(player.Position, "DT", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(player.Position, "CB", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(player.Position, "S", StringComparison.OrdinalIgnoreCase))
+            .Take(2)
+            .ToList();
+        var stats = new List<PlayerGameStats>();
+        var passingYards = 120 + (score * 5) + (quarterback?.Overall ?? 65);
+
+        AddStats(stats, quarterback, team, stat =>
+        {
+            stat.PassingYards = passingYards;
+            stat.PassingTouchdowns = score / 10;
+        });
+        AddStats(stats, runner, team, stat =>
+        {
+            stat.RushingYards = 35 + (score * 2) + ((runner?.Overall ?? 65) / 3);
+            stat.RushingTouchdowns = score / 17;
+        });
+        for (var index = 0; index < receivers.Count; index++)
+        {
+            var receiver = receivers[index];
+            AddStats(stats, receiver, team, stat =>
+            {
+                stat.ReceivingYards = index == 0 ? (passingYards * 3) / 5 : (passingYards * 2) / 5;
+                stat.ReceivingTouchdowns = index == 0 ? score / 14 : score / 28;
+            });
+        }
+        for (var index = 0; index < defenders.Count; index++)
+        {
+            var defender = defenders[index];
+            AddStats(stats, defender, team, stat =>
+            {
+                stat.Tackles = 5 + ((defender.Overall + index) % 6);
+                stat.Sacks = defender.Position.EndsWith("E", StringComparison.OrdinalIgnoreCase) || string.Equals(defender.Position, "DT", StringComparison.OrdinalIgnoreCase)
+                    ? (score + index) % 3
+                    : 0;
+                stat.Interceptions = string.Equals(defender.Position, "CB", StringComparison.OrdinalIgnoreCase) || string.Equals(defender.Position, "S", StringComparison.OrdinalIgnoreCase)
+                    ? (score + index) % 2
+                    : 0;
+            });
+        }
+        return stats;
+    }
+
+    private static void AddStats(List<PlayerGameStats> stats, PlayerState player, TeamState team, Action<PlayerGameStats> apply)
+    {
+        if (player == null)
+            return;
+
+        var line = new PlayerGameStats
+        {
+            PlayerId = player.PlayerId,
+            PlayerName = player.Name,
+            TeamId = team?.TeamId ?? "",
+            Position = player.Position,
+        };
+        apply(line);
+        stats.Add(line);
     }
 }

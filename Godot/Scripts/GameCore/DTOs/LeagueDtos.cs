@@ -161,6 +161,29 @@ public sealed class LeagueHistorySeasonDto
     public List<LeagueHistoryTeamRecordDto> TeamRecords { get; set; } = new();
     public List<LeagueHistoryPlayoffSeedDto> PlayoffSeeds { get; set; } = new();
     public List<LeagueHistoryPlayoffResultDto> PlayoffResults { get; set; } = new();
+    public List<DraftClassRecapDto> DraftClass { get; set; } = new();
+}
+
+public sealed class DraftClassRecapDto
+{
+    public int OverallPick { get; set; }
+    public int Round { get; set; }
+    public int PickInRound { get; set; }
+    public string TeamName { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Position { get; set; } = "";
+    public string College { get; set; } = "";
+    public int Age { get; set; }
+    public string EstimatedOverall { get; set; } = "";
+    public string EstimatedPotential { get; set; } = "";
+    public string Confidence { get; set; } = "";
+    public int CombineScore { get; set; }
+    public int ProDayScore { get; set; }
+    public string Report { get; set; } = "";
+    public string Trait { get; set; } = "";
+    public string Interview { get; set; } = "";
+    public string RookiePlacement { get; set; } = "";
+    public string ContractSummary { get; set; } = "";
 }
 
 public sealed class LeagueHistoryTeamRecordDto

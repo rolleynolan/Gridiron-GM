@@ -15,6 +15,8 @@ public sealed class ContractService
 
     public decimal GetCommittedSalary(TeamState team)
         => (team?.Roster ?? Enumerable.Empty<PlayerState>())
+            .Concat(team?.InjuredReserve ?? Enumerable.Empty<PlayerState>())
+            .Concat(team?.PracticeSquad ?? Enumerable.Empty<PlayerState>())
             .Where(player => player != null)
             .Sum(player => Math.Max(0m, player.Contract?.AnnualSalary ?? 0m));
 
@@ -49,6 +51,11 @@ public sealed class ContractService
     public ContractTransactionResult ReSignPlayer(string playerId, string teamId, ContractOffer offer)
     {
         return new TransactionService(_context).ReSignPlayer(playerId, teamId, offer, this);
+    }
+
+    public ContractTransactionResult ApplyFranchiseTag(string playerId, string teamId = null)
+    {
+        return new TransactionService(_context).ApplyFranchiseTag(playerId, teamId, this);
     }
 
     public int ProcessContractExpirations()

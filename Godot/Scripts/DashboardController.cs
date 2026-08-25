@@ -99,8 +99,25 @@ public partial class DashboardController : Control
     private Button _btnSubmitFreeAgentOffer;
     private Label _freeAgencyStatus;
     private string _selectedFreeAgentId = "";
+    private Button _btnRosterManagement;
+    private AcceptDialog _rosterManagementDialog;
+    private ItemList _waiverClaimList;
+    private ItemList _practiceSquadFreeAgentList;
+    private ItemList _practiceSquadList;
+    private RichTextLabel _transactionHistoryText;
+    private Label _rosterManagementStatus;
+    private string _selectedWaiverPlayerId = "";
+    private string _selectedPracticeSquadFreeAgentId = "";
+    private string _selectedPracticeSquadPlayerId = "";
+    private Button _btnTrainingCamp;
+    private AcceptDialog _trainingCampDialog;
+    private OptionButton _trainingCampPosition;
+    private Label _trainingCampStatus;
+    private RichTextLabel _trainingCampReport;
+    private RichTextLabel _trainingCampRoles;
     private Button _btnReleaseSelectedPlayer;
     private Button _btnOfferExtension;
+    private Button _btnApplyFranchiseTag;
     private AcceptDialog _extensionDialog;
     private Label _extensionPlayerLabel;
     private SpinBox _extensionAnnualOffer;
@@ -111,11 +128,15 @@ public partial class DashboardController : Control
     private Button _btnDraftBoard;
     private AcceptDialog _draftBoardDialog;
     private ItemList _draftProspectList;
+    private RichTextLabel _draftProspectDetail;
     private Label _draftStatus;
     private Button _btnMakeDraftPick;
     private string _selectedDraftProspectId = "";
     private PopupMenu _popupColumns;
+    private Control _playerReportPanel;
     private Label _lblPlayerHeader;
+    private Label _lblRosterEvaluation;
+    private RichTextLabel _rtlPlayerStats;
     private RichTextLabel _rtlScoutSummary;
     private RichTextLabel _rtlScoutReport;
     private Container _tagsRow;
@@ -370,7 +391,10 @@ public partial class DashboardController : Control
         _btnRunGameCoreSmokeTest = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnRunGameCoreSmokeTest");
         _btnColumns = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnColumns", "BtnColumns not found; skipping columns menu binding.");
         _popupColumns = GetNodeOrWarn<PopupMenu>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/PopupColumns");
+        _playerReportPanel = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel");
         _lblPlayerHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/LblPlayerHeader");
+        _lblRosterEvaluation = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/LblRosterEvaluation");
+        _rtlPlayerStats = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/RtlPlayerStats");
         _rtlScoutSummary = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/RtlScoutSummary");
         _rtlScoutReport = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/ReportScroll/RtlScoutReport");
         _tagsRow = GetNodeOrWarn<Container>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/TagsRow");
@@ -436,6 +460,8 @@ public partial class DashboardController : Control
         CreateFreeAgencyDialog();
         CreateFreeAgencyButton();
         CreateRosterContractControls();
+        CreateRosterManagementControls();
+        CreateTrainingCampControls();
         CreateDraftBoard();
 
         // NEW nodes (make sure you added these nodes under MainTabs)
@@ -2397,9 +2423,11 @@ public partial class DashboardController : Control
         var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         _draftBoardDialog.AddChild(content);
         _draftStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_draftStatus);
-        _draftProspectList = new ItemList { CustomMinimumSize = new Vector2(760, 380), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _draftProspectList = new ItemList { CustomMinimumSize = new Vector2(760, 300), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         content.AddChild(_draftProspectList);
-        _draftProspectList.ItemSelected += index => { _selectedDraftProspectId = _draftProspectList.GetItemMetadata((int)index).ToString(); UpdateDraftStatus(); };
+        _draftProspectList.ItemSelected += index => { _selectedDraftProspectId = _draftProspectList.GetItemMetadata((int)index).ToString(); UpdateDraftProspectDetail(); UpdateDraftStatus(); };
+        _draftProspectDetail = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(760, 120), FitContent = true };
+        content.AddChild(_draftProspectDetail);
         _btnMakeDraftPick = new Button { Text = "Make Pick", Disabled = true }; content.AddChild(_btnMakeDraftPick);
         _btnMakeDraftPick.Pressed += MakeDraftPick;
     }
@@ -2410,8 +2438,28 @@ public partial class DashboardController : Control
         EnsureNativeGameCoreServices(); var league = _nativeGameCoreContext?.ActiveLeague;
         if (league == null) { _draftStatus.Text = "Start or load a franchise to view the draft board."; return; }
         var draft = new DraftService(_nativeGameCoreContext); draft.PrepareDraftBoard(); if (string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase)) draft.AdvanceCpuPicksUntilUserTurn(); _draftProspectList.Clear();
-        foreach (var p in league.CollegeProspects.Where(p => p != null && string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.ScoutedOverall).ThenBy(p => p.Name)) { _draftProspectList.AddItem($"{p.Position,-4} {p.Name,-24} Est {p.ScoutedOverall,2} POT {p.ScoutedPotential,2}  {p.College}"); _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, p.ProspectId); }
-        _selectedDraftProspectId = ""; UpdateDraftStatus();
+        var evaluations = new ProspectEvaluationService(_nativeGameCoreContext);
+        foreach (var p in league.CollegeProspects.Where(p => p != null && string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.ScoutedOverall).ThenBy(p => p.Name))
+        {
+            var evaluation = evaluations.GetEvaluation(p.ProspectId);
+            _draftProspectList.AddItem($"{p.Position,-4} {p.Name,-24} Est {evaluation.EstimatedOverall,-5} POT {evaluation.EstimatedPotential,-5} {evaluation.Confidence} confidence");
+            _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, p.ProspectId);
+        }
+        _selectedDraftProspectId = "";
+        if (_draftProspectDetail != null)
+            _draftProspectDetail.Text = "Select a prospect to review public combine/pro-day results and your scouting evaluation. Estimates are not hidden ratings.";
+        UpdateDraftStatus();
+    }
+
+    private void UpdateDraftProspectDetail()
+    {
+        if (_draftProspectDetail == null)
+            return;
+
+        var evaluation = new ProspectEvaluationService(_nativeGameCoreContext).GetEvaluation(_selectedDraftProspectId);
+        _draftProspectDetail.Text = evaluation == null
+            ? "Prospect evaluation unavailable."
+            : $"Known facts\n{evaluation.KnownFacts}\n\nTeam evaluation (estimate)\nOVR: {evaluation.EstimatedOverall} | Potential: {evaluation.EstimatedPotential} | {evaluation.Confidence} confidence\nTrait: {evaluation.Trait}\nInterview: {evaluation.Interview}\n{evaluation.Report}";
     }
     private void UpdateDraftStatus()
     {
@@ -2428,11 +2476,20 @@ public partial class DashboardController : Control
             return;
 
         _btnOfferExtension = new Button { Text = "Offer Extension" };
+        _btnApplyFranchiseTag = new Button { Text = "Apply Franchise Tag", TooltipText = "Available only during the Franchise Tag phase." };
         _btnReleaseSelectedPlayer = new Button { Text = "Release Selected" };
+        var waiveSelectedPlayer = new Button { Text = "Waive Selected" };
+        var moveSelectedPlayerToIr = new Button { Text = "Move to IR" };
         actionRow.AddChild(_btnOfferExtension);
+        actionRow.AddChild(_btnApplyFranchiseTag);
         actionRow.AddChild(_btnReleaseSelectedPlayer);
+        actionRow.AddChild(waiveSelectedPlayer);
+        actionRow.AddChild(moveSelectedPlayerToIr);
         _btnOfferExtension.Pressed += ShowExtensionOffer;
+        _btnApplyFranchiseTag.Pressed += async () => await ApplyFranchiseTagToSelectedPlayer();
         _btnReleaseSelectedPlayer.Pressed += async () => await ReleaseSelectedPlayer();
+        waiveSelectedPlayer.Pressed += async () => await WaiveSelectedPlayer();
+        moveSelectedPlayerToIr.Pressed += async () => await MoveSelectedPlayerToIr();
 
         _extensionDialog = new AcceptDialog { Title = "Offer Contract Extension", MinSize = new Vector2I(480, 300) };
         AddChild(_extensionDialog);
@@ -2454,6 +2511,11 @@ public partial class DashboardController : Control
 
     private void ShowExtensionOffer()
     {
+        if (!ContractPhaseRules.CanOfferExtensions(_nativeGameCoreContext?.ActiveLeague, out var phaseError))
+        {
+            SetPrimaryStatus(phaseError);
+            return;
+        }
         var player = GetSelectedNativeRosterPlayer();
         if (player == null)
         {
@@ -2493,6 +2555,30 @@ public partial class DashboardController : Control
         await RefreshAll();
     }
 
+    private async Task ApplyFranchiseTagToSelectedPlayer()
+    {
+        if (!ContractPhaseRules.CanApplyFranchiseTag(_nativeGameCoreContext?.ActiveLeague, out var phaseError))
+        {
+            SetPrimaryStatus(phaseError);
+            return;
+        }
+
+        var player = GetSelectedNativeRosterPlayer();
+        if (player == null)
+        {
+            SetPrimaryStatus("Select an eligible player from your roster first.");
+            return;
+        }
+
+        var result = new ContractService(_nativeGameCoreContext).ApplyFranchiseTag(player.PlayerId);
+        SetPrimaryStatus(result.Message);
+        if (!result.Accepted)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Franchise tag saved.", autosaveToo: true);
+        await RefreshAll();
+    }
+
     private async Task ReleaseSelectedPlayer()
     {
         var player = GetSelectedNativeRosterPlayer();
@@ -2508,6 +2594,42 @@ public partial class DashboardController : Control
             return;
 
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Player release saved.", autosaveToo: true);
+        await RefreshAll();
+    }
+
+    private async Task WaiveSelectedPlayer()
+    {
+        var player = GetSelectedNativeRosterPlayer();
+        if (player == null)
+        {
+            SetPrimaryStatus("Select a player from your roster first.");
+            return;
+        }
+
+        var result = new TransactionService(_nativeGameCoreContext).PlaceOnWaivers(player.PlayerId, null, new ContractService(_nativeGameCoreContext));
+        SetPrimaryStatus(result.Message);
+        if (!result.Accepted)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Waiver transaction saved.", autosaveToo: true);
+        await RefreshAll();
+    }
+
+    private async Task MoveSelectedPlayerToIr()
+    {
+        var player = GetSelectedNativeRosterPlayer();
+        if (player == null)
+        {
+            SetPrimaryStatus("Select an injured player from your roster first.");
+            return;
+        }
+
+        var result = new TransactionService(_nativeGameCoreContext).MoveToInjuredReserve(player.PlayerId, null, new ContractService(_nativeGameCoreContext));
+        SetPrimaryStatus(result.Message);
+        if (!result.Accepted)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Injured reserve move saved.", autosaveToo: true);
         await RefreshAll();
     }
 
@@ -2604,7 +2726,8 @@ public partial class DashboardController : Control
         }
 
         var contracts = new ContractService(_nativeGameCoreContext);
-        _freeAgencyCapSummary.Text = $"{team.Name} | Cap room: {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))} | Active roster: {team.Roster.Count}/53 | Free agents: {league.FreeAgents.Count}";
+        var phaseStatus = ContractPhaseRules.GetStatus(league);
+        _freeAgencyCapSummary.Text = $"{team.Name} | Cap room: {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))} | Active roster: {team.Roster.Count}/53 | Free agents: {league.FreeAgents.Count}\n{phaseStatus.Explanation}";
         _freeAgentList.Clear();
         foreach (var player in league.FreeAgents.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
         {
@@ -2615,7 +2738,7 @@ public partial class DashboardController : Control
 
         _selectedFreeAgentId = "";
         _freeAgentDetail.Text = "Select a player to review their asking price and make an offer.";
-        _freeAgencyStatus.Text = "Negotiation adjusts asking price by a small amount based on your GM profile.";
+        _freeAgencyStatus.Text = phaseStatus.CanSignFreeAgents ? "Negotiation adjusts asking price by a small amount based on your GM profile." : phaseStatus.Explanation;
         _btnSubmitFreeAgentOffer.Disabled = true;
     }
 
@@ -2635,7 +2758,7 @@ public partial class DashboardController : Control
         _freeAgentAnnualOffer.Value = (double)(required / 1_000_000m);
         _freeAgentGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m);
         _freeAgentDetail.Text = $"[b]{player.Name}[/b]\n{player.Position} | OVR {player.Overall} | Age {player.Age}\nMorale: {player.Morale} ({player.MoraleTrend})\n\nEstimated asking price: ${required / 1_000_000m:0.00}M annually\nOffer at least 15% of annual salary as guaranteed money.";
-        _btnSubmitFreeAgentOffer.Disabled = false;
+        _btnSubmitFreeAgentOffer.Disabled = !ContractPhaseRules.GetStatus(league).CanSignFreeAgents;
     }
 
     private async Task SubmitFreeAgentOffer()
@@ -2662,6 +2785,297 @@ public partial class DashboardController : Control
         await RefreshAll();
         RefreshFreeAgencyUi();
         _freeAgencyStatus.Text = transactionMessage;
+    }
+
+    private void CreateRosterManagementControls()
+    {
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
+        if (actionRow == null)
+            return;
+
+        _btnRosterManagement = new Button { Text = "Roster Moves", TooltipText = "Claim waivers, manage the practice squad, and browse transactions." };
+        actionRow.AddChild(_btnRosterManagement);
+        _btnRosterManagement.Pressed += ShowRosterManagement;
+
+        _rosterManagementDialog = new AcceptDialog { Name = "RosterManagementDialog", Title = "Roster Moves", MinSize = new Vector2I(940, 620), Exclusive = false };
+        AddChild(_rosterManagementDialog);
+        _rosterManagementDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _rosterManagementDialog.AddChild(content);
+        var tabs = new TabContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(tabs);
+
+        var waiversTab = new VBoxContainer { Name = "Waivers" };
+        tabs.AddChild(waiversTab);
+        waiversTab.AddChild(new Label { Text = "Claiming a player inherits the existing contract and must satisfy roster and cap rules." });
+        _waiverClaimList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        waiversTab.AddChild(_waiverClaimList);
+        _waiverClaimList.ItemSelected += index => _selectedWaiverPlayerId = _waiverClaimList.GetItemMetadata((int)index).ToString();
+        var claimButton = new Button { Text = "Claim Selected Waiver" };
+        waiversTab.AddChild(claimButton);
+        claimButton.Pressed += async () => await ClaimSelectedWaiver();
+
+        var practiceTab = new VBoxContainer { Name = "Practice Squad" };
+        tabs.AddChild(practiceTab);
+        practiceTab.AddChild(new Label { Text = "Eligible free agents are age 25 or younger. Elevations require an active-roster opening." });
+        var practiceSplit = new HSplitContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        practiceTab.AddChild(practiceSplit);
+        var candidates = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        practiceSplit.AddChild(candidates);
+        candidates.AddChild(new Label { Text = "Eligible Free Agents" });
+        _practiceSquadFreeAgentList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        candidates.AddChild(_practiceSquadFreeAgentList);
+        _practiceSquadFreeAgentList.ItemSelected += index => _selectedPracticeSquadFreeAgentId = _practiceSquadFreeAgentList.GetItemMetadata((int)index).ToString();
+        var signButton = new Button { Text = "Sign to Practice Squad" };
+        candidates.AddChild(signButton);
+        signButton.Pressed += async () => await SignSelectedPracticeSquadPlayer();
+        var squad = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        practiceSplit.AddChild(squad);
+        squad.AddChild(new Label { Text = "Current Practice Squad" });
+        _practiceSquadList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        squad.AddChild(_practiceSquadList);
+        _practiceSquadList.ItemSelected += index => _selectedPracticeSquadPlayerId = _practiceSquadList.GetItemMetadata((int)index).ToString();
+        var elevateButton = new Button { Text = "Elevate to Active Roster" };
+        squad.AddChild(elevateButton);
+        elevateButton.Pressed += async () => await ElevateSelectedPracticeSquadPlayer();
+
+        var transactionsTab = new VBoxContainer { Name = "Transactions" };
+        tabs.AddChild(transactionsTab);
+        _transactionHistoryText = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        transactionsTab.AddChild(_transactionHistoryText);
+        _rosterManagementStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_rosterManagementStatus);
+    }
+
+    private void ShowRosterManagement()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Roster moves are available in the Native C# GameCore.");
+            return;
+        }
+
+        RefreshRosterManagementUi();
+        _rosterManagementDialog.PopupCentered(new Vector2I(940, 620));
+    }
+
+    private void RefreshRosterManagementUi()
+    {
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null)
+        {
+            _rosterManagementStatus.Text = "Start or load a franchise to manage roster moves.";
+            return;
+        }
+
+        _selectedWaiverPlayerId = "";
+        _selectedPracticeSquadFreeAgentId = "";
+        _selectedPracticeSquadPlayerId = "";
+        _waiverClaimList.Clear();
+        foreach (var waiver in league.Waivers.Where(waiver => waiver?.Player != null).OrderByDescending(waiver => waiver.Player.Overall))
+        {
+            var player = waiver.Player;
+            _waiverClaimList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Contract {GameCoreStateHelper.FormatCapRoom(player.Contract?.AnnualSalary ?? 0m)}  Expires week {waiver.ExpiresAbsoluteWeek}");
+            _waiverClaimList.SetItemMetadata(_waiverClaimList.ItemCount - 1, player.PlayerId);
+        }
+        _practiceSquadFreeAgentList.Clear();
+        foreach (var player in league.FreeAgents.Where(player => player.Age <= 25).OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            _practiceSquadFreeAgentList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age}");
+            _practiceSquadFreeAgentList.SetItemMetadata(_practiceSquadFreeAgentList.ItemCount - 1, player.PlayerId);
+        }
+        _practiceSquadList.Clear();
+        foreach (var player in (team.PracticeSquad ?? new List<PlayerState>()).OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            _practiceSquadList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age}");
+            _practiceSquadList.SetItemMetadata(_practiceSquadList.ItemCount - 1, player.PlayerId);
+        }
+
+        var history = _nativeDashboardService.GetTransactionHistory();
+        _transactionHistoryText.Text = history.Ok && history.Transactions.Count > 0
+            ? string.Join("\n", history.Transactions.Select(transaction => $"{transaction.DateLabel} | {transaction.TeamName} | {transaction.PlayerName} | {transaction.Type}: {transaction.Details}"))
+            : "No transactions recorded.";
+        _rosterManagementStatus.Text = $"{team.Name}: active {team.Roster.Count}/53, practice squad {team.PracticeSquad.Count}/16, waivers {league.Waivers.Count}.";
+    }
+
+    private async Task ClaimSelectedWaiver()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedWaiverPlayerId))
+        {
+            _rosterManagementStatus.Text = "Select a waived player first.";
+            return;
+        }
+        var result = new TransactionService(_nativeGameCoreContext).ClaimWaiver(_selectedWaiverPlayerId, null, new ContractService(_nativeGameCoreContext));
+        await CompleteRosterManagementAction(result, "Waiver claim saved.");
+    }
+
+    private async Task SignSelectedPracticeSquadPlayer()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedPracticeSquadFreeAgentId))
+        {
+            _rosterManagementStatus.Text = "Select an eligible free agent first.";
+            return;
+        }
+        var result = new TransactionService(_nativeGameCoreContext).SignToPracticeSquad(_selectedPracticeSquadFreeAgentId, null, new ContractService(_nativeGameCoreContext));
+        await CompleteRosterManagementAction(result, "Practice-squad signing saved.");
+    }
+
+    private async Task ElevateSelectedPracticeSquadPlayer()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedPracticeSquadPlayerId))
+        {
+            _rosterManagementStatus.Text = "Select a practice-squad player first.";
+            return;
+        }
+        var result = new TransactionService(_nativeGameCoreContext).ElevatePracticeSquadPlayer(_selectedPracticeSquadPlayerId, null, new ContractService(_nativeGameCoreContext));
+        await CompleteRosterManagementAction(result, "Practice-squad elevation saved.");
+    }
+
+    private async Task CompleteRosterManagementAction(ContractTransactionResult result, string saveMessage)
+    {
+        _rosterManagementStatus.Text = result?.Message ?? "Roster action failed.";
+        if (result?.Accepted != true)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, saveMessage, autosaveToo: true);
+        await RefreshAll();
+        RefreshRosterManagementUi();
+    }
+
+    private void CreateTrainingCampControls()
+    {
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
+        if (actionRow == null)
+            return;
+
+        _btnTrainingCamp = new Button { Text = "Training Camp", TooltipText = "Choose a position focus and finalize the legal roster." };
+        actionRow.AddChild(_btnTrainingCamp);
+        _btnTrainingCamp.Pressed += ShowTrainingCamp;
+        _trainingCampDialog = new AcceptDialog { Name = "TrainingCampDialog", Title = "Training Camp", MinSize = new Vector2I(660, 560), Exclusive = false };
+        AddChild(_trainingCampDialog);
+        _trainingCampDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _trainingCampDialog.AddChild(content);
+        content.AddChild(new Label { Text = "Choose one position group for focused camp reps. The focus improves readiness and eligible player development once." , AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        _trainingCampPosition = new OptionButton();
+        content.AddChild(SetupRow("Position Focus", _trainingCampPosition));
+        var refreshReport = new Button { Text = "Refresh Camp Report" };
+        content.AddChild(refreshReport);
+        refreshReport.Pressed += async () => await RefreshTrainingCampReport();
+        _trainingCampReport = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(600, 190), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(_trainingCampReport);
+        _trainingCampRoles = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(600, 150), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(_trainingCampRoles);
+        var applyFocus = new Button { Text = "Apply Camp Focus" };
+        content.AddChild(applyFocus);
+        applyFocus.Pressed += async () => await ApplyTrainingCampFocus();
+        var resolveBattles = new Button { Text = "Resolve Position Battles" };
+        content.AddChild(resolveBattles);
+        resolveBattles.Pressed += async () => await ResolvePositionBattles();
+        var finalize = new Button { Text = "Finalize Legal Roster" };
+        content.AddChild(finalize);
+        finalize.Pressed += async () => await FinalizeTrainingCampRoster();
+        _trainingCampStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_trainingCampStatus);
+    }
+
+    private void ShowTrainingCamp()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Training camp is available in the Native C# GameCore.");
+            return;
+        }
+
+        RefreshTrainingCampUi();
+        _trainingCampDialog.PopupCentered(new Vector2I(660, 560));
+    }
+
+    private void RefreshTrainingCampUi()
+    {
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null)
+        {
+            _trainingCampStatus.Text = "Start or load a franchise to manage training camp.";
+            return;
+        }
+
+        var camp = new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId);
+        _trainingCampPosition.Clear();
+        foreach (var position in team.Roster.Select(player => player.Position).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(position => position, StringComparer.OrdinalIgnoreCase))
+            _trainingCampPosition.AddItem(position);
+        _trainingCampStatus.Text = camp.Status.IsAvailable
+            ? camp.Status.RosterFinalized
+                ? camp.Status.Summary
+                : $"Active roster: {team.Roster.Count}/53. {camp.Status.Summary} Choose focus, then finalize."
+            : "Training-camp decisions are only available during Training Camp Pending.";
+        _trainingCampReport.Text = FormatTrainingCampReport(camp.Status.Report);
+        if (team.TrainingCamp.PositionBattles.Count > 0)
+            _trainingCampReport.Text += "\n\nBattles:\n" + string.Join("\n", team.TrainingCamp.PositionBattles.Select(battle => $"{battle.Position}: {battle.Explanation}"));
+        var roles = new RosterEvaluationService(_nativeGameCoreContext).GetPlayerRoles(team.TeamId);
+        _trainingCampRoles.Text = roles.Ok ? string.Join("\n", roles.Players.Select(player => $"{player.Name} ({player.Position}) - {player.Role}, {player.Readiness}. {player.Explanation}")) : roles.Error;
+    }
+
+    private async Task ApplyTrainingCampFocus()
+    {
+        if (_trainingCampPosition.ItemCount == 0)
+        {
+            _trainingCampStatus.Text = "No active-roster position group is available.";
+            return;
+        }
+
+        var response = new TrainingCampService(_nativeGameCoreContext).ApplyPositionFocus(_trainingCampPosition.GetItemText(_trainingCampPosition.Selected));
+        _trainingCampStatus.Text = response.Message;
+        if (!response.Ok)
+            return;
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp focus saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshTrainingCampUi();
+    }
+
+    private async Task RefreshTrainingCampReport()
+    {
+        var response = new TrainingCampService(_nativeGameCoreContext).GenerateReport();
+        _trainingCampStatus.Text = response.Message;
+        if (!response.Ok)
+            return;
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp report saved.", autosaveToo: true);
+        RefreshTrainingCampUi();
+    }
+
+    private async Task ResolvePositionBattles()
+    {
+        var outcomes = new PositionBattleService(_nativeGameCoreContext).Resolve();
+        _trainingCampStatus.Text = outcomes.Count == 0 ? "No unresolved contested position groups were found, or your depth-chart choices are protected." : $"{outcomes.Count} position battle(s) resolved.";
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Position-battle outcomes saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshTrainingCampUi();
+    }
+
+    private async Task FinalizeTrainingCampRoster()
+    {
+        var response = new TrainingCampService(_nativeGameCoreContext).FinalizeRoster();
+        _trainingCampStatus.Text = response.Message;
+        if (!response.Ok)
+            return;
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp roster decision saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshTrainingCampUi();
+    }
+
+    private static string FormatTrainingCampReport(TrainingCampReportDto report)
+    {
+        if (report?.Positions == null || report.Positions.Count == 0)
+            return "Refresh the camp report to evaluate roster readiness.";
+
+        var lines = new List<string> { report.Summary };
+        foreach (var position in report.Positions)
+            lines.Add($"{position.Position}: {position.AvailablePlayers}/{position.RequiredStarters} available starters | OVR {position.AverageOverall} | POT {position.AveragePotential} | FAT {position.AverageFatigue} | OUT {position.UnavailablePlayers}. {position.Recommendation}");
+        return string.Join("\n", lines);
     }
 
     private void CreateFranchiseSetupDialog()
@@ -3524,6 +3938,7 @@ public partial class DashboardController : Control
 
     private void RefreshNativeRosterTab()
     {
+        UpdateRosterContractActionAvailability();
         SetRosterSummaryPlaceholder();
         ShowRosterMessage("Loading roster...");
 
@@ -3544,6 +3959,18 @@ public partial class DashboardController : Control
             ClearRosterTab("Roster unavailable");
             SetPrimaryStatus($"Native C# roster failed: {InlineMessage(ex.Message)}");
         }
+    }
+
+    private void UpdateRosterContractActionAvailability()
+    {
+        if (_btnApplyFranchiseTag == null)
+            return;
+
+        var status = ContractPhaseRules.GetStatus(_nativeGameCoreContext?.ActiveLeague);
+        _btnApplyFranchiseTag.Disabled = !status.CanApplyFranchiseTag;
+        _btnApplyFranchiseTag.TooltipText = status.CanApplyFranchiseTag
+            ? "Apply one fully guaranteed one-year tag to an eligible final-year player."
+            : status.Explanation;
     }
 
     private void RefreshNativeDepthChartView()
@@ -6691,6 +7118,24 @@ public partial class DashboardController : Control
                 lines.RemoveAt(lines.Count - 1);
         }
 
+        lines.Add("");
+        lines.Add("Draft Class Recap");
+        if (season.DraftClass == null || season.DraftClass.Count == 0)
+        {
+            lines.Add("No immutable draft recap is available for this season.");
+        }
+        else
+        {
+            foreach (var pick in season.DraftClass.OrderBy(entry => entry.OverallPick))
+            {
+                lines.Add($"#{pick.OverallPick} R{pick.Round}.{pick.PickInRound} - {FallbackText(pick.TeamName, "TBD")}: {FallbackText(pick.Name, "Unknown")} ({FallbackText(pick.Position, "?")}, {FallbackText(pick.College, "College")}, age {pick.Age})");
+                lines.Add($"Pre-draft estimate: OVR {pick.EstimatedOverall}, POT {pick.EstimatedPotential} ({pick.Confidence} confidence) | Combine {pick.CombineScore}/100 | Pro day {pick.ProDayScore}/100");
+                lines.Add($"Trait: {FallbackText(pick.Trait, "None")} | Interview: {FallbackText(pick.Interview, "No interview note.")}");
+                lines.Add($"Placement: {FallbackText(pick.RookiePlacement, "Unavailable")} | {FallbackText(pick.ContractSummary, "Contract unavailable")}");
+                if (!string.IsNullOrWhiteSpace(pick.Report))
+                    lines.Add($"Report: {pick.Report}");
+            }
+        }
         lines.Add("");
         lines.Add("Playoff Results");
         AppendHistoryRound(lines, season, "Wild Card");
@@ -9896,6 +10341,9 @@ public partial class DashboardController : Control
 
     private void UpdateReportPanel(Godot.Collections.Dictionary player)
     {
+        if (_playerReportPanel != null)
+            _playerReportPanel.Visible = true;
+
         var pos = GetString(player, "position");
         var name = GetString(player, "name");
         var age = GetAgeValue(player);
@@ -9928,7 +10376,73 @@ public partial class DashboardController : Control
         if (_rtlScoutReport != null)
             _rtlScoutReport.Text = string.IsNullOrWhiteSpace(report) ? "No scout report available." : report;
 
+        UpdateRosterEvaluationFeedback(GetPlayerId(player));
+        UpdatePlayerStatisticsHistory(GetPlayerId(player));
         UpdateTags(player);
+    }
+
+    private void UpdatePlayerStatisticsHistory(string playerId)
+    {
+        if (_rtlPlayerStats == null)
+            return;
+
+        if (!IsNativeRuntimeSource() || _nativeGameCoreContext?.ActiveLeague == null)
+        {
+            _rtlPlayerStats.Text = "Season statistics are available in the Native C# GameCore.";
+            return;
+        }
+
+        var response = new PlayerHistoryService(_nativeGameCoreContext).GetPlayerHistory(playerId, _currentTeamId);
+        if (!response.Ok)
+        {
+            _rtlPlayerStats.Text = response.Error;
+            return;
+        }
+
+        var lines = new List<string>
+        {
+            $"Season Statistics ({response.CurrentSeason.SeasonYear} live): {FormatPlayerStatistics(response.CurrentSeason)}",
+            "Career History (archived):",
+        };
+        if (response.CareerSeasons.Count == 0)
+            lines.Add("No archived seasons yet.");
+        else
+            lines.AddRange(response.CareerSeasons.Select(stats => $"{stats.SeasonYear}: {FormatPlayerStatistics(stats)}"));
+        _rtlPlayerStats.Text = string.Join("\n", lines);
+    }
+
+    private static string FormatPlayerStatistics(PlayerSeasonHistoryDto stats)
+    {
+        var lines = new List<string> { $"GP {stats.GamesPlayed}" };
+        if (stats.PassingYards > 0 || stats.PassingTouchdowns > 0)
+            lines.Add($"Pass {stats.PassingYards} yd, {stats.PassingTouchdowns} TD");
+        if (stats.RushingYards > 0 || stats.RushingTouchdowns > 0)
+            lines.Add($"Rush {stats.RushingYards} yd, {stats.RushingTouchdowns} TD");
+        if (stats.ReceivingYards > 0 || stats.ReceivingTouchdowns > 0)
+            lines.Add($"Rec {stats.ReceivingYards} yd, {stats.ReceivingTouchdowns} TD");
+        if (stats.Tackles > 0 || stats.Sacks > 0 || stats.Interceptions > 0)
+            lines.Add($"Def {stats.Tackles} TKL, {stats.Sacks} SK, {stats.Interceptions} INT");
+        return string.Join(" | ", lines);
+    }
+
+    private void UpdateRosterEvaluationFeedback(string playerId)
+    {
+        if (_lblRosterEvaluation == null)
+            return;
+
+        if (!IsNativeRuntimeSource() || _nativeGameCoreContext?.ActiveLeague == null || string.IsNullOrWhiteSpace(playerId))
+        {
+            _lblRosterEvaluation.Text = "Current role: unavailable.";
+            return;
+        }
+
+        var response = new RosterEvaluationService(_nativeGameCoreContext).GetPlayerRoles(_currentTeamId);
+        var feedback = response.Ok
+            ? response.Players.FirstOrDefault(item => string.Equals(item.PlayerId, playerId, StringComparison.OrdinalIgnoreCase))
+            : null;
+        _lblRosterEvaluation.Text = feedback == null
+            ? "Current role: unavailable."
+            : $"Current role: {feedback.Role} | Readiness: {feedback.Readiness}\n{feedback.Explanation}";
     }
 
     private void UpdateTags(Godot.Collections.Dictionary player)
@@ -9978,12 +10492,18 @@ public partial class DashboardController : Control
 
     private void SetReportPlaceholder(string message)
     {
+        if (_playerReportPanel != null)
+            _playerReportPanel.Visible = false;
         if (_lblPlayerHeader != null)
             _lblPlayerHeader.Text = "Player Report";
         if (_rtlScoutSummary != null)
             _rtlScoutSummary.Text = message;
         if (_rtlScoutReport != null)
             _rtlScoutReport.Text = "";
+        if (_lblRosterEvaluation != null)
+            _lblRosterEvaluation.Text = "Current role: select a player to evaluate readiness and depth standing.";
+        if (_rtlPlayerStats != null)
+            _rtlPlayerStats.Text = "Season statistics: select a player to review live totals and archived career seasons.";
         if (_tagsRow != null)
         {
             foreach (var child in _tagsRow.GetChildren())

@@ -9,6 +9,23 @@ public sealed class DashboardStateResponse
     public string Error { get; set; } = "";
 }
 
+public sealed class TransactionHistoryResponse
+{
+    public bool Ok { get; set; }
+    public List<TransactionRecordDto> Transactions { get; set; } = new();
+    public string Error { get; set; } = "";
+}
+
+public sealed class TransactionRecordDto
+{
+    public string DateLabel { get; set; } = "";
+    public string Phase { get; set; } = "";
+    public string Type { get; set; } = "";
+    public string TeamName { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string Details { get; set; } = "";
+}
+
 public sealed class DashboardDto
 {
     public TeamSummaryDto Team { get; set; } = new();

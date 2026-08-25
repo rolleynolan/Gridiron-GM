@@ -126,6 +126,33 @@ public sealed class DashboardService
         };
     }
 
+    public TransactionHistoryResponse GetTransactionHistory(int limit = 100)
+    {
+        var league = _context.ActiveLeague;
+        if (league == null)
+            return new TransactionHistoryResponse { Error = "No active league loaded." };
+
+        return new TransactionHistoryResponse
+        {
+            Ok = true,
+            Transactions = (league.Transactions ?? new System.Collections.Generic.List<TransactionRecord>())
+                .Where(transaction => transaction != null)
+                .OrderByDescending(transaction => transaction.SeasonYear)
+                .ThenByDescending(transaction => transaction.TransactionId, StringComparer.OrdinalIgnoreCase)
+                .Take(Math.Clamp(limit, 1, 500))
+                .Select(transaction => new TransactionRecordDto
+                {
+                    DateLabel = transaction.DateLabel,
+                    Phase = transaction.Phase,
+                    Type = transaction.Type,
+                    TeamName = transaction.TeamName,
+                    PlayerName = transaction.PlayerName,
+                    Details = transaction.Details,
+                })
+                .ToList(),
+        };
+    }
+
     public LeagueHistoryResponse GetLeagueHistory()
     {
         var league = _context.ActiveLeague;
@@ -143,7 +170,7 @@ public sealed class DashboardService
             .Where(record => record != null)
             .OrderByDescending(record => record.SeasonYear)
             .ThenByDescending(record => record.GeneratedAtLabel, StringComparer.OrdinalIgnoreCase)
-            .Select(MapLeagueHistorySeason)
+            .Select(record => MapLeagueHistorySeason(record, (league.HistoricalDrafts ?? new System.Collections.Generic.List<DraftState>()).FirstOrDefault(draft => draft?.DraftYear == record.SeasonYear)))
             .ToList();
 
         return new LeagueHistoryResponse
@@ -356,6 +383,8 @@ public sealed class DashboardService
                     : "Continue to process retirements"
                 : string.Equals(phaseKey, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
                     ? "Open Free Agency"
+                    : string.Equals(phaseKey, ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
+                        ? "Review Roster"
                     : "Continue to next offseason phase",
         };
     }
@@ -367,13 +396,13 @@ public sealed class DashboardService
             ScheduleService.OffseasonPendingPhaseKey => "Process expiring contracts and prepare the offseason market.",
             ScheduleService.StaffCarouselPendingPhaseKey => "Staff changes are not available in this build. Continue to retirement processing.",
             ScheduleService.ExclusiveNegotiationPendingPhaseKey => "Contract extensions and releases are available before free agency.",
-            ScheduleService.FranchiseTagPendingPhaseKey => "Franchise tags are not available in this build. Continue to league-year processing.",
+            ScheduleService.FranchiseTagPendingPhaseKey => "Apply one franchise tag to an eligible final-year player or continue to process expirations.",
             ScheduleService.LeagueYearPendingPhaseKey => "The new league year is ready to open free agency.",
             ScheduleService.FreeAgencyPendingPhaseKey => "Free agency is open. Review the market and submit offers.",
             ScheduleService.DraftPrepPendingPhaseKey => "Draft preparation is active.",
             ScheduleService.DraftPendingPhaseKey => "The draft is ready for selections.",
             ScheduleService.RookieSigningPendingPhaseKey => "Rookie signing is pending.",
-            ScheduleService.TrainingCampPendingPhaseKey => "Training camp systems are not available in this build.",
+            ScheduleService.TrainingCampPendingPhaseKey => "Finalize your 53-player roster to begin the next preseason.",
             _ => "Continue to the next offseason phase.",
         };
     }
@@ -624,7 +653,7 @@ public sealed class DashboardService
             && leagueGames.All(game => string.Equals(game.Status, "completed", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static LeagueHistorySeasonDto MapLeagueHistorySeason(SeasonHistoryRecord record)
+    private static LeagueHistorySeasonDto MapLeagueHistorySeason(SeasonHistoryRecord record, DraftState draft)
     {
         return new LeagueHistorySeasonDto
         {
@@ -687,6 +716,30 @@ public sealed class DashboardService
                     LoserTeamName = result.LoserTeamName ?? "",
                 })
                 .ToList(),
+            DraftClass = (draft?.RecapEntries ?? new System.Collections.Generic.List<DraftClassRecapEntry>())
+                .Where(entry => entry != null)
+                .OrderBy(entry => entry.OverallPick)
+                .Select(entry => new DraftClassRecapDto
+                {
+                    OverallPick = entry.OverallPick, Round = entry.Round, PickInRound = entry.PickInRound, TeamName = entry.TeamName ?? "", Name = entry.Name ?? "", Position = entry.Position ?? "", College = entry.College ?? "", Age = entry.Age,
+                    EstimatedOverall = FormatEstimateRange(entry.ScoutedOverall, entry.ScoutingConfidence), EstimatedPotential = FormatEstimateRange(entry.ScoutedPotential, entry.ScoutingConfidence, 1), Confidence = GetConfidenceLabel(entry.ScoutingConfidence),
+                    CombineScore = entry.CombineScore, ProDayScore = entry.ProDayScore, Report = entry.ScoutingReport ?? "", Trait = entry.Trait ?? "", Interview = entry.InterviewSummary ?? "", RookiePlacement = entry.RookiePlacement ?? "", ContractSummary = FormatContractSummary(entry),
+                })
+                .ToList(),
         };
     }
+
+    private static string FormatEstimateRange(int estimate, int confidence, int extraSpread = 0)
+    {
+        var spread = (confidence >= 80 ? 3 : confidence >= 60 ? 5 : 8) + extraSpread;
+        return $"{Math.Clamp(estimate - spread, 40, 99)}-{Math.Clamp(estimate + spread, 40, 99)}";
+    }
+
+    private static string GetConfidenceLabel(int confidence)
+        => confidence >= 80 ? "High" : confidence >= 60 ? "Medium" : "Low";
+
+    private static string FormatContractSummary(DraftClassRecapEntry entry)
+        => string.IsNullOrWhiteSpace(entry.ContractType)
+            ? "Contract unavailable"
+            : $"{entry.ContractType}: ${entry.ContractAnnualSalary / 1_000_000m:0.00}M annual, ${entry.ContractGuaranteedSalary / 1_000_000m:0.00}M guaranteed, {entry.ContractYears} year(s)";
 }

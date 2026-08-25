@@ -17,4 +17,5 @@ public sealed class DraftState
     public int DraftYear { get; set; }
     public bool IsCompleted { get; set; }
     public List<DraftPickState> Picks { get; set; } = new();
+    public List<DraftClassRecapEntry> RecapEntries { get; set; } = new();
 }
