@@ -91,8 +91,8 @@ public sealed class GameCoreRulesTests
             UserTeamId = "home",
             Teams = new List<TeamState>
             {
-                new() { TeamId = "home", Name = "Home Club", Abbreviation = "HOM", Roster = new List<PlayerState> { new() { PlayerId = "home-qb", Position = "QB", Overall = 66 } } },
-                new() { TeamId = "away", Name = "Away Club", Abbreviation = "AWY", Roster = new List<PlayerState> { new() { PlayerId = "away-qb", Position = "QB", Overall = 65 } } },
+                new() { TeamId = "home", Name = "Home Club", Abbreviation = "HOM", Roster = new List<PlayerState> { new() { PlayerId = "home-qb", Position = "QB", Overall = 50 } } },
+                new() { TeamId = "away", Name = "Away Club", Abbreviation = "AWY", Roster = new List<PlayerState> { new() { PlayerId = "away-qb", Position = "QB", Overall = 90 } } },
             },
             Schedule = new List<ScheduledGame>
             {
@@ -107,6 +107,54 @@ public sealed class GameCoreRulesTests
         var result = Assert.Single(league.Results);
         Assert.True(result.AwayScore > result.HomeScore);
         Assert.Equal($"Away Club defeated Home Club, {result.AwayScore}-{result.HomeScore}.", result.Summary);
+    }
+
+    [Fact]
+    public void StrongerLineupCannotLosePointsToRatingModulo()
+    {
+        static int SimulateHomeScore(int homeOverall)
+        {
+            var league = new LeagueState
+            {
+                UserTeamId = "home",
+                Teams = new List<TeamState>
+                {
+                    new() { TeamId = "home", Name = "Home Club", Abbreviation = "HOM", Roster = new List<PlayerState> { new() { PlayerId = "home-qb", Position = "QB", Overall = homeOverall } } },
+                    new() { TeamId = "away", Name = "Away Club", Abbreviation = "AWY", Roster = new List<PlayerState> { new() { PlayerId = "away-qb", Position = "QB", Overall = 65 } } },
+                },
+                Schedule = new List<ScheduledGame>
+                {
+                    new() { GameId = "strength-test", AbsoluteWeek = 8, PhaseWeek = 8, DayIndex = 2, Phase = "Regular Season", GameType = "regular_season", HomeTeamId = "home", AwayTeamId = "away" },
+                },
+            };
+            var response = new GameDayService(new GameCoreContext { ActiveLeague = league }).SimulateScheduledGame("strength-test", allowUserTeamGame: true);
+            Assert.True(response.Ok, response.Error);
+            return league.Results.Single().HomeScore;
+        }
+
+        var averageScore = SimulateHomeScore(65);
+        var strongerScore = SimulateHomeScore(75);
+
+        Assert.True(strongerScore > averageScore, $"Expected stronger lineup to outscore the baseline, got {strongerScore} and {averageScore}.");
+    }
+
+    [Fact]
+    public void FullScheduleScoringRemainsWithinBroadFootballScale()
+    {
+        var context = Bootstrap();
+        var gameDay = new GameDayService(context);
+        var regularSeasonGames = context.ActiveLeague.Schedule
+            .Where(game => string.Equals(game.GameType, "regular_season", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        foreach (var game in regularSeasonGames)
+            Assert.True(gameDay.SimulateScheduledGame(game.GameId, allowUserTeamGame: true).Ok);
+
+        var diagnostics = SimulationDiagnosticsService.AnalyzeRegularSeason(context.ActiveLeague);
+        Assert.Equal(LeagueBootstrapService.RegularSeasonGameCount, diagnostics.CompletedRegularSeasonGames);
+        Assert.InRange(diagnostics.PointsPerTeamGame, 12, 40);
+        Assert.InRange(diagnostics.HomeWinRate, 0.30, 0.80);
+        Assert.InRange(diagnostics.LargestScoreMargin, 1, 40);
     }
 
     [Fact]

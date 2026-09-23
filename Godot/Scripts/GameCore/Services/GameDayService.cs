@@ -278,7 +278,22 @@ public sealed class GameDayService
 
         var coordinators = team?.Coaches?.Where(coach => coach != null && (string.Equals(coach.Role, "Offensive Coordinator", StringComparison.OrdinalIgnoreCase) || string.Equals(coach.Role, "Defensive Coordinator", StringComparison.OrdinalIgnoreCase))).ToList();
         var strategyModifier = coordinators?.Count == 2 ? Math.Clamp(((coordinators[0].Overall + coordinators[1].Overall) - 150) / 30, -1, 1) : 0;
-        return 14 + bonus + strategyModifier + (averageOverall % 11) + week + Math.Max(0, dayIndex);
+        var strengthModifier = Math.Clamp((averageOverall - 60) / 2, -5, 15);
+        var gameVariation = BuildScoreVariation(team?.TeamId, week, dayIndex);
+        return Math.Clamp(17 + bonus + strategyModifier + strengthModifier + gameVariation, 3, 55);
+    }
+
+    private static int BuildScoreVariation(string teamId, int week, int dayIndex)
+    {
+        unchecked
+        {
+            uint hash = 2166136261;
+            foreach (var character in teamId ?? string.Empty)
+                hash = (hash ^ character) * 16777619;
+            hash = (hash ^ (uint)Math.Max(0, week)) * 16777619;
+            hash = (hash ^ (uint)Math.Max(0, dayIndex)) * 16777619;
+            return (int)(hash % 11) - 5;
+        }
     }
 
     private static BoxScoreState BuildBoxScore(TeamState homeTeam, TeamState awayTeam, int homeScore, int awayScore)
