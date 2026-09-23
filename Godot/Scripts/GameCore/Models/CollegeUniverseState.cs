@@ -88,6 +88,9 @@ public sealed class CollegePlayerState
     public int Potential { get; set; }
     public int Age { get; set; }
     public int ClassYear { get; set; }
+    public int CollegeYear { get; set; }
+    public int PlayableSeasonsUsed { get; set; }
+    public bool IsRedshirted { get; set; }
     public bool DraftEligible { get; set; }
     public string DraftDecision { get; set; } = "Pending";
     public string DraftDecisionReason { get; set; } = "";

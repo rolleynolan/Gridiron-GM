@@ -78,12 +78,13 @@ public static class GameCoreSmokeTest
             collegeService.AdvanceToProWeek(1);
             var collegeWeekOneResults = league.CollegeUniverse.Results.Count;
             Require(collegeWeekOneResults > 0 && league.CollegeUniverse.Teams.All(team => team.Ranking > 0) && league.CollegeUniverse.Players.Any(player => player.GamesPlayed > 0), "College weekly advancement should resolve results, rankings, and player statistics.");
+            Require(league.CollegeUniverse.Teams.All(team => league.CollegeUniverse.Players.Any(player => player.TeamId == team.TeamId && player.IsRedshirted && player.CollegeYear == 1 && player.PlayableSeasonsUsed == 0 && player.GamesPlayed == 0)), "Every college program should carry a persisted first-year redshirt who does not consume playable eligibility or game statistics.");
             collegeService.AdvanceToProWeek(1);
             Require(league.CollegeUniverse.Results.Count == collegeWeekOneResults, "College weekly advancement should be idempotent for an already processed pro week.");
             const string collegeSaveName = "native_smoke_college_universe.json";
             Require(saveService.Save(context, collegeSaveName).Ok, "College-universe smoke save should succeed.");
             var collegeLoad = saveService.Load(collegeSaveName);
-            Require(collegeLoad.Ok && collegeLoad.League.CollegeUniverse.Results.Count == collegeWeekOneResults && collegeLoad.League.CollegeUniverse.Teams.All(team => team.Ranking > 0) && collegeLoad.League.Teams.First(team => team.TeamId == staffTeam.TeamId).Coaches.Any(coach => coach.CoachId == hireCandidate.CoachId) && collegeLoad.League.Transactions.Any(transaction => transaction.Type == "staff_hired" && transaction.StaffId == hireCandidate.CoachId), "College results, staff changes, and rankings should persist through save/load.");
+            Require(collegeLoad.Ok && collegeLoad.League.CollegeUniverse.Results.Count == collegeWeekOneResults && collegeLoad.League.CollegeUniverse.Teams.All(team => team.Ranking > 0) && collegeLoad.League.CollegeUniverse.Players.Count(player => player.IsRedshirted) == CollegeTeamCatalog.TeamCount && collegeLoad.League.Teams.First(team => team.TeamId == staffTeam.TeamId).Coaches.Any(coach => coach.CoachId == hireCandidate.CoachId) && collegeLoad.League.Transactions.Any(transaction => transaction.Type == "staff_hired" && transaction.StaffId == hireCandidate.CoachId), "College results, redshirt eligibility, staff changes, and rankings should persist through save/load.");
             Require(saveService.Delete(collegeSaveName).Ok, "College-universe smoke save should clean up.");
             var legacyCollegeContext = new GameCoreContext();
             var legacyCollegeLeague = new LeagueBootstrapService(legacyCollegeContext).CreateTestLeague(teamSeedPath);

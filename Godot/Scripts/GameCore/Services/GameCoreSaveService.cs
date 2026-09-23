@@ -783,7 +783,20 @@ public sealed class GameCoreSaveService
         foreach (var player in universe.Players.Where(player => player != null))
         {
             player.PlayerId ??= ""; player.Name ??= ""; player.TeamId ??= ""; player.Position ??= "";
-            player.ClassYear = Math.Clamp(player.ClassYear, 1, 4); player.GamesPlayed = Math.Max(0, player.GamesPlayed);
+            player.ClassYear = Math.Clamp(player.ClassYear, 1, 4);
+            player.CollegeYear = player.CollegeYear <= 0 ? player.ClassYear : Math.Clamp(player.CollegeYear, 1, 5);
+            player.PlayableSeasonsUsed = player.PlayableSeasonsUsed <= 0 && !player.IsRedshirted
+                ? player.ClassYear
+                : Math.Clamp(player.PlayableSeasonsUsed, 0, 4);
+            if (player.IsRedshirted)
+            {
+                player.GamesPlayed = 0;
+                player.PassingYards = 0;
+                player.RushingYards = 0;
+                player.ReceivingYards = 0;
+                player.Touchdowns = 0;
+            }
+            player.GamesPlayed = Math.Max(0, player.GamesPlayed);
             player.DraftDecision = string.IsNullOrWhiteSpace(player.DraftDecision) ? (player.DraftEligible ? "Declared" : "Pending") : player.DraftDecision;
             player.DraftDecisionReason ??= "";
             player.DraftStock = string.IsNullOrWhiteSpace(player.DraftStock) ? "Undeclared" : player.DraftStock;

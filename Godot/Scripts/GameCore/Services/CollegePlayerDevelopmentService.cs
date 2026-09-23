@@ -33,7 +33,7 @@ public static class CollegePlayerDevelopmentService
                 SeasonYear = universe.SeasonYear,
                 OverallBefore = before,
                 OverallAfter = after,
-                Reason = after == before ? "Reached current potential." : productive ? "Season development with productive-stat bonus." : "Season development.",
+                Reason = after == before ? "Reached current potential." : player.IsRedshirted ? "Redshirt practice development." : productive ? "Season development with productive-stat bonus." : "Season development.",
             });
         }
     }

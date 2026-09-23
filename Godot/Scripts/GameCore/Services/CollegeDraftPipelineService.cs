@@ -118,9 +118,9 @@ public sealed class CollegeDraftPipelineService
 
     private static bool ShouldDeclare(CollegePlayerState player, int seasonYear)
     {
-        if (player.ClassYear >= 4)
+        if (player.CollegeYear >= 5 || player.PlayableSeasonsUsed >= 4)
             return true;
-        if (player.ClassYear < 3)
+        if (player.CollegeYear < 3)
             return false;
 
         var projection = player.Overall + ((player.Potential - player.Overall) / 2) + Math.Min(6, player.Touchdowns / 2);
@@ -137,10 +137,10 @@ public sealed class CollegeDraftPipelineService
 
     private static string BuildDecisionReason(CollegePlayerState player, bool declares)
     {
-        if (player.ClassYear >= 4)
-            return $"Completed senior eligibility with a {player.DraftStock.ToLowerInvariant()} outlook.";
+        if (player.CollegeYear >= 5 || player.PlayableSeasonsUsed >= 4)
+            return $"Exhausted college eligibility with a {player.DraftStock.ToLowerInvariant()} outlook.";
         return declares
-            ? $"Eligible junior declared after a productive season and a {player.DraftStock.ToLowerInvariant()} outlook."
+            ? $"Eligible after three college years and declared with a {player.DraftStock.ToLowerInvariant()} outlook."
             : $"Returning to school to continue development after a {player.DraftStock.ToLowerInvariant()} outlook.";
     }
 

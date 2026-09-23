@@ -35,13 +35,14 @@ public sealed class CollegeUniverseService
             var player = new CollegePlayerState
             {
                 PlayerId = prospect.ProspectId, Name = prospect.Name, TeamId = team.TeamId, Position = prospect.Position,
-                Overall = prospect.Overall, Potential = prospect.Potential, Age = prospect.Age, ClassYear = 4, DraftEligible = true,
+                Overall = prospect.Overall, Potential = prospect.Potential, Age = prospect.Age, ClassYear = 4,
+                CollegeYear = 4, PlayableSeasonsUsed = 4, DraftEligible = true,
             };
             if (playerIds.Add(player.PlayerId)) universe.Players.Add(player);
         }
         foreach (var player in previousUniverse?.Players?.Where(player => player != null).OrderBy(player => player.PlayerId, StringComparer.Ordinal) ?? Enumerable.Empty<CollegePlayerState>())
         {
-            if (!validTeamIds.Contains(player.TeamId) || player.ClassYear >= 4 || !playerIds.Add(player.PlayerId))
+            if (!validTeamIds.Contains(player.TeamId) || player.CollegeYear >= 5 || player.PlayableSeasonsUsed >= 4 || !playerIds.Add(player.PlayerId))
                 continue;
             ArchiveAndResetReturningPlayer(player, previousUniverse.SeasonYear);
             universe.Players.Add(player);
@@ -62,9 +63,32 @@ public sealed class CollegeUniverseService
                 Potential = 70 + value % 23,
                 Age = previousUniverse == null ? 19 + value % 3 : 18,
                 ClassYear = previousUniverse == null ? 1 + value % 3 : 1,
+                CollegeYear = previousUniverse == null ? 1 + value % 3 : 1,
+                PlayableSeasonsUsed = previousUniverse == null ? 1 + value % 3 : 1,
                 DraftEligible = false,
             };
             if (playerIds.Add(player.PlayerId)) universe.Players.Add(player);
+        }
+        foreach (var team in universe.Teams)
+        {
+            var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{league.SeasonYear}-{team.TeamId}-redshirt");
+            var position = DevelopmentRosterPositions[value % DevelopmentRosterPositions.Length];
+            var redshirt = new CollegePlayerState
+            {
+                PlayerId = $"college-{league.SeasonYear}-{team.TeamId}-redshirt",
+                Name = $"{team.Abbreviation} Prospect RS",
+                TeamId = team.TeamId,
+                Position = position,
+                Overall = 56 + value % 18,
+                Potential = 71 + value % 22,
+                Age = 18,
+                ClassYear = 1,
+                CollegeYear = 1,
+                PlayableSeasonsUsed = 0,
+                IsRedshirted = true,
+                DraftEligible = false,
+            };
+            if (playerIds.Add(redshirt.PlayerId)) universe.Players.Add(redshirt);
         }
         universe.Schedule = BuildSchedule(universe.Teams);
         RefreshRankings(universe);
@@ -86,7 +110,10 @@ public sealed class CollegeUniverseService
                 Touchdowns = player.Touchdowns,
             });
         player.Age++;
-        player.ClassYear++;
+        player.CollegeYear++;
+        player.PlayableSeasonsUsed++;
+        player.ClassYear = Math.Clamp(player.PlayableSeasonsUsed, 1, 4);
+        player.IsRedshirted = false;
         player.DraftEligible = false;
         player.DraftDecision = "Pending";
         player.DraftDecisionReason = "";
@@ -138,7 +165,10 @@ public sealed class CollegeUniverseService
         var development = player.DevelopmentHistory?.LastOrDefault(record => record != null && record.SeasonYear == universe.SeasonYear);
         var developmentContext = development == null ? "" : $"\nDevelopment: {development.Reason}";
         var injuryContext = player.CurrentInjury?.IsActive == true ? $"\nInjury: {player.CurrentInjury.Name} · {player.CurrentInjury.WeeksRemaining} week(s) remaining" : "";
-        return $"COLLEGE CONTEXT\n#{team.Ranking} {team.Name} ({team.Wins}-{team.Losses}) | {player.ClassYear}{Suffix(player.ClassYear)} year | {player.GamesPlayed} GP | {player.Touchdowns} TD{developmentContext}{injuryContext}";
+        var eligibility = player.IsRedshirted
+            ? $"Redshirt · college year {player.CollegeYear} · 4 seasons remaining"
+            : $"Year {player.CollegeYear} · class {player.ClassYear} · {Math.Max(0, 4 - player.PlayableSeasonsUsed)} seasons remaining";
+        return $"COLLEGE CONTEXT\n#{team.Ranking} {team.Name} ({team.Wins}-{team.Losses}) | {eligibility} | {player.GamesPlayed} GP | {player.Touchdowns} TD{developmentContext}{injuryContext}";
     }
 
     private static List<CollegeScheduledGame> BuildSchedule(IReadOnlyList<CollegeTeamState> teams)
@@ -203,5 +233,4 @@ public sealed class CollegeUniverseService
         for (var index = 0; index < ordered.Count; index++) ordered[index].Ranking = index + 1;
     }
     private static int StableValue(string value) { unchecked { uint hash = 2166136261; foreach (var character in value) hash = (hash ^ character) * 16777619; return (int)(hash & 0x7fffffff); } }
-    private static string Suffix(int year) => year % 10 == 1 && year != 11 ? "st" : year % 10 == 2 && year != 12 ? "nd" : year % 10 == 3 && year != 13 ? "rd" : "th";
 }

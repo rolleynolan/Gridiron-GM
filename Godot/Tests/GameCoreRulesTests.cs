@@ -470,6 +470,9 @@ public sealed class GameCoreRulesTests
         Assert.All(profile.Roster, player =>
         {
             Assert.InRange(player.ClassYear, 1, 4);
+            Assert.InRange(player.CollegeYear, 1, 5);
+            Assert.InRange(player.PlayableSeasonsUsed, 0, 4);
+            Assert.Equal(4 - player.PlayableSeasonsUsed, player.PlayableSeasonsRemaining);
             Assert.False(string.IsNullOrWhiteSpace(player.Position));
             Assert.False(string.IsNullOrWhiteSpace(player.Availability));
         });
@@ -515,7 +518,7 @@ public sealed class GameCoreRulesTests
         var context = Bootstrap();
         var league = context.ActiveLeague;
         var completedUniverse = league.CollegeUniverse;
-        var returningPlayer = completedUniverse.Players.First(player => player.ClassYear == 1);
+        var returningPlayer = completedUniverse.Players.First(player => player.ClassYear == 1 && !player.IsRedshirted);
         var playerId = returningPlayer.PlayerId;
         var teamId = returningPlayer.TeamId;
         new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
@@ -543,6 +546,59 @@ public sealed class GameCoreRulesTests
         Assert.Equal(completedGames, profilePlayer.CareerGames);
         Assert.Equal(completedYards, profilePlayer.CareerYards);
         Assert.Equal(completedTouchdowns, profilePlayer.CareerTouchdowns);
+    }
+
+    [Fact]
+    public void RedshirtSeasonPreservesPlayableEligibilityAndPlayerIdentity()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        var completedUniverse = league.CollegeUniverse;
+        var redshirt = completedUniverse.Players.First(player => player.IsRedshirted);
+        var playerId = redshirt.PlayerId;
+        var teamId = redshirt.TeamId;
+
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+
+        Assert.Equal(0, redshirt.GamesPlayed);
+        Assert.Equal(0, redshirt.PlayableSeasonsUsed);
+        Assert.Empty(redshirt.CareerStats);
+        league.SeasonYear++;
+        var nextUniverse = CollegeUniverseService.CreateInitial(league, completedUniverse);
+        var returning = nextUniverse.Players.Single(player => player.PlayerId == playerId);
+
+        Assert.Equal(teamId, returning.TeamId);
+        Assert.Equal(2, returning.CollegeYear);
+        Assert.Equal(1, returning.ClassYear);
+        Assert.Equal(1, returning.PlayableSeasonsUsed);
+        Assert.False(returning.IsRedshirted);
+        Assert.Empty(returning.CareerStats);
+        league.CollegeUniverse = nextUniverse;
+        var profilePlayer = new CollegeTeamProfileService(context).GetProfile(teamId).Roster.Single(player => player.PlayerId == playerId);
+        Assert.Equal(3, profilePlayer.PlayableSeasonsRemaining);
+        Assert.Equal("Available", profilePlayer.Availability);
+
+        var legacyPlayer = nextUniverse.Players.First(player => !player.IsRedshirted && player.ClassYear > 1);
+        var legacyPlayerId = legacyPlayer.PlayerId;
+        var legacyClassYear = legacyPlayer.ClassYear;
+        legacyPlayer.CollegeYear = 0;
+        legacyPlayer.PlayableSeasonsUsed = 0;
+        league.SaveVersion = LeagueState.CurrentSaveVersion - 1;
+        var saveName = $"college_eligibility_migration_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+        try
+        {
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            var migrated = loaded.League.CollegeUniverse.Players.Single(player => player.PlayerId == legacyPlayerId);
+            Assert.Equal(legacyClassYear, migrated.CollegeYear);
+            Assert.Equal(legacyClassYear, migrated.PlayableSeasonsUsed);
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
     }
 
     [Fact]

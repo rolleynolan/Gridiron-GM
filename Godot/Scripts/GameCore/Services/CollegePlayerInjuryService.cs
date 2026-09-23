@@ -10,7 +10,8 @@ public static class CollegePlayerInjuryService
 {
     private static readonly string[] InjuryNames = { "Hamstring strain", "Ankle sprain", "Shoulder strain", "Knee sprain" };
 
-    public static bool IsAvailableForGame(CollegePlayerState player) => player != null && !(player.CurrentInjury?.IsActive ?? false);
+    public static bool IsAvailableForGame(CollegePlayerState player)
+        => player != null && !player.IsRedshirted && !(player.CurrentInjury?.IsActive ?? false);
 
     public static void ApplyDeterministicGameInjury(CollegeUniverseState universe, CollegeScheduledGame game)
     {

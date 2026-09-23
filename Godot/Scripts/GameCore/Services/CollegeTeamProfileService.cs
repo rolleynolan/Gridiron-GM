@@ -114,6 +114,10 @@ public sealed class CollegeTeamProfileService
             Name = player.Name,
             Position = player.Position,
             ClassYear = player.ClassYear,
+            CollegeYear = player.CollegeYear,
+            PlayableSeasonsUsed = player.PlayableSeasonsUsed,
+            PlayableSeasonsRemaining = Math.Max(0, 4 - player.PlayableSeasonsUsed),
+            IsRedshirted = player.IsRedshirted,
             GamesPlayed = player.GamesPlayed,
             PassingYards = player.PassingYards,
             RushingYards = player.RushingYards,
@@ -123,7 +127,9 @@ public sealed class CollegeTeamProfileService
             CareerGames = player.GamesPlayed + (player.CareerStats?.Where(record => record != null).Sum(record => record.GamesPlayed) ?? 0),
             CareerYards = player.PassingYards + player.RushingYards + player.ReceivingYards + (player.CareerStats?.Where(record => record != null).Sum(record => record.PassingYards + record.RushingYards + record.ReceivingYards) ?? 0),
             CareerTouchdowns = player.Touchdowns + (player.CareerStats?.Where(record => record != null).Sum(record => record.Touchdowns) ?? 0),
-            Availability = player.CurrentInjury?.IsActive == true
+            Availability = player.IsRedshirted
+                ? "Redshirt"
+                : player.CurrentInjury?.IsActive == true
                 ? $"{player.CurrentInjury.Name} ({player.CurrentInjury.WeeksRemaining}w)"
                 : "Available",
         };
@@ -172,6 +178,10 @@ public sealed class CollegeTeamPlayerLine
     public string Name { get; set; } = "";
     public string Position { get; set; } = "";
     public int ClassYear { get; set; }
+    public int CollegeYear { get; set; }
+    public int PlayableSeasonsUsed { get; set; }
+    public int PlayableSeasonsRemaining { get; set; }
+    public bool IsRedshirted { get; set; }
     public int GamesPlayed { get; set; }
     public int PassingYards { get; set; }
     public int RushingYards { get; set; }
