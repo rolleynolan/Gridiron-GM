@@ -84,6 +84,7 @@ All notable project changes are recorded here.
 - Expanded the game-day partial to own selected-game simulation, current matchup presentation, completed-game loading, and result selection, reducing the main dashboard controller by roughly another thousand lines.
 - Corrected the multi-team wildcard head-to-head sweep criterion so one club sweeping every tied opponent wins the step and one club losing to every tied opponent is eliminated before the procedure restarts. Legacy results without game IDs also remain distinct during tiebreak evaluation.
 - Added the persisted Head Coach authority foundation with the twelve approved domains, Head-Coach-only validation, canonical ownership queries, safe legacy defaults, lower-staff cleanup, expired-agreement cleanup on release or reassignment, and save/load coverage. The Staff profile now reports the current GM/Head Coach authority split while negotiation economics and demand generation remain intentionally deferred.
+- Hardened staff hiring so GameCore accepts only the seven supported organization roles, canonicalizes role names at the service boundary, and leaves the staff market unchanged when an unsupported role is requested.
 
 ### Notes
 

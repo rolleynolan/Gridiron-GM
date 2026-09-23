@@ -426,6 +426,24 @@ public sealed class GameCoreRulesTests
         Assert.Empty(candidate.Authority.ControlledDomains);
     }
 
+    [Fact]
+    public void StaffHiringRejectsUnsupportedRoleWithoutMutatingCandidate()
+    {
+        var context = Bootstrap();
+        context.ActiveLeague.Calendar.Phase = ScheduleService.StaffCarouselPendingPhase;
+        var team = context.ActiveLeague.Teams.First(candidate => candidate.TeamId == context.ActiveLeague.UserTeamId);
+        var candidate = context.ActiveLeague.AvailableCoaches.First();
+        var originalMarketCount = context.ActiveLeague.AvailableCoaches.Count;
+
+        var result = new StaffService(context).HireCoach(team.TeamId, "Personnel Packages Coach", candidate.CoachId);
+
+        Assert.False(result.Ok);
+        Assert.Contains("not supported", result.Message);
+        Assert.Equal("Available Staff", candidate.Role);
+        Assert.Equal(originalMarketCount, context.ActiveLeague.AvailableCoaches.Count);
+        Assert.DoesNotContain(team.Coaches, coach => coach.CoachId == candidate.CoachId);
+    }
+
     private static LeagueState LeagueInPhase(string phase)
         => new()
         {

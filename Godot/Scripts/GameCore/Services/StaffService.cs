@@ -15,6 +15,17 @@ public sealed class StaffChangeResult
 // Owns the narrow staff-carousel workflow. Implemented staff effects remain bounded and role-specific.
 public sealed class StaffService
 {
+    public static readonly IReadOnlyList<string> SupportedRoles = new[]
+    {
+        "Head Coach",
+        "Offensive Coordinator",
+        "Defensive Coordinator",
+        "Special Teams Coordinator",
+        "Director of Player Personnel",
+        "Medical Director",
+        "Strength & Conditioning Coach",
+    };
+
     private readonly GameCoreContext _context;
 
     public StaffService(GameCoreContext context) => _context = context;
@@ -46,17 +57,20 @@ public sealed class StaffService
         var team = GameCoreStateHelper.ResolveTeam(league, teamId);
         if (team == null || string.IsNullOrWhiteSpace(role))
             return Failure("Team or staff role was not found.");
+        var supportedRole = SupportedRoles.FirstOrDefault(candidate => string.Equals(candidate, role.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (supportedRole == null)
+            return Failure("That staff role is not supported.");
         if (!CanChangeStaff(league, out var error))
             return Failure(error);
-        if (team.Coaches?.Any(item => string.Equals(item?.Role, role, StringComparison.OrdinalIgnoreCase)) == true)
-            return Failure($"{role} is already filled. Release the current staff member before hiring.");
+        if (team.Coaches?.Any(item => string.Equals(item?.Role, supportedRole, StringComparison.OrdinalIgnoreCase)) == true)
+            return Failure($"{supportedRole} is already filled. Release the current staff member before hiring.");
 
         var coach = league.AvailableCoaches?.FirstOrDefault(item => SameId(item?.CoachId, coachId));
         if (coach == null)
             return Failure("Selected staff-market candidate was not found.");
 
         league.AvailableCoaches.Remove(coach);
-        coach.Role = role.Trim();
+        coach.Role = supportedRole;
         HeadCoachAuthorityService.Normalize(coach);
         coach.TenureStartSeason = league.SeasonYear;
         team.Coaches ??= new List<CoachState>();
@@ -103,7 +117,7 @@ public sealed class StaffService
         return changed;
     }
 
-    private static readonly string[] RequiredRoles = { "Head Coach", "Offensive Coordinator", "Defensive Coordinator", "Special Teams Coordinator", "Director of Player Personnel", "Medical Director", "Strength & Conditioning Coach" };
+    private static readonly IReadOnlyList<string> RequiredRoles = SupportedRoles;
 
     private static void Record(LeagueState league, string type, TeamState team, CoachState coach, string details)
     {
