@@ -300,6 +300,10 @@ public sealed class GameDayService
     {
         var homeYards = BuildTeamYards(homeTeam, homeScore);
         var awayYards = BuildTeamYards(awayTeam, awayScore);
+        var homeScoringSchedule = BuildScoringSchedule(homeScore, 0);
+        var awayScoringSchedule = BuildScoringSchedule(awayScore, 1);
+        var homeTouchdowns = homeScoringSchedule.Count(score => score.Points == 7);
+        var awayTouchdowns = awayScoringSchedule.Count(score => score.Points == 7);
 
         return new BoxScoreState
         {
@@ -310,13 +314,13 @@ public sealed class GameDayService
                 ["total_yards_away"] = awayYards,
                 ["turnovers_home"] = Math.Abs(homeScore - awayScore) % 3,
                 ["turnovers_away"] = (Math.Abs(homeScore - awayScore) + 1) % 3,
-                ["touchdowns_home"] = BuildScoringSchedule(homeScore, 0).Count(score => score.Points == 7),
-                ["touchdowns_away"] = BuildScoringSchedule(awayScore, 1).Count(score => score.Points == 7),
+                ["touchdowns_home"] = homeTouchdowns,
+                ["touchdowns_away"] = awayTouchdowns,
             },
-            PlayerStats = BuildPlayerStats(homeTeam, homeScore)
-                .Concat(BuildPlayerStats(awayTeam, awayScore))
+            PlayerStats = BuildPlayerStats(homeTeam, homeScore, homeTouchdowns)
+                .Concat(BuildPlayerStats(awayTeam, awayScore, awayTouchdowns))
                 .ToList(),
-            PlayByPlay = BuildPlayByPlay(homeTeam, awayTeam, homeScore, awayScore),
+            PlayByPlay = BuildPlayByPlay(homeTeam, awayTeam, homeScore, awayScore, homeScoringSchedule, awayScoringSchedule),
         };
     }
 
@@ -339,10 +343,14 @@ public sealed class GameDayService
         return Math.Clamp(225 + (score * 5) + ((averageRating - 65) * 4), 180, 625);
     }
 
-    private static List<GamePlayEventState> BuildPlayByPlay(TeamState homeTeam, TeamState awayTeam, int homeScore, int awayScore)
+    private static List<GamePlayEventState> BuildPlayByPlay(
+        TeamState homeTeam,
+        TeamState awayTeam,
+        int homeScore,
+        int awayScore,
+        IReadOnlyList<(int Quarter, int Points, int Order)> homeSchedule,
+        IReadOnlyList<(int Quarter, int Points, int Order)> awaySchedule)
     {
-        var homeSchedule = BuildScoringSchedule(homeScore, 0);
-        var awaySchedule = BuildScoringSchedule(awayScore, 1);
         var events = new List<GamePlayEventState>();
         var runningHome = 0;
         var runningAway = 0;
@@ -492,7 +500,7 @@ public sealed class GameDayService
             result.BoxScore.PlayByPlay[index].Sequence = index + 1;
     }
 
-    private static IEnumerable<PlayerGameStats> BuildPlayerStats(TeamState team, int score)
+    private static IEnumerable<PlayerGameStats> BuildPlayerStats(TeamState team, int score, int totalTouchdowns)
     {
         var players = (team?.Roster ?? new List<PlayerState>())
             .Where(PlayerInjuryService.IsAvailableForGame)
@@ -515,16 +523,22 @@ public sealed class GameDayService
             .ToList();
         var stats = new List<PlayerGameStats>();
         var passingYards = 120 + (score * 5) + (quarterback?.Overall ?? 65);
+        var canRecordPassingTouchdowns = quarterback != null && receivers.Count > 0;
+        var canRecordRushingTouchdowns = runner != null;
+        var rushingTouchdowns = canRecordRushingTouchdowns
+            ? canRecordPassingTouchdowns ? totalTouchdowns / 3 : totalTouchdowns
+            : 0;
+        var passingTouchdowns = canRecordPassingTouchdowns ? totalTouchdowns - rushingTouchdowns : 0;
 
         AddStats(stats, quarterback, team, stat =>
         {
             stat.PassingYards = passingYards;
-            stat.PassingTouchdowns = score / 10;
+            stat.PassingTouchdowns = passingTouchdowns;
         });
         AddStats(stats, runner, team, stat =>
         {
             stat.RushingYards = 35 + (score * 2) + ((runner?.Overall ?? 65) / 3);
-            stat.RushingTouchdowns = score / 17;
+            stat.RushingTouchdowns = rushingTouchdowns;
         });
         for (var index = 0; index < receivers.Count; index++)
         {
@@ -532,7 +546,7 @@ public sealed class GameDayService
             AddStats(stats, receiver, team, stat =>
             {
                 stat.ReceivingYards = index == 0 ? (passingYards * 3) / 5 : (passingYards * 2) / 5;
-                stat.ReceivingTouchdowns = index == 0 ? score / 14 : score / 28;
+                stat.ReceivingTouchdowns = index == 0 ? (passingTouchdowns + 1) / 2 : passingTouchdowns / 2;
             });
         }
         for (var index = 0; index < defenders.Count; index++)

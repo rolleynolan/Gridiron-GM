@@ -84,6 +84,28 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void SimulatedPlayerTouchdownsReconcileWithTeamBoxScore()
+    {
+        var context = Bootstrap();
+        var game = context.ActiveLeague.Schedule.First();
+        Assert.True(new GameDayService(context).SimulateScheduledGame(game.GameId, allowUserTeamGame: true).Ok);
+        var result = context.ActiveLeague.Results.Single(candidate => candidate.GameId == game.GameId);
+
+        AssertTouchdownsReconcile(result, result.HomeTeamId, "touchdowns_home");
+        AssertTouchdownsReconcile(result, result.AwayTeamId, "touchdowns_away");
+
+        static void AssertTouchdownsReconcile(GameResult result, string teamId, string teamStatKey)
+        {
+            var playerStats = result.BoxScore.PlayerStats.Where(stat => stat.TeamId == teamId).ToList();
+            var passing = playerStats.Sum(stat => stat.PassingTouchdowns);
+            var receiving = playerStats.Sum(stat => stat.ReceivingTouchdowns);
+            var rushing = playerStats.Sum(stat => stat.RushingTouchdowns);
+            Assert.Equal(passing, receiving);
+            Assert.Equal(result.BoxScore.TeamStats[teamStatKey], passing + rushing);
+        }
+    }
+
+    [Fact]
     public void AwayWinnerSummaryListsWinningScoreFirst()
     {
         var league = new LeagueState

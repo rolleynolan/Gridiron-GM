@@ -122,11 +122,11 @@ The September hardening tranche is now in place:
   touchdowns, and a deterministic season/team draw in place of the real-world coin toss.
 - Direct production-service tests now cover failed-batch atomicity, save migration, draft and waiver ownership, live-game
   idempotency, schedule-based tiebreak precedence, multi-team wildcard sweeps, and Head Coach authority persistence. The
-  focused suite contains 61 passing tests in addition to smoke QA.
+  focused suite contains 62 passing tests in addition to smoke QA.
 - A headless `--gamecore-benchmark` command records elapsed time and managed allocation for one detailed game, a pro week,
   a 272-game pro season, and a projected 128-team/12-game college workload. The September 23 baseline on the current
-  workstation is 0.066 ms and roughly 36 KiB per game for the current matchup engine; the 768-game college proxy took
-  37.6 ms and allocated 26.77 MiB. These are engineering baselines, not targets for the future snap engine.
+  workstation is 0.066 ms and roughly 35 KiB per game for the current matchup engine; the 768-game college proxy took
+  37.5 ms and allocated 26.01 MiB. These are engineering baselines, not targets for the future snap engine.
 - Game-day commands and developer commands now live in focused dashboard partials, while playoff ordering and benchmarking
   live in non-UI services.
 
