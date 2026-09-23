@@ -74,6 +74,12 @@ All notable project changes are recorded here.
 - Added the functional draft selection announcement queue. It presents every newly committed pick in order with the actual selecting team, installed logo, pick, player, position, and college; top-ten cards carry expanded public context, later cards are compact, all presentation is skippable without changing outcomes, and the short-announcement preference persists across seasons.
 - Began the engineering stabilization gate by removing the retired HTTP game-simulation fallback, extracting the active native game-day simulation command from the main dashboard file, and correcting stale season-complete messaging now that the offseason loop is playable.
 - Connected the domain-test project to the active GameCore assembly and added direct coverage for contract phase permissions, rookie-signing restrictions, and regular-season diagnostics. The focused suite now validates current production services rather than testing only the isolated franchise-setup source file.
+- Checkpointed the large working tree into reviewable local commits and excluded generated output/capture directories from source control.
+- Removed the unused local backend client/interface and duplicate legacy GM profile store, then removed native-mode guards from the settings, inbox, market, roster-action, training-camp, history, save/load, live-game, and player-report routes.
+- Replaced placeholder playoff ordering with schedule-derived NFL division and wildcard tiebreak sequences, including deterministic final draws for save/reload stability and persisted touchdown totals for the final statistical criterion.
+- Added direct regression coverage for transaction atomicity, legacy-save migration, draft and waiver ownership, live-game idempotency, and tiebreak precedence; the focused production-service suite now passes 47 tests.
+- Added a headless detailed-simulation benchmark for a single game, pro week, full pro regular season, and 128-team college workload proxy, with time and managed-allocation reporting.
+- Extracted smoke/benchmark command handling into a focused dashboard partial and moved playoff and benchmark behavior into non-UI services.
 
 ### Notes
 

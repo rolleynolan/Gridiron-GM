@@ -110,16 +110,27 @@ command into a focused dashboard partial, corrected stale season-complete messag
 real GameCore assembly. Direct rule tests now cover the contract-phase matrix, rookie-signing restriction, and regular-season
 diagnostic filtering in addition to the existing franchise tests and full GameCore smoke run.
 
-Remaining stabilization work is bounded and must stay ahead of new simulation scope:
+The September hardening tranche is now in place:
 
-- Continue decomposing `DashboardController` by durable workspace responsibility; partial files are an intermediate source
-  organization step, while reusable state projection and command behavior should move into focused non-UI services.
-- Remove the remaining unreachable HTTP/RPC-era dashboard branches and parsing helpers one verified workflow at a time.
-- Replace the placeholder standings ordering with the adopted complete tiebreak procedure and focused schedule-based tests.
-- Add direct tests for transaction atomicity, save migration, draft/waiver ownership, and live-game idempotency so the large
-  smoke test is not the only regression boundary.
-- Establish deterministic simulation benchmarks and allocation measurements before designing fallback simulation engines.
-- Checkpoint the current large working tree in reviewable commits before beginning another broad feature tranche.
+- The previously uncommitted feature work is checkpointed into reviewable local commits, with generated output excluded.
+- The unused local HTTP client/interface and duplicate legacy profile store are removed. Native-only guards have also been
+  removed from the settings, inbox, market, roster-action, training-camp, history, save/load, live-game, and player-report
+  routes. The remaining large response-parsing branches are isolated cleanup debt and are not allowed to regain a caller.
+- Postseason selection now applies the adopted NFL division and wildcard sequence from persisted regular-season schedules:
+  head-to-head, division/conference/common records, strength of victory/schedule, combined scoring ranks, net points, net
+  touchdowns, and a deterministic season/team draw in place of the real-world coin toss.
+- Direct production-service tests now cover failed-batch atomicity, save migration, draft and waiver ownership, live-game
+  idempotency, and schedule-based tiebreak precedence. The focused suite contains 47 passing tests in addition to smoke QA.
+- A headless `--gamecore-benchmark` command records elapsed time and managed allocation for one detailed game, a pro week,
+  a 272-game pro season, and a projected 128-team/12-game college workload. The September 23 baseline on the current
+  workstation was 0.070 ms and roughly 37 KiB per game for the current matchup engine; the 768-game college proxy took
+  44.0 ms and allocated 28.91 MiB. These are engineering baselines, not targets for the future snap engine.
+- Game-day commands and developer commands now live in focused dashboard partials, while playoff ordering and benchmarking
+  live in non-UI services.
+
+Remaining stabilization is limited to continuing the controller extraction and deleting the last unreachable response
+parsers as their surrounding workflows move to partials. Detailed snap-engine design may proceed, but each new simulation
+stage must retain direct tests and update the benchmark baseline before expanding to all 128 colleges.
 
 ## 1. C# playable season loop
 
