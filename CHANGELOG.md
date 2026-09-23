@@ -92,6 +92,7 @@ All notable project changes are recorded here.
 - Reconciled each team's total-offense figure with its recorded passing and rushing lines, removing a separate estimate that could contradict the player box score.
 - Corrected injury-event insertion so third-quarter medical timeouts retain chronological quarter/clock order in saved playback timelines; full-season regression coverage now validates every event sequence.
 - Removed avoidable coordinator and scoring-schedule temporary collections from the matchup hot path while preserving results and playback order. The 272-game benchmark now uses roughly 30 KiB per game, and the 768-game college proxy completes in about 35 ms on the current workstation.
+- Expanded newly generated college seasons from 16 to 128 fictional programs across eight balanced conferences. The round-robin scheduler now produces 12 games per team and 768 unique matchups with one game per team per week; compact 16-position development rosters, draft links, rankings, postseason, archives, migration, and three-season continuity pass at the new scale. Existing active 16-team seasons remain intact until rollover rather than being rewritten midseason. The existing 768-game engine workload completes in about 32.5 ms on the current workstation.
 
 ### Notes
 

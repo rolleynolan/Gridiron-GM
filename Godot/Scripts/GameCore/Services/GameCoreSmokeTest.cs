@@ -73,7 +73,7 @@ public static class GameCoreSmokeTest
             var highStrategyScore = GameDayService.SimulateMatchup(league, "staff-strategy-high", strategyHome.TeamId, strategyAway.TeamId, 1, 1, "Preseason", "preseason", "Preseason Week 1", 0, 0, false).HomeScore;
             Require(highStrategyScore - lowStrategyScore == 2, "Paired coordinators should shift simulated strength only within the capped two-point low-to-high range.");
             Require(league.CollegeProspects.Count == LeagueBootstrapService.StartingProspectCount, "Fresh world should include the full starting college prospect class.");
-            Require(league.CollegeUniverse != null && league.CollegeUniverse.Teams.Count == 16 && league.CollegeUniverse.Players.Count > league.CollegeProspects.Count && league.CollegeUniverse.Schedule.Count > 0, "Fresh world should include a persisted college competition, players, and schedule.");
+            Require(league.CollegeUniverse != null && league.CollegeUniverse.Teams.Count == CollegeTeamCatalog.TeamCount && league.CollegeUniverse.Players.Count > league.CollegeProspects.Count && league.CollegeUniverse.Schedule.Count == SimulationBenchmarkService.ProjectedCollegeSeasonGames, "Fresh world should include the full persisted college competition, players, and schedule.");
             var collegeService = new CollegeUniverseService(context);
             collegeService.AdvanceToProWeek(1);
             var collegeWeekOneResults = league.CollegeUniverse.Results.Count;
@@ -92,7 +92,7 @@ public static class GameCoreSmokeTest
             const string collegeMigrationSaveName = "native_smoke_college_migration.json";
             Require(saveService.Save(legacyCollegeContext, collegeMigrationSaveName).Ok, "Legacy college migration smoke save should succeed.");
             var migratedCollegeLoad = saveService.Load(collegeMigrationSaveName);
-            Require(migratedCollegeLoad.Ok && migratedCollegeLoad.League.CollegeUniverse?.Teams.Count == 16 && migratedCollegeLoad.League.SaveVersion == LeagueState.CurrentSaveVersion, "Legacy saves should receive a normalized persisted college universe.");
+            Require(migratedCollegeLoad.Ok && migratedCollegeLoad.League.CollegeUniverse?.Teams.Count == CollegeTeamCatalog.TeamCount && migratedCollegeLoad.League.SaveVersion == LeagueState.CurrentSaveVersion, "Legacy saves should receive a normalized persisted college universe.");
             Require(saveService.Delete(collegeMigrationSaveName).Ok, "College migration smoke save should clean up.");
             Pass(result, "College universe foundation");
             currentStep = "College league leaders foundation";
@@ -1415,11 +1415,11 @@ public static class GameCoreSmokeTest
                 Require(league.Results.Count == LeagueBootstrapService.ExpectedScheduleGameCount, $"Season {seasonYear} should resolve every scheduled pro game exactly once.");
 
                 var college = new CollegeUniverseService(context);
-                for (var collegeWeek = 1; collegeWeek <= 8; collegeWeek++)
+                for (var collegeWeek = 1; collegeWeek <= CollegeUniverseService.RegularSeasonWeeks; collegeWeek++)
                     college.AdvanceToProWeek(collegeWeek);
                 var collegeResultCount = league.CollegeUniverse.Results.Count;
                 Require(collegeResultCount == league.CollegeUniverse.Schedule.Count && league.CollegeUniverse.Teams.All(team => team.Ranking > 0) && league.CollegeUniverse.Players.Any(player => player.GamesPlayed > 0), $"Season {seasonYear} college universe should complete deterministically.");
-                college.AdvanceToProWeek(8);
+                college.AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
                 Require(league.CollegeUniverse.Results.Count == collegeResultCount, $"Season {seasonYear} college advancement should remain idempotent.");
 
                 league.Calendar.AbsoluteWeek = LeagueBootstrapService.TotalSeasonWeeks + 1;
@@ -1457,22 +1457,21 @@ public static class GameCoreSmokeTest
 
                 var userTeam = league.Teams.First(team => string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
                 var contracts = new ContractService(context);
-                while (userTeam.Roster.Count > RosterService.RosterLimit)
-                {
-                    var release = contracts.ReleasePlayer(userTeam.Roster.OrderBy(player => player.Overall).ThenBy(player => player.Age).First().PlayerId, userTeam.TeamId);
-                    Require(release.Ok && release.Accepted, release.Message);
-                }
+                PrepareUserTrainingCampRoster(context, userTeam, contracts);
                 new RosterConstructionService(context).ProcessCpuTrainingCampCuts();
                 var depth = new DepthChartService(context);
                 Require(depth.AutoFillDepthChart(userTeam.TeamId).Ok, $"Season {seasonYear} should auto-fill a legal user depth chart before rollover.");
                 var camp = new TrainingCampService(context);
                 var focus = userTeam.Roster.First(player => PlayerInjuryService.IsAvailableForGame(player)).Position;
-                Require(camp.ApplyPositionFocus(focus, userTeam.TeamId).Ok && camp.FinalizeRoster(userTeam.TeamId).Ok, $"Season {seasonYear} should finalize the user training-camp roster.");
+                var focusResult = camp.ApplyPositionFocus(focus, userTeam.TeamId);
+                Require(focusResult.Ok, $"Season {seasonYear} training-camp focus failed: {focusResult.Message}");
+                var finalizeResult = camp.FinalizeRoster(userTeam.TeamId);
+                Require(finalizeResult.Ok, $"Season {seasonYear} training-camp finalization failed: {finalizeResult.Message}");
                 Require(new SeasonRolloverService(context).StartNextSeason(out var rolloverMessage), rolloverMessage);
 
                 Require(league.SeasonYear == seasonYear + 1 && league.HistoricalSeasons.Count(record => record != null && record.SeasonYear == seasonYear) == 1, $"Season {seasonYear} rollover should preserve exactly one history record.");
                 Require(league.HistoricalDrafts.Count(draft => draft != null && draft.DraftYear == seasonYear) == 1 && league.CollegeProspects.Count == LeagueBootstrapService.StartingProspectCount && league.CollegeProspects.All(prospect => prospect.DraftClassYear == league.SeasonYear + 1), $"Season {seasonYear} rollover should archive the draft and create one next-year draft pool.");
-                Require(league.CollegeUniverse.SeasonYear == league.SeasonYear && league.CollegeUniverse.LastAdvancedAbsoluteWeek == 0 && league.CollegeUniverse.Results.Count == 0 && league.CollegeUniverse.Teams.Count == 16, $"Season {seasonYear} rollover should reset the persisted college universe.");
+                Require(league.CollegeUniverse.SeasonYear == league.SeasonYear && league.CollegeUniverse.LastAdvancedAbsoluteWeek == 0 && league.CollegeUniverse.Results.Count == 0 && league.CollegeUniverse.Teams.Count == CollegeTeamCatalog.TeamCount, $"Season {seasonYear} rollover should reset the persisted college universe.");
                 Require(league.CollegeSeasonArchives.Count(record => record != null && record.SeasonYear == seasonYear) == 1 && league.CollegeSeasonArchives.Single(record => record.SeasonYear == seasonYear).PostseasonGames.Count == 5, $"Season {seasonYear} rollover should retain immutable college postseason context.");
                 Require(league.Teams.All(team => team.Roster.Count <= RosterService.RosterLimit && new ContractService(context).GetCapRoom(team) >= 0m), $"Season {seasonYear} rollover should preserve legal roster and cap state.");
                 var recordBook = new RecordBookService(context).GetRecordBook();
@@ -1497,7 +1496,7 @@ public static class GameCoreSmokeTest
     private static void ValidateCollegePostseason(string teamSeedPath)
     {
         var context = new GameCoreContext(); new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
-        new CollegeUniverseService(context).AdvanceToProWeek(8);
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         var postseason = context.ActiveLeague.CollegeUniverse.Postseason;
         Require(postseason.Completed && postseason.Games.Count == 5 && postseason.Games.All(game => !string.IsNullOrWhiteSpace(game.WinnerTeamId)), "Completed college regular seasons should generate a deterministic persisted postseason slate.");
         var snapshot = string.Join("|", postseason.Games.Select(game => $"{game.Label}:{game.WinnerTeamId}:{game.HomeScore}:{game.AwayScore}"));
@@ -1579,11 +1578,11 @@ public static class GameCoreSmokeTest
     {
         var context = new GameCoreContext();
         var league = new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
-        new CollegeUniverseService(context).AdvanceToProWeek(8);
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         var developed = league.CollegeUniverse.Players.Where(player => player != null).ToList();
         Require(developed.Count > 0 && developed.All(player => player.DevelopmentHistory.Count(record => record.SeasonYear == league.SeasonYear) == 1 && player.Overall >= 40 && player.Overall <= player.Potential), "Completed college seasons should apply one bounded development record to every active college player.");
         var snapshot = string.Join("|", developed.OrderBy(player => player.PlayerId, StringComparer.Ordinal).Select(player => $"{player.PlayerId}:{player.Overall}:{player.DevelopmentHistory.Single(record => record.SeasonYear == league.SeasonYear).Reason}"));
-        new CollegeUniverseService(context).AdvanceToProWeek(8);
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         Require(string.Join("|", league.CollegeUniverse.Players.OrderBy(player => player.PlayerId, StringComparer.Ordinal).Select(player => $"{player.PlayerId}:{player.Overall}:{player.DevelopmentHistory.Single(record => record.SeasonYear == league.SeasonYear).Reason}")) == snapshot, "College development should be idempotent after the completed season.");
         var saves = new GameCoreSaveService();
         const string saveName = "native_smoke_college_development.json";
@@ -1626,7 +1625,7 @@ public static class GameCoreSmokeTest
     {
         var context = new GameCoreContext();
         var league = new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
-        new CollegeUniverseService(context).AdvanceToProWeek(8);
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         var leaders = new CollegeLeadersService(context).GetLeaders();
         Require(leaders.Ok && leaders.SeasonYear == league.SeasonYear && leaders.Categories.Count == 4 && leaders.Categories.All(category => category.Leaders.Count > 0 && category.Leaders.SequenceEqual(category.Leaders.OrderByDescending(entry => entry.Value).ThenByDescending(entry => league.CollegeUniverse.Players.First(player => player.PlayerId == entry.PlayerId).Touchdowns).ThenBy(entry => entry.PlayerName, StringComparer.Ordinal).ThenBy(entry => entry.PlayerId, StringComparer.Ordinal))), "College leader tables should be complete and deterministic from authoritative season statistics.");
         var snapshot = string.Join("|", leaders.Categories.Select(category => $"{category.Name}:{string.Join(",", category.Leaders.Select(entry => $"{entry.PlayerId}:{entry.Value}"))}"));
@@ -1643,11 +1642,11 @@ public static class GameCoreSmokeTest
         var context = new GameCoreContext();
         var league = new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
         var college = new CollegeUniverseService(context);
-        college.AdvanceToProWeek(8);
+        college.AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         var awards = league.CollegeUniverse.Awards;
         Require(awards.Count == 3 && awards.Select(award => award.AwardName).Distinct(StringComparer.Ordinal).Count() == 3 && awards.All(award => !string.IsNullOrWhiteSpace(award.PlayerId) && !string.IsNullOrWhiteSpace(award.Summary) && award.Score > 0), "Completed college schedules should persist a compact deterministic awards slate.");
         var snapshot = string.Join("|", awards.Select(award => $"{award.AwardName}:{award.PlayerId}:{award.Score}"));
-        college.AdvanceToProWeek(8);
+        college.AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         Require(string.Join("|", league.CollegeUniverse.Awards.Select(award => $"{award.AwardName}:{award.PlayerId}:{award.Score}")) == snapshot, "College awards should remain immutable after repeated advancement.");
 
         var saves = new GameCoreSaveService();
@@ -1659,7 +1658,7 @@ public static class GameCoreSmokeTest
 
         var legacyContext = new GameCoreContext();
         var legacyLeague = new LeagueBootstrapService(legacyContext).CreateTestLeague(teamSeedPath);
-        new CollegeUniverseService(legacyContext).AdvanceToProWeek(8);
+        new CollegeUniverseService(legacyContext).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         legacyLeague.SaveVersion = LeagueState.CurrentSaveVersion - 1;
         legacyLeague.CollegeUniverse.Awards = null;
         const string migrationSaveName = "native_smoke_college_awards_migration.json";
@@ -1675,7 +1674,7 @@ public static class GameCoreSmokeTest
         var context = new GameCoreContext();
         var league = new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
         var college = new CollegeUniverseService(context);
-        college.AdvanceToProWeek(8);
+        college.AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         var juniors = league.CollegeUniverse.Players.Where(player => player.ClassYear == 3 && !league.CollegeProspects.Any(prospect => string.Equals(prospect.CollegePlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase))).Take(2).ToList();
         Require(juniors.Count == 2, "College draft-pipeline smoke setup requires two unlisted juniors.");
         juniors[0].Overall = 82; juniors[0].Potential = 90; juniors[0].Touchdowns = 8;
@@ -2541,6 +2540,50 @@ public static class GameCoreSmokeTest
         return string.Join("|", standings.Standings
             .OrderBy(row => row.TeamId, StringComparer.OrdinalIgnoreCase)
             .Select(row => $"{row.TeamId}:{row.Wins}-{row.Losses}-{row.Ties}:{row.PointsFor}-{row.PointsAgainst}"));
+    }
+
+    private static void PrepareUserTrainingCampRoster(GameCoreContext context, TeamState team, ContractService contracts)
+    {
+        var shortages = DepthChartRules.RequiredStartersByPosition
+            .SelectMany(requirement => Enumerable.Repeat(
+                requirement.Key,
+                Math.Max(0, requirement.Value - team.Roster.Count(player => string.Equals(player.Position, requirement.Key, StringComparison.OrdinalIgnoreCase) && PlayerInjuryService.IsAvailableForGame(player)))))
+            .ToList();
+        var targetBeforeSignings = Math.Max(0, RosterService.RosterLimit - shortages.Count);
+        while (team.Roster.Count > targetBeforeSignings)
+        {
+            var availableCounts = team.Roster
+                .Where(PlayerInjuryService.IsAvailableForGame)
+                .GroupBy(player => player.Position, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+            var releaseCandidate = team.Roster
+                .OrderBy(player => player.Overall)
+                .ThenBy(player => player.Age)
+                .FirstOrDefault(player => !PlayerInjuryService.IsAvailableForGame(player)
+                    || !DepthChartRules.RequiredStartersByPosition.TryGetValue(player.Position ?? "", out var required)
+                    || availableCounts.GetValueOrDefault(player.Position ?? "") > required);
+            Require(releaseCandidate != null, "Training-camp smoke setup could not create roster space without removing a required starter.");
+            var release = contracts.ReleasePlayer(releaseCandidate.PlayerId, team.TeamId);
+            Require(release.Ok && release.Accepted, release.Message);
+        }
+
+        foreach (var position in shortages)
+        {
+            var freeAgent = context.ActiveLeague.FreeAgents
+                .Where(player => string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase) && PlayerInjuryService.IsAvailableForGame(player))
+                .OrderBy(player => contracts.GetRequiredAnnualSalary(player, team))
+                .ThenByDescending(player => player.Overall)
+                .FirstOrDefault();
+            Require(freeAgent != null, $"Training-camp smoke setup could not find an available {position}.");
+            var requirement = contracts.GetRequiredAnnualSalary(freeAgent, team);
+            var signing = contracts.SignFreeAgent(freeAgent.PlayerId, team.TeamId, new ContractOffer
+            {
+                AnnualSalary = requirement * 1.15m,
+                GuaranteedSalary = requirement * 0.30m,
+                Years = 1,
+            }, "Smoke-test starter coverage");
+            Require(signing.Ok && signing.Accepted, signing.Message);
+        }
     }
 
     private static string NormalizeResultsSeasonKey(string gameType)

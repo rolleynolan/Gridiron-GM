@@ -7,16 +7,11 @@ namespace GridironGM.GameCore.Services;
 
 public sealed class CollegeUniverseService
 {
-    private static readonly (string Id, string Name, string Abbr, string Conference)[] Seeds =
+    public const int RegularSeasonWeeks = 12;
+    private static readonly string[] DevelopmentRosterPositions =
     {
-        ("nv", "North Valley", "NVU", "Northern"), ("ls", "Lakeshore State", "LSS", "Northern"),
-        ("wt", "Western Tech", "WTE", "Northern"), ("pr", "Pine Ridge", "PRU", "Northern"),
-        ("cu", "Coastal University", "COU", "Coastal"), ("ms", "Metro State", "MST", "Coastal"),
-        ("rr", "Red River", "RRU", "Coastal"), ("sc", "Summit College", "SUM", "Coastal"),
-        ("as", "Atlantic State", "AST", "Atlantic"), ("pa", "Prairie A&M", "PAM", "Atlantic"),
-        ("ca", "Canyon University", "CAN", "Atlantic"), ("gl", "Great Lakes", "GLU", "Atlantic"),
-        ("es", "Eastern State", "EST", "Frontier"), ("mv", "Mountain Valley", "MTV", "Frontier"),
-        ("sv", "Southern Valley", "SOV", "Frontier"), ("ct", "Capital Tech", "CPT", "Frontier"),
+        "QB", "RB", "WR", "WR", "TE", "OT", "OG", "C",
+        "EDGE", "DT", "LB", "CB", "CB", "S", "K", "P",
     };
 
     private readonly GameCoreContext _context;
@@ -25,7 +20,7 @@ public sealed class CollegeUniverseService
     public static CollegeUniverseState CreateInitial(LeagueState league)
     {
         var universe = new CollegeUniverseState { SeasonYear = league.SeasonYear };
-        universe.Teams = Seeds.Select(seed => new CollegeTeamState { TeamId = seed.Id, Name = seed.Name, Abbreviation = seed.Abbr, Conference = seed.Conference }).ToList();
+        universe.Teams = CollegeTeamCatalog.CreateTeams();
         var prospects = league.CollegeProspects ?? new List<CollegeProspectState>();
         for (var index = 0; index < prospects.Count; index++)
         {
@@ -43,13 +38,13 @@ public sealed class CollegeUniverseService
         }
         // Underclassmen make the roster and standings world persist beyond only the current draft pool.
         foreach (var team in universe.Teams)
-        for (var slot = 0; slot < 8; slot++)
+        for (var slot = 0; slot < DevelopmentRosterPositions.Length; slot++)
         {
             var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{team.TeamId}-{slot}");
             universe.Players.Add(new CollegePlayerState
             {
                 PlayerId = $"college-{league.SeasonYear}-{team.TeamId}-{slot + 1}", Name = $"{team.Abbreviation} Prospect {slot + 1}", TeamId = team.TeamId,
-                Position = new[] { "QB", "RB", "WR", "TE", "EDGE", "LB", "CB", "S" }[slot], Overall = 58 + value % 19,
+                Position = DevelopmentRosterPositions[slot], Overall = 58 + value % 19,
                 Potential = 70 + value % 23, Age = 19 + value % 3, ClassYear = 1 + value % 3, DraftEligible = false,
             });
         }
@@ -100,14 +95,22 @@ public sealed class CollegeUniverseService
 
     private static List<CollegeScheduledGame> BuildSchedule(IReadOnlyList<CollegeTeamState> teams)
     {
-        var schedule = new List<CollegeScheduledGame>();
-        for (var week = 1; week <= 8; week++)
-        for (var index = 0; index < teams.Count / 2; index++)
+        var schedule = new List<CollegeScheduledGame>(teams.Count * RegularSeasonWeeks / 2);
+        var rotation = teams.ToList();
+        for (var week = 1; week <= RegularSeasonWeeks; week++)
         {
-            var home = teams[(index + week - 1) % teams.Count];
-            var away = teams[(teams.Count - 1 - index + week - 1) % teams.Count];
-            if (home.TeamId == away.TeamId) continue;
-            schedule.Add(new CollegeScheduledGame { GameId = $"college-{week}-{index + 1}", ProAbsoluteWeek = week, HomeTeamId = home.TeamId, AwayTeamId = away.TeamId });
+            for (var index = 0; index < rotation.Count / 2; index++)
+            {
+                var left = rotation[index];
+                var right = rotation[rotation.Count - 1 - index];
+                var home = (week + index) % 2 == 0 ? left : right;
+                var away = ReferenceEquals(home, left) ? right : left;
+                schedule.Add(new CollegeScheduledGame { GameId = $"college-{week}-{index + 1}", ProAbsoluteWeek = week, HomeTeamId = home.TeamId, AwayTeamId = away.TeamId });
+            }
+
+            var last = rotation[^1];
+            rotation.RemoveAt(rotation.Count - 1);
+            rotation.Insert(1, last);
         }
         return schedule;
     }

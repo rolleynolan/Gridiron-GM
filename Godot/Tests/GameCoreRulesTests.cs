@@ -411,6 +411,35 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void CollegeUniverseCreatesFullScaleUniqueSchedule()
+    {
+        var league = new LeagueState { SeasonYear = 2026 };
+
+        var universe = CollegeUniverseService.CreateInitial(league);
+
+        Assert.Equal(CollegeTeamCatalog.TeamCount, universe.Teams.Count);
+        Assert.Equal(CollegeTeamCatalog.TeamCount, universe.Teams.Select(team => team.TeamId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(CollegeTeamCatalog.TeamCount, universe.Teams.Select(team => team.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(CollegeTeamCatalog.TeamCount, universe.Teams.Select(team => team.Abbreviation).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(8, universe.Teams.Select(team => team.Conference).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.All(universe.Teams.GroupBy(team => team.Conference, StringComparer.OrdinalIgnoreCase), conference => Assert.Equal(16, conference.Count()));
+        Assert.Equal(CollegeTeamCatalog.TeamCount * CollegeUniverseService.RegularSeasonWeeks / 2, universe.Schedule.Count);
+        Assert.All(universe.Schedule.GroupBy(game => game.ProAbsoluteWeek), week =>
+        {
+            Assert.Equal(CollegeTeamCatalog.TeamCount / 2, week.Count());
+            Assert.Equal(CollegeTeamCatalog.TeamCount, week.SelectMany(game => new[] { game.HomeTeamId, game.AwayTeamId }).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        });
+        Assert.All(universe.Teams, team => Assert.Equal(
+            CollegeUniverseService.RegularSeasonWeeks,
+            universe.Schedule.Count(game => game.HomeTeamId == team.TeamId || game.AwayTeamId == team.TeamId)));
+        Assert.Equal(
+            universe.Schedule.Count,
+            universe.Schedule.Select(game => string.Compare(game.HomeTeamId, game.AwayTeamId, StringComparison.OrdinalIgnoreCase) < 0
+                ? $"{game.HomeTeamId}|{game.AwayTeamId}"
+                : $"{game.AwayTeamId}|{game.HomeTeamId}").Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
     public void HeadCoachAuthorityAcceptsOnlyCanonicalHeadCoachDomains()
     {
         var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };
