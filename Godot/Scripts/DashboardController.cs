@@ -1400,25 +1400,8 @@ public partial class DashboardController : Control
 
     public override async void _Ready()
     {
-        if (OS.GetCmdlineUserArgs().Contains("--gamecore-smoke-test", StringComparer.Ordinal))
-        {
-            if (!ValidateTeamLogoAssets(out var logoError))
-            {
-                GD.PushError($"[Asset smoke] {logoError}");
-                GetTree().Quit(1);
-                return;
-            }
-            GD.Print("[Asset smoke] PASS 32 installed team logos load as nearest-filtered textures.");
-            var smokeResult = await Task.Run(() => GameCoreSmokeTest.Run(GetTeamSeedPath()));
-            foreach (var step in smokeResult.Steps)
-                GD.Print($"[GameCore smoke] {step}");
-
-            if (!smokeResult.Ok)
-                GD.PushError($"[GameCore smoke] {smokeResult.Message}");
-
-            GetTree().Quit(smokeResult.Ok ? 0 : 1);
+        if (await TryRunDeveloperCommand())
             return;
-        }
 
         var window = GetWindow();
         if (window != null)
@@ -1858,25 +1841,17 @@ public partial class DashboardController : Control
 
     private void UpdateNativeSaveLoadButtons()
     {
-        var nativeEnabled = IsNativeRuntimeSource();
         var hasActiveNativeLeague = _nativeGameCoreContext?.ActiveLeague != null;
         if (_btnSaveNativeGame != null)
-            _btnSaveNativeGame.Disabled = !nativeEnabled;
+            _btnSaveNativeGame.Disabled = false;
         if (_btnLoadNativeGame != null)
-            _btnLoadNativeGame.Disabled = !nativeEnabled;
+            _btnLoadNativeGame.Disabled = false;
         if (_btnSaveGame != null)
-            _btnSaveGame.Disabled = nativeEnabled ? !hasActiveNativeLeague : false;
+            _btnSaveGame.Disabled = !hasActiveNativeLeague;
     }
 
     private async Task<bool> EnsureNativeStartupState()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            HideStartupPanel();
-            _nativeStartupState = NativeStartupState.Unknown;
-            return true;
-        }
-
         if (_nativeGameCoreContext?.ActiveLeague != null)
         {
             _nativeStartupState = NativeStartupState.Ready;
@@ -2081,13 +2056,13 @@ public partial class DashboardController : Control
     private async Task<(int status, string body)> GetWithTimeoutAsync(string path, int timeoutMs)
     {
         await Task.CompletedTask;
-        return (0, "The retired Python backend is unavailable in the C# runtime.");
+        return (0, "The retired backend path is unavailable in the native runtime.");
     }
 
     private async Task<(int status, string body)> PostWithTimeoutAsync(string path, string json, int timeoutMs)
     {
         await Task.CompletedTask;
-        return (0, "The retired Python backend is unavailable in the C# runtime.");
+        return (0, "The retired backend path is unavailable in the native runtime.");
     }
 
     private static string InlineMessage(string message, int maxLength = 240)
@@ -2118,10 +2093,6 @@ public partial class DashboardController : Control
         if (!string.IsNullOrWhiteSpace(body))
         {
             var normalized = InlineMessage(body);
-            if (!string.IsNullOrWhiteSpace(url) &&
-                normalized.Contains(url, StringComparison.OrdinalIgnoreCase))
-                return normalized;
-
             return string.IsNullOrWhiteSpace(url) ? normalized : $"{url}: {normalized}";
         }
 
@@ -2166,20 +2137,8 @@ public partial class DashboardController : Control
         if (_lblGameNext != null)
             _lblGameNext.Text = "Next: loading...";
 
-        if (IsNativeRuntimeSource())
-            return RefreshNativeDashboardState();
-
-        var (status, body) = await GetWithTimeoutAsync("/dashboard_state", REQUEST_TIMEOUT_MS);
-        if (status < 200 || status >= 300)
-        {
-            var summary = SummarizeRequestError("/dashboard_state", status, body);
-            ApplyDashboardUnavailableState(summary);
-            SetStateDumpText(body);
-            SetServerError(summary);
-            return false;
-        }
-
-        return ApplyDashboardStatePayload(body);
+        await Task.CompletedTask;
+        return RefreshNativeDashboardState();
     }
 
     private bool RefreshNativeDashboardState()
@@ -2231,39 +2190,10 @@ public partial class DashboardController : Control
             _lblGameStatus.Text = "Schedule: loading...";
         if (_lblGameNext != null)
             _lblGameNext.Text = "Next: loading...";
-        if (IsNativeRuntimeSource())
-        {
-            var summary = BuildNativeStateSummaryDictionary();
-            ApplyStateSummary(summary);
-            RenderFrontOfficeLabel();
-            await RefreshDashboardState();
-            return;
-        }
-
-        var (status, body) = await GetWithTimeoutAsync("/state_summary", REQUEST_TIMEOUT_MS);
-
-        if (status < 200 || status >= 300)
-        {
-            var summary = SummarizeRequestError("/state_summary", status, body);
-            if (_calendarTitle != null)
-                _calendarTitle.Text = "Season";
-            if (_calendarText != null)
-                _calendarText.Text = $"State: ERROR - {summary}";
-            if (_lblGameStatus != null)
-                _lblGameStatus.Text = "Schedule unavailable";
-            if (_lblGameNext != null)
-                _lblGameNext.Text = "Next: unavailable";
-            SetStateDumpText(body);
-            SetServerError(summary);
-            return;
-        }
-
-        var ok = ApplyStateSummaryPayload(body);
-        if (ok)
-        {
-            await RefreshDashboardState();
-            await RefreshFrontOfficeContext();
-        }
+        var summary = BuildNativeStateSummaryDictionary();
+        ApplyStateSummary(summary);
+        RenderFrontOfficeLabel();
+        await RefreshDashboardState();
     }
 
     private bool ApplyStateSummaryPayload(string body)
@@ -3268,17 +3198,8 @@ public partial class DashboardController : Control
 
     private async Task RefreshFrontOfficeContext()
     {
-        if (IsNativeRuntimeSource())
-        {
-            RenderFrontOfficeLabel();
-            return;
-        }
-
-        var (profileStatus, profileBody) = await GetWithTimeoutAsync("/gm_profile", REQUEST_TIMEOUT_MS);
-        if (profileStatus >= 200 && profileStatus < 300)
-            ApplyGmProfilePayload(profileBody);
-        else
-            RenderFrontOfficeLabel();
+        RenderFrontOfficeLabel();
+        await Task.CompletedTask;
     }
 
     private void ApplyGmProfilePayload(string body)
@@ -3563,17 +3484,25 @@ public partial class DashboardController : Control
     private async Task AdvanceDay()
     {
         _btnAdvanceDay.Disabled = true;
-        var (status, body) = await PostWithTimeoutAsync("/advance_day", "{}", REQUEST_TIMEOUT_MS);
-        _btnAdvanceDay.Disabled = false;
-
-        if (status < 200 || status >= 300)
+        try
         {
-            SetStateDumpText(body);
-            return;
+            EnsureNativeGameCoreServices();
+            var response = _nativeContinueService.Continue(1);
+            if (response?.Ok != true)
+            {
+                SetPrimaryStatus(response?.Error ?? "Advance day failed.");
+                return;
+            }
+            ApplyNativeContinueStatus(response.Result);
+            if (response.Result?.Advanced == true)
+                await SaveNativeAutosave("Native autosave updated.");
+            await RefreshStateSummary();
+            await RefreshLeagueHub();
         }
-
-        await RefreshStateSummary();
-        await RefreshLeagueHub();
+        finally
+        {
+            _btnAdvanceDay.Disabled = false;
+        }
     }
 
     private void CreateDraftBoard()
@@ -4255,9 +4184,6 @@ public partial class DashboardController : Control
 
     private PlayerState GetSelectedNativeRosterPlayer()
     {
-        if (!IsNativeRuntimeSource())
-            return null;
-
         var playerId = GetSelectedPlayerId();
         var league = _nativeGameCoreContext?.ActiveLeague;
         var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
@@ -4375,12 +4301,6 @@ public partial class DashboardController : Control
 
     private void ShowFranchiseSettings()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Franchise utilities are available in the Native C# GameCore.");
-            return;
-        }
-
         RefreshFranchiseSettingsUi();
         _franchiseSettingsDialog.PopupCentered(new Vector2I(980, 620));
     }
@@ -4398,7 +4318,7 @@ public partial class DashboardController : Control
         }
         if (_franchiseSaveStatus != null)
         {
-            var saves = IsNativeRuntimeSource() ? GetNativeGameCoreSaveService() : null;
+            var saves = GetNativeGameCoreSaveService();
             var named = saves?.SaveExists(GameCoreSaveService.NamedSaveFileName) == true ? "available" : "not found";
             var autosave = saves?.SaveExists() == true ? "available" : "not found";
             _franchiseSaveStatus.Text = $"Named franchise save: {named}. Autosave: {autosave}. Successful explicit saves also update the existing autosave.";
@@ -4461,12 +4381,6 @@ public partial class DashboardController : Control
 
     private void ShowInboxDesk()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("The decision queue is available in the Native C# GameCore.");
-            return;
-        }
-
         RefreshInboxDesk();
         _inboxDeskDialog.PopupCentered(new Vector2I(1040, 630));
     }
@@ -4578,12 +4492,6 @@ public partial class DashboardController : Control
 
     private void ShowMarketDesk()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Transactions are available in the Native C# GameCore.");
-            return;
-        }
-
         RefreshMarketDeskUi();
         _marketDeskDialog.PopupCentered(new Vector2I(1040, 650));
     }
@@ -4726,7 +4634,6 @@ public partial class DashboardController : Control
 
     private void ShowUdfaMarket()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("The UDFA market is available in the Native C# GameCore."); return; }
         RefreshUdfaMarket(); var viewport = GetViewportRect().Size; _udfaMarketDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 760, 1240), Mathf.Clamp((int)(viewport.Y * .88f), 540, 760)));
     }
 
@@ -4855,7 +4762,6 @@ public partial class DashboardController : Control
 
     private void ShowWaiversDialog()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Waivers are available in the Native C# GameCore."); return; }
         RefreshWaiversUi();
         var viewport = GetViewportRect().Size;
         _waiversDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 720, 1240), Mathf.Clamp((int)(viewport.Y * .86f), 500, 740)));
@@ -4980,7 +4886,6 @@ public partial class DashboardController : Control
 
     private void ShowLeagueTransactionsDialog()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("League Transactions is available in the Native C# GameCore."); return; }
         RefreshLeagueTransactionsUi(); var viewport = GetViewportRect().Size; _leagueTransactionsDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .94f), 760, 1320), Mathf.Clamp((int)(viewport.Y * .88f), 540, 780)));
     }
 
@@ -5091,11 +4996,6 @@ public partial class DashboardController : Control
 
     private void ShowTradeFinderDialog()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Trade Block / Finder is available in the Native C# GameCore.");
-            return;
-        }
         RefreshTradeFinderUi();
         var viewport = GetViewportRect().Size;
         _tradeFinderDialog.PopupCentered(new Vector2I(
@@ -5267,11 +5167,6 @@ public partial class DashboardController : Control
 
     private void ShowTradeDialog()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Trades are available in the Native C# GameCore.");
-            return;
-        }
         RefreshTradeUi();
         var viewport = GetViewportRect().Size;
         var dialogSize = new Vector2I(
@@ -5397,12 +5292,6 @@ public partial class DashboardController : Control
 
     private void ShowFreeAgency()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Free agency is available in the Native C# GameCore.");
-            return;
-        }
-
         RefreshFreeAgencyUi();
         var viewport = GetViewportRect().Size;
         _freeAgencyDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 760, 1240), Mathf.Clamp((int)(viewport.Y * .88f), 540, 760)));
@@ -5671,12 +5560,6 @@ public partial class DashboardController : Control
 
     private void ShowRosterManagement()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Roster moves are available in the Native C# GameCore.");
-            return;
-        }
-
         RefreshRosterManagementUi();
         _rosterManagementDialog.PopupCentered(new Vector2I(1040, 650));
     }
@@ -5897,7 +5780,6 @@ public partial class DashboardController : Control
 
     private void ShowTrainingCampPositionFocus()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Training-camp position focus is available in the Native C# GameCore."); return; }
         RenderTrainingCampPositionFocus(); var viewport = GetViewportRect().Size; _trainingCampPositionFocusDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 820, 1320), Mathf.Clamp((int)(viewport.Y * .86f), 540, 780)));
     }
 
@@ -5943,7 +5825,6 @@ public partial class DashboardController : Control
 
     private void ShowTrainingCampPlayerFocus()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Training-camp player focus is available in the Native C# GameCore."); return; }
         PopulateTrainingCampPlayerFocusPositions(); RenderTrainingCampPlayerFocus(); var viewport = GetViewportRect().Size; _trainingCampPlayerFocusDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .94f), 860, 1360), Mathf.Clamp((int)(viewport.Y * .9f), 580, 820)));
     }
 
@@ -6010,7 +5891,6 @@ public partial class DashboardController : Control
 
     private void ShowTrainingCampWeeklyReport()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Training-camp reports are available in the Native C# GameCore."); return; }
         RenderTrainingCampWeeklyReport(); var viewport = GetViewportRect().Size; _trainingCampWeeklyReportDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .95f), 880, 1380), Mathf.Clamp((int)(viewport.Y * .92f), 620, 860)));
     }
 
@@ -6075,7 +5955,6 @@ public partial class DashboardController : Control
 
     private void ShowFinalCutdown()
     {
-        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Final roster cut-down is available in the Native C# GameCore."); return; }
         RenderFinalCutdown(); var viewport = GetViewportRect().Size; _finalCutdownDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .94f), 820, 1320), Mathf.Clamp((int)(viewport.Y * .9f), 560, 800)));
     }
 
@@ -6136,12 +6015,6 @@ public partial class DashboardController : Control
 
     private void ShowTrainingCamp()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            SetPrimaryStatus("Training camp is available in the Native C# GameCore.");
-            return;
-        }
-
         RefreshTrainingCampUi();
         _trainingCampDialog.PopupCentered(new Vector2I(660, 560));
     }
@@ -6333,41 +6206,15 @@ public partial class DashboardController : Control
 
     private async Task NewGame()
     {
-        if (IsNativeRuntimeSource())
+        if (HasExistingNativeSave())
         {
-            if (HasExistingNativeSave())
-            {
-                if (_newGameConfirmDialog != null)
-                    _newGameConfirmDialog.PopupCentered();
-                else
-                    await ConfirmNativeNewGame();
-            }
+            if (_newGameConfirmDialog != null)
+                _newGameConfirmDialog.PopupCentered();
             else
-            {
-                await ShowFranchiseSetupDialog();
-            }
-            return;
+                await ConfirmNativeNewGame();
         }
-
-        SetNewGameButtonsDisabled(true);
-        var (status, body) = await PostWithTimeoutAsync("/new_game", "{}", REQUEST_TIMEOUT_MS);
-
-        if (status < 200 || status >= 300)
-        {
-            SetStateDumpText(body);
-            SetNewGameButtonsDisabled(false);
-            return;
-        }
-
-        ResetClientCachesForNewGame();
-        if (_teamList != null)
-            _teamList.Clear();
-        _teams.Clear();
-        _teamDisplayById.Clear();
-
-        await RefreshStateSummaryForNewGame();
-        PrepareNewGameTeamPicker();
-        ShowNewGameTeamPicker();
+        else
+            await ShowFranchiseSetupDialog();
     }
 
     private bool HasExistingNativeSave()
@@ -6526,57 +6373,31 @@ public partial class DashboardController : Control
 
     private async Task SetUserTeamForNewGame(string teamId)
     {
-        if (IsNativeRuntimeSource())
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams.FirstOrDefault(candidate =>
+            string.Equals(candidate.TeamId, teamId, StringComparison.OrdinalIgnoreCase));
+        if (team == null)
         {
-            EnsureNativeGameCoreServices();
-            var league = _nativeGameCoreContext?.ActiveLeague;
-            var team = league?.Teams.FirstOrDefault(candidate =>
-                string.Equals(candidate.TeamId, teamId, StringComparison.OrdinalIgnoreCase));
-            if (team == null)
-            {
-                _gmTeamLabel = "(error)";
-                RenderFrontOfficeLabel();
-                SetPrimaryStatus("Unable to select that franchise.");
-                return;
-            }
-
-            league.UserTeamId = team.TeamId;
-            ResetClientCachesForNewGame();
-            var saveResult = await SaveCurrentNativeGame(
-                GameCoreSaveService.NamedSaveFileName,
-                $"Franchise started with {team.Name}.",
-                autosaveToo: true);
-            if (!saveResult.Ok)
-                return;
-
-            HideStartupPanel();
-            await RefreshAll();
-            await TrySelectTeamInRoster(team.TeamId);
-            SetPrimaryStatus($"Franchise started with {team.Name}.");
-            return;
-        }
-
-        var payload = new Godot.Collections.Dictionary
-        {
-            { "team_id", teamId }
-        };
-        var json = Json.Stringify(payload);
-        var (status, body) = await PostWithTimeoutAsync("/set_user_team", json, REQUEST_TIMEOUT_MS);
-
-        if (status < 200 || status >= 300)
-        {
-            SetStateDumpText(body);
             _gmTeamLabel = "(error)";
             RenderFrontOfficeLabel();
+            SetPrimaryStatus("Unable to select that franchise.");
             return;
         }
 
-        await RefreshStateSummary();
-        await RefreshInbox();
-        await TrySelectTeamInRoster(teamId);
-        await RefreshLeagueHub();
-        if (IsRosterTabActive())
-            await RefreshRosterTab();
+        league.UserTeamId = team.TeamId;
+        ResetClientCachesForNewGame();
+        var saveResult = await SaveCurrentNativeGame(
+            GameCoreSaveService.NamedSaveFileName,
+            $"Franchise started with {team.Name}.",
+            autosaveToo: true);
+        if (!saveResult.Ok)
+            return;
+
+        HideStartupPanel();
+        await RefreshAll();
+        await TrySelectTeamInRoster(team.TeamId);
+        SetPrimaryStatus($"Franchise started with {team.Name}.");
     }
 
     private async Task<bool> TrySelectTeamInRoster(string teamId)
@@ -6661,61 +6482,29 @@ public partial class DashboardController : Control
 
     private async Task ResetSave()
     {
-        if (IsNativeRuntimeSource())
+        if (_btnResetSave != null)
+            _btnResetSave.Disabled = true;
+
+        try
+        {
+            var saveService = GetNativeGameCoreSaveService();
+            saveService.Delete();
+            saveService.Delete(GameCoreSaveService.NamedSaveFileName);
+            EnsureNativeGameCoreServices();
+            _nativeGameCoreContext.ActiveLeague = null;
+            new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath());
+            _nativeStartupState = NativeStartupState.Ready;
+            ResetDashboardPreviewUiState();
+            ResetClientCachesForNewGame();
+            HideStartupPanel();
+            await RefreshAll();
+            SetPrimaryStatus("Native save reset. Started new native league.");
+        }
+        finally
         {
             if (_btnResetSave != null)
-                _btnResetSave.Disabled = true;
-
-            try
-            {
-                var saveService = GetNativeGameCoreSaveService();
-                saveService.Delete();
-                saveService.Delete(GameCoreSaveService.NamedSaveFileName);
-                EnsureNativeGameCoreServices();
-                _nativeGameCoreContext.ActiveLeague = null;
-                new LeagueBootstrapService(_nativeGameCoreContext).CreateTestLeague(GetTeamSeedPath());
-                _nativeStartupState = NativeStartupState.Ready;
-                ResetDashboardPreviewUiState();
-                ResetClientCachesForNewGame();
-                HideStartupPanel();
-                await RefreshAll();
-                SetPrimaryStatus("Native save reset. Started new native league.");
-            }
-            finally
-            {
-                if (_btnResetSave != null)
-                    _btnResetSave.Disabled = false;
-            }
-
-            return;
+                _btnResetSave.Disabled = false;
         }
-
-        _btnResetSave.Disabled = true;
-        var (status, body) = await PostWithTimeoutAsync("/reset_save", "{}", REQUEST_TIMEOUT_MS);
-        _btnResetSave.Disabled = false;
-
-        if (status < 200 || status >= 300)
-        {
-            SetStateDumpText(body);
-            return;
-        }
-
-        ResetClientCachesForNewGame();
-        if (!ApplyStateSummaryPayload(body))
-        {
-            await RefreshAll();
-            return;
-        }
-        await RefreshFrontOfficeContext();
-
-        SetPrimaryStatus("Save reset.");
-
-        GD.Print("Reset save OK");
-
-        await RefreshInbox();
-        await RefreshLeagueHub();
-        if (IsRosterTabActive())
-            await RefreshRosterTab();
     }
 
     private async Task SetUserTeamFromSelection()
@@ -6732,27 +6521,22 @@ public partial class DashboardController : Control
             return;
         }
 
-        var payload = new Godot.Collections.Dictionary
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams.FirstOrDefault(candidate => string.Equals(candidate.TeamId, _currentTeamId, StringComparison.OrdinalIgnoreCase));
+        if (team == null)
         {
-            { "team_id", _currentTeamId }
-        };
-        var json = Json.Stringify(payload);
-        var (status, body) = await PostWithTimeoutAsync("/set_user_team", json, REQUEST_TIMEOUT_MS);
-        if (_btnSetUserTeam != null)
-            _btnSetUserTeam.Disabled = false;
-
-        if (status < 200 || status >= 300)
-        {
-            SetStateDumpText(body);
             _gmTeamLabel = "(error)";
             RenderFrontOfficeLabel();
+            if (_btnSetUserTeam != null)
+                _btnSetUserTeam.Disabled = false;
             return;
         }
-
-        await RefreshStateSummary();
-        await RefreshInbox();
-        if (IsRosterTabActive())
-            await RefreshRosterTab();
+        league.UserTeamId = team.TeamId;
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, $"User franchise changed to {team.Name}.", autosaveToo: true);
+        if (_btnSetUserTeam != null)
+            _btnSetUserTeam.Disabled = false;
+        await RefreshAll();
     }
 
     private bool IsRosterTabActive()
@@ -8093,15 +7877,6 @@ public partial class DashboardController : Control
 
     private async Task<GameCoreSaveResult> SaveCurrentNativeGame(string saveName, string successMessage, bool autosaveToo)
     {
-        if (!IsNativeRuntimeSource())
-        {
-            return new GameCoreSaveResult
-            {
-                Ok = false,
-                Message = "Native save/load is only available in Native C# GameCore.",
-            };
-        }
-
         EnsureNativeGameCoreServices();
         var saveService = GetNativeGameCoreSaveService();
         var saveResult = saveService.Save(_nativeGameCoreContext, saveName);
@@ -8176,9 +7951,6 @@ public partial class DashboardController : Control
 
     private async Task ContinueNativeStartup()
     {
-        if (!IsNativeRuntimeSource())
-            return;
-
         if (_btnStartupContinue != null)
             _btnStartupContinue.Disabled = true;
 
@@ -8952,14 +8724,7 @@ public partial class DashboardController : Control
 
     private async Task RefreshHistoryAsync()
     {
-        if (IsNativeRuntimeSource())
-        {
-            RefreshNativeHistoryView();
-            await Task.CompletedTask;
-            return;
-        }
-
-        ShowHistoryMessage("League history is only available in native mode.");
+        RefreshNativeHistoryView();
         await Task.CompletedTask;
     }
 
@@ -9417,12 +9182,6 @@ public partial class DashboardController : Control
             await ApplyLiveDepthAdjustment(insertAfter ? "move_after" : "move_before", position, playerId, targetPlayerId);
             return;
         }
-        if (!IsNativeRuntimeSource())
-        {
-            SetDepthChartActionStatus("Drag-and-drop ordering is available in the Native C# GameCore.");
-            return;
-        }
-
         SetDepthChartRequestBusy(true);
         SetDepthChartActionStatus("Saving depth chart order…");
         try
@@ -9463,12 +9222,6 @@ public partial class DashboardController : Control
     {
         if (_depthChartRequestBusy || string.IsNullOrWhiteSpace(_selectedDepthChartPosition))
             return;
-        if (!IsNativeRuntimeSource())
-        {
-            SetDepthChartActionStatus("Position locks are available in the Native C# GameCore.");
-            return;
-        }
-
         var wasLocked = IsDepthChartPositionLocked(_selectedDepthChartPosition);
         SetDepthChartRequestBusy(true);
         SetDepthChartActionStatus(wasLocked ? "Unlocking position…" : "Locking position…");
@@ -10487,14 +10240,6 @@ public partial class DashboardController : Control
 
     private async Task OnWatchGamePressed()
     {
-        if (!IsNativeRuntimeSource())
-        {
-            if (_lblGameDayStatus != null)
-                _lblGameDayStatus.Text = "Watch Game requires the Native C# GameCore.";
-            SetPrimaryStatus("Watch Game requires the Native C# GameCore.");
-            return;
-        }
-
         var gameId = FmtString(GetFirstNonNil(_activeGameDayGame, "game_id"), "");
         if (string.IsNullOrWhiteSpace(gameId))
             gameId = FmtString(GetFirstNonNil(_dashboardNextGame, "game_id"), "");
@@ -15654,7 +15399,7 @@ public partial class DashboardController : Control
         if (_rtlPlayerStats == null)
             return;
 
-        if (!IsNativeRuntimeSource() || _nativeGameCoreContext?.ActiveLeague == null)
+        if (_nativeGameCoreContext?.ActiveLeague == null)
         {
             _rtlPlayerStats.Text = "Season statistics are available in the Native C# GameCore.";
             return;
@@ -15698,7 +15443,7 @@ public partial class DashboardController : Control
         if (_lblRosterEvaluation == null)
             return;
 
-        if (!IsNativeRuntimeSource() || _nativeGameCoreContext?.ActiveLeague == null || string.IsNullOrWhiteSpace(playerId))
+        if (_nativeGameCoreContext?.ActiveLeague == null || string.IsNullOrWhiteSpace(playerId))
         {
             _lblRosterEvaluation.Text = "Current role: unavailable.";
             return;
