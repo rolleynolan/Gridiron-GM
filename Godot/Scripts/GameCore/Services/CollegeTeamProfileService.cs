@@ -71,31 +71,49 @@ public sealed class CollegeTeamProfileService
             });
         }
 
+        profile.Roster = (universe.Players ?? new List<CollegePlayerState>())
+            .Where(player => player != null && string.Equals(player.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(player => PositionOrder(player.Position))
+            .ThenBy(player => player.Position, StringComparer.Ordinal)
+            .ThenBy(player => player.Name, StringComparer.Ordinal)
+            .Select(ToPlayerLine)
+            .ToList();
         profile.StatLeaders = (universe.Players ?? new List<CollegePlayerState>())
             .Where(player => player != null && string.Equals(player.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(player => player.PassingYards + player.RushingYards + player.ReceivingYards)
             .ThenByDescending(player => player.Touchdowns)
             .ThenBy(player => player.Name, StringComparer.Ordinal)
             .Take(5)
-            .Select(player => new CollegeTeamPlayerLine
-            {
-                PlayerId = player.PlayerId,
-                Name = player.Name,
-                Position = player.Position,
-                ClassYear = player.ClassYear,
-                GamesPlayed = player.GamesPlayed,
-                PassingYards = player.PassingYards,
-                RushingYards = player.RushingYards,
-                ReceivingYards = player.ReceivingYards,
-                Touchdowns = player.Touchdowns,
-                Availability = player.CurrentInjury?.IsActive == true
-                    ? $"{player.CurrentInjury.Name} ({player.CurrentInjury.WeeksRemaining}w)"
-                    : "Available",
-            })
+            .Select(ToPlayerLine)
             .ToList();
 
         return profile;
     }
+
+    private static CollegeTeamPlayerLine ToPlayerLine(CollegePlayerState player)
+        => new()
+        {
+            PlayerId = player.PlayerId,
+            Name = player.Name,
+            Position = player.Position,
+            ClassYear = player.ClassYear,
+            GamesPlayed = player.GamesPlayed,
+            PassingYards = player.PassingYards,
+            RushingYards = player.RushingYards,
+            ReceivingYards = player.ReceivingYards,
+            Touchdowns = player.Touchdowns,
+            Availability = player.CurrentInjury?.IsActive == true
+                ? $"{player.CurrentInjury.Name} ({player.CurrentInjury.WeeksRemaining}w)"
+                : "Available",
+        };
+
+    private static int PositionOrder(string position)
+        => position switch
+        {
+            "QB" => 0, "RB" => 1, "WR" => 2, "TE" => 3, "OT" => 4, "OG" => 5, "C" => 6,
+            "EDGE" => 7, "DT" => 8, "LB" => 9, "CB" => 10, "S" => 11, "K" => 12, "P" => 13,
+            _ => 14,
+        };
 }
 
 public sealed class CollegeTeamProfileResult
@@ -112,6 +130,7 @@ public sealed class CollegeTeamProfileResult
     public int Losses { get; set; }
     public List<CollegeTeamScheduleEntry> Schedule { get; set; } = new();
     public List<CollegeTeamPlayerLine> StatLeaders { get; set; } = new();
+    public List<CollegeTeamPlayerLine> Roster { get; set; } = new();
 }
 
 public sealed class CollegeTeamScheduleEntry

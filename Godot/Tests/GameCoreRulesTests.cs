@@ -463,6 +463,16 @@ public sealed class GameCoreRulesTests
         });
         Assert.NotEmpty(profile.StatLeaders);
         Assert.All(profile.StatLeaders, player => Assert.False(string.IsNullOrWhiteSpace(player.Availability)));
+        Assert.True(profile.Roster.Count >= 16);
+        Assert.Equal(
+            profile.Roster.Select(player => player.PlayerId).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+            profile.Roster.Count);
+        Assert.All(profile.Roster, player =>
+        {
+            Assert.InRange(player.ClassYear, 1, 4);
+            Assert.False(string.IsNullOrWhiteSpace(player.Position));
+            Assert.False(string.IsNullOrWhiteSpace(player.Availability));
+        });
         Assert.Equal(before, string.Join("|", universe.Teams.Select(candidate => $"{candidate.TeamId}:{candidate.Wins}:{candidate.Losses}")));
     }
 
