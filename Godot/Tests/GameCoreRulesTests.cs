@@ -567,6 +567,14 @@ public sealed class GameCoreRulesTests
         Assert.Equal(prospect.College, rookie.College);
         Assert.Equal(expectedGames, rookie.CollegeCareerStats.Sum(stats => stats.GamesPlayed));
         Assert.NotSame(prospect.CollegeCareerStats, rookie.CollegeCareerStats);
+
+        var history = new PlayerHistoryService(context).GetPlayerHistory(rookie.PlayerId, team.TeamId);
+        Assert.True(history.Ok, history.Error);
+        Assert.Equal(prospect.College, history.College);
+        Assert.Equal(expectedGames, history.CollegeSeasons.Sum(stats => stats.GamesPlayed));
+        Assert.Equal(
+            prospect.CollegeCareerStats.Select(stats => stats.SeasonYear).OrderByDescending(year => year),
+            history.CollegeSeasons.Select(stats => stats.SeasonYear));
     }
 
     [Fact]

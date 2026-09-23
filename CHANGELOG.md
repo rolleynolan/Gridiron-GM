@@ -99,6 +99,7 @@ All notable project changes are recorded here.
 - Added immutable year-by-year program records to college season archives. Every completed season now preserves all 128 teams' final ranking, record, conference, and championship status; the team encyclopedia displays that history and save migration safely supplies empty history for older archives.
 - Added real college-player continuity across season rollover. Returning underclassmen retain their identity, school, development and injury history, archive the completed season's statistics into career totals, advance a class year, and reset only current-season state; incoming freshmen fill vacated positional slots. College team profiles now show current and career production together without exposing hidden ratings.
 - Completed the college-to-pro identity handoff. Declaration now copies every archived and current college season to the persisted prospect record; drafted and undrafted rookies retain the college player's stable identity, school, and college career statistics instead of receiving an unrelated generated identity. Scouting context shows those career totals after the player leaves the college roster.
+- Extended the normal pro player profile with the player's persisted school, season-by-season college production, and college career totals, so the college identity handoff remains visible after drafting or UDFA signing.
 
 ### Notes
 

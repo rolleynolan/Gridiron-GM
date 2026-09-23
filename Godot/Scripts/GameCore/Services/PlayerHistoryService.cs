@@ -30,9 +30,15 @@ public sealed class PlayerHistoryService
         {
             Ok = true,
             PlayerName = player.Name ?? "",
+            College = player.College ?? "",
             CurrentSeason = Map(current),
             CareerSeasons = (player.CareerStats ?? new List<PlayerSeasonStats>())
                 .Where(stats => stats != null && stats.SeasonYear > 0 && stats.SeasonYear != currentYear)
+                .OrderByDescending(stats => stats.SeasonYear)
+                .Select(Map)
+                .ToList(),
+            CollegeSeasons = (player.CollegeCareerStats ?? new List<CollegePlayerSeasonStats>())
+                .Where(stats => stats != null && stats.SeasonYear > 0)
                 .OrderByDescending(stats => stats.SeasonYear)
                 .Select(Map)
                 .ToList(),
@@ -51,5 +57,16 @@ public sealed class PlayerHistoryService
             SeasonYear = stats?.SeasonYear ?? 0, GamesPlayed = stats?.GamesPlayed ?? 0, PassingYards = stats?.PassingYards ?? 0, PassingTouchdowns = stats?.PassingTouchdowns ?? 0,
             RushingYards = stats?.RushingYards ?? 0, RushingTouchdowns = stats?.RushingTouchdowns ?? 0, ReceivingYards = stats?.ReceivingYards ?? 0, ReceivingTouchdowns = stats?.ReceivingTouchdowns ?? 0,
             Tackles = stats?.Tackles ?? 0, Sacks = stats?.Sacks ?? 0, Interceptions = stats?.Interceptions ?? 0,
+        };
+
+    private static CollegeSeasonHistoryDto Map(CollegePlayerSeasonStats stats)
+        => new()
+        {
+            SeasonYear = stats?.SeasonYear ?? 0,
+            GamesPlayed = stats?.GamesPlayed ?? 0,
+            PassingYards = stats?.PassingYards ?? 0,
+            RushingYards = stats?.RushingYards ?? 0,
+            ReceivingYards = stats?.ReceivingYards ?? 0,
+            Touchdowns = stats?.Touchdowns ?? 0,
         };
 }

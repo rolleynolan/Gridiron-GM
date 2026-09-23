@@ -14491,6 +14491,28 @@ public partial class DashboardController : Control
             lines.Add("No archived seasons yet.");
         else
             lines.AddRange(response.CareerSeasons.Select(stats => $"{stats.SeasonYear}: {FormatPlayerStatistics(stats)}"));
+
+        if (!string.IsNullOrWhiteSpace(response.College) || response.CollegeSeasons.Count > 0)
+        {
+            lines.Add("");
+            lines.Add($"COLLEGE CAREER{(string.IsNullOrWhiteSpace(response.College) ? "" : $" · {response.College}")}");
+            if (response.CollegeSeasons.Count == 0)
+            {
+                lines.Add("No college season statistics available.");
+            }
+            else
+            {
+                lines.AddRange(response.CollegeSeasons.Select(stats => $"{stats.SeasonYear}: {FormatCollegeStatistics(stats)}"));
+                lines.Add($"Career: {FormatCollegeStatistics(new CollegeSeasonHistoryDto
+                {
+                    GamesPlayed = response.CollegeSeasons.Sum(stats => stats.GamesPlayed),
+                    PassingYards = response.CollegeSeasons.Sum(stats => stats.PassingYards),
+                    RushingYards = response.CollegeSeasons.Sum(stats => stats.RushingYards),
+                    ReceivingYards = response.CollegeSeasons.Sum(stats => stats.ReceivingYards),
+                    Touchdowns = response.CollegeSeasons.Sum(stats => stats.Touchdowns),
+                })}");
+            }
+        }
         _rtlPlayerStats.Text = "CURRENT-YEAR STATS\n" + string.Join("\n", lines);
     }
 
@@ -14505,6 +14527,20 @@ public partial class DashboardController : Control
             lines.Add($"Rec {stats.ReceivingYards} yd, {stats.ReceivingTouchdowns} TD");
         if (stats.Tackles > 0 || stats.Sacks > 0 || stats.Interceptions > 0)
             lines.Add($"Def {stats.Tackles} TKL, {stats.Sacks} SK, {stats.Interceptions} INT");
+        return string.Join(" | ", lines);
+    }
+
+    private static string FormatCollegeStatistics(CollegeSeasonHistoryDto stats)
+    {
+        var lines = new List<string> { $"GP {stats.GamesPlayed}" };
+        if (stats.PassingYards > 0)
+            lines.Add($"Pass {stats.PassingYards} yd");
+        if (stats.RushingYards > 0)
+            lines.Add($"Rush {stats.RushingYards} yd");
+        if (stats.ReceivingYards > 0)
+            lines.Add($"Rec {stats.ReceivingYards} yd");
+        if (stats.Touchdowns > 0)
+            lines.Add($"{stats.Touchdowns} TD");
         return string.Join(" | ", lines);
     }
 
