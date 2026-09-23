@@ -91,6 +91,7 @@ All notable project changes are recorded here.
 - Reconciled passing, receiving, and rushing touchdown lines with each team's recorded touchdown total. Scoring schedules are now built once and shared by team stats, player stats, and play-by-play, reducing benchmark allocation to roughly 35 KiB per game.
 - Reconciled each team's total-offense figure with its recorded passing and rushing lines, removing a separate estimate that could contradict the player box score.
 - Corrected injury-event insertion so third-quarter medical timeouts retain chronological quarter/clock order in saved playback timelines; full-season regression coverage now validates every event sequence.
+- Removed avoidable coordinator and scoring-schedule temporary collections from the matchup hot path while preserving results and playback order. The 272-game benchmark now uses roughly 30 KiB per game, and the 768-game college proxy completes in about 35 ms on the current workstation.
 
 ### Notes
 

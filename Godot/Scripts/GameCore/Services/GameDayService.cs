@@ -276,8 +276,20 @@ public sealed class GameDayService
                 .Average(player => player == null ? 65 : Math.Max(0, player.Overall - (Math.Clamp(player.Fatigue, 0, 100) / 8))))
             : 65;
 
-        var coordinators = team?.Coaches?.Where(coach => coach != null && (string.Equals(coach.Role, "Offensive Coordinator", StringComparison.OrdinalIgnoreCase) || string.Equals(coach.Role, "Defensive Coordinator", StringComparison.OrdinalIgnoreCase))).ToList();
-        var strategyModifier = coordinators?.Count == 2 ? Math.Clamp(((coordinators[0].Overall + coordinators[1].Overall) - 150) / 30, -1, 1) : 0;
+        var coordinatorCount = 0;
+        var coordinatorOverall = 0;
+        if (team?.Coaches != null)
+        {
+            foreach (var coach in team.Coaches)
+            {
+                if (coach == null || (!string.Equals(coach.Role, "Offensive Coordinator", StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(coach.Role, "Defensive Coordinator", StringComparison.OrdinalIgnoreCase)))
+                    continue;
+                coordinatorCount++;
+                coordinatorOverall += coach.Overall;
+            }
+        }
+        var strategyModifier = coordinatorCount == 2 ? Math.Clamp((coordinatorOverall - 150) / 30, -1, 1) : 0;
         var strengthModifier = Math.Clamp((averageOverall - 60) / 2, -5, 15);
         var gameVariation = BuildScoreVariation(team?.TeamId, week, dayIndex);
         return Math.Clamp(17 + bonus + strategyModifier + strengthModifier + gameVariation, 3, 55);
@@ -335,6 +347,17 @@ public sealed class GameDayService
         IReadOnlyList<(int Quarter, int Points, int Order)> awaySchedule)
     {
         var events = new List<GamePlayEventState>();
+        var scoringPlays = new List<(bool Home, int Quarter, int Points, int Order)>(homeSchedule.Count + awaySchedule.Count);
+        foreach (var score in homeSchedule)
+            scoringPlays.Add((true, score.Quarter, score.Points, score.Order));
+        foreach (var score in awaySchedule)
+            scoringPlays.Add((false, score.Quarter, score.Points, score.Order));
+        scoringPlays.Sort((left, right) =>
+        {
+            var quarterComparison = left.Quarter.CompareTo(right.Quarter);
+            return quarterComparison != 0 ? quarterComparison : left.Order.CompareTo(right.Order);
+        });
+        var scoringPlayIndex = 0;
         var runningHome = 0;
         var runningAway = 0;
 
@@ -354,29 +377,27 @@ public sealed class GameDayService
                 AwayScore = runningAway,
             });
 
-            var scoring = homeSchedule.Where(item => item.Quarter == quarter).Select(item => (Home: true, item.Points, item.Order))
-                .Concat(awaySchedule.Where(item => item.Quarter == quarter).Select(item => (Home: false, item.Points, item.Order)))
-                .OrderBy(item => item.Order)
-                .ToList();
-            for (var index = 0; index < scoring.Count; index++)
+            var quarterScoreIndex = 0;
+            while (scoringPlayIndex < scoringPlays.Count && scoringPlays[scoringPlayIndex].Quarter == quarter)
             {
-                var score = scoring[index];
+                var score = scoringPlays[scoringPlayIndex++];
                 if (score.Home) runningHome += score.Points; else runningAway += score.Points;
                 var team = score.Home ? homeTeam : awayTeam;
                 events.Add(new GamePlayEventState
                 {
                     Quarter = quarter,
-                    ClockSeconds = Math.Max(45, 11 * 60 - (index * 165) - (score.Order % 37)),
+                    ClockSeconds = Math.Max(45, 11 * 60 - (quarterScoreIndex * 165) - (score.Order % 37)),
                     PossessionTeamId = team?.TeamId ?? "",
                     Down = score.Points == 3 ? 4 : 1,
                     Distance = score.Points == 3 ? 7 : 10,
                     YardLine = score.Points == 3 ? 24 : 1,
-                    YardsGained = score.Points == 7 ? 8 + ((quarter + index) % 18) : 0,
+                    YardsGained = score.Points == 7 ? 8 + ((quarter + quarterScoreIndex) % 18) : 0,
                     Description = BuildScoringDescription(team?.Abbreviation, score.Points),
                     HomeScore = runningHome,
                     AwayScore = runningAway,
                     IsScoringPlay = true,
                 });
+                quarterScoreIndex++;
             }
 
             events.Add(new GamePlayEventState
@@ -408,8 +429,9 @@ public sealed class GameDayService
 
     private static List<(int Quarter, int Points, int Order)> BuildScoringSchedule(int totalScore, int offset)
     {
-        var chunks = new List<int>();
+        var schedule = new List<(int Quarter, int Points, int Order)>();
         var remaining = Math.Max(0, totalScore);
+        var index = 0;
         while (remaining > 0)
         {
             var points = remaining switch
@@ -423,15 +445,14 @@ public sealed class GameDayService
                 _ when remaining >= 7 => 7,
                 _ => remaining,
             };
-            chunks.Add(points);
-            remaining -= points;
-        }
-
-        return chunks.Select((points, index) => (
+            schedule.Add((
                 Quarter: 1 + ((index + offset) % 4),
                 Points: points,
-                Order: (index * 2) + offset))
-            .ToList();
+                Order: (index * 2) + offset));
+            remaining -= points;
+            index++;
+        }
+        return schedule;
     }
 
     private static string BuildScoringDescription(string abbreviation, int points)
