@@ -785,6 +785,14 @@ public sealed class GameCoreSaveService
             player.DraftDecision = string.IsNullOrWhiteSpace(player.DraftDecision) ? (player.DraftEligible ? "Declared" : "Pending") : player.DraftDecision;
             player.DraftDecisionReason ??= "";
             player.DraftStock = string.IsNullOrWhiteSpace(player.DraftStock) ? "Undeclared" : player.DraftStock;
+            player.CareerStats ??= new List<CollegePlayerSeasonStats>();
+            player.CareerStats = player.CareerStats.Where(record => record != null).ToList();
+            foreach (var stats in player.CareerStats)
+            {
+                stats.SeasonYear = Math.Max(0, stats.SeasonYear); stats.TeamId ??= "";
+                stats.GamesPlayed = Math.Max(0, stats.GamesPlayed); stats.PassingYards = Math.Max(0, stats.PassingYards);
+                stats.RushingYards = Math.Max(0, stats.RushingYards); stats.ReceivingYards = Math.Max(0, stats.ReceivingYards); stats.Touchdowns = Math.Max(0, stats.Touchdowns);
+            }
             player.DevelopmentHistory ??= new List<CollegePlayerDevelopmentRecord>();
             player.DevelopmentHistory = player.DevelopmentHistory.Where(record => record != null).ToList();
             foreach (var record in player.DevelopmentHistory)

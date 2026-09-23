@@ -40,6 +40,7 @@ public sealed class SeasonRolloverService
         }
 
         var useShortDraftAnnouncements = league.Draft?.UseShortDraftAnnouncements == true;
+        var completedCollegeUniverse = league.CollegeUniverse;
         CollegeSeasonArchiveService.EnsureArchived(league);
         ArchiveDraft(league);
         ConvertUndraftedProspects(league);
@@ -58,7 +59,7 @@ public sealed class SeasonRolloverService
         league.TradeMarket = new TradeMarketState();
         league.RookieMinicamp = new RookieMinicampState();
         league.CollegeProspects = LeagueBootstrapService.CreateProspectClass(league, league.SeasonYear + 1);
-        league.CollegeUniverse = CollegeUniverseService.CreateInitial(league);
+        league.CollegeUniverse = CollegeUniverseService.CreateInitial(league, completedCollegeUniverse);
         league.Schedule = LeagueBootstrapService.BuildDeterministicSchedule(league.Teams);
         league.Results = new List<GameResult>();
         league.PlayoffBracket = new PlayoffBracket();

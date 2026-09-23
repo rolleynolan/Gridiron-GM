@@ -17,10 +17,12 @@ public sealed class CollegeUniverseService
     private readonly GameCoreContext _context;
     public CollegeUniverseService(GameCoreContext context) => _context = context;
 
-    public static CollegeUniverseState CreateInitial(LeagueState league)
+    public static CollegeUniverseState CreateInitial(LeagueState league, CollegeUniverseState previousUniverse = null)
     {
         var universe = new CollegeUniverseState { SeasonYear = league.SeasonYear };
         universe.Teams = CollegeTeamCatalog.CreateTeams();
+        var validTeamIds = universe.Teams.Select(team => team.TeamId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var playerIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var prospects = league.CollegeProspects ?? new List<CollegeProspectState>();
         for (var index = 0; index < prospects.Count; index++)
         {
@@ -30,27 +32,71 @@ public sealed class CollegeUniverseService
             prospect.College = team.Name;
             prospect.CollegeTeamId = team.TeamId;
             prospect.CollegePlayerId = prospect.ProspectId;
-            universe.Players.Add(new CollegePlayerState
+            var player = new CollegePlayerState
             {
                 PlayerId = prospect.ProspectId, Name = prospect.Name, TeamId = team.TeamId, Position = prospect.Position,
                 Overall = prospect.Overall, Potential = prospect.Potential, Age = prospect.Age, ClassYear = 4, DraftEligible = true,
-            });
+            };
+            if (playerIds.Add(player.PlayerId)) universe.Players.Add(player);
+        }
+        foreach (var player in previousUniverse?.Players?.Where(player => player != null).OrderBy(player => player.PlayerId, StringComparer.Ordinal) ?? Enumerable.Empty<CollegePlayerState>())
+        {
+            if (!validTeamIds.Contains(player.TeamId) || player.ClassYear >= 4 || !playerIds.Add(player.PlayerId))
+                continue;
+            ArchiveAndResetReturningPlayer(player, previousUniverse.SeasonYear);
+            universe.Players.Add(player);
         }
         // Underclassmen make the roster and standings world persist beyond only the current draft pool.
         foreach (var team in universe.Teams)
         for (var slot = 0; slot < DevelopmentRosterPositions.Length; slot++)
         {
+            var position = DevelopmentRosterPositions[slot];
+            var requiredAtPosition = DevelopmentRosterPositions.Take(slot + 1).Count(candidate => candidate == position);
+            if (universe.Players.Count(player => string.Equals(player.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase) && string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase)) >= requiredAtPosition)
+                continue;
             var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{team.TeamId}-{slot}");
-            universe.Players.Add(new CollegePlayerState
+            var player = new CollegePlayerState
             {
                 PlayerId = $"college-{league.SeasonYear}-{team.TeamId}-{slot + 1}", Name = $"{team.Abbreviation} Prospect {slot + 1}", TeamId = team.TeamId,
-                Position = DevelopmentRosterPositions[slot], Overall = 58 + value % 19,
-                Potential = 70 + value % 23, Age = 19 + value % 3, ClassYear = 1 + value % 3, DraftEligible = false,
-            });
+                Position = position, Overall = 58 + value % 19,
+                Potential = 70 + value % 23,
+                Age = previousUniverse == null ? 19 + value % 3 : 18,
+                ClassYear = previousUniverse == null ? 1 + value % 3 : 1,
+                DraftEligible = false,
+            };
+            if (playerIds.Add(player.PlayerId)) universe.Players.Add(player);
         }
         universe.Schedule = BuildSchedule(universe.Teams);
         RefreshRankings(universe);
         return universe;
+    }
+
+    private static void ArchiveAndResetReturningPlayer(CollegePlayerState player, int completedSeasonYear)
+    {
+        player.CareerStats ??= new List<CollegePlayerSeasonStats>();
+        if (player.GamesPlayed > 0 && !player.CareerStats.Any(record => record != null && record.SeasonYear == completedSeasonYear))
+            player.CareerStats.Add(new CollegePlayerSeasonStats
+            {
+                SeasonYear = completedSeasonYear,
+                TeamId = player.TeamId,
+                GamesPlayed = player.GamesPlayed,
+                PassingYards = player.PassingYards,
+                RushingYards = player.RushingYards,
+                ReceivingYards = player.ReceivingYards,
+                Touchdowns = player.Touchdowns,
+            });
+        player.Age++;
+        player.ClassYear++;
+        player.DraftEligible = false;
+        player.DraftDecision = "Pending";
+        player.DraftDecisionReason = "";
+        player.DraftStock = "Season outlook pending";
+        player.GamesPlayed = 0;
+        player.PassingYards = 0;
+        player.RushingYards = 0;
+        player.ReceivingYards = 0;
+        player.Touchdowns = 0;
+        player.CurrentInjury = new CollegePlayerInjuryState();
     }
 
     public void AdvanceToProWeek(int absoluteWeek)

@@ -510,6 +510,42 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void ReturningCollegePlayersKeepIdentityAndArchiveCareerStatistics()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        var completedUniverse = league.CollegeUniverse;
+        var returningPlayer = completedUniverse.Players.First(player => player.ClassYear == 1);
+        var playerId = returningPlayer.PlayerId;
+        var teamId = returningPlayer.TeamId;
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+        var completedGames = returningPlayer.GamesPlayed;
+        var completedYards = returningPlayer.PassingYards + returningPlayer.RushingYards + returningPlayer.ReceivingYards;
+        var completedTouchdowns = returningPlayer.Touchdowns;
+        var completedClass = returningPlayer.ClassYear;
+        league.SeasonYear++;
+
+        var nextUniverse = CollegeUniverseService.CreateInitial(league, completedUniverse);
+        var carriedPlayer = nextUniverse.Players.Single(player => player.PlayerId == playerId);
+
+        Assert.Equal(teamId, carriedPlayer.TeamId);
+        Assert.Equal(completedClass + 1, carriedPlayer.ClassYear);
+        Assert.Equal(0, carriedPlayer.GamesPlayed);
+        Assert.Equal(0, carriedPlayer.PassingYards + carriedPlayer.RushingYards + carriedPlayer.ReceivingYards);
+        var archived = Assert.Single(carriedPlayer.CareerStats);
+        Assert.Equal(completedGames, archived.GamesPlayed);
+        Assert.Equal(completedYards, archived.PassingYards + archived.RushingYards + archived.ReceivingYards);
+        Assert.Equal(completedTouchdowns, archived.Touchdowns);
+        Assert.All(nextUniverse.Teams, team => Assert.True(nextUniverse.Players.Count(player => player.TeamId == team.TeamId) >= 16));
+
+        league.CollegeUniverse = nextUniverse;
+        var profilePlayer = new CollegeTeamProfileService(context).GetProfile(teamId).Roster.Single(player => player.PlayerId == playerId);
+        Assert.Equal(completedGames, profilePlayer.CareerGames);
+        Assert.Equal(completedYards, profilePlayer.CareerYards);
+        Assert.Equal(completedTouchdowns, profilePlayer.CareerTouchdowns);
+    }
+
+    [Fact]
     public void HeadCoachAuthorityAcceptsOnlyCanonicalHeadCoachDomains()
     {
         var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };

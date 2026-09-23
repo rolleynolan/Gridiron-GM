@@ -97,9 +97,21 @@ public sealed class CollegePlayerState
     public int RushingYards { get; set; }
     public int ReceivingYards { get; set; }
     public int Touchdowns { get; set; }
+    public List<CollegePlayerSeasonStats> CareerStats { get; set; } = new();
     public List<CollegePlayerDevelopmentRecord> DevelopmentHistory { get; set; } = new();
     public CollegePlayerInjuryState CurrentInjury { get; set; } = new();
     public List<CollegePlayerInjuryRecord> InjuryHistory { get; set; } = new();
+}
+
+public sealed class CollegePlayerSeasonStats
+{
+    public int SeasonYear { get; set; }
+    public string TeamId { get; set; } = "";
+    public int GamesPlayed { get; set; }
+    public int PassingYards { get; set; }
+    public int RushingYards { get; set; }
+    public int ReceivingYards { get; set; }
+    public int Touchdowns { get; set; }
 }
 
 public sealed class CollegePlayerInjuryState

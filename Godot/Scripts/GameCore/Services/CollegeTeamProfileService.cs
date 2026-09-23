@@ -119,6 +119,10 @@ public sealed class CollegeTeamProfileService
             RushingYards = player.RushingYards,
             ReceivingYards = player.ReceivingYards,
             Touchdowns = player.Touchdowns,
+            CareerSeasons = player.CareerStats?.Count(record => record != null) ?? 0,
+            CareerGames = player.GamesPlayed + (player.CareerStats?.Where(record => record != null).Sum(record => record.GamesPlayed) ?? 0),
+            CareerYards = player.PassingYards + player.RushingYards + player.ReceivingYards + (player.CareerStats?.Where(record => record != null).Sum(record => record.PassingYards + record.RushingYards + record.ReceivingYards) ?? 0),
+            CareerTouchdowns = player.Touchdowns + (player.CareerStats?.Where(record => record != null).Sum(record => record.Touchdowns) ?? 0),
             Availability = player.CurrentInjury?.IsActive == true
                 ? $"{player.CurrentInjury.Name} ({player.CurrentInjury.WeeksRemaining}w)"
                 : "Available",
@@ -173,5 +177,9 @@ public sealed class CollegeTeamPlayerLine
     public int RushingYards { get; set; }
     public int ReceivingYards { get; set; }
     public int Touchdowns { get; set; }
+    public int CareerSeasons { get; set; }
+    public int CareerGames { get; set; }
+    public int CareerYards { get; set; }
+    public int CareerTouchdowns { get; set; }
     public string Availability { get; set; } = "";
 }
