@@ -45,6 +45,11 @@ public sealed class ContinueService
             };
         }
 
+        var pendingWaiver = (league.Waivers ?? new System.Collections.Generic.List<WaiverClaimState>())
+            .FirstOrDefault(waiver => waiver?.PendingConfirmation == true && string.Equals(waiver.PendingClaimTeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (pendingWaiver?.Player != null)
+            return BuildStop(league, false, "waiver_claim_confirmation", 0, 0, 0, new ContinueEvent { Type = "waiver_claim_confirmation", Description = $"Finalize or cancel the winning waiver opportunity for {pendingWaiver.Player.Name}." });
+
         if (maxDays <= 0)
             maxDays = 1;
 
@@ -133,13 +138,22 @@ public sealed class ContinueService
             {
                 events.Add(new ContinueEvent
                 {
-                    Type = "waivers_expired",
-                    Description = $"{expiredWaivers} waived player(s) entered free agency.",
+                    Type = "waivers_resolved",
+                    Description = $"{expiredWaivers} waiver case(s) resolved through a claim or free agency.",
                 });
+            }
+            var resolvedUserWaiver = (league.Waivers ?? new System.Collections.Generic.List<WaiverClaimState>())
+                .FirstOrDefault(waiver => waiver?.PendingConfirmation == true && string.Equals(waiver.PendingClaimTeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+            if (resolvedUserWaiver?.Player != null)
+            {
+                events.Add(new ContinueEvent { Type = "waiver_claim_confirmation", Description = $"The winning waiver opportunity for {resolvedUserWaiver.Player.Name} requires a decision." });
+                return BuildStop(league, true, "waiver_claim_confirmation", daysAdvanced, Math.Max(0, league.Calendar.AbsoluteWeek - startAbsoluteWeek), gamesSimulated, events.ToArray());
             }
 
             if (league.Calendar.AbsoluteWeek != priorAbsoluteWeek)
             {
+                // Resolve the college week that closed, not the newly opened pro week.
+                new CollegeUniverseService(_context).AdvanceToProWeek(priorAbsoluteWeek);
                 var stopReason = string.Equals(league.Calendar.Phase, ScheduleService.PostseasonPendingPhase, StringComparison.OrdinalIgnoreCase)
                     ? "postseason_pending"
                     : string.Equals(league.Calendar.Phase, priorPhase, StringComparison.OrdinalIgnoreCase)
@@ -571,7 +585,7 @@ public sealed class ContinueService
             "divisional_round_pending" => "Wild Card round completed. Divisional Round is pending.",
             "conference_championship_pending" => "Divisional Round completed. Conference Championship is pending.",
             "league_championship_pending" => "Conference Championship completed. League Championship is pending.",
-            "season_complete" => "Season complete. Offseason systems are not implemented yet.",
+            "season_complete" => "Season complete. Continue to begin the offseason.",
             "offseason_pending" => "Offseason Pending reached.",
             "staff_carousel_pending" => "Staff Carousel Pending reached.",
             "retirement_pending" => "Retirement Pending reached.",
@@ -737,13 +751,14 @@ public sealed class ContinueService
 
         if (ScheduleService.IsTerminalOffseasonPlaceholderPhase(currentPhase))
         {
+            var trainingCampCpuRepairs = new CpuRosterManagementService(_context).RepairCpuStarterShortages();
             var cpuCuts = new RosterConstructionService(_context).ProcessCpuTrainingCampCuts();
             var userRoster = _rosterService.GetTeamRoster();
             if (!userRoster.Ok || !userRoster.RosterStatus.IsValid)
             {
                 return BuildStop(
                     league,
-                    cpuCuts > 0,
+                    cpuCuts > 0 || trainingCampCpuRepairs.Signings > 0,
                     "roster_invalid",
                     0,
                     0,
@@ -770,7 +785,7 @@ public sealed class ContinueService
 
             return BuildStop(
                 league,
-                cpuCuts > 0,
+                cpuCuts > 0 || trainingCampCpuRepairs.Signings > 0,
                 currentPhaseKey,
                 0,
                 0,
@@ -854,14 +869,22 @@ public sealed class ContinueService
         var nextPhase = ScheduleService.GetNextOffseasonPlaceholderPhase(currentPhase);
         MoveLeagueToOffseasonPhase(league, nextPhase);
         var nextPhaseKey = ScheduleService.GetOffseasonPhaseKey(nextPhase);
+        var staffChanges = string.Equals(nextPhaseKey, ScheduleService.StaffCarouselPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
+            ? new StaffService(_context).ProcessOffseasonRetirementsAndCpuReplacements()
+            : 0;
         var openingFreeAgency = string.Equals(nextPhaseKey, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
         var openingDraft = string.Equals(nextPhaseKey, ScheduleService.DraftPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
+        var cpuRepairs = openingFreeAgency ? new CpuRosterManagementService(_context).RepairCpuStarterShortages() : new CpuRosterRepairResult();
+        if (openingDraft)
+            new CollegeDraftPipelineService(_context).FinalizeCurrentDraftClass();
         if (openingDraft)
             new DraftService(_context).AdvanceCpuPicksUntilUserTurn();
         events.Add(new ContinueEvent
         {
             Type = openingFreeAgency ? "free_agency_open" : nextPhaseKey,
-            Description = openingFreeAgency ? "Free agency is open. Review the market and submit offers before continuing to draft preparation." : openingDraft ? "The draft is underway. Make your current selection before continuing." : BuildOffseasonDescription(league, nextPhase),
+            Description = openingFreeAgency
+                ? $"Free agency is open. CPU teams completed {cpuRepairs.Signings} rule-approved starter repair signing(s); review the market and submit offers before continuing to draft preparation."
+                : openingDraft ? "The draft is underway. Make your current selection before continuing." : staffChanges > 0 ? $"Staff Carousel is open. {staffChanges} retirement or CPU replacement change(s) were recorded; review any franchise vacancies." : BuildOffseasonDescription(league, nextPhase),
         });
         return BuildStop(
             league,
@@ -907,7 +930,7 @@ public sealed class ContinueService
         return ScheduleService.GetOffseasonPhaseKey(phaseLabel) switch
         {
             ScheduleService.OffseasonPendingPhaseKey => "Process expiring contracts and prepare the offseason market.",
-            ScheduleService.StaffCarouselPendingPhaseKey => "Staff changes are not available in this build. Continue to retirement processing.",
+            ScheduleService.StaffCarouselPendingPhaseKey => "Staff changes are open. Review vacancies and the staff market, or continue to retirement processing.",
             ScheduleService.ExclusiveNegotiationPendingPhaseKey => "Contract extensions and releases are available before free agency.",
             ScheduleService.FranchiseTagPendingPhaseKey => "Apply a franchise tag to one eligible final-year player or continue to process expiring contracts.",
             ScheduleService.LeagueYearPendingPhaseKey => "The new league year is ready to open free agency.",
@@ -1002,8 +1025,8 @@ public sealed class ContinueService
             {
                 Type = leagueChampionshipSimulation.AlreadyCompleted ? "league_championship_already_completed" : "league_championship_completed",
                 Description = leagueChampionshipSimulation.AlreadyCompleted
-                    ? "League Championship already completed. Season complete. Offseason systems are not implemented yet."
-                    : "Simulated the League Championship. Season complete. Offseason systems are not implemented yet.",
+                    ? "League Championship already completed. Season complete. Continue to begin the offseason."
+                    : "Simulated the League Championship. Season complete. Continue to begin the offseason.",
             });
     }
 

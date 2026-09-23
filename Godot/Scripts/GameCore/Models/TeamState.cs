@@ -18,6 +18,7 @@ public sealed class TeamState
     public List<PlayerState> PracticeSquad { get; set; } = new();
     public List<CoachState> Coaches { get; set; } = new();
     public Dictionary<string, List<string>> DepthChart { get; set; } = new();
+    public List<string> DepthChartLockedPositions { get; set; } = new();
     public TrainingCampState TrainingCamp { get; set; } = new();
     public int FranchiseTagSeason { get; set; }
     public string FranchiseTagPlayerId { get; set; } = "";

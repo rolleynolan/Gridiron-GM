@@ -193,12 +193,66 @@ public sealed class GameCoreSaveService
         league.Calendar ??= new CalendarState();
         league.Teams ??= new List<TeamState>();
         league.FreeAgents ??= new List<PlayerState>();
+        league.AvailableCoaches ??= new List<CoachState>();
+        if (isLegacySave && league.AvailableCoaches.Count == 0)
+            league.AvailableCoaches = LeagueBootstrapService.CreateStaffMarket(league.FranchiseMetadata?.World?.Seed ?? WorldDefinition.StandardSeed);
         league.Waivers ??= new List<WaiverClaimState>();
         league.CollegeProspects ??= new List<CollegeProspectState>();
+        league.CollegeUniverse ??= new CollegeUniverseState();
+        league.CollegeSeasonArchives ??= new List<CollegeSeasonArchiveRecord>();
         league.Draft ??= new DraftState();
         league.HistoricalDrafts ??= new List<DraftState>();
+        NormalizeDraftPickOwnership(league.Draft);
+        foreach (var historicalDraft in league.HistoricalDrafts)
+            NormalizeDraftPickOwnership(historicalDraft);
         league.Schedule ??= new List<ScheduledGame>();
         league.Results ??= new List<GameResult>();
+        league.ActiveLiveGameSession ??= new LiveGameSessionState();
+        league.ActiveLiveGameSession.GameId ??= "";
+        league.ActiveLiveGameSession.PendingResult ??= new GameResult();
+        league.ActiveLiveGameSession.PlayedEvents ??= new List<GamePlayEventState>();
+        league.ActiveLiveGameSession.Adjustments ??= new List<LiveGameAdjustmentState>();
+        league.TradeMarket ??= new TradeMarketState();
+        league.TradeMarket.Phase ??= "";
+        league.TradeMarket.SubmittedDate ??= "";
+        league.TradeMarket.RequestedPosition ??= "";
+        league.TradeMarket.OfferedPlayerIds ??= new List<string>();
+        league.TradeMarket.OfferedPickOverallNumbers ??= new List<int>();
+        league.TradeMarket.Offers ??= new List<TradeMarketOfferState>();
+        foreach (var offer in league.TradeMarket.Offers)
+        {
+            if (offer == null) continue;
+            offer.OfferId ??= ""; offer.PartnerTeamId ??= ""; offer.Rationale ??= ""; offer.Status ??= "open";
+            offer.PartnerPlayerIds ??= new List<string>(); offer.PartnerPickOverallNumbers ??= new List<int>();
+        }
+        league.RookieMinicamp ??= new RookieMinicampState();
+        league.RookieMinicamp.InvitedPlayerIds ??= new List<string>();
+        league.ActiveLiveGameSession.PendingResult.BoxScore ??= new BoxScoreState();
+        league.ActiveLiveGameSession.PendingResult.BoxScore.Final ??= "";
+        league.ActiveLiveGameSession.PendingResult.BoxScore.TeamStats ??= new Dictionary<string, int>();
+        league.ActiveLiveGameSession.PendingResult.BoxScore.PlayerStats ??= new List<PlayerGameStats>();
+        league.ActiveLiveGameSession.PendingResult.BoxScore.PlayByPlay ??= new List<GamePlayEventState>();
+        league.ActiveLiveGameSession.NextEventIndex = Math.Clamp(
+            league.ActiveLiveGameSession.NextEventIndex,
+            0,
+            league.ActiveLiveGameSession.PendingResult.BoxScore.PlayByPlay.Count);
+        foreach (var play in league.ActiveLiveGameSession.PlayedEvents.Concat(league.ActiveLiveGameSession.PendingResult.BoxScore.PlayByPlay))
+        {
+            if (play == null)
+                continue;
+            play.PossessionTeamId ??= "";
+            play.Description ??= "";
+        }
+        foreach (var adjustment in league.ActiveLiveGameSession.Adjustments)
+        {
+            if (adjustment == null)
+                continue;
+            adjustment.TeamId ??= "";
+            adjustment.Position ??= "";
+            adjustment.PlayerId ??= "";
+            adjustment.TargetPlayerId ??= "";
+            adjustment.Action ??= "";
+        }
         league.PlayoffBracket ??= new PlayoffBracket();
         league.HistoricalSeasons ??= new List<SeasonHistoryRecord>();
         league.RetirementHistory ??= new List<SeasonRetirementRecord>();
@@ -221,6 +275,11 @@ public sealed class GameCoreSaveService
             team.PracticeSquad ??= new List<PlayerState>();
             team.Coaches ??= new List<CoachState>();
             team.DepthChart ??= new Dictionary<string, List<string>>();
+            team.DepthChartLockedPositions ??= new List<string>();
+            team.DepthChartLockedPositions = team.DepthChartLockedPositions
+                .Where(position => !string.IsNullOrWhiteSpace(position) && team.DepthChart.ContainsKey(position))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
             team.FranchiseTagPlayerId ??= "";
             if (team.FranchiseTagSeason != league.SeasonYear)
             {
@@ -333,6 +392,7 @@ public sealed class GameCoreSaveService
             season.TeamRecords ??= new List<SeasonTeamRecord>();
             season.PlayoffSeeds ??= new List<SeasonPlayoffSeedRecord>();
             season.PlayoffResults ??= new List<SeasonPlayoffResultRecord>();
+            season.Awards ??= new List<SeasonAwardRecord>();
 
             foreach (var teamRecord in season.TeamRecords)
             {
@@ -373,6 +433,12 @@ public sealed class GameCoreSaveService
                 playoffResult.LoserTeamId ??= "";
                 playoffResult.LoserTeamName ??= "";
             }
+            foreach (var award in season.Awards)
+            {
+                if (award == null) continue;
+                award.AwardName ??= ""; award.PlayerId ??= ""; award.PlayerName ??= ""; award.TeamId ??= ""; award.TeamName ??= ""; award.Position ??= ""; award.Summary ??= "";
+            }
+            SeasonAwardsService.EnsureAwards(league, season);
         }
 
         foreach (var retirementSeason in league.RetirementHistory)
@@ -396,6 +462,9 @@ public sealed class GameCoreSaveService
                 retirement.Position ??= "";
                 retirement.ReasonLabel ??= "";
                 retirement.RetiredDuringPhase ??= "";
+                retirement.CurrentSeasonStats ??= new PlayerSeasonStats();
+                retirement.CareerStats ??= new List<PlayerSeasonStats>();
+                NormalizePlayerStatistics(new PlayerState { SeasonStats = retirement.CurrentSeasonStats, CareerStats = retirement.CareerStats });
                 if (retirement.SeasonYear <= 0)
                     retirement.SeasonYear = retirementSeason.SeasonYear;
             }
@@ -414,6 +483,8 @@ public sealed class GameCoreSaveService
             transaction.TeamName ??= "";
             transaction.PlayerId ??= "";
             transaction.PlayerName ??= "";
+            transaction.StaffId ??= "";
+            transaction.StaffName ??= "";
             transaction.Details ??= "";
         }
 
@@ -430,8 +501,11 @@ public sealed class GameCoreSaveService
             team.Roster ??= new List<PlayerState>();
             team.InjuredReserve ??= new List<PlayerState>();
             team.PracticeSquad ??= new List<PlayerState>();
+            team.Coaches ??= new List<CoachState>();
             team.TrainingCamp ??= new TrainingCampState();
             team.TrainingCamp.FocusPosition ??= "";
+            team.TrainingCamp.FocusPlayerId ??= "";
+            team.TrainingCamp.FocusPlayerName ??= "";
             team.TrainingCamp.Summary ??= "";
             team.TrainingCamp.Report ??= new TrainingCampReportState();
             team.TrainingCamp.Report.Summary ??= "";
@@ -450,6 +524,9 @@ public sealed class GameCoreSaveService
                 ? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, List<string>>(team.DepthChart, StringComparer.OrdinalIgnoreCase);
 
+            foreach (var coach in team.Coaches.Where(coach => coach != null))
+                NormalizeCoach(coach, coach.Role);
+
             foreach (var pair in new List<string>(team.DepthChart.Keys))
                 team.DepthChart[pair] ??= new List<string>();
 
@@ -467,6 +544,7 @@ public sealed class GameCoreSaveService
                 player.Fatigue = Math.Clamp(player.Fatigue, 0, 100);
                 player.Morale = Math.Clamp(player.Morale, 0, 100);
                 player.MoraleTrend = string.IsNullOrWhiteSpace(player.MoraleTrend) ? "Stable" : player.MoraleTrend;
+                player.Trait ??= "";
                 player.Contract ??= new PlayerContractState();
                 player.Contract.ContractType = string.IsNullOrWhiteSpace(player.Contract.ContractType) ? "Standard" : player.Contract.ContractType;
                 NormalizePlayerStatistics(player);
@@ -491,10 +569,14 @@ public sealed class GameCoreSaveService
             NormalizePlayerInjury(player);
             player.Morale = Math.Clamp(player.Morale, 0, 100);
             player.MoraleTrend = string.IsNullOrWhiteSpace(player.MoraleTrend) ? "Stable" : player.MoraleTrend;
+            player.Trait ??= "";
             player.Contract ??= new PlayerContractState { ContractType = "Free Agent" };
             player.Contract.ContractType = string.IsNullOrWhiteSpace(player.Contract.ContractType) ? "Free Agent" : player.Contract.ContractType;
             NormalizePlayerStatistics(player);
         }
+
+        foreach (var coach in league.AvailableCoaches.Where(coach => coach != null))
+            NormalizeCoach(coach, "Available Staff");
 
         foreach (var waiver in league.Waivers)
         {
@@ -502,6 +584,16 @@ public sealed class GameCoreSaveService
                 continue;
             waiver.Player ??= new PlayerState();
             waiver.WaivedByTeamId ??= "";
+            waiver.PendingClaimTeamId ??= "";
+            waiver.ConditionalReleasePlayerId ??= "";
+            waiver.DeclinedTeamIds ??= new List<string>();
+            waiver.Claims ??= new List<WaiverClaimEntryState>();
+            foreach (var claim in waiver.Claims)
+            {
+                if (claim == null) continue;
+                claim.TeamId ??= "";
+                claim.ConditionalReleasePlayerId ??= "";
+            }
             waiver.Player.PlayerId ??= "";
             waiver.Player.Name ??= "";
             waiver.Player.Position ??= "";
@@ -518,11 +610,26 @@ public sealed class GameCoreSaveService
             prospect.Name ??= "";
             prospect.Position ??= "";
             prospect.College ??= "";
+            prospect.CollegeTeamId ??= "";
+            prospect.CollegePlayerId ??= "";
+            prospect.DeclarationStatus = string.IsNullOrWhiteSpace(prospect.DeclarationStatus) ? "Declared" : prospect.DeclarationStatus;
+            prospect.DeclarationRationale ??= "";
+            prospect.DraftStock = string.IsNullOrWhiteSpace(prospect.DraftStock) ? "Season outlook pending" : prospect.DraftStock;
             prospect.DraftedByTeamId ??= "";
+        }
+        NormalizeCollegeUniverse(league);
+        foreach (var archive in league.CollegeSeasonArchives.Where(archive => archive != null))
+        {
+            archive.ChampionTeamId ??= ""; archive.ChampionTeamName ??= ""; archive.Awards ??= new List<CollegeSeasonAwardRecord>(); archive.PostseasonGames ??= new List<CollegePostseasonGame>();
         }
         ProspectEvaluationService.EnsureEvaluations(league);
         league.Draft.Picks ??= new List<DraftPickState>();
         league.Draft.RecapEntries ??= new List<DraftClassRecapEntry>();
+        league.Draft.UserBoardProspectIds ??= new List<string>();
+        league.Draft.UserBoardProspectIds = league.Draft.UserBoardProspectIds.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.OrdinalIgnoreCase).Take(100).ToList();
+        league.Draft.UserBoardNotes ??= new Dictionary<string, string>();
+        league.Draft.UserBoardTags ??= new Dictionary<string, string>();
+        league.Draft.UserBoardTiers ??= new Dictionary<string, string>();
         foreach (var pick in league.Draft.Picks)
         {
             if (pick == null)
@@ -539,6 +646,10 @@ public sealed class GameCoreSaveService
 
             historicalDraft.Picks ??= new List<DraftPickState>();
             historicalDraft.RecapEntries ??= new List<DraftClassRecapEntry>();
+            historicalDraft.UserBoardProspectIds ??= new List<string>();
+            historicalDraft.UserBoardNotes ??= new Dictionary<string, string>();
+            historicalDraft.UserBoardTags ??= new Dictionary<string, string>();
+            historicalDraft.UserBoardTiers ??= new Dictionary<string, string>();
             foreach (var pick in historicalDraft.Picks)
             {
                 if (pick == null)
@@ -596,6 +707,7 @@ public sealed class GameCoreSaveService
             result.BoxScore.Final ??= "";
             result.BoxScore.TeamStats ??= new Dictionary<string, int>();
             result.BoxScore.PlayerStats ??= new List<PlayerGameStats>();
+            result.BoxScore.PlayByPlay ??= new List<GamePlayEventState>();
             foreach (var stat in result.BoxScore.PlayerStats)
             {
                 if (stat == null)
@@ -604,6 +716,13 @@ public sealed class GameCoreSaveService
                 stat.PlayerName ??= "";
                 stat.TeamId ??= "";
                 stat.Position ??= "";
+            }
+            foreach (var play in result.BoxScore.PlayByPlay)
+            {
+                if (play == null)
+                    continue;
+                play.PossessionTeamId ??= "";
+                play.Description ??= "";
             }
             ScheduleService.NormalizeResult(result);
             if (isLegacySave)
@@ -632,6 +751,82 @@ public sealed class GameCoreSaveService
             new SeasonHistoryService(context).EnsureSeasonHistorySnapshot(league, out _);
     }
 
+    private static void NormalizeCollegeUniverse(LeagueState league)
+    {
+        var createdFromLegacySave = league.CollegeUniverse.Teams == null || league.CollegeUniverse.Teams.Count == 0;
+        if (createdFromLegacySave)
+            league.CollegeUniverse = CollegeUniverseService.CreateInitial(league);
+
+        var universe = league.CollegeUniverse;
+        universe.SeasonYear = universe.SeasonYear <= 0 ? league.SeasonYear : universe.SeasonYear;
+        universe.Teams ??= new List<CollegeTeamState>();
+        universe.Players ??= new List<CollegePlayerState>();
+        universe.Schedule ??= new List<CollegeScheduledGame>();
+        universe.Results ??= new List<CollegeGameResult>();
+        universe.Postseason ??= new CollegePostseasonState();
+        universe.Postseason.Games ??= new List<CollegePostseasonGame>();
+        universe.Awards ??= new List<CollegeSeasonAwardRecord>();
+        foreach (var team in universe.Teams.Where(team => team != null))
+        {
+            team.TeamId ??= ""; team.Name ??= ""; team.Abbreviation ??= ""; team.Conference ??= "";
+            team.Wins = Math.Max(0, team.Wins); team.Losses = Math.Max(0, team.Losses); team.Ranking = Math.Max(0, team.Ranking);
+        }
+        foreach (var player in universe.Players.Where(player => player != null))
+        {
+            player.PlayerId ??= ""; player.Name ??= ""; player.TeamId ??= ""; player.Position ??= "";
+            player.ClassYear = Math.Clamp(player.ClassYear, 1, 4); player.GamesPlayed = Math.Max(0, player.GamesPlayed);
+            player.DraftDecision = string.IsNullOrWhiteSpace(player.DraftDecision) ? (player.DraftEligible ? "Declared" : "Pending") : player.DraftDecision;
+            player.DraftDecisionReason ??= "";
+            player.DraftStock = string.IsNullOrWhiteSpace(player.DraftStock) ? "Undeclared" : player.DraftStock;
+            player.DevelopmentHistory ??= new List<CollegePlayerDevelopmentRecord>();
+            player.DevelopmentHistory = player.DevelopmentHistory.Where(record => record != null).ToList();
+            foreach (var record in player.DevelopmentHistory)
+            {
+                record.SeasonYear = Math.Max(0, record.SeasonYear);
+                record.OverallBefore = Math.Clamp(record.OverallBefore, 40, 99);
+                record.OverallAfter = Math.Clamp(record.OverallAfter, 40, 99);
+                record.Reason ??= "";
+            }
+            player.CurrentInjury ??= new CollegePlayerInjuryState();
+            player.CurrentInjury.Name ??= "";
+            player.CurrentInjury.WeeksRemaining = Math.Max(0, player.CurrentInjury.WeeksRemaining);
+            player.CurrentInjury.OccurredInWeek = Math.Max(0, player.CurrentInjury.OccurredInWeek);
+            player.CurrentInjury.GameId ??= "";
+            player.InjuryHistory ??= new List<CollegePlayerInjuryRecord>();
+            player.InjuryHistory = player.InjuryHistory.Where(record => record != null).ToList();
+            foreach (var injury in player.InjuryHistory)
+            {
+                injury.SeasonYear = Math.Max(0, injury.SeasonYear);
+                injury.Name ??= "";
+                injury.WeeksOut = Math.Max(0, injury.WeeksOut);
+                injury.OccurredInWeek = Math.Max(0, injury.OccurredInWeek);
+                injury.RecoveredInWeek = Math.Max(0, injury.RecoveredInWeek);
+                injury.GameId ??= "";
+            }
+        }
+        foreach (var game in universe.Schedule.Where(game => game != null))
+        {
+            game.GameId ??= ""; game.HomeTeamId ??= ""; game.AwayTeamId ??= "";
+            game.Status = string.IsNullOrWhiteSpace(game.Status) ? "upcoming" : game.Status;
+        }
+        foreach (var result in universe.Results.Where(result => result != null))
+        {
+            result.GameId ??= ""; result.HomeTeamId ??= ""; result.AwayTeamId ??= ""; result.WinnerTeamId ??= "";
+        }
+        foreach (var game in universe.Postseason.Games.Where(game => game != null))
+        {
+            game.Label ??= ""; game.HomeTeamId ??= ""; game.AwayTeamId ??= ""; game.WinnerTeamId ??= "";
+        }
+        foreach (var award in universe.Awards.Where(award => award != null))
+        {
+            award.AwardName ??= ""; award.PlayerId ??= ""; award.PlayerName ??= ""; award.TeamId ??= "";
+            award.TeamName ??= ""; award.Position ??= ""; award.Summary ??= "";
+        }
+        CollegeAwardsService.EnsureAwards(universe);
+        if (createdFromLegacySave)
+            new CollegeUniverseService(new GameCoreContext { ActiveLeague = league }).AdvanceToProWeek(Math.Max(0, league.Calendar?.AbsoluteWeek ?? 0));
+    }
+
     private static void NormalizeReservePlayers(IEnumerable<PlayerState> players, string status)
     {
         foreach (var player in players ?? Enumerable.Empty<PlayerState>())
@@ -647,9 +842,35 @@ public sealed class GameCoreSaveService
             player.Fatigue = Math.Clamp(player.Fatigue, 0, 100);
             player.Morale = Math.Clamp(player.Morale, 0, 100);
             player.MoraleTrend = string.IsNullOrWhiteSpace(player.MoraleTrend) ? "Stable" : player.MoraleTrend;
+            player.Trait ??= "";
             player.Contract ??= new PlayerContractState();
             player.Contract.ContractType = string.IsNullOrWhiteSpace(player.Contract.ContractType) ? "Standard" : player.Contract.ContractType;
             NormalizePlayerStatistics(player);
+        }
+    }
+
+    private static void NormalizeCoach(CoachState coach, string fallbackRole)
+    {
+        coach.CoachId ??= "";
+        coach.Name ??= "";
+        coach.Role = string.IsNullOrWhiteSpace(coach.Role) ? fallbackRole : coach.Role;
+        coach.Overall = Math.Clamp(coach.Overall, 1, 99);
+        coach.Age = Math.Clamp(coach.Age, 20, 90);
+        coach.TenureStartSeason = Math.Max(0, coach.TenureStartSeason);
+    }
+
+    private static void NormalizeDraftPickOwnership(DraftState draft)
+    {
+        if (draft == null)
+            return;
+
+        draft.Picks ??= new List<DraftPickState>();
+        foreach (var pick in draft.Picks.Where(pick => pick != null))
+        {
+            pick.TeamId ??= "";
+            pick.OriginalTeamId = string.IsNullOrWhiteSpace(pick.OriginalTeamId) ? pick.TeamId : pick.OriginalTeamId;
+            pick.ProspectId ??= "";
+            pick.PlayerId ??= "";
         }
     }
 
@@ -659,6 +880,9 @@ public sealed class GameCoreSaveService
         player.SeasonStats ??= new PlayerSeasonStats();
         player.CareerStats ??= new List<PlayerSeasonStats>();
         player.CareerStats = player.CareerStats.Where(stat => stat != null).ToList();
+        player.DevelopmentHistory ??= new List<PlayerDevelopmentRecord>();
+        player.DevelopmentHistory = player.DevelopmentHistory.Where(record => record != null).ToList();
+        foreach (var record in player.DevelopmentHistory) { record.SeasonYear = Math.Max(0, record.SeasonYear); record.OverallBefore = Math.Clamp(record.OverallBefore, 40, 99); record.OverallAfter = Math.Clamp(record.OverallAfter, 40, 99); record.Note ??= ""; }
     }
 
     private static void NormalizePlayerInjury(PlayerState player)

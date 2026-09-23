@@ -26,8 +26,10 @@ public sealed class SeasonHistoryService
         }
 
         league.HistoricalSeasons ??= new List<SeasonHistoryRecord>();
-        if (league.HistoricalSeasons.Any(record => record != null && record.SeasonYear == league.SeasonYear))
+        var existingRecord = league.HistoricalSeasons.FirstOrDefault(record => record != null && record.SeasonYear == league.SeasonYear);
+        if (existingRecord != null)
         {
+            SeasonAwardsService.EnsureAwards(league, existingRecord);
             reason = "Season history snapshot already exists.";
             return true;
         }
@@ -104,6 +106,7 @@ public sealed class SeasonHistoryService
             GeneratedAtLabel = BuildGeneratedAtLabel(league),
         };
 
+        SeasonAwardsService.EnsureAwards(league, snapshot);
         league.HistoricalSeasons.Add(snapshot);
         reason = "Season history snapshot generated.";
         return true;

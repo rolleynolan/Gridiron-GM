@@ -4,7 +4,7 @@ namespace GridironGM.GameCore.Models;
 
 public sealed class LeagueState
 {
-    public const int CurrentSaveVersion = 23;
+    public const int CurrentSaveVersion = 31;
     public const decimal DefaultSalaryCap = 255_000_000m;
 
     public string LeagueId { get; set; } = "test_league";
@@ -18,12 +18,18 @@ public sealed class LeagueState
     public CalendarState Calendar { get; set; } = new();
     public List<TeamState> Teams { get; set; } = new();
     public List<PlayerState> FreeAgents { get; set; } = new();
+    public List<CoachState> AvailableCoaches { get; set; } = new();
     public List<WaiverClaimState> Waivers { get; set; } = new();
     public List<CollegeProspectState> CollegeProspects { get; set; } = new();
+    public CollegeUniverseState CollegeUniverse { get; set; } = new();
+    public List<CollegeSeasonArchiveRecord> CollegeSeasonArchives { get; set; } = new();
     public DraftState Draft { get; set; } = new();
     public List<DraftState> HistoricalDrafts { get; set; } = new();
     public List<ScheduledGame> Schedule { get; set; } = new();
     public List<GameResult> Results { get; set; } = new();
+    public LiveGameSessionState ActiveLiveGameSession { get; set; } = new();
+    public TradeMarketState TradeMarket { get; set; } = new();
+    public RookieMinicampState RookieMinicamp { get; set; } = new();
     public PlayoffBracket PlayoffBracket { get; set; } = new();
     public List<SeasonHistoryRecord> HistoricalSeasons { get; set; } = new();
     public List<SeasonRetirementRecord> RetirementHistory { get; set; } = new();

@@ -33,15 +33,18 @@ public static class PlayerStatisticsService
         if (league == null)
             return;
 
-        foreach (var player in league.Teams.Where(team => team != null)
-                     .SelectMany(team => (team.Roster ?? new List<PlayerState>())
-                         .Concat(team.InjuredReserve ?? new List<PlayerState>())
-                         .Concat(team.PracticeSquad ?? new List<PlayerState>()))
-                     .Where(player => player != null)
-                     .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
-                     .Select(group => group.First()))
+        foreach (var team in league.Teams.Where(team => team != null))
         {
-            player.Fatigue = Math.Max(0, Math.Clamp(player.Fatigue, 0, 100) - 4);
+            var conditioningBonus = team.Coaches?.Any(coach => coach != null
+                && string.Equals(coach.Role, "Strength & Conditioning Coach", StringComparison.OrdinalIgnoreCase)
+                && coach.Overall >= 85) == true ? 1 : 0;
+            foreach (var player in (team.Roster ?? new List<PlayerState>())
+                         .Concat(team.InjuredReserve ?? new List<PlayerState>())
+                         .Concat(team.PracticeSquad ?? new List<PlayerState>())
+                         .Where(player => player != null)
+                         .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
+                         .Select(group => group.First()))
+                player.Fatigue = Math.Max(0, Math.Clamp(player.Fatigue, 0, 100) - 4 - conditioningBonus);
         }
     }
 

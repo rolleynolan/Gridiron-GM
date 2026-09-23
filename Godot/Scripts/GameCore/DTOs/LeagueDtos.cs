@@ -161,7 +161,45 @@ public sealed class LeagueHistorySeasonDto
     public List<LeagueHistoryTeamRecordDto> TeamRecords { get; set; } = new();
     public List<LeagueHistoryPlayoffSeedDto> PlayoffSeeds { get; set; } = new();
     public List<LeagueHistoryPlayoffResultDto> PlayoffResults { get; set; } = new();
+    public List<SeasonAwardDto> Awards { get; set; } = new();
     public List<DraftClassRecapDto> DraftClass { get; set; } = new();
+}
+
+public sealed class SeasonAwardDto
+{
+    public string AwardName { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string TeamName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public string Summary { get; set; } = "";
+}
+
+public sealed class HistoricalArchiveResponse
+{
+    public bool Ok { get; set; }
+    public string Error { get; set; } = "";
+    public RecordBookResponse RecordBook { get; set; } = new();
+    public List<HistoricalChampionshipDto> Championships { get; set; } = new();
+    public List<HistoricalRetirementDto> Retirements { get; set; } = new();
+}
+
+public sealed class HistoricalChampionshipDto
+{
+    public int SeasonYear { get; set; }
+    public string ChampionTeamName { get; set; } = "";
+    public string RunnerUpTeamName { get; set; } = "";
+    public int ChampionScore { get; set; }
+    public int RunnerUpScore { get; set; }
+}
+
+public sealed class HistoricalRetirementDto
+{
+    public int SeasonYear { get; set; }
+    public string PlayerName { get; set; } = "";
+    public string TeamName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public int Age { get; set; }
+    public string Reason { get; set; } = "";
 }
 
 public sealed class DraftClassRecapDto

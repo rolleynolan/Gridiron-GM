@@ -22,6 +22,8 @@ public sealed class DraftClassRecapEntry
     public string ScoutingReport { get; set; } = "";
     public string Trait { get; set; } = "";
     public string InterviewSummary { get; set; } = "";
+    public int PublicBoardRank { get; set; }
+    public string PublicReaction { get; set; } = "";
     public string RookiePlacement { get; set; } = "";
     public decimal ContractAnnualSalary { get; set; }
     public decimal ContractGuaranteedSalary { get; set; }

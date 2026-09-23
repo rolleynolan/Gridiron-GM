@@ -99,6 +99,8 @@ public sealed class RetirementService
                     Overall = player.Overall,
                     ReasonLabel = BuildReasonLabel(player),
                     RetiredDuringPhase = ScheduleService.RetirementPendingPhaseKey,
+                    CurrentSeasonStats = player.SeasonStats?.Copy() ?? new PlayerSeasonStats(),
+                    CareerStats = (player.CareerStats ?? new List<PlayerSeasonStats>()).Where(stats => stats != null).Select(stats => stats.Copy()).ToList(),
                 });
             }
         }

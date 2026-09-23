@@ -11,5 +11,7 @@ public sealed class TransactionRecord
     public string TeamName { get; set; } = "";
     public string PlayerId { get; set; } = "";
     public string PlayerName { get; set; } = "";
+    public string StaffId { get; set; } = "";
+    public string StaffName { get; set; } = "";
     public string Details { get; set; } = "";
 }

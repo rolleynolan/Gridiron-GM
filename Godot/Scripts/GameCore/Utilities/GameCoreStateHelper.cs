@@ -63,7 +63,7 @@ public static class GameCoreStateHelper
                 : $"{standing.Wins}-{standing.Losses}";
 
     public static string FormatCapRoom(decimal capRoom)
-        => capRoom.ToString("C0", CultureInfo.InvariantCulture);
+        => "$" + capRoom.ToString("N0", CultureInfo.InvariantCulture);
 
     public static IEnumerable<GameResult> GetRecentResults(LeagueState league, int count = 5)
         => (league?.Results ?? Enumerable.Empty<GameResult>())
@@ -117,6 +117,23 @@ public static class GameCoreStateHelper
                 Tackles = stat.Tackles,
                 Sacks = stat.Sacks,
                 Interceptions = stat.Interceptions,
+            }).ToList();
+            dto.BoxScore["play_by_play"] = result.BoxScore.PlayByPlay.Select(play => new GamePlayEventState
+            {
+                Sequence = play.Sequence,
+                Quarter = play.Quarter,
+                ClockSeconds = play.ClockSeconds,
+                PossessionTeamId = play.PossessionTeamId,
+                Down = play.Down,
+                Distance = play.Distance,
+                YardLine = play.YardLine,
+                YardsGained = play.YardsGained,
+                Description = play.Description,
+                HomeScore = play.HomeScore,
+                AwayScore = play.AwayScore,
+                IsScoringPlay = play.IsScoringPlay,
+                IsTurnover = play.IsTurnover,
+                IsInjury = play.IsInjury,
             }).ToList();
         }
 

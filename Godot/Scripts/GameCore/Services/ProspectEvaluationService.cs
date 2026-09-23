@@ -24,14 +24,16 @@ public sealed class ProspectEvaluationService
             return null;
 
         EnsureEvaluations(league, new[] { prospect });
-        var spread = GetEstimateSpread(prospect.ScoutingConfidence);
+        var staffModifier = GetPersonnelScoutingModifier(league);
+        var effectiveConfidence = Math.Clamp(prospect.ScoutingConfidence + staffModifier, 1, 100);
+        var spread = GetEstimateSpread(effectiveConfidence);
         return new ProspectEvaluationDto
         {
             ProspectId = prospect.ProspectId,
-            KnownFacts = "${prospect.Position} | Age ${prospect.Age} | ${prospect.College}\nPublic combine: ${prospect.CombineScore}/100 | Public pro day: ${prospect.ProDayScore}/100",
+            KnownFacts = $"{prospect.Position} | Age {prospect.Age} | {prospect.College}\nPublic combine: {prospect.CombineScore}/100 | Public pro day: {prospect.ProDayScore}/100\nDraft outlook: {prospect.DraftStock} | {prospect.DeclarationStatus}\n{prospect.DeclarationRationale}",
             EstimatedOverall = FormatRange(prospect.ScoutedOverall, spread),
             EstimatedPotential = FormatRange(prospect.ScoutedPotential, spread + 1),
-            Confidence = GetConfidenceLabel(prospect.ScoutingConfidence),
+            Confidence = $"{GetConfidenceLabel(effectiveConfidence)} ({effectiveConfidence}/100; personnel staff {staffModifier:+#;-#;0})",
             Report = prospect.ScoutingReport,
             Trait = prospect.Trait,
             Interview = prospect.InterviewSummary,
@@ -67,7 +69,7 @@ public sealed class ProspectEvaluationService
             if (string.IsNullOrWhiteSpace(prospect.ScoutingReport))
             {
                 var spread = GetEstimateSpread(prospect.ScoutingConfidence);
-                prospect.ScoutingReport = "Estimated OVR ${FormatRange(prospect.ScoutedOverall, spread)}; estimated potential ${FormatRange(prospect.ScoutedPotential, spread + 1)}. ${GetConfidenceLabel(prospect.ScoutingConfidence)} confidence.";
+                prospect.ScoutingReport = $"Estimated OVR {FormatRange(prospect.ScoutedOverall, spread)}; estimated potential {FormatRange(prospect.ScoutedPotential, spread + 1)}. {GetConfidenceLabel(prospect.ScoutingConfidence)} confidence.";
             }
         }
     }
@@ -87,8 +89,16 @@ public sealed class ProspectEvaluationService
         => confidence >= 80 ? 3 : confidence >= 60 ? 5 : 8;
 
     private static string FormatRange(int estimate, int spread)
-        => "${Math.Clamp(estimate - spread, 40, 99)}-${Math.Clamp(estimate + spread, 40, 99)}";
+        => $"{Math.Clamp(estimate - spread, 40, 99)}-{Math.Clamp(estimate + spread, 40, 99)}";
 
     private static string GetConfidenceLabel(int confidence)
         => confidence >= 80 ? "High" : confidence >= 60 ? "Medium" : "Low";
+
+    private static int GetPersonnelScoutingModifier(LeagueState league)
+    {
+        var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var personnelDirector = team?.Coaches?.FirstOrDefault(coach => string.Equals(coach.Role, "Director of Player Personnel", StringComparison.OrdinalIgnoreCase));
+        // Cap the visible clarity benefit; this changes only presentation confidence, never stored estimates or hidden ratings.
+        return personnelDirector == null ? 0 : Math.Clamp((personnelDirector.Overall - 65) / 4, -3, 6);
+    }
 }

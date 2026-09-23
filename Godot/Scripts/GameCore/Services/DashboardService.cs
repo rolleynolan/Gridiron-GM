@@ -146,7 +146,7 @@ public sealed class DashboardService
                     Phase = transaction.Phase,
                     Type = transaction.Type,
                     TeamName = transaction.TeamName,
-                    PlayerName = transaction.PlayerName,
+                    PlayerName = string.IsNullOrWhiteSpace(transaction.PlayerName) ? transaction.StaffName : transaction.PlayerName,
                     Details = transaction.Details,
                 })
                 .ToList(),
@@ -177,6 +177,31 @@ public sealed class DashboardService
         {
             Ok = true,
             Seasons = seasons,
+        };
+    }
+
+    public RecordBookResponse GetRecordBook()
+        => new RecordBookService(_context).GetRecordBook();
+
+    public HistoricalArchiveResponse GetHistoricalArchive()
+    {
+        var league = _context?.ActiveLeague;
+        if (league == null) return new HistoricalArchiveResponse { Error = "Historical archive is unavailable." };
+        return new HistoricalArchiveResponse
+        {
+            Ok = true,
+            RecordBook = GetRecordBook(),
+            Championships = (league.HistoricalSeasons ?? new System.Collections.Generic.List<SeasonHistoryRecord>())
+                .Where(season => season != null)
+                .OrderByDescending(season => season.SeasonYear)
+                .Select(season => new HistoricalChampionshipDto { SeasonYear = season.SeasonYear, ChampionTeamName = season.ChampionTeamName ?? "", RunnerUpTeamName = season.RunnerUpTeamName ?? "", ChampionScore = season.ChampionshipWinnerScore, RunnerUpScore = season.ChampionshipRunnerUpScore })
+                .ToList(),
+            Retirements = (league.RetirementHistory ?? new System.Collections.Generic.List<SeasonRetirementRecord>())
+                .SelectMany(season => (season?.Players ?? new System.Collections.Generic.List<PlayerRetirementRecord>()).Where(player => player != null))
+                .OrderByDescending(player => player.SeasonYear)
+                .ThenBy(player => player.PlayerName, StringComparer.OrdinalIgnoreCase)
+                .Select(player => new HistoricalRetirementDto { SeasonYear = player.SeasonYear, PlayerName = player.PlayerName ?? "", TeamName = player.TeamName ?? "", Position = player.Position ?? "", Age = player.Age, Reason = player.ReasonLabel ?? "" })
+                .ToList(),
         };
     }
 
@@ -214,6 +239,22 @@ public sealed class DashboardService
     {
         var items = new System.Collections.Generic.List<ActionItemDto>();
 
+        var pendingWaiver = (_context.ActiveLeague?.Waivers ?? new System.Collections.Generic.List<WaiverClaimState>())
+            .FirstOrDefault(waiver => waiver?.PendingConfirmation == true && string.Equals(waiver.PendingClaimTeamId, _context.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (pendingWaiver?.Player != null)
+        {
+            var pendingTeam = _context.ActiveLeague.Teams.FirstOrDefault(team => string.Equals(team.TeamId, pendingWaiver.PendingClaimTeamId, StringComparison.OrdinalIgnoreCase));
+            var conditionalRelease = pendingTeam?.Roster?.FirstOrDefault(player => string.Equals(player.PlayerId, pendingWaiver.ConditionalReleasePlayerId, StringComparison.OrdinalIgnoreCase));
+            var releaseSummary = conditionalRelease == null ? "No conditional release is attached." : $"Finalizing will release {conditionalRelease.Name} ({conditionalRelease.Position}); cancelling leaves that player on the roster.";
+            items.Add(new ActionItemDto
+            {
+                Type = "waiver_claim_confirmation",
+                Title = "Action Required: Winning Waiver Claim",
+                Description = $"The League Office awarded the pending claim for {pendingWaiver.Player.Name} ({pendingWaiver.Player.Position}). The inherited contract is {GameCoreStateHelper.FormatCapRoom(pendingWaiver.Player.Contract?.AnnualSalary ?? 0m)} annually. {releaseSummary} Finalize or cancel the opportunity before time can advance; no transfer or release has occurred yet.",
+                PrimaryAction = "Review Waiver Decision",
+            });
+        }
+
         if (roster.Ok && roster.RosterStatus != null && !roster.RosterStatus.IsValid)
         {
             items.Add(new ActionItemDto
@@ -233,6 +274,48 @@ public sealed class DashboardService
                 Title = "Depth Chart Issue",
                 Description = string.Join(" ", depthChart.DepthChartStatus.Issues),
                 PrimaryAction = "View Depth Chart",
+            });
+        }
+
+        if (depthChart.Ok && depthChart.DepthChartStatus?.IsValid == true)
+        {
+            var thinInjuryGroups = depthChart.Positions
+                .Select(position => new
+                {
+                    position.Position,
+                    position.RequiredStarters,
+                    Available = position.Players.Count(player => player.IsAvailable),
+                    Unavailable = position.Players.Count(player => !player.IsAvailable),
+                })
+                .Where(group => group.RequiredStarters > 0 && group.Available == group.RequiredStarters && group.Unavailable > 0)
+                .OrderBy(group => FootballPositionOrder.GetSortOrder(group.Position))
+                .ThenBy(group => group.Position, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (thinInjuryGroups.Count > 0)
+            {
+                items.Add(new ActionItemDto
+                {
+                    Type = "injury_depth_advisory",
+                    Title = "Injury Depth Advisory",
+                    Description = $"The roster remains legal, but injuries leave no available reserve at {string.Join(", ", thinInjuryGroups.Select(group => group.Position))}. Review availability and the saved emergency order; this advisory does not authorize a signing or depth change.",
+                    PrimaryAction = "Review Depth Chart",
+                });
+            }
+        }
+
+        var calendar = _context.ActiveLeague?.Calendar;
+        if (string.Equals(calendar?.Phase, "Regular Season", StringComparison.OrdinalIgnoreCase)
+            && calendar.PhaseWeek == 1
+            && nextGame != null
+            && string.Equals(nextGame.GameType, "regular_season", StringComparison.OrdinalIgnoreCase)
+            && nextGame.PhaseWeek == 1)
+        {
+            items.Add(new ActionItemDto
+            {
+                Type = "opening_week_readiness",
+                Title = "Opening Week Readiness",
+                Description = $"Week 1 against {opponent?.Name ?? "TBD"} is approaching. Review the active roster, player availability, and saved depth order before game day. This reminder does not change personnel or assignments.",
+                PrimaryAction = "Review Roster",
             });
         }
 
@@ -273,7 +356,7 @@ public sealed class DashboardService
                                 : "Action Required: Simulate the Wild Card round.",
                 Description = bracketAvailable
                     ? leagueChampionshipCompleted
-                        ? "Season complete. Offseason systems are not implemented yet."
+                        ? "Season complete. Continue to begin the offseason."
                         : conferenceChampionshipCompleted
                             ? "Conference Championship results are final. The League Championship is ready for native simulation."
                             : divisionalCompleted
@@ -292,7 +375,7 @@ public sealed class DashboardService
             {
                 Type = "season_complete",
                 Title = "Season complete.",
-                Description = "Season complete. Offseason systems are not implemented yet.",
+                Description = "Season complete. Continue to begin the offseason.",
                 PrimaryAction = "Continue",
             });
         }
@@ -367,17 +450,22 @@ public sealed class DashboardService
         var phaseLabel = ScheduleService.GetOffseasonPhaseLabel(phase);
         var phaseKey = ScheduleService.GetOffseasonPhaseKey(phase);
         var isRetirement = string.Equals(phaseKey, ScheduleService.RetirementPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
+        var isDraftPrep = string.Equals(phaseKey, ScheduleService.DraftPrepPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
         var seasonRetirements = RetirementService.GetSeasonRetirementRecord(league, league?.SeasonYear ?? 0);
         return new ActionItemDto
         {
             Type = phaseKey,
-            Title = phaseLabel,
-            Description = isRetirement
+            Title = isDraftPrep ? "Draft Board Review Reminder" : phaseLabel,
+            Description = isDraftPrep
+                ? "The draft begins after this preparation day. Review your private Team Draft Board, including its manual order, tiers, notes, tags, and current scouting confidence. No approval or board change is required."
+                : isRetirement
                 ? seasonRetirements?.Completed == true
                     ? $"{seasonRetirements.RetiredCount} players retired."
                     : "Retirement decisions pending."
                 : BuildOffseasonActionDescription(phaseKey),
-            PrimaryAction = isRetirement
+            PrimaryAction = isDraftPrep
+                ? "Review Team Draft Board"
+                : isRetirement
                 ? seasonRetirements?.Completed == true
                     ? "Continue to next offseason phase"
                     : "Continue to process retirements"
@@ -715,6 +803,10 @@ public sealed class DashboardService
                     LoserTeamId = result.LoserTeamId ?? "",
                     LoserTeamName = result.LoserTeamName ?? "",
                 })
+                .ToList(),
+            Awards = (record?.Awards ?? new System.Collections.Generic.List<SeasonAwardRecord>())
+                .Where(award => award != null)
+                .Select(award => new SeasonAwardDto { AwardName = award.AwardName ?? "", PlayerName = award.PlayerName ?? "", TeamName = award.TeamName ?? "", Position = award.Position ?? "", Summary = award.Summary ?? "" })
                 .ToList(),
             DraftClass = (draft?.RecapEntries ?? new System.Collections.Generic.List<DraftClassRecapEntry>())
                 .Where(entry => entry != null)

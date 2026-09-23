@@ -31,9 +31,10 @@ public sealed class RosterEvaluationService
                 var battle = battles.FirstOrDefault(entry => string.Equals(entry.WinnerPlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase));
                 var role = !available ? "Unavailable" : index >= 0 && index < starters ? "Starter" : "Backup";
                 var readiness = !available ? $"Out: {player.Injury}" : player.Fatigue >= 40 ? "Limited" : player.Fatigue >= 20 ? "Managing workload" : "Ready";
+                var evaluation = PlayerEvaluationProjectionService.Evaluate(_context.ActiveLeague, player);
                 var explanation = !available ? $"Unavailable for {player.CurrentInjury?.DaysRemaining ?? 0} day(s); depth chart promotes an available replacement."
                     : battle != null ? $"Battle winner. {battle.Explanation}"
-                    : $"{role} at {player.Position} (depth #{Math.Max(1, index + 1)}); OVR {player.Overall}, POT {player.Potential}, fatigue {player.Fatigue}.";
+                    : $"{role} at {player.Position} (depth #{Math.Max(1, index + 1)}); staff estimate {evaluation.OverallRange} OVR / {evaluation.PotentialRange} POT ({evaluation.Confidence.ToLowerInvariant()} confidence), fatigue {player.Fatigue}.";
                 return new PlayerRoleFeedbackDto { PlayerId = player.PlayerId, Name = player.Name, Position = player.Position, Role = role, Readiness = readiness, Explanation = explanation };
             }).OrderBy(player => player.Position, StringComparer.OrdinalIgnoreCase).ThenBy(player => player.Role).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase).ToList(),
         };

@@ -39,9 +39,12 @@ public sealed class SeasonRolloverService
             return false;
         }
 
+        var useShortDraftAnnouncements = league.Draft?.UseShortDraftAnnouncements == true;
+        CollegeSeasonArchiveService.EnsureArchived(league);
         ArchiveDraft(league);
         ConvertUndraftedProspects(league);
         AgePlayers(league);
+        AgeStaff(league);
         league.SeasonYear++;
         foreach (var team in league.Teams.Where(team => team != null))
         {
@@ -51,8 +54,11 @@ public sealed class SeasonRolloverService
             team.TrainingCamp = new TrainingCampState();
         }
 
-        league.Draft = new DraftState();
+        league.Draft = new DraftState { UseShortDraftAnnouncements = useShortDraftAnnouncements };
+        league.TradeMarket = new TradeMarketState();
+        league.RookieMinicamp = new RookieMinicampState();
         league.CollegeProspects = LeagueBootstrapService.CreateProspectClass(league, league.SeasonYear + 1);
+        league.CollegeUniverse = CollegeUniverseService.CreateInitial(league);
         league.Schedule = LeagueBootstrapService.BuildDeterministicSchedule(league.Teams);
         league.Results = new List<GameResult>();
         league.PlayoffBracket = new PlayoffBracket();
@@ -85,19 +91,21 @@ public sealed class SeasonRolloverService
         {
             DraftYear = league.Draft.DraftYear,
             IsCompleted = league.Draft.IsCompleted,
+            UseShortDraftAnnouncements = league.Draft.UseShortDraftAnnouncements,
             Picks = league.Draft.Picks.Where(pick => pick != null).Select(pick => new DraftPickState
             {
                 OverallPick = pick.OverallPick,
                 Round = pick.Round,
                 PickInRound = pick.PickInRound,
                 TeamId = pick.TeamId,
+                OriginalTeamId = pick.OriginalTeamId,
                 ProspectId = pick.ProspectId,
                 PlayerId = pick.PlayerId,
             }).ToList(),
             RecapEntries = league.Draft.RecapEntries.Where(entry => entry != null).Select(entry => new DraftClassRecapEntry
             {
                 OverallPick = entry.OverallPick, Round = entry.Round, PickInRound = entry.PickInRound, TeamId = entry.TeamId, TeamName = entry.TeamName, ProspectId = entry.ProspectId, PlayerId = entry.PlayerId, Name = entry.Name, Position = entry.Position, College = entry.College, Age = entry.Age,
-                ScoutedOverall = entry.ScoutedOverall, ScoutedPotential = entry.ScoutedPotential, ScoutingConfidence = entry.ScoutingConfidence, CombineScore = entry.CombineScore, ProDayScore = entry.ProDayScore, ScoutingReport = entry.ScoutingReport, Trait = entry.Trait, InterviewSummary = entry.InterviewSummary,
+                ScoutedOverall = entry.ScoutedOverall, ScoutedPotential = entry.ScoutedPotential, ScoutingConfidence = entry.ScoutingConfidence, CombineScore = entry.CombineScore, ProDayScore = entry.ProDayScore, ScoutingReport = entry.ScoutingReport, Trait = entry.Trait, InterviewSummary = entry.InterviewSummary, PublicBoardRank = entry.PublicBoardRank, PublicReaction = entry.PublicReaction,
                 RookiePlacement = entry.RookiePlacement, ContractAnnualSalary = entry.ContractAnnualSalary, ContractGuaranteedSalary = entry.ContractGuaranteedSalary, ContractYears = entry.ContractYears, ContractType = entry.ContractType,
             }).ToList(),
         });
@@ -105,28 +113,7 @@ public sealed class SeasonRolloverService
 
     private static void ConvertUndraftedProspects(LeagueState league)
     {
-        var undrafted = league.CollegeProspects
-            .Where(prospect => prospect != null
-                && prospect.DraftClassYear <= league.SeasonYear + 1
-                && string.IsNullOrWhiteSpace(prospect.DraftedByTeamId))
-            .ToList();
-        foreach (var prospect in undrafted)
-        {
-            league.FreeAgents.Add(new PlayerState
-            {
-                PlayerId = $"udfa-{league.SeasonYear}-{prospect.ProspectId}",
-                Name = prospect.Name,
-                Position = prospect.Position,
-                Overall = prospect.Overall,
-                Potential = prospect.Potential,
-                Age = prospect.Age,
-                Status = "Free Agent",
-                Morale = 50,
-                MoraleTrend = "Stable",
-                Contract = new PlayerContractState { ContractType = "Undrafted Free Agent" },
-            });
-        }
-        league.CollegeProspects = league.CollegeProspects.Except(undrafted).ToList();
+        UndraftedFreeAgentService.OpenMarket(league);
     }
 
     private static void AgePlayers(LeagueState league)
@@ -147,8 +134,17 @@ public sealed class SeasonRolloverService
                 player.CareerStats.Add(player.SeasonStats.Copy());
             player.SeasonStats = new PlayerSeasonStats();
             player.Fatigue = 0;
-            PlayerDevelopmentService.ApplyAnnualDevelopment(player);
+            var team = league.Teams.FirstOrDefault(candidate => (candidate?.Roster ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.InjuredReserve ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.PracticeSquad ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)));
+            var headCoach = team?.Coaches?.FirstOrDefault(coach => string.Equals(coach.Role, "Head Coach", StringComparison.OrdinalIgnoreCase));
+            var staffBonus = headCoach?.Overall >= 82 ? 1 : 0;
+            PlayerDevelopmentService.ApplyAnnualDevelopment(player, staffBonus, league.SeasonYear);
             player.Age++;
         }
+    }
+
+    private static void AgeStaff(LeagueState league)
+    {
+        foreach (var coach in league.Teams.SelectMany(team => team?.Coaches ?? Enumerable.Empty<CoachState>()).Concat(league.AvailableCoaches ?? Enumerable.Empty<CoachState>()).Where(coach => coach != null).GroupBy(coach => coach.CoachId, StringComparer.OrdinalIgnoreCase).Select(group => group.First()))
+            coach.Age = Math.Min(90, coach.Age + 1);
     }
 }

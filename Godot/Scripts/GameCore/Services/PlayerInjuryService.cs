@@ -73,7 +73,9 @@ public static class PlayerInjuryService
             if (!(injury?.IsActive ?? false))
                 continue;
 
-            injury.DaysRemaining--;
+            var team = league.Teams.FirstOrDefault(candidate => (candidate?.Roster ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.InjuredReserve ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.PracticeSquad ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)));
+            var medicalDirector = team?.Coaches?.FirstOrDefault(coach => string.Equals(coach.Role, "Medical Director", StringComparison.OrdinalIgnoreCase));
+            injury.DaysRemaining -= medicalDirector?.Overall >= 85 ? 2 : 1;
             if (injury.DaysRemaining > 0)
                 continue;
 
