@@ -32,6 +32,7 @@ public sealed class StaffService
         var priorRole = coach.Role;
         team.Coaches.Remove(coach);
         coach.Role = "Available Staff";
+        HeadCoachAuthorityService.Normalize(coach);
         league.AvailableCoaches ??= new List<CoachState>();
         if (!league.AvailableCoaches.Any(item => SameId(item?.CoachId, coach.CoachId)))
             league.AvailableCoaches.Add(coach);
@@ -56,6 +57,7 @@ public sealed class StaffService
 
         league.AvailableCoaches.Remove(coach);
         coach.Role = role.Trim();
+        HeadCoachAuthorityService.Normalize(coach);
         coach.TenureStartSeason = league.SeasonYear;
         team.Coaches ??= new List<CoachState>();
         team.Coaches.Add(coach);
@@ -94,7 +96,7 @@ public sealed class StaffService
             {
                 var candidate = (league.AvailableCoaches ?? new List<CoachState>()).OrderByDescending(coach => coach.Overall).ThenBy(coach => coach.CoachId, StringComparer.OrdinalIgnoreCase).FirstOrDefault();
                 if (candidate == null) break;
-                league.AvailableCoaches.Remove(candidate); candidate.Role = role; candidate.TenureStartSeason = league.SeasonYear; team.Coaches.Add(candidate);
+                league.AvailableCoaches.Remove(candidate); candidate.Role = role; HeadCoachAuthorityService.Normalize(candidate); candidate.TenureStartSeason = league.SeasonYear; team.Coaches.Add(candidate);
                 Record(league, "staff_hired", team, candidate, $"CPU replacement hired as {role} after a staff retirement."); changed++;
             }
         }

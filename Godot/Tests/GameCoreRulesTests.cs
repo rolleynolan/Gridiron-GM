@@ -282,6 +282,150 @@ public sealed class GameCoreRulesTests
         Assert.True(report.ProjectedCollegeSeason.ElapsedMilliseconds > 0);
     }
 
+    [Fact]
+    public void HeadCoachAuthorityAcceptsOnlyCanonicalHeadCoachDomains()
+    {
+        var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };
+
+        var accepted = HeadCoachAuthorityService.TryBuildAgreement(
+            candidate,
+            "Head Coach",
+            new[]
+            {
+                HeadCoachAuthorityService.DefensivePlayCalling,
+                HeadCoachAuthorityService.OffensivePlayCalling,
+                HeadCoachAuthorityService.DefensivePlayCalling,
+            },
+            out var agreement,
+            out var error);
+
+        Assert.True(accepted, error);
+        Assert.Equal(
+            new[] { HeadCoachAuthorityService.OffensivePlayCalling, HeadCoachAuthorityService.DefensivePlayCalling },
+            agreement.ControlledDomains);
+        Assert.DoesNotContain("personnel_packages", HeadCoachAuthorityService.Domains);
+        Assert.DoesNotContain("roster_transactions", HeadCoachAuthorityService.Domains);
+    }
+
+    [Fact]
+    public void LowerLevelCoachCannotReceiveNegotiatedAuthority()
+    {
+        var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };
+
+        var accepted = HeadCoachAuthorityService.TryBuildAgreement(
+            candidate,
+            "Offensive Coordinator",
+            new[] { HeadCoachAuthorityService.OffensivePlayCalling },
+            out var agreement,
+            out var error);
+
+        Assert.False(accepted);
+        Assert.Empty(agreement.ControlledDomains);
+        Assert.Contains("Only a Head Coach", error);
+    }
+
+    [Fact]
+    public void AuthorityOwnershipFollowsActiveHeadCoachAgreement()
+    {
+        var team = new TeamState
+        {
+            TeamId = "authority-team",
+            Coaches = new List<CoachState>
+            {
+                new()
+                {
+                    CoachId = "head-coach",
+                    Role = "Head Coach",
+                    Authority = new HeadCoachAuthorityState
+                    {
+                        ControlledDomains = new List<string> { HeadCoachAuthorityService.OverallGameManagement },
+                    },
+                },
+                new()
+                {
+                    CoachId = "coordinator",
+                    Role = "Offensive Coordinator",
+                    Authority = new HeadCoachAuthorityState
+                    {
+                        ControlledDomains = new List<string> { HeadCoachAuthorityService.OffensivePlayCalling },
+                    },
+                },
+            },
+        };
+
+        HeadCoachAuthorityService.Normalize(team.Coaches[1]);
+
+        Assert.True(HeadCoachAuthorityService.IsHeadCoachControlled(team, HeadCoachAuthorityService.OverallGameManagement));
+        Assert.False(HeadCoachAuthorityService.IsHeadCoachControlled(team, HeadCoachAuthorityService.OffensivePlayCalling));
+        Assert.Empty(team.Coaches[1].Authority.ControlledDomains);
+    }
+
+    [Fact]
+    public void HeadCoachAuthoritySurvivesSaveLoadAndLowerStaffAuthorityIsCleared()
+    {
+        var context = Bootstrap();
+        var team = context.ActiveLeague.Teams[0];
+        var headCoach = team.Coaches.First(coach => coach.Role == "Head Coach");
+        var coordinator = team.Coaches.First(coach => coach.Role == "Offensive Coordinator");
+        headCoach.Authority.ControlledDomains.Add(HeadCoachAuthorityService.OffensivePlaybook);
+        coordinator.Authority.ControlledDomains.Add(HeadCoachAuthorityService.OffensivePlayCalling);
+        var saveName = $"authority_test_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+
+        try
+        {
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            var loadedTeam = loaded.League.Teams.First(candidate => candidate.TeamId == team.TeamId);
+            var loadedHeadCoach = loadedTeam.Coaches.First(coach => coach.Role == "Head Coach");
+            var loadedCoordinator = loadedTeam.Coaches.First(coach => coach.Role == "Offensive Coordinator");
+            Assert.Contains(HeadCoachAuthorityService.OffensivePlaybook, loadedHeadCoach.Authority.ControlledDomains);
+            Assert.Empty(loadedCoordinator.Authority.ControlledDomains);
+            Assert.Equal(LeagueState.CurrentSaveVersion, loaded.League.SaveVersion);
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
+    }
+
+    [Fact]
+    public void ReleasingHeadCoachClearsExpiredAuthorityAgreement()
+    {
+        var context = Bootstrap();
+        context.ActiveLeague.Calendar.Phase = ScheduleService.StaffCarouselPendingPhase;
+        var team = context.ActiveLeague.Teams.First(candidate => candidate.TeamId == context.ActiveLeague.UserTeamId);
+        var headCoach = team.Coaches.First(coach => coach.Role == "Head Coach");
+        headCoach.Authority.ControlledDomains.Add(HeadCoachAuthorityService.CoordinatorStaffing);
+
+        var result = new StaffService(context).ReleaseCoach(team.TeamId, headCoach.CoachId);
+
+        Assert.True(result.Ok, result.Message);
+        Assert.Equal("Available Staff", headCoach.Role);
+        Assert.Empty(headCoach.Authority.ControlledDomains);
+        Assert.Contains(headCoach, context.ActiveLeague.AvailableCoaches);
+    }
+
+    [Fact]
+    public void HiringLowerLevelCoachCannotCarryAuthorityIntoRole()
+    {
+        var context = Bootstrap();
+        context.ActiveLeague.Calendar.Phase = ScheduleService.StaffCarouselPendingPhase;
+        var team = context.ActiveLeague.Teams.First(candidate => candidate.TeamId == context.ActiveLeague.UserTeamId);
+        var current = team.Coaches.First(coach => coach.Role == "Offensive Coordinator");
+        var staff = new StaffService(context);
+        Assert.True(staff.ReleaseCoach(team.TeamId, current.CoachId).Ok);
+        var candidate = context.ActiveLeague.AvailableCoaches.First(coach => coach.CoachId != current.CoachId);
+        candidate.Authority.ControlledDomains.Add(HeadCoachAuthorityService.OffensivePlayCalling);
+
+        var result = staff.HireCoach(team.TeamId, "Offensive Coordinator", candidate.CoachId);
+
+        Assert.True(result.Ok, result.Message);
+        Assert.Equal("Offensive Coordinator", candidate.Role);
+        Assert.Empty(candidate.Authority.ControlledDomains);
+    }
+
     private static LeagueState LeagueInPhase(string phase)
         => new()
         {

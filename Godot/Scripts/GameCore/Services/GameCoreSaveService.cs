@@ -857,6 +857,7 @@ public sealed class GameCoreSaveService
         coach.Overall = Math.Clamp(coach.Overall, 1, 99);
         coach.Age = Math.Clamp(coach.Age, 20, 90);
         coach.TenureStartSeason = Math.Max(0, coach.TenureStartSeason);
+        HeadCoachAuthorityService.Normalize(coach);
     }
 
     private static void NormalizeDraftPickOwnership(DraftState draft)

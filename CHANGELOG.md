@@ -82,6 +82,8 @@ All notable project changes are recorded here.
 - Extracted smoke/benchmark command handling into a focused dashboard partial and moved playoff and benchmark behavior into non-UI services.
 - Completed the native-only dashboard cleanup by deleting the final endpoint calls, timeout/error helpers, HTTP response parsers, and unreachable backend branches. Team selection, depth-chart changes, continue/sim-until, game simulation, completed-result loading, and box-score selection now execute only through GameCore services.
 - Expanded the game-day partial to own selected-game simulation, current matchup presentation, completed-game loading, and result selection, reducing the main dashboard controller by roughly another thousand lines.
+- Corrected the multi-team wildcard head-to-head sweep criterion so one club sweeping every tied opponent wins the step and one club losing to every tied opponent is eliminated before the procedure restarts. Legacy results without game IDs also remain distinct during tiebreak evaluation.
+- Added the persisted Head Coach authority foundation with the twelve approved domains, Head-Coach-only validation, canonical ownership queries, safe legacy defaults, lower-staff cleanup, expired-agreement cleanup on release or reassignment, and save/load coverage. The Staff profile now reports the current GM/Head Coach authority split while negotiation economics and demand generation remain intentionally deferred.
 
 ### Notes
 

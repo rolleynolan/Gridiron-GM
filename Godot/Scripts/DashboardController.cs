@@ -6588,9 +6588,7 @@ public partial class DashboardController : Control
         _selectedStaffRole = row.Role; _selectedStaffCoachId = row.CoachId;
         UpdateStaffManagementControls();
         _staffDetailHeader.Text = $"{row.Role} · {row.Member}";
-        var strategyNote = row.Role is "Head Coach" or "Offensive Coordinator" or "Defensive Coordinator" or "Special Teams Coordinator"
-            ? "\n\nStrategy, gameplan, and coaching style: unavailable because these staff systems are not modeled."
-            : string.Empty;
+        var authorityNote = ResolveHeadCoachAuthoritySummary(row);
         var staffEffect = row.Role switch
         {
             "Director of Player Personnel" => ResolvePersonnelStaffEffect(row),
@@ -6600,8 +6598,28 @@ public partial class DashboardController : Control
             "Offensive Coordinator" or "Defensive Coordinator" => "Paired coordinator strategy can shift simulated team strength by at most 1 point; ratings, fatigue, injuries, and randomness remain primary.",
             _ => "No gameplay effect is modeled for this role yet.",
         };
-        _staffDetailBody.Text = $"Role: {row.Role}\nAssigned staff member: {row.Member}\nAge: {row.Age}\nCurrent-role aptitude: {row.Aptitude}\nTendency: {row.Tendency}\n\nCurrent effect: {staffEffect}\n\nStaff changes are available only during the Staff Carousel phase. Staff contracts, strategy, and broader effects are not modeled.{strategyNote}";
+        _staffDetailBody.Text = $"Role: {row.Role}\nAssigned staff member: {row.Member}\nAge: {row.Age}\nCurrent-role aptitude: {row.Aptitude}\nTendency: {row.Tendency}\n\nCurrent effect: {staffEffect}{authorityNote}\n\nStaff changes are available only during the Staff Carousel phase. Head Coach authority terms are changed only through a new-hire or extension negotiation; contract negotiation is not yet playable.";
         _staffDetailDialog?.PopupCentered(new Vector2I(620, 430));
+    }
+
+    private string ResolveHeadCoachAuthoritySummary(StaffRow row)
+    {
+        if (!string.Equals(row.Role, "Head Coach", StringComparison.OrdinalIgnoreCase) || row.IsVacant)
+            return string.Empty;
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var coach = team?.Coaches?.FirstOrDefault(item => string.Equals(item.CoachId, row.CoachId, StringComparison.OrdinalIgnoreCase));
+        var controlled = HeadCoachAuthorityService.Domains
+            .Where(domain => coach?.Authority?.ControlledDomains?.Contains(domain, StringComparer.OrdinalIgnoreCase) == true)
+            .Select(HeadCoachAuthorityService.GetDisplayName)
+            .ToList();
+        var retained = HeadCoachAuthorityService.Domains
+            .Where(domain => coach?.Authority?.ControlledDomains?.Contains(domain, StringComparer.OrdinalIgnoreCase) != true)
+            .Select(HeadCoachAuthorityService.GetDisplayName)
+            .ToList();
+        var coachText = controlled.Count == 0 ? "None" : string.Join(", ", controlled);
+        var gmText = retained.Count == 0 ? "None" : string.Join(", ", retained);
+        return $"\n\nAuthority agreement\nHead Coach controls: {coachText}\nGeneral Manager retains: {gmText}";
     }
 
     private static string ResolvePersonnelStaffEffect(StaffRow row)

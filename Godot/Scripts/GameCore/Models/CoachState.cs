@@ -8,4 +8,5 @@ public sealed class CoachState
     public int Overall { get; set; }
     public int Age { get; set; }
     public int TenureStartSeason { get; set; }
+    public HeadCoachAuthorityState Authority { get; set; } = new();
 }
