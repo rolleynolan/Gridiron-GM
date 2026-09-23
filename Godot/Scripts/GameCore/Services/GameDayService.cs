@@ -461,16 +461,18 @@ public sealed class GameDayService
         if (injuries.Count == 0)
             return;
 
-        var finalIndex = result.BoxScore.PlayByPlay.FindIndex(play => play.Quarter >= 4);
-        if (finalIndex < 0)
-            finalIndex = Math.Max(0, result.BoxScore.PlayByPlay.Count - 1);
-        foreach (var injury in injuries)
+        for (var injuryIndex = 0; injuryIndex < injuries.Count; injuryIndex++)
         {
-            var priorPlay = finalIndex > 0 ? result.BoxScore.PlayByPlay[finalIndex - 1] : null;
-            result.BoxScore.PlayByPlay.Insert(finalIndex++, new GamePlayEventState
+            var injury = injuries[injuryIndex];
+            var clockSeconds = Math.Max(90, 510 - (injuryIndex * 23));
+            var insertionIndex = result.BoxScore.PlayByPlay.FindIndex(play => play.Quarter > 3 || (play.Quarter == 3 && play.ClockSeconds <= clockSeconds));
+            if (insertionIndex < 0)
+                insertionIndex = result.BoxScore.PlayByPlay.Count;
+            var priorPlay = insertionIndex > 0 ? result.BoxScore.PlayByPlay[insertionIndex - 1] : null;
+            result.BoxScore.PlayByPlay.Insert(insertionIndex, new GamePlayEventState
             {
                 Quarter = 3,
-                ClockSeconds = Math.Max(90, 510 - (finalIndex * 23)),
+                ClockSeconds = clockSeconds,
                 PossessionTeamId = injury.Team.TeamId,
                 YardLine = 50,
                 Description = $"Medical timeout: {injury.Player.Name} leaves with {injury.Player.CurrentInjury.Name}.",

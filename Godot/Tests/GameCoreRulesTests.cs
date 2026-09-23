@@ -183,6 +183,18 @@ public sealed class GameCoreRulesTests
         Assert.InRange(diagnostics.PointsPerTeamGame, 12, 40);
         Assert.InRange(diagnostics.HomeWinRate, 0.30, 0.80);
         Assert.InRange(diagnostics.LargestScoreMargin, 1, 40);
+        Assert.Contains(context.ActiveLeague.Results, result => result.BoxScore.PlayByPlay.Any(play => play.IsInjury));
+        Assert.All(context.ActiveLeague.Results, result =>
+        {
+            for (var index = 1; index < result.BoxScore.PlayByPlay.Count; index++)
+            {
+                var prior = result.BoxScore.PlayByPlay[index - 1];
+                var current = result.BoxScore.PlayByPlay[index];
+                Assert.True(
+                    current.Quarter > prior.Quarter || (current.Quarter == prior.Quarter && current.ClockSeconds <= prior.ClockSeconds),
+                    $"Game {result.GameId} timeline moved backward from Q{prior.Quarter} {prior.ClockSeconds} to Q{current.Quarter} {current.ClockSeconds}.");
+            }
+        });
     }
 
     [Fact]
