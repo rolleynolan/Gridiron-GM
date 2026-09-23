@@ -60,4 +60,52 @@ public partial class DashboardController
                 _btnGameDaySim.Disabled = false;
         }
     }
+
+
+    private async Task SimSelectedGame()
+    {
+        if (IsGameDayMessage(_selectedInboxActionItem)) { await OnInboxPrimaryActionPressed(); return; }
+        if (string.IsNullOrWhiteSpace(_selectedSimGameId)) return;
+        if (_overviewActionButton != null) _overviewActionButton.Disabled = true;
+        try
+        {
+            EnsureNativeGameCoreServices(); var response = _nativeGameDayService.SimulateCurrentUserGame(_selectedSimGameId);
+            if (response?.Ok != true) { SetPrimaryStatus(response?.Error ?? "Unable to simulate the selected game."); return; }
+            await SaveNativeAutosave("Native autosave updated."); await RefreshStateSummary(); await RefreshInbox(); await RefreshLeagueHub();
+        }
+        finally { if (_overviewActionButton != null) _overviewActionButton.Disabled = false; }
+    }
+
+    private bool OpenGameDayPopupFromDashboardData()
+    {
+        EnsureNativeGameCoreServices(); var response = _nativeGameDayService.GetCurrentGameDayState();
+        if (response?.Ok == true && response.Game != null) { _activeGameDayGame = ConvertNativeGameDayState(response.Game); return OpenGameDayPopup(_activeGameDayGame); }
+        _activeGameDayGame = _dashboardNextGame?.Duplicate(true) ?? new Godot.Collections.Dictionary();
+        return OpenGameDayPopup(_activeGameDayGame);
+    }
+
+    private async Task OpenCompletedScheduleGameAsync(Godot.Collections.Dictionary game)
+    {
+        var gameId = GetGameId(game);
+        if (string.IsNullOrWhiteSpace(gameId)) { SetPrimaryStatus("No game result is available."); if (_lblScheduleActionStatus != null) _lblScheduleActionStatus.Text = "No game result is available."; return; }
+        var loaded = TryShowNativeGameResult(gameId, "Game result not found.", "Loaded game result.");
+        SetPrimaryStatus(loaded ? "Viewing game recap." : "Unable to load game result.");
+        if (_lblScheduleActionStatus != null) _lblScheduleActionStatus.Text = loaded ? "Completed game loaded." : "Unable to load game result.";
+        await Task.CompletedTask;
+    }
+
+    private async Task OnResultSelected(long index)
+    {
+        var item = (int)index; if (item < 0 || item >= _resultsList.ItemCount) return;
+        var meta = _resultsList.GetItemMetadata(item); var gameId = ""; var resultIndex = item;
+        if (meta.VariantType == Variant.Type.Dictionary && TryGetDictionary(meta, out var metadata))
+        { if (metadata.ContainsKey("game_id")) gameId = FmtString((Variant)metadata["game_id"], ""); if (metadata.ContainsKey("index")) resultIndex = GetIntValue((Variant)metadata["index"], item); }
+        else { gameId = FmtString(meta, ""); resultIndex = GetIntValue(meta, item); }
+        if (string.IsNullOrWhiteSpace(gameId) && _resultsGames != null && resultIndex >= 0 && resultIndex < _resultsGames.Count && TryGetDictionary((Variant)_resultsGames[resultIndex], out var fallback))
+        { gameId = GetGameId(fallback); if (string.IsNullOrWhiteSpace(gameId)) { ShowBoxScoreForGame(fallback); return; } }
+        if (string.IsNullOrWhiteSpace(gameId)) { SetStateDumpText("Box score unavailable."); return; }
+        if (_gameCache.TryGetValue(gameId, out var cached)) { ShowBoxScoreForGame(cached); return; }
+        if (!TryShowNativeGameResult(gameId, "Unable to load game result.", "Loaded game result.")) SetStateDumpText("Box score unavailable.");
+        await Task.CompletedTask;
+    }
 }
