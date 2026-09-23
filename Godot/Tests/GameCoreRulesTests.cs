@@ -440,6 +440,33 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void CollegeTeamProfileUsesPersistedSeasonStateWithoutHiddenRatings()
+    {
+        var context = Bootstrap();
+        var college = new CollegeUniverseService(context);
+        college.AdvanceToProWeek(2);
+        var universe = context.ActiveLeague.CollegeUniverse;
+        var team = universe.Teams.OrderBy(candidate => candidate.Ranking).First();
+
+        var before = string.Join("|", universe.Teams.Select(candidate => $"{candidate.TeamId}:{candidate.Wins}:{candidate.Losses}"));
+        var profile = new CollegeTeamProfileService(context).GetProfile(team.TeamId);
+
+        Assert.True(profile.Ok, profile.Message);
+        Assert.Equal(team.TeamId, profile.TeamId);
+        Assert.Equal(CollegeUniverseService.RegularSeasonWeeks, profile.Schedule.Count);
+        Assert.Equal(2, profile.Schedule.Count(game => game.IsFinal));
+        Assert.All(profile.Schedule.Where(game => game.IsFinal), game =>
+        {
+            Assert.NotNull(game.TeamScore);
+            Assert.NotNull(game.OpponentScore);
+            Assert.Contains(game.Result, new[] { "W", "L" });
+        });
+        Assert.NotEmpty(profile.StatLeaders);
+        Assert.All(profile.StatLeaders, player => Assert.False(string.IsNullOrWhiteSpace(player.Availability)));
+        Assert.Equal(before, string.Join("|", universe.Teams.Select(candidate => $"{candidate.TeamId}:{candidate.Wins}:{candidate.Losses}")));
+    }
+
+    [Fact]
     public void HeadCoachAuthorityAcceptsOnlyCanonicalHeadCoachDomains()
     {
         var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };
