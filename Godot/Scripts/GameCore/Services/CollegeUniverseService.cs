@@ -131,7 +131,9 @@ public sealed class CollegeUniverseService
         {
             if (prospect == null || string.IsNullOrWhiteSpace(prospect.College))
                 return "College context is unavailable.";
-            return $"COLLEGE CONTEXT\n{prospect.College} | {prospect.DeclarationStatus} | {prospect.DraftStock}";
+            var career = prospect.CollegeCareerStats ?? new List<CollegePlayerSeasonStats>();
+            var careerText = career.Count == 0 ? "No archived college statistics" : $"{career.Sum(record => record.GamesPlayed)} GP | {career.Sum(record => record.PassingYards + record.RushingYards + record.ReceivingYards):N0} YD | {career.Sum(record => record.Touchdowns)} TD";
+            return $"COLLEGE CONTEXT\n{prospect.College} | {prospect.DeclarationStatus} | {prospect.DraftStock}\nCollege career: {careerText}";
         }
         var development = player.DevelopmentHistory?.LastOrDefault(record => record != null && record.SeasonYear == universe.SeasonYear);
         var developmentContext = development == null ? "" : $"\nDevelopment: {development.Reason}";

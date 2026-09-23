@@ -235,7 +235,7 @@ public sealed class GameCoreRulesTests
         Assert.True(transactions.DraftRookie(pick, prospect, team, out var firstError), firstError);
         Assert.False(transactions.DraftRookie(pick, prospect, team, out _));
 
-        var playerId = $"rookie-{league.SeasonYear}-{prospect.ProspectId}";
+        var playerId = string.IsNullOrWhiteSpace(prospect.CollegePlayerId) ? $"rookie-{league.SeasonYear}-{prospect.ProspectId}" : prospect.CollegePlayerId;
         Assert.Equal(1, league.Teams.SelectMany(candidate => candidate.Roster).Count(player => player.PlayerId == playerId));
         Assert.Equal(team.TeamId, prospect.DraftedByTeamId);
     }
@@ -543,6 +543,30 @@ public sealed class GameCoreRulesTests
         Assert.Equal(completedGames, profilePlayer.CareerGames);
         Assert.Equal(completedYards, profilePlayer.CareerYards);
         Assert.Equal(completedTouchdowns, profilePlayer.CareerTouchdowns);
+    }
+
+    [Fact]
+    public void DeclaredCollegeCareerFollowsPlayerIntoProRoster()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+        var pipeline = new CollegeDraftPipelineService(context).FinalizeCurrentDraftClass();
+        Assert.True(pipeline.DeclaredCount > 0);
+        var prospect = league.CollegeProspects.First(candidate => candidate.CollegeCareerStats.Count > 0 && string.IsNullOrWhiteSpace(candidate.DraftedByTeamId));
+        var expectedGames = prospect.CollegeCareerStats.Sum(stats => stats.GamesPlayed);
+        league.Calendar.Phase = ScheduleService.DraftPendingPhase;
+        new DraftService(context).PrepareDraftBoard();
+        var pick = league.Draft.Picks.First(candidate => string.IsNullOrWhiteSpace(candidate.ProspectId));
+        var team = league.Teams.First(candidate => candidate.TeamId == pick.TeamId);
+
+        Assert.True(new TransactionService(context).DraftRookie(pick, prospect, team, out var error), error);
+        var rookie = team.Roster.Single(player => player.PlayerId == prospect.CollegePlayerId);
+
+        Assert.Equal(prospect.CollegePlayerId, rookie.CollegePlayerId);
+        Assert.Equal(prospect.College, rookie.College);
+        Assert.Equal(expectedGames, rookie.CollegeCareerStats.Sum(stats => stats.GamesPlayed));
+        Assert.NotSame(prospect.CollegeCareerStats, rookie.CollegeCareerStats);
     }
 
     [Fact]

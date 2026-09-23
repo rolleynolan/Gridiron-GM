@@ -74,6 +74,7 @@ public sealed class CollegeDraftPipelineService
             prospect.DraftStock = player.DraftStock;
             prospect.CollegePlayerId = player.PlayerId;
             prospect.CollegeTeamId = player.TeamId;
+            prospect.CollegeCareerStats = CopyCollegeCareer(player, league.SeasonYear);
         }
 
         // A declared player leaves the college-owned player pool; the linked draft record is now authoritative.
@@ -82,6 +83,38 @@ public sealed class CollegeDraftPipelineService
         ProspectEvaluationService.EnsureEvaluations(league);
         return result;
     }
+
+    private static List<CollegePlayerSeasonStats> CopyCollegeCareer(CollegePlayerState player, int currentSeasonYear)
+    {
+        var seasons = (player.CareerStats ?? new List<CollegePlayerSeasonStats>())
+            .Where(record => record != null)
+            .Select(CopyStats)
+            .ToList();
+        if (player.GamesPlayed > 0 && seasons.All(record => record.SeasonYear != currentSeasonYear))
+            seasons.Add(new CollegePlayerSeasonStats
+            {
+                SeasonYear = currentSeasonYear,
+                TeamId = player.TeamId,
+                GamesPlayed = player.GamesPlayed,
+                PassingYards = player.PassingYards,
+                RushingYards = player.RushingYards,
+                ReceivingYards = player.ReceivingYards,
+                Touchdowns = player.Touchdowns,
+            });
+        return seasons.OrderBy(record => record.SeasonYear).ToList();
+    }
+
+    private static CollegePlayerSeasonStats CopyStats(CollegePlayerSeasonStats record)
+        => new()
+        {
+            SeasonYear = record.SeasonYear,
+            TeamId = record.TeamId,
+            GamesPlayed = record.GamesPlayed,
+            PassingYards = record.PassingYards,
+            RushingYards = record.RushingYards,
+            ReceivingYards = record.ReceivingYards,
+            Touchdowns = record.Touchdowns,
+        };
 
     private static bool ShouldDeclare(CollegePlayerState player, int seasonYear)
     {

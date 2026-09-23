@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace GridironGM.GameCore.Models;
 
 public sealed class CollegeProspectState
@@ -15,6 +17,7 @@ public sealed class CollegeProspectState
     public string DeclarationStatus { get; set; } = "Declared";
     public string DeclarationRationale { get; set; } = "";
     public string DraftStock { get; set; } = "Season outlook pending";
+    public List<CollegePlayerSeasonStats> CollegeCareerStats { get; set; } = new();
     public int ScoutedOverall { get; set; }
     public int ScoutedPotential { get; set; }
     public int ScoutingConfidence { get; set; }

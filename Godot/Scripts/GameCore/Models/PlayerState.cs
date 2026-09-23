@@ -18,6 +18,9 @@ public sealed class PlayerState
     public int Morale { get; set; } = 50;
     public string MoraleTrend { get; set; } = "Stable";
     public string Trait { get; set; } = "";
+    public string College { get; set; } = "";
+    public string CollegePlayerId { get; set; } = "";
+    public List<CollegePlayerSeasonStats> CollegeCareerStats { get; set; } = new();
     public PlayerContractState Contract { get; set; } = new();
     public PlayerSeasonStats SeasonStats { get; set; } = new();
     public List<PlayerSeasonStats> CareerStats { get; set; } = new();

@@ -258,10 +258,13 @@ public sealed class TransactionService
 
         var player = new PlayerState
         {
-            PlayerId = $"rookie-{league.SeasonYear}-{prospect.ProspectId}",
+            PlayerId = string.IsNullOrWhiteSpace(prospect.CollegePlayerId) ? $"rookie-{league.SeasonYear}-{prospect.ProspectId}" : prospect.CollegePlayerId,
             Name = prospect.Name,
             Position = prospect.Position,
             Trait = string.IsNullOrWhiteSpace(prospect.Trait) ? "Development-minded" : prospect.Trait,
+            College = prospect.College,
+            CollegePlayerId = prospect.CollegePlayerId,
+            CollegeCareerStats = CopyCollegeCareer(prospect.CollegeCareerStats),
             Overall = prospect.Overall,
             Potential = prospect.Potential,
             Age = prospect.Age,
@@ -319,6 +322,18 @@ public sealed class TransactionService
         error = "";
         return true;
     }
+
+    private static List<CollegePlayerSeasonStats> CopyCollegeCareer(IEnumerable<CollegePlayerSeasonStats> records)
+        => (records ?? Enumerable.Empty<CollegePlayerSeasonStats>()).Where(record => record != null).Select(record => new CollegePlayerSeasonStats
+        {
+            SeasonYear = record.SeasonYear,
+            TeamId = record.TeamId,
+            GamesPlayed = record.GamesPlayed,
+            PassingYards = record.PassingYards,
+            RushingYards = record.RushingYards,
+            ReceivingYards = record.ReceivingYards,
+            Touchdowns = record.Touchdowns,
+        }).ToList();
 
     private static string BuildPublicDraftReaction(TeamState team, CollegeProspectState prospect, DraftPickState pick, int publicBoardRank)
     {

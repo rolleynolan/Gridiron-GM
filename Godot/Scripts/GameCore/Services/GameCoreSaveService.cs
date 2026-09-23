@@ -615,6 +615,8 @@ public sealed class GameCoreSaveService
             prospect.DeclarationStatus = string.IsNullOrWhiteSpace(prospect.DeclarationStatus) ? "Declared" : prospect.DeclarationStatus;
             prospect.DeclarationRationale ??= "";
             prospect.DraftStock = string.IsNullOrWhiteSpace(prospect.DraftStock) ? "Season outlook pending" : prospect.DraftStock;
+            prospect.CollegeCareerStats ??= new List<CollegePlayerSeasonStats>();
+            NormalizeCollegeStatistics(prospect.CollegeCareerStats);
             prospect.DraftedByTeamId ??= "";
         }
         NormalizeCollegeUniverse(league);
@@ -893,12 +895,27 @@ public sealed class GameCoreSaveService
     private static void NormalizePlayerStatistics(PlayerState player)
     {
         player.Potential = PlayerDevelopmentService.ResolvePotential(player);
+        player.College ??= "";
+        player.CollegePlayerId ??= "";
+        player.CollegeCareerStats ??= new List<CollegePlayerSeasonStats>();
+        NormalizeCollegeStatistics(player.CollegeCareerStats);
         player.SeasonStats ??= new PlayerSeasonStats();
         player.CareerStats ??= new List<PlayerSeasonStats>();
         player.CareerStats = player.CareerStats.Where(stat => stat != null).ToList();
         player.DevelopmentHistory ??= new List<PlayerDevelopmentRecord>();
         player.DevelopmentHistory = player.DevelopmentHistory.Where(record => record != null).ToList();
         foreach (var record in player.DevelopmentHistory) { record.SeasonYear = Math.Max(0, record.SeasonYear); record.OverallBefore = Math.Clamp(record.OverallBefore, 40, 99); record.OverallAfter = Math.Clamp(record.OverallAfter, 40, 99); record.Note ??= ""; }
+    }
+
+    private static void NormalizeCollegeStatistics(List<CollegePlayerSeasonStats> records)
+    {
+        records.RemoveAll(record => record == null);
+        foreach (var stats in records)
+        {
+            stats.SeasonYear = Math.Max(0, stats.SeasonYear); stats.TeamId ??= "";
+            stats.GamesPlayed = Math.Max(0, stats.GamesPlayed); stats.PassingYards = Math.Max(0, stats.PassingYards);
+            stats.RushingYards = Math.Max(0, stats.RushingYards); stats.ReceivingYards = Math.Max(0, stats.ReceivingYards); stats.Touchdowns = Math.Max(0, stats.Touchdowns);
+        }
     }
 
     private static void NormalizePlayerInjury(PlayerState player)
