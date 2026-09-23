@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using GridironGM.GameCore.DTOs;
 using GridironGM.GameCore.Models;
 
 namespace GridironGM.GameCore.Services;
@@ -38,15 +39,87 @@ public sealed class ContractService
         return Math.Round(Math.Max(baseSalary * ageFactor * moraleFactor, currentSalary * 1.05m), 0, MidpointRounding.AwayFromZero);
     }
 
-    public ContractTransactionResult SignFreeAgent(string playerId, string teamId, ContractOffer offer)
+    public ContractTransactionResult SignFreeAgent(string playerId, string teamId, ContractOffer offer, string transactionRationale = null)
     {
-        return new TransactionService(_context).SignFreeAgent(playerId, teamId, offer, this);
+        return new TransactionService(_context).SignFreeAgent(playerId, teamId, offer, this, transactionRationale);
     }
 
     public ContractTransactionResult ReleasePlayer(string playerId, string teamId = null)
     {
         return new TransactionService(_context).ReleasePlayer(playerId, teamId, this);
     }
+
+    public ContractTransactionResult ReleasePlayers(System.Collections.Generic.IEnumerable<string> playerIds, string teamId = null)
+    {
+        return new TransactionService(_context).ReleasePlayers(playerIds, teamId, this);
+    }
+
+    public PlayerReleasePreviewDto PreviewRelease(string playerId, string teamId = null)
+    {
+        var league = _context.ActiveLeague;
+        if (league == null) return new PlayerReleasePreviewDto { Error = "No active league loaded." };
+        var resolvedTeamId = string.IsNullOrWhiteSpace(teamId) ? league.UserTeamId : teamId;
+        var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, resolvedTeamId, StringComparison.OrdinalIgnoreCase));
+        var player = team?.Roster?.FirstOrDefault(candidate => string.Equals(candidate?.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
+        if (team == null || player == null) return new PlayerReleasePreviewDto { Error = "Team or rostered player was not found." };
+        if (!ContractPhaseRules.CanManageRoster(league, out var phaseError)) return new PlayerReleasePreviewDto { Error = phaseError };
+
+        var annualSalary = Math.Max(0m, player.Contract?.AnnualSalary ?? 0m);
+        var payrollBefore = GetCommittedSalary(team);
+        var capRoomBefore = GetCapRoom(team);
+        return new PlayerReleasePreviewDto
+        {
+            Ok = true,
+            PlayerId = player.PlayerId,
+            PlayerName = player.Name,
+            Position = player.Position,
+            ContractType = player.Contract?.ContractType ?? "Standard",
+            YearsRemaining = Math.Max(0, player.Contract?.YearsRemaining ?? 0),
+            AnnualSalary = annualSalary,
+            GuaranteedSalary = Math.Max(0m, player.Contract?.GuaranteedSalary ?? 0m),
+            PayrollBefore = payrollBefore,
+            PayrollAfter = Math.Max(0m, payrollBefore - annualSalary),
+            CapRoomBefore = capRoomBefore,
+            CapRoomAfter = Math.Min(league.SalaryCap, capRoomBefore + annualSalary),
+            RosterCountBefore = team.Roster.Count,
+            RosterCountAfter = Math.Max(0, team.Roster.Count - 1),
+        };
+    }
+
+    public PracticeSquadActiveSigningPreviewDto PreviewPracticeSquadActiveSigning(string playerId, string teamId = null)
+    {
+        var league = _context.ActiveLeague;
+        if (league == null) return new PracticeSquadActiveSigningPreviewDto { Error = "No active league loaded." };
+        var resolvedTeamId = string.IsNullOrWhiteSpace(teamId) ? league.UserTeamId : teamId;
+        var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, resolvedTeamId, StringComparison.OrdinalIgnoreCase));
+        var player = team?.PracticeSquad?.FirstOrDefault(candidate => string.Equals(candidate?.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
+        if (team == null || player == null) return new PracticeSquadActiveSigningPreviewDto { Error = "Team or practice-squad player was not found." };
+        if (!ContractPhaseRules.CanManageRoster(league, out var phaseError)) return new PracticeSquadActiveSigningPreviewDto { Error = phaseError };
+        if (team.Roster.Count >= RosterService.RosterLimit) return new PracticeSquadActiveSigningPreviewDto { Error = $"Roster is full at {RosterService.RosterLimit} players. Create an active-roster slot first." };
+
+        var currentSalary = Math.Max(0m, player.Contract?.AnnualSalary ?? 0m);
+        var activeSalary = Math.Max(TransactionService.ActiveRosterMinimumSalary, currentSalary);
+        var capBefore = GetCapRoom(team);
+        var capAfter = capBefore + currentSalary - activeSalary;
+        if (capAfter < 0m) return new PracticeSquadActiveSigningPreviewDto { Error = "The permanent active-roster contract would exceed available cap room." };
+        return new PracticeSquadActiveSigningPreviewDto
+        {
+            Ok = true,
+            PlayerId = player.PlayerId,
+            PlayerName = player.Name,
+            Position = player.Position,
+            CurrentContractType = player.Contract?.ContractType ?? "Practice Squad",
+            CurrentAnnualSalary = currentSalary,
+            NewAnnualSalary = activeSalary,
+            RosterCountBefore = team.Roster.Count,
+            RosterCountAfter = team.Roster.Count + 1,
+            CapRoomBefore = capBefore,
+            CapRoomAfter = capAfter,
+        };
+    }
+
+    public ContractTransactionResult SignPracticeSquadPlayerToActiveRoster(string playerId, string teamId = null)
+        => new TransactionService(_context).SignPracticeSquadPlayerToActiveRoster(playerId, teamId, this);
 
     public ContractTransactionResult ReSignPlayer(string playerId, string teamId, ContractOffer offer)
     {

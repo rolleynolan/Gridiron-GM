@@ -1,0 +1,156 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using GridironGM.GameCore.Models;
+
+namespace GridironGM.GameCore.Services;
+
+public sealed class CollegeUniverseService
+{
+    private static readonly (string Id, string Name, string Abbr, string Conference)[] Seeds =
+    {
+        ("nv", "North Valley", "NVU", "Northern"), ("ls", "Lakeshore State", "LSS", "Northern"),
+        ("wt", "Western Tech", "WTE", "Northern"), ("pr", "Pine Ridge", "PRU", "Northern"),
+        ("cu", "Coastal University", "COU", "Coastal"), ("ms", "Metro State", "MST", "Coastal"),
+        ("rr", "Red River", "RRU", "Coastal"), ("sc", "Summit College", "SUM", "Coastal"),
+        ("as", "Atlantic State", "AST", "Atlantic"), ("pa", "Prairie A&M", "PAM", "Atlantic"),
+        ("ca", "Canyon University", "CAN", "Atlantic"), ("gl", "Great Lakes", "GLU", "Atlantic"),
+        ("es", "Eastern State", "EST", "Frontier"), ("mv", "Mountain Valley", "MTV", "Frontier"),
+        ("sv", "Southern Valley", "SOV", "Frontier"), ("ct", "Capital Tech", "CPT", "Frontier"),
+    };
+
+    private readonly GameCoreContext _context;
+    public CollegeUniverseService(GameCoreContext context) => _context = context;
+
+    public static CollegeUniverseState CreateInitial(LeagueState league)
+    {
+        var universe = new CollegeUniverseState { SeasonYear = league.SeasonYear };
+        universe.Teams = Seeds.Select(seed => new CollegeTeamState { TeamId = seed.Id, Name = seed.Name, Abbreviation = seed.Abbr, Conference = seed.Conference }).ToList();
+        var prospects = league.CollegeProspects ?? new List<CollegeProspectState>();
+        for (var index = 0; index < prospects.Count; index++)
+        {
+            var prospect = prospects[index];
+            if (prospect == null) continue;
+            var team = universe.Teams[index % universe.Teams.Count];
+            prospect.College = team.Name;
+            prospect.CollegeTeamId = team.TeamId;
+            prospect.CollegePlayerId = prospect.ProspectId;
+            universe.Players.Add(new CollegePlayerState
+            {
+                PlayerId = prospect.ProspectId, Name = prospect.Name, TeamId = team.TeamId, Position = prospect.Position,
+                Overall = prospect.Overall, Potential = prospect.Potential, Age = prospect.Age, ClassYear = 4, DraftEligible = true,
+            });
+        }
+        // Underclassmen make the roster and standings world persist beyond only the current draft pool.
+        foreach (var team in universe.Teams)
+        for (var slot = 0; slot < 8; slot++)
+        {
+            var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{team.TeamId}-{slot}");
+            universe.Players.Add(new CollegePlayerState
+            {
+                PlayerId = $"college-{league.SeasonYear}-{team.TeamId}-{slot + 1}", Name = $"{team.Abbreviation} Prospect {slot + 1}", TeamId = team.TeamId,
+                Position = new[] { "QB", "RB", "WR", "TE", "EDGE", "LB", "CB", "S" }[slot], Overall = 58 + value % 19,
+                Potential = 70 + value % 23, Age = 19 + value % 3, ClassYear = 1 + value % 3, DraftEligible = false,
+            });
+        }
+        universe.Schedule = BuildSchedule(universe.Teams);
+        RefreshRankings(universe);
+        return universe;
+    }
+
+    public void AdvanceToProWeek(int absoluteWeek)
+    {
+        var league = _context?.ActiveLeague;
+        var universe = league?.CollegeUniverse;
+        if (universe == null || absoluteWeek <= universe.LastAdvancedAbsoluteWeek)
+            return;
+
+        for (var week = universe.LastAdvancedAbsoluteWeek + 1; week <= absoluteWeek; week++)
+        {
+            if (week > 1)
+                CollegePlayerInjuryService.RecoverOneWeek(universe, week);
+            foreach (var game in universe.Schedule.Where(game => game.ProAbsoluteWeek == week && !string.Equals(game.Status, "final", StringComparison.OrdinalIgnoreCase)).OrderBy(game => game.GameId, StringComparer.Ordinal))
+                ResolveGame(universe, game);
+        }
+        universe.LastAdvancedAbsoluteWeek = absoluteWeek;
+        RefreshRankings(universe);
+        CollegePlayerDevelopmentService.ApplyCompletedSeasonDevelopment(league);
+        CollegePostseasonService.EnsureCompleted(universe);
+        CollegeAwardsService.EnsureAwards(universe);
+    }
+
+    public string GetCompactProspectContext(string prospectId)
+    {
+        var league = _context?.ActiveLeague;
+        var prospect = league?.CollegeProspects?.FirstOrDefault(item => string.Equals(item?.ProspectId, prospectId, StringComparison.OrdinalIgnoreCase));
+        var universe = league?.CollegeUniverse;
+        var player = universe?.Players?.FirstOrDefault(item => string.Equals(item?.PlayerId, prospect?.CollegePlayerId ?? prospectId, StringComparison.OrdinalIgnoreCase));
+        var team = universe?.Teams?.FirstOrDefault(item => string.Equals(item?.TeamId, prospect?.CollegeTeamId, StringComparison.OrdinalIgnoreCase));
+        if (player == null || team == null)
+        {
+            if (prospect == null || string.IsNullOrWhiteSpace(prospect.College))
+                return "College context is unavailable.";
+            return $"COLLEGE CONTEXT\n{prospect.College} | {prospect.DeclarationStatus} | {prospect.DraftStock}";
+        }
+        var development = player.DevelopmentHistory?.LastOrDefault(record => record != null && record.SeasonYear == universe.SeasonYear);
+        var developmentContext = development == null ? "" : $"\nDevelopment: {development.Reason}";
+        var injuryContext = player.CurrentInjury?.IsActive == true ? $"\nInjury: {player.CurrentInjury.Name} · {player.CurrentInjury.WeeksRemaining} week(s) remaining" : "";
+        return $"COLLEGE CONTEXT\n#{team.Ranking} {team.Name} ({team.Wins}-{team.Losses}) | {player.ClassYear}{Suffix(player.ClassYear)} year | {player.GamesPlayed} GP | {player.Touchdowns} TD{developmentContext}{injuryContext}";
+    }
+
+    private static List<CollegeScheduledGame> BuildSchedule(IReadOnlyList<CollegeTeamState> teams)
+    {
+        var schedule = new List<CollegeScheduledGame>();
+        for (var week = 1; week <= 8; week++)
+        for (var index = 0; index < teams.Count / 2; index++)
+        {
+            var home = teams[(index + week - 1) % teams.Count];
+            var away = teams[(teams.Count - 1 - index + week - 1) % teams.Count];
+            if (home.TeamId == away.TeamId) continue;
+            schedule.Add(new CollegeScheduledGame { GameId = $"college-{week}-{index + 1}", ProAbsoluteWeek = week, HomeTeamId = home.TeamId, AwayTeamId = away.TeamId });
+        }
+        return schedule;
+    }
+
+    private static void ResolveGame(CollegeUniverseState universe, CollegeScheduledGame game)
+    {
+        var home = universe.Teams.First(team => team.TeamId == game.HomeTeamId);
+        var away = universe.Teams.First(team => team.TeamId == game.AwayTeamId);
+        var homeScore = Score(universe, home.TeamId, game.ProAbsoluteWeek, 3);
+        var awayScore = Score(universe, away.TeamId, game.ProAbsoluteWeek, 0);
+        if (homeScore == awayScore) homeScore++;
+        var winnerId = homeScore > awayScore ? home.TeamId : away.TeamId;
+        if (winnerId == home.TeamId) { home.Wins++; away.Losses++; } else { away.Wins++; home.Losses++; }
+        universe.Results.Add(new CollegeGameResult { GameId = game.GameId, ProAbsoluteWeek = game.ProAbsoluteWeek, HomeTeamId = home.TeamId, AwayTeamId = away.TeamId, HomeScore = homeScore, AwayScore = awayScore, WinnerTeamId = winnerId });
+        game.Status = "final";
+        ApplyPlayerStats(universe, home.TeamId, homeScore, game.ProAbsoluteWeek);
+        ApplyPlayerStats(universe, away.TeamId, awayScore, game.ProAbsoluteWeek);
+        CollegePlayerInjuryService.ApplyDeterministicGameInjury(universe, game);
+    }
+
+    private static int Score(CollegeUniverseState universe, string teamId, int week, int bonus)
+    {
+        var strength = universe.Players.Where(player => player.TeamId == teamId && CollegePlayerInjuryService.IsAvailableForGame(player)).OrderByDescending(player => player.Overall).Take(16).DefaultIfEmpty().Average(player => player?.Overall ?? 60);
+        return Math.Clamp((int)Math.Round((strength - 54) * .62) + StableValue($"{teamId}-{week}") % 17 + bonus, 10, 55);
+    }
+
+    private static void ApplyPlayerStats(CollegeUniverseState universe, string teamId, int score, int week)
+    {
+        foreach (var player in universe.Players.Where(player => player.TeamId == teamId && CollegePlayerInjuryService.IsAvailableForGame(player)))
+        {
+            var value = StableValue($"{player.PlayerId}-{week}"); player.GamesPlayed++;
+            if (player.Position == "QB") player.PassingYards += 110 + value % 190;
+            if (player.Position == "RB") player.RushingYards += 25 + value % 95;
+            if (player.Position == "WR" || player.Position == "TE") player.ReceivingYards += 20 + value % 100;
+            if (new[] { "QB", "RB", "WR", "TE" }.Contains(player.Position)) player.Touchdowns += (value + score) % 4 == 0 ? 1 : 0;
+        }
+    }
+
+    private static void RefreshRankings(CollegeUniverseState universe)
+    {
+        var ordered = universe.Teams.OrderByDescending(team => team.Wins).ThenBy(team => team.Losses).ThenByDescending(team => universe.Players.Where(player => player.TeamId == team.TeamId).Average(player => player.Overall)).ThenBy(team => team.Name, StringComparer.Ordinal).ToList();
+        for (var index = 0; index < ordered.Count; index++) ordered[index].Ranking = index + 1;
+    }
+    private static int StableValue(string value) { unchecked { uint hash = 2166136261; foreach (var character in value) hash = (hash ^ character) * 16777619; return (int)(hash & 0x7fffffff); } }
+    private static string Suffix(int year) => year % 10 == 1 && year != 11 ? "st" : year % 10 == 2 && year != 12 ? "nd" : year % 10 == 3 && year != 13 ? "rd" : "th";
+}

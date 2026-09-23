@@ -23,4 +23,6 @@ public sealed class PlayerRetirementRecord
     public int Overall { get; set; }
     public string ReasonLabel { get; set; } = "";
     public string RetiredDuringPhase { get; set; } = "";
+    public PlayerSeasonStats CurrentSeasonStats { get; set; } = new();
+    public List<PlayerSeasonStats> CareerStats { get; set; } = new();
 }

@@ -83,13 +83,21 @@ public sealed class RosterService
                 .ThenBy(player => player.Position, StringComparer.OrdinalIgnoreCase)
                 .ThenByDescending(player => player.Overall)
                 .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(player => new PlayerRowDto
+                .Select(player =>
                 {
+                    var evaluation = PlayerEvaluationProjectionService.Evaluate(league, player);
+                    return new PlayerRowDto
+                    {
                     PlayerId = player.PlayerId,
                     Name = player.Name,
                     Position = player.Position,
                     Overall = player.Overall,
                     Potential = player.Potential,
+                    EstimatedOverall = evaluation.EstimatedOverall,
+                    EstimatedPotential = evaluation.EstimatedPotential,
+                    EstimatedOverallRange = evaluation.OverallRange,
+                    EstimatedPotentialRange = evaluation.PotentialRange,
+                    ScoutingConfidence = evaluation.Confidence,
                     Age = player.Age,
                     Fatigue = player.Fatigue,
                     Status = player.Status,
@@ -97,6 +105,22 @@ public sealed class RosterService
                     InjuryDaysRemaining = player.CurrentInjury?.DaysRemaining ?? 0,
                     IsAvailable = PlayerInjuryService.IsAvailableForGame(player),
                     DepthRole = roles.TryGetValue(player.PlayerId, out var role) ? role : "Depth",
+                    ContractSummary = player.Contract == null || player.Contract.AnnualSalary <= 0m
+                        ? "Unavailable"
+                        : $"${player.Contract.AnnualSalary / 1_000_000m:0.00}M · {player.Contract.YearsRemaining} yr",
+                    AnnualSalary = player.Contract?.AnnualSalary ?? 0m,
+                    ContractYearsRemaining = player.Contract?.YearsRemaining ?? 0,
+                    Morale = player.Morale,
+                    Trait = player.Trait,
+                    MoraleTrend = player.MoraleTrend ?? "Unavailable",
+                    GamesPlayed = player.SeasonStats?.GamesPlayed ?? 0,
+                    PassingYards = player.SeasonStats?.PassingYards ?? 0,
+                    RushingYards = player.SeasonStats?.RushingYards ?? 0,
+                    ReceivingYards = player.SeasonStats?.ReceivingYards ?? 0,
+                    Tackles = player.SeasonStats?.Tackles ?? 0,
+                    Sacks = player.SeasonStats?.Sacks ?? 0,
+                    Interceptions = player.SeasonStats?.Interceptions ?? 0,
+                    };
                 })
                 .ToList(),
         };

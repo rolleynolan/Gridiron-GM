@@ -48,6 +48,17 @@ public static class ContractPhaseRules
         return status.CanSignFreeAgents;
     }
 
+    public static bool CanSignFreeAgent(LeagueState league, PlayerState player, out string error)
+    {
+        if (string.Equals(league?.Calendar?.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase))
+        {
+            var allowed = UndraftedFreeAgentService.IsUndraftedRookie(player);
+            error = allowed ? "" : "During rookie signing, only undrafted rookies may receive contracts.";
+            return allowed;
+        }
+        return CanSignFreeAgents(league, out error);
+    }
+
     public static bool CanOfferExtensions(LeagueState league, out string error)
     {
         var status = GetStatus(league);
@@ -67,6 +78,16 @@ public static class ContractPhaseRules
         var status = GetStatus(league);
         error = status.CanManageRoster ? "" : status.Explanation;
         return status.CanManageRoster;
+    }
+
+    public static bool CanProposeTrades(LeagueState league, out string error)
+    {
+        var phase = league?.Calendar?.Phase ?? "";
+        var allowed = string.Equals(phase, ScheduleService.FreeAgencyPendingPhase, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(phase, ScheduleService.DraftPrepPendingPhase, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase);
+        error = allowed ? "" : "Trades are available only during free agency, draft preparation, and the live draft.";
+        return allowed;
     }
 
     private static bool IsRosterLocked(string phase)

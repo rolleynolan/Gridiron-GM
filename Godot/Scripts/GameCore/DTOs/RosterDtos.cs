@@ -38,6 +38,11 @@ public sealed class PlayerRowDto
     public string Position { get; set; } = "";
     public int Overall { get; set; }
     public int Potential { get; set; }
+    public int EstimatedOverall { get; set; }
+    public int EstimatedPotential { get; set; }
+    public string EstimatedOverallRange { get; set; } = "";
+    public string EstimatedPotentialRange { get; set; } = "";
+    public string ScoutingConfidence { get; set; } = "Low";
     public int Age { get; set; }
     public int Fatigue { get; set; }
     public string Status { get; set; } = "";
@@ -45,4 +50,17 @@ public sealed class PlayerRowDto
     public int InjuryDaysRemaining { get; set; }
     public bool IsAvailable { get; set; }
     public string DepthRole { get; set; } = "";
+    public string ContractSummary { get; set; } = "";
+    public decimal AnnualSalary { get; set; }
+    public int ContractYearsRemaining { get; set; }
+    public string MoraleTrend { get; set; } = "";
+    public int Morale { get; set; }
+    public string Trait { get; set; } = "";
+    public int GamesPlayed { get; set; }
+    public int PassingYards { get; set; }
+    public int RushingYards { get; set; }
+    public int ReceivingYards { get; set; }
+    public int Tackles { get; set; }
+    public int Sacks { get; set; }
+    public int Interceptions { get; set; }
 }

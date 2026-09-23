@@ -7,4 +7,5 @@ public sealed class CoachState
     public string Role { get; set; } = "";
     public int Overall { get; set; }
     public int Age { get; set; }
+    public int TenureStartSeason { get; set; }
 }

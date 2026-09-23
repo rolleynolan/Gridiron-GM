@@ -10,6 +10,7 @@ namespace GridironGM.GameCore.Services;
 
 public sealed class LeagueBootstrapService
 {
+    private static readonly string[] PlayerTraits = { "Team-first", "Competitive", "Steady professional", "High-motor", "Development-minded", "Resilient" };
     public const int PreseasonWeeks = 3;
     public const int PreseasonByeWeeks = 1;
     public const int RegularSeasonWeeks = 18;
@@ -20,7 +21,7 @@ public sealed class LeagueBootstrapService
     public const int RegularSeasonGamesPerTeam = 17;
     public const int RegularSeasonGameCount = (TeamCount * RegularSeasonGamesPerTeam) / 2;
     public const int ExpectedScheduleGameCount = (PreseasonWeeks * PreseasonGamesPerWeek) + RegularSeasonGameCount;
-    public const int CoachesPerTeam = 5;
+    public const int CoachesPerTeam = 7;
     public const int StartingProspectCount = 320;
 
     private static readonly (string Position, int Count, int BaseOverall)[] RosterPlan =
@@ -43,7 +44,7 @@ public sealed class LeagueBootstrapService
         ("P", 1, 68),
     };
 
-    private static readonly string[] CoachRoles = { "Head Coach", "Offensive Coordinator", "Defensive Coordinator", "Special Teams Coordinator", "Director of Player Personnel" };
+    private static readonly string[] CoachRoles = { "Head Coach", "Offensive Coordinator", "Defensive Coordinator", "Special Teams Coordinator", "Director of Player Personnel", "Medical Director", "Strength & Conditioning Coach" };
     private static readonly string[] Colleges = { "North Valley", "Lakeshore State", "Western Tech", "Coastal University", "Pine Ridge", "Metro State", "Red River", "Summit College", "Atlantic State", "Prairie A&M", "Canyon University", "Great Lakes" };
     private static readonly (string Position, int BaseOverall)[] ProspectPlan =
     {
@@ -70,7 +71,7 @@ public sealed class LeagueBootstrapService
         new("den", "Denver Summit", "DEN", "West", "Atlas", 17_200_000m, 53),
         new("lv", "Las Vegas Night", "LVG", "West", "Atlas", 20_100_000m, 57),
         new("sea", "Seattle Evergreen", "SEA", "West", "Atlas", 15_900_000m, 61),
-        new("por", "Portland Pines", "POR", "West", "Atlas", 9_950_000m, 65),
+        new("por", "Portland Stags", "POR", "West", "Atlas", 9_950_000m, 65),
         new("la", "Los Angeles Gold", "LAG", "Pacific", "Nova", 21_000_000m, 69),
         new("sf", "San Francisco Redwoods", "SFR", "Pacific", "Nova", 22_750_000m, 73),
         new("sd", "San Diego Breakers", "SDG", "Pacific", "Nova", 11_250_000m, 77),
@@ -79,7 +80,7 @@ public sealed class LeagueBootstrapService
         new("kc", "Kansas City Crown", "KCC", "Central", "Nova", 18_400_000m, 89),
         new("okc", "Oklahoma Storm", "OKC", "Central", "Nova", 7_950_000m, 93),
         new("oma", "Omaha Plainsmen", "OMA", "Central", "Nova", 6_700_000m, 97),
-        new("mia", "Miami Current", "MIA", "Coastal", "Nova", 14_900_000m, 101),
+        new("mia", "Miami Neon", "MIA", "Coastal", "Nova", 14_900_000m, 101),
         new("orl", "Orlando Orbit", "ORL", "Coastal", "Nova", 10_250_000m, 105),
         new("tb", "Tampa Bay Tritons", "TBT", "Coastal", "Nova", 12_800_000m, 109),
         new("jax", "Jacksonville Armada", "JAX", "Coastal", "Nova", 8_300_000m, 113),
@@ -124,6 +125,7 @@ public sealed class LeagueBootstrapService
             },
             Teams = teams,
             FreeAgents = BuildFreeAgents(world.Seed, namePools),
+            AvailableCoaches = BuildAvailableCoaches(world.Seed, namePools),
             CollegeProspects = BuildCollegeProspects(world.Seed, 2027, namePools),
             Schedule = new List<ScheduledGame>(),
             Results = new List<GameResult>(),
@@ -134,6 +136,8 @@ public sealed class LeagueBootstrapService
                 StopReason = "",
             },
         };
+
+        league.CollegeUniverse = CollegeUniverseService.CreateInitial(league);
 
         league.Schedule = BuildDeterministicSchedule(league.Teams);
         new ContractService(_context).RefreshCapRoom(league);
@@ -205,6 +209,18 @@ public sealed class LeagueBootstrapService
     {
         var seed = (league?.FranchiseMetadata?.World?.Seed ?? WorldDefinition.StandardSeed) + (ulong)Math.Max(0, draftClassYear) * 7919UL;
         return BuildCollegeProspects(seed, draftClassYear, NamePoolService.Load());
+    }
+
+    public static List<CoachState> CreateStaffMarket(ulong worldSeed)
+    {
+        try
+        {
+            return BuildAvailableCoaches(worldSeed, NamePoolService.Load());
+        }
+        catch (IOException)
+        {
+            return BuildAvailableCoaches(worldSeed, FallbackNamePools);
+        }
     }
 
     private static List<TeamState> CreateLeagueTeams(string teamSeedPath, ulong worldSeed, GeneratedNamePools namePools)
@@ -441,11 +457,39 @@ public sealed class LeagueBootstrapService
                 Role = CoachRoles[index],
                 Overall = 58 + (value % 29),
                 Age = 34 + ((value / 7) % 27),
+                TenureStartSeason = 2026,
             });
         }
 
         return coaches;
     }
+
+    private static List<CoachState> BuildAvailableCoaches(ulong worldSeed, GeneratedNamePools namePools)
+    {
+        var coaches = new List<CoachState>();
+        var seed = (int)(worldSeed % int.MaxValue);
+        for (var index = 0; index < 40; index++)
+        {
+            var value = StableValue(seed, index, 211);
+            coaches.Add(new CoachState
+            {
+                CoachId = $"available-coach-{index + 1:D3}",
+                Name = BuildName(namePools, value, StableValue(seed, index, 223)),
+                Role = "Available Staff",
+                Overall = 54 + (value % 35),
+                Age = 31 + ((value / 11) % 31),
+                TenureStartSeason = 0,
+            });
+        }
+        return coaches;
+    }
+
+    private static readonly GeneratedNamePools FallbackNamePools = new()
+    {
+        MaleFirstNames = new[] { "Alex", "Casey", "Jordan", "Morgan", "Taylor" },
+        FemaleFirstNames = new[] { "Alex", "Casey", "Jordan", "Morgan", "Taylor" },
+        LastNames = new[] { "Carter", "Hayes", "Reed", "Sutton", "Walker" },
+    };
 
     private static List<CollegeProspectState> BuildCollegeProspects(ulong worldSeed, int draftClassYear, GeneratedNamePools namePools)
     {
@@ -493,6 +537,7 @@ public sealed class LeagueBootstrapService
                 Potential = Math.Clamp(baseOverall + 7 + ((value / 7) % 16), 55, 99),
                 Age = 23 + ((value / 11) % 11),
                 Status = "Free Agent",
+                Trait = PlayerTraits[value % PlayerTraits.Length],
                 Injury = "",
                 Morale = 42 + ((value / 17) % 19),
                 MoraleTrend = "Stable",
@@ -584,6 +629,7 @@ public sealed class LeagueBootstrapService
                     Overall = overall,
                     Potential = Math.Clamp(overall + 4 + ((playerSeed / 7) % 12), 55, 99),
                     Age = age,
+                    Trait = PlayerTraits[Math.Abs(playerSeed) % PlayerTraits.Length],
                     Status = "Active",
                     Injury = string.Empty,
                 });

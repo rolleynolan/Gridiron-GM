@@ -22,3 +22,7 @@ window/stretch/mode="canvas_items"
 [dotnet]
 
 project/assembly_name="Gridiron GM"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

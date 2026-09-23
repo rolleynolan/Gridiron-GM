@@ -20,6 +20,15 @@ public static class NamePoolService
             ? Path.Combine(Directory.GetCurrentDirectory(), "Assets", "data_seed")
             : Path.GetDirectoryName(Path.GetFullPath(teamSeedPath));
 
+        // Native smoke and command-line runs start at the repository root, while Godot starts at the project root.
+        // Support both without changing the packaged runtime's resource layout.
+        if (string.IsNullOrWhiteSpace(teamSeedPath) && !Directory.Exists(directory))
+        {
+            var godotProjectDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Godot", "Assets", "data_seed");
+            if (Directory.Exists(godotProjectDirectory))
+                directory = godotProjectDirectory;
+        }
+
         if (string.IsNullOrWhiteSpace(directory))
             throw new InvalidOperationException("Unable to locate the name pool directory.");
 

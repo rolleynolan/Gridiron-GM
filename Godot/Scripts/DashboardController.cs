@@ -30,6 +30,72 @@ public partial class DashboardController : Control
     [Export]
     public bool DebugToolsVisibleByDefault { get; set; } = false;
     private Label _serverStatus;
+    private Label _shellCalendar;
+    private Label _shellTeam;
+    private Label _shellTeamContext;
+    private Label _shellRuntime;
+    private Label _shellRecord;
+    private TextureRect _shellTeamLogo;
+    private TextureRect _railTeamLogo;
+    private Button _shellInboxBadge;
+    private Button _shellAdvance;
+    private VBoxContainer _shellNavigation;
+    private VBoxContainer _teamNavigationGroup;
+    private VBoxContainer _financesNavigationGroup;
+    private VBoxContainer _leagueNavigationGroup;
+    private VBoxContainer _scoutingNavigationGroup;
+    private VBoxContainer _tradeNavigationGroup;
+    private AcceptDialog _collegeRankingsDialog;
+    private Tree _collegeRankingsTree;
+    private AcceptDialog _collegeLeadersDialog;
+    private AcceptDialog _collegePostseasonProjectionsDialog;
+    private AcceptDialog _collegeBigBoardsDialog;
+    private AcceptDialog _collegeAwardsDialog;
+    private AcceptDialog _collegeNewsDialog;
+    private VBoxContainer _leagueStatsWorkspace;
+    private OptionButton _leagueStatsCategory;
+    private OptionButton _leagueStatsMeasure;
+    private OptionButton _leagueStatsViewMode;
+    private Tree _leagueStatsTree;
+    private bool _leagueStatsWorkspaceActive;
+    private VBoxContainer _leagueScheduleWorkspace;
+    private OptionButton _leagueScheduleWeekPicker;
+    private TabContainer _leagueScheduleTabs;
+    private Tree _leagueWeekScheduleTree;
+    private Tree _leaguePlayoffTree;
+    private bool _leagueScheduleWorkspaceActive;
+    private ScrollContainer _leagueNewsWorkspace;
+    private VBoxContainer _leagueNewsGrid;
+    private readonly List<LeagueNewsStory> _leagueNewsStories = new();
+    private VBoxContainer _leaguePlayerSearchWorkspace;
+    private LineEdit _leaguePlayerSearchText;
+    private OptionButton _leaguePlayerPositionFilter;
+    private OptionButton _leaguePlayerStatusFilter;
+    private Label _leaguePlayerSearchCount;
+    private Tree _leaguePlayerSearchTree;
+    private int _leaguePlayerSearchPage;
+    private VBoxContainer _leagueHistoryWorkspace;
+    private OptionButton _leagueHistoryYearPicker;
+    private TabContainer _leagueHistoryArchiveTabs;
+    private VBoxContainer _leagueAwardsWorkspace;
+    private readonly Dictionary<int, Button> _shellPrimaryNavigation = new();
+    private Control _franchiseHome;
+    private VBoxContainer _homeStandingsBody;
+    private VBoxContainer _homeProfileBody;
+    private VBoxContainer _homeNewsBody;
+    private VBoxContainer _homeProspectsBody;
+    private VBoxContainer _homeLeadersBody;
+    private int _homeConferenceIndex;
+    private int _homeProspectPanelIndex;
+    private int _homeLeaderCategory;
+    private bool _dashboardEditMode;
+    private HBoxContainer _dashboardEditorBar;
+    private OptionButton _dashboardTilePicker;
+    private Label _dashboardEditHint;
+    private VBoxContainer _dashboardTileGrid;
+    private readonly List<string> _dashboardTileOrder = new() { "standings", "news", "profile", "prospects", "leaders" };
+    private readonly HashSet<string> _dashboardHiddenTiles = new();
+    private bool _dashboardFeaturedTileWide = true;
     private Label _calendarTitle;
     private Label _calendarText;
     private Control _mainTabs;
@@ -49,6 +115,18 @@ public partial class DashboardController : Control
     private RichTextLabel _stateDump;
     private Button _btnContinue;
     private Button _btnInbox;
+    private AcceptDialog _franchiseSettingsDialog;
+    private RichTextLabel _franchiseProfileSummary;
+    private Label _franchiseSaveStatus;
+    private CheckButton _franchiseDeveloperToggle;
+    private AcceptDialog _inboxDeskDialog;
+    private OptionButton _inboxCategoryFilter;
+    private ItemList _inboxQueueList;
+    private Label _inboxDeskCount;
+    private Label _inboxDeskSubject;
+    private Label _inboxDeskContext;
+    private RichTextLabel _inboxDeskBody;
+    private Button _inboxDeskAction;
     private Button _btnLeagueShortcut;
     private Button _btnRosterShortcut;
     private Button _btnSaveGame;
@@ -89,13 +167,58 @@ public partial class DashboardController : Control
     private Label _setupStatus;
     private List<GmProfile> _setupProfiles = new();
     private Button _btnFreeAgency;
+    private Button _btnTrades;
+    private AcceptDialog _marketDeskDialog;
+    private Label _marketDeskSummary;
+    private RichTextLabel _marketDeskHistory;
+    private Label _marketDeskStatus;
+    private AcceptDialog _tradeDialog;
+    private AcceptDialog _tradeFinderDialog;
+    private ItemList _tradeFinderAssets;
+    private Tree _tradeFinderOffers;
+    private OptionButton _tradeFinderRequestedPosition;
+    private Label _tradeFinderSelectionStatus;
+    private RichTextLabel _tradeFinderStatus;
+    private Button _tradeFinderAcceptOffer;
+    private Button _tradeFinderRejectOffer;
+    private Button _tradeFinderWithdraw;
+    private string _selectedTradeMarketOfferId = "";
+    private readonly List<string> _tradeFinderSelectedAssets = new();
+    private readonly List<string> _pendingTradeOfferAssets = new();
+    private AcceptDialog _waiversDialog;
+    private Tree _waiversTree;
+    private Label _waiversSummary;
+    private RichTextLabel _waiversStatus;
+    private Button _btnClaimWaiverMarket;
+    private OptionButton _waiverConditionalReleasePicker;
+    private string _selectedWaiverMarketPlayerId = "";
+    private AcceptDialog _leagueTransactionsDialog;
+    private OptionButton _leagueTransactionsTypeFilter;
+    private OptionButton _leagueTransactionsTeamFilter;
+    private LineEdit _leagueTransactionsPlayerSearch;
+    private Tree _leagueTransactionsTree;
+    private RichTextLabel _leagueTransactionsStatus;
+    private OptionButton _tradePartnerSelect;
+    private ItemList _tradeOfferAssets;
+    private ItemList _tradeRequestAssets;
+    private RichTextLabel _tradePartnerEvaluation;
+    private RichTextLabel _tradeRationale;
+    private Label _tradeStatus;
     private AcceptDialog _freeAgencyDialog;
     private Label _freeAgencyCapSummary;
-    private ItemList _freeAgentList;
-    private RichTextLabel _freeAgentDetail;
+    private Tree _freeAgentList;
+    private LineEdit _freeAgencySearch;
+    private OptionButton _freeAgencyPositionFilter;
+    private MenuButton _freeAgencyColumnsMenu;
+    private PopupMenu _freeAgentContextMenu;
+    private AcceptDialog _freeAgentNegotiationDialog;
+    private RichTextLabel _freeAgentNegotiationContext;
+    private int _freeAgentSortColumn;
+    private bool _freeAgentSortDescending = true;
     private SpinBox _freeAgentAnnualOffer;
     private SpinBox _freeAgentGuaranteeOffer;
     private SpinBox _freeAgentYearsOffer;
+    private OptionButton _freeAgentContractType;
     private Button _btnSubmitFreeAgentOffer;
     private Label _freeAgencyStatus;
     private string _selectedFreeAgentId = "";
@@ -104,20 +227,58 @@ public partial class DashboardController : Control
     private ItemList _waiverClaimList;
     private ItemList _practiceSquadFreeAgentList;
     private ItemList _practiceSquadList;
+    private SpinBox _practiceSquadAnnualOffer;
     private RichTextLabel _transactionHistoryText;
     private Label _rosterManagementStatus;
     private string _selectedWaiverPlayerId = "";
     private string _selectedPracticeSquadFreeAgentId = "";
     private string _selectedPracticeSquadPlayerId = "";
+    private ConfirmationDialog _practiceSquadActiveSigningDialog;
+    private RichTextLabel _practiceSquadActiveSigningDetails;
+    private string _practiceSquadActiveSigningPlayerId = "";
     private Button _btnTrainingCamp;
     private AcceptDialog _trainingCampDialog;
-    private OptionButton _trainingCampPosition;
     private Label _trainingCampStatus;
     private RichTextLabel _trainingCampReport;
     private RichTextLabel _trainingCampRoles;
+    private AcceptDialog _trainingCampWeeklyReportDialog;
+    private Label _trainingCampWeeklyReportSummary;
+    private Tree _trainingCampWeeklyPositionTree;
+    private Tree _trainingCampWeeklyBattleTree;
+    private Tree _trainingCampWeeklyHealthTree;
+    private Label _trainingCampWeeklyReportStatus;
+    private AcceptDialog _trainingCampPlayerFocusDialog;
+    private Tree _trainingCampPlayerFocusTree;
+    private LineEdit _trainingCampPlayerFocusSearch;
+    private OptionButton _trainingCampPlayerFocusPosition;
+    private Label _trainingCampPlayerFocusSummary;
+    private Label _trainingCampPlayerFocusStatus;
+    private Button _trainingCampApplyPlayerFocus;
+    private string _trainingCampSelectedFocusPlayerId = "";
+    private AcceptDialog _trainingCampPositionFocusDialog;
+    private Tree _trainingCampPositionFocusTree;
+    private Label _trainingCampPositionFocusSummary;
+    private Label _trainingCampPositionFocusStatus;
+    private Button _trainingCampApplyPositionFocus;
+    private string _trainingCampSelectedFocusPosition = "";
+    private AcceptDialog _finalCutdownDialog;
+    private Tree _finalCutdownTree;
+    private Label _finalCutdownSummary;
+    private Label _finalCutdownStatus;
+    private Button _finalCutdownConfirmCuts;
+    private ConfirmationDialog _finalCutdownBatchDialog;
+    private RichTextLabel _finalCutdownBatchDetails;
+    private readonly HashSet<string> _finalCutdownSelectedPlayerIds = new(StringComparer.OrdinalIgnoreCase);
     private Button _btnReleaseSelectedPlayer;
+    private Button _btnWaiveSelectedPlayer;
+    private Button _btnMoveSelectedPlayerToIr;
     private Button _btnOfferExtension;
     private Button _btnApplyFranchiseTag;
+    private ConfirmationDialog _releaseDialog;
+    private RichTextLabel _releaseDetails;
+    private string _releasePlayerId = "";
+    private PopupMenu _rosterContextMenu;
+    private PopupMenu _rosterContractMenu;
     private AcceptDialog _extensionDialog;
     private Label _extensionPlayerLabel;
     private SpinBox _extensionAnnualOffer;
@@ -126,20 +287,53 @@ public partial class DashboardController : Control
     private Label _extensionStatus;
     private string _extensionPlayerId = "";
     private Button _btnDraftBoard;
+    private AcceptDialog _udfaMarketDialog;
+    private Tree _udfaMarketTree;
+    private Label _udfaMarketSummary;
+    private Label _udfaMarketStatus;
+    private Button _udfaOfferContract;
+    private Button _udfaInvite;
+    private string _selectedUdfaPlayerId = "";
     private AcceptDialog _draftBoardDialog;
     private ItemList _draftProspectList;
     private RichTextLabel _draftProspectDetail;
+    private LineEdit _draftSearch;
+    private OptionButton _draftPositionFilter;
+    private ItemList _draftOrderList;
+    private ItemList _draftRecentPicks;
+    private ItemList _teamDraftBoardList;
+    private OptionButton _teamDraftBoardPositionFilter;
+    private OptionButton _teamDraftBoardConfidenceFilter;
+    private Label _teamDraftBoardFilterSummary;
+    private OptionButton _teamDraftBoardTag;
+    private LineEdit _teamDraftBoardTier;
+    private LineEdit _teamDraftBoardNote;
+    private Label _draftPickContext;
+    private Label _draftOwnedPicks;
     private Label _draftStatus;
+    private Button _btnStartDraft;
     private Button _btnMakeDraftPick;
+    private Button _btnTradeCurrentDraftPick;
+    private AcceptDialog _draftAnnouncementDialog;
+    private TextureRect _draftAnnouncementLogo;
+    private Label _draftAnnouncementKicker;
+    private Label _draftAnnouncementHeadline;
+    private RichTextLabel _draftAnnouncementBody;
+    private CheckBox _draftShortAnnouncements;
+    private readonly Queue<DraftClassRecapEntry> _pendingDraftAnnouncements = new();
+    private bool _syncingDraftAnnouncementPreference;
     private string _selectedDraftProspectId = "";
     private PopupMenu _popupColumns;
+    private Control _rosterPane;
     private Control _playerReportPanel;
+    private Label _squadWorkspaceHeader;
     private Label _lblPlayerHeader;
     private Label _lblRosterEvaluation;
     private RichTextLabel _rtlPlayerStats;
     private RichTextLabel _rtlScoutSummary;
     private RichTextLabel _rtlScoutReport;
     private Container _tagsRow;
+    private HBoxContainer _squadPlayerActions;
 
     // NEW: team/roster UI
     private ItemList _teamList;
@@ -150,16 +344,94 @@ public partial class DashboardController : Control
     private LineEdit _rosterSearch;
     private OptionButton _posFilter;
     private Button _btnClearFilters;
+    private OptionButton _rosterStatusFilter;
     private Tree _rosterTree;
     private Control _depthChartPanel;
     private Label _depthChartSummary;
     private Button _btnAutoFillDepthChart;
-    private Button _btnDepthChartMoveUp;
-    private Button _btnDepthChartMoveDown;
     private Button _btnDepthChartSetStarter;
+    private Button _btnDepthChartToggleLock;
+    private Button _btnReturnToLiveGame;
     private Label _depthChartActionStatus;
     private Label _depthChartSelectionStatus;
     private Tree _depthChartTree;
+    private DepthFieldDiagram _depthFieldDiagram;
+    private Godot.Collections.Array _depthChartPositions = new();
+    private Godot.Collections.Dictionary _depthChartPayload;
+    private LineEdit _depthChartSearch;
+    private int _depthChartUnitFilter;
+    private VBoxContainer _developmentWorkspace;
+    private Label _developmentWindowLabel;
+    private LineEdit _developmentSearch;
+    private OptionButton _developmentPositionFilter;
+    private OptionButton _developmentTrendFilter;
+    private OptionButton _developmentChangeFilter;
+    private Tree _developmentTree;
+    private readonly List<DevelopmentRow> _developmentRows = new();
+    private string _developmentSortColumn = "player";
+    private bool _developmentSortAscending = true;
+    private ScrollContainer _injuriesWorkspace;
+    private HBoxContainer _injuryPanelRow;
+    private readonly Dictionary<string, Tree> _injuryPanelTrees = new(StringComparer.OrdinalIgnoreCase);
+    private VBoxContainer _staffWorkspace;
+    private Label _staffOrganizationLabel;
+    private Tree _staffTree;
+    private readonly List<StaffRow> _staffRows = new();
+    private AcceptDialog _staffDetailDialog;
+    private Label _staffDetailHeader;
+    private RichTextLabel _staffDetailBody;
+    private OptionButton _staffMarketPicker;
+    private Button _staffChangeButton;
+    private Label _staffChangeStatus;
+    private string _selectedStaffRole = "";
+    private string _selectedStaffCoachId = "";
+    private VBoxContainer _teamHistoryWorkspace;
+    private Label _teamHistoryOrganizationLabel;
+    private TabContainer _teamHistoryTabs;
+    private Tree _teamSeasonHistoryTree;
+    private Tree _teamFinancialHistoryTree;
+    private Tree _teamDraftHistoryTree;
+    private Tree _teamTransactionHistoryTree;
+    private Tree _teamStaffHistoryTree;
+    private AcceptDialog _teamSeasonRecapDialog;
+    private Label _teamSeasonRecapHeader;
+    private RichTextLabel _teamSeasonRecapBody;
+    private readonly List<TeamHistorySeasonRow> _teamHistorySeasons = new();
+    private string _teamHistorySortColumn = "season";
+    private bool _teamHistorySortAscending;
+    private ScrollContainer _teamStandingsWorkspace;
+    private HBoxContainer _teamStandingsPanels;
+    private Label _teamStandingsContext;
+    private Tree _teamDivisionStandingsTree;
+    private Tree _teamConferencePlayoffTree;
+    private VBoxContainer _teamStatsWorkspace;
+    private OptionButton _teamStatsSeasonFilter;
+    private OptionButton _teamStatsComparisonFilter;
+    private HBoxContainer _teamStatsEditorBar;
+    private OptionButton _teamStatsTilePicker;
+    private VBoxContainer _teamStatsGrid;
+    private Label _teamStatsEditHint;
+    private bool _teamStatsEditMode;
+    private bool _teamStatsViewActive;
+    private VBoxContainer _teamFinancesWorkspace;
+    private bool _teamFinancesViewActive;
+    private VBoxContainer _contractsWorkspace;
+    private Tree _contractsTree;
+    private bool _contractsViewActive;
+    private string _contractsSortColumn = "current";
+    private bool _contractsSortAscending;
+    private VBoxContainer _accountingWorkspace;
+    private Tree _accountingLedgerTree;
+    private RichTextLabel _accountingDetail;
+    private bool _accountingViewActive;
+    private VBoxContainer _practiceSquadWorkspace;
+    private Tree _practiceSquadRosterTree;
+    private Label _practiceSquadWorkspaceStatus;
+    private bool _practiceSquadViewActive;
+    private string _practiceSquadWorkspacePlayerId = "";
+    private readonly List<string> _teamStatsTileOrder = new() { "totals", "league_rank", "leaders", "trend" };
+    private readonly HashSet<string> _teamStatsHiddenTiles = new();
+    private bool _teamStatsFeaturedWide = true;
     private RichTextLabel _rtlTeamSummary;
     private Label _lblRecentResultsHeader;
     private RichTextLabel _overviewRecentResults;
@@ -181,6 +453,8 @@ public partial class DashboardController : Control
     private Button _btnGameDaySim;
     private Button _btnGameDayWatch;
     private Button _btnGameDayCancel;
+    private LiveGameObserver _liveGameObserver;
+    private PostGameHub _postGameHub;
     private Control _postGameRecapPopup;
     private Label _lblPostGameScore;
     private Label _lblPostGameWinner;
@@ -207,6 +481,8 @@ public partial class DashboardController : Control
     private ItemList _boxScoreLeadersList;
     private Button _btnBoxScoreBack;
     private Tree _scheduleList;
+    private Label _leagueContextSummary;
+    private RichTextLabel _scheduleInspector;
     private Label _lblScheduleActionStatus;
     private Button _btnScheduleAction;
     private Tree _injuriesTree;
@@ -218,6 +494,8 @@ public partial class DashboardController : Control
 
     private readonly List<RosterColumn> _columns = new();
     private readonly Dictionary<string, bool> _columnVisibility = new();
+    private readonly List<string> _rosterColumnOrder = new();
+    private readonly Dictionary<string, int> _rosterColumnWidths = new();
     private Godot.Collections.Array _currentRoster = new();
     private readonly List<PlayerRow> _rosterRows = new();
     private readonly Dictionary<string, Godot.Collections.Dictionary> _playerDetailsById = new();
@@ -228,11 +506,18 @@ public partial class DashboardController : Control
     private string _userTeamId = "";
     private string _sortColumnId = "";
     private bool _sortAscending = true;
+    private string _lastRosterColumnId = "";
     private string _rosterSearchText = "";
     private string _posFilterValue = "All";
+    private string _rosterStatusFilterValue = "All statuses";
     private bool _suppressTeamListEvents = false;
     private bool _suppressRosterFilterEvents = false;
     private bool _depthChartViewActive = false;
+    private bool _developmentViewActive = false;
+    private bool _injuriesViewActive = false;
+    private bool _staffViewActive = false;
+    private bool _teamHistoryViewActive = false;
+    private bool _teamStandingsViewActive = false;
     private bool _depthChartRequestBusy = false;
     private bool _dashboardRefreshPendingFromDepthChartEdit = false;
     private Godot.Collections.Array _inboxMessages = new();
@@ -259,9 +544,12 @@ public partial class DashboardController : Control
     private int? _gmReputation = null;
     private int? _gmJobSecurity = null;
     private readonly List<LeagueHistorySeasonDto> _leagueHistorySeasons = new();
+    private string _recordBookSummary = "";
+    private HistoricalArchiveResponse _historicalArchive = new();
     private bool _suppressHistorySelectionEvents = false;
     private int? _selectedHistorySeasonYear = null;
     private string _dashboardTeamName = "";
+    private string _dashboardTeamAbbreviation = "";
     private string _dashboardTeamRecord = "0-0";
     private int? _dashboardRosterSize = null;
     private int? _dashboardInjuryCount = null;
@@ -274,8 +562,11 @@ public partial class DashboardController : Control
     private Godot.Collections.Array _dashboardRecentResults = new();
     private Godot.Collections.Dictionary _dashboardPlayoffBracket = new();
     private Godot.Collections.Dictionary _latestGameResult = null;
+    private Godot.Collections.Dictionary _observedGameResult = null;
     private Godot.Collections.Dictionary _selectedScheduleGame = null;
     private bool _restorePostGameRecapAfterBoxScore = false;
+    private bool _restoreLiveGameObserverAfterBoxScore = false;
+    private bool _liveGameAdjustmentMode = false;
 
     private static readonly string[] PosFilterOptions =
     {
@@ -310,6 +601,7 @@ public partial class DashboardController : Control
     private DashboardService _nativeDashboardService;
     private ContinueService _nativeContinueService;
     private GameDayService _nativeGameDayService;
+    private LiveGameSessionService _nativeLiveGameSessionService;
 
     // NEW: store team dicts from /state_summary so we can map selection -> team_id
     private Godot.Collections.Array _teams = new();
@@ -335,10 +627,788 @@ public partial class DashboardController : Control
         return node;
     }
 
+    private void CreateWorkstationShell()
+    {
+        var navy = new Color("07121f");
+        var slate = new Color("0d2031");
+        var edge = new Color("254258");
+        var ink = new Color("eee7d8");
+        var muted = new Color("9cadb8");
+        var green = new Color("4f9b55");
+
+        var appMargin = GetNodeOrNull<Control>("AppMargin");
+        if (appMargin != null)
+            ApplyWorkstationTheme(appMargin, slate, edge, ink, muted, green);
+
+        var legacyTabs = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/TabButtonRow");
+        var legacyActions = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
+        var legacyHeader = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/HeaderPanel");
+        if (legacyTabs != null)
+            legacyTabs.Visible = false;
+        if (legacyActions != null)
+            legacyActions.Visible = false;
+        if (legacyHeader != null)
+            legacyHeader.Visible = false;
+
+        var topBar = new PanelContainer { Name = "WorkstationTopBar", MouseFilter = MouseFilterEnum.Ignore };
+        topBar.SetAnchorsPreset(LayoutPreset.TopWide);
+        topBar.OffsetLeft = 244;
+        topBar.OffsetRight = -8;
+        topBar.OffsetBottom = 92;
+        topBar.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(navy, edge, 0, 1));
+        AddChild(topBar);
+        var topRow = new HFlowContainer();
+        topRow.AddThemeConstantOverride("h_separation", 18);
+        topRow.AddThemeConstantOverride("v_separation", 4);
+        topBar.AddChild(topRow);
+        _shellTeamLogo = CreateTeamLogoTexture(new Vector2(44, 44));
+        _shellTeamLogo.TooltipText = "Controlled franchise logo";
+        topRow.AddChild(_shellTeamLogo);
+        var teamIdentity = new VBoxContainer { CustomMinimumSize = new Vector2(180, 0) };
+        teamIdentity.AddThemeConstantOverride("separation", 0);
+        _shellTeam = new Label { Text = "FRANCHISE" };
+        _shellTeam.AddThemeColorOverride("font_color", ink);
+        _shellTeam.AddThemeFontSizeOverride("font_size", 15);
+        teamIdentity.AddChild(_shellTeam);
+        _shellTeamContext = new Label { Text = "CONTROLLED TEAM" };
+        _shellTeamContext.AddThemeColorOverride("font_color", muted);
+        _shellTeamContext.AddThemeFontSizeOverride("font_size", 11);
+        teamIdentity.AddChild(_shellTeamContext);
+        topRow.AddChild(teamIdentity);
+        _shellCalendar = new Label { Text = "LEAGUE CONTEXT LOADING", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _shellCalendar.AddThemeColorOverride("font_color", ink);
+        _shellCalendar.AddThemeFontSizeOverride("font_size", 14);
+        topRow.AddChild(_shellCalendar);
+        _shellRecord = new Label { Text = "0-0" };
+        _shellRecord.AddThemeColorOverride("font_color", new Color("f4eddf"));
+        _shellRecord.AddThemeFontSizeOverride("font_size", 14);
+        topRow.AddChild(_shellRecord);
+        _shellInboxBadge = CreateShellButton("INBOX 0", ink, edge);
+        _shellInboxBadge.TooltipText = "Unread and action-needed messages";
+        _shellInboxBadge.Pressed += ShowInboxDesk;
+        topRow.AddChild(_shellInboxBadge);
+        _shellAdvance = CreateShellButton("ADVANCE", new Color("f4eddf"), green);
+        _shellAdvance.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color("193d37"), green, 0, 1));
+        _shellAdvance.Pressed += () =>
+        {
+            if (_inboxMessages != null && _inboxMessages.Count > 0) ShowInboxDesk();
+            else _btnContinue?.EmitSignal(Button.SignalName.Pressed);
+        };
+        topRow.AddChild(_shellAdvance);
+
+        var rail = new PanelContainer { Name = "WorkstationNavigation" };
+        rail.SetAnchorsPreset(LayoutPreset.LeftWide);
+        rail.OffsetRight = 232;
+        rail.OffsetBottom = -8;
+        rail.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(navy, edge, 0, 1));
+        AddChild(rail);
+        _shellNavigation = new VBoxContainer();
+        _shellNavigation.AddThemeConstantOverride("separation", 4);
+        rail.AddChild(_shellNavigation);
+        _railTeamLogo = CreateTeamLogoTexture(new Vector2(72, 72));
+        _railTeamLogo.TooltipText = "Controlled franchise logo";
+        _shellNavigation.AddChild(_railTeamLogo);
+        var brand = new Label { Text = "GRIDIRON GM\nFRANCHISE DESK" };
+        brand.AddThemeColorOverride("font_color", ink);
+        brand.AddThemeFontSizeOverride("font_size", 20);
+        brand.AddThemeConstantOverride("outline_size", 1);
+        brand.AddThemeColorOverride("font_outline_color", new Color("1d3447"));
+        _shellNavigation.AddChild(brand);
+        _shellNavigation.AddChild(CreateNavigationRule(edge));
+        _shellPrimaryNavigation[0] = AddNavigationButton("HOME", "Franchise Home", async () => await SelectMainTab(0), true, green, muted, edge);
+        AddNavigationButton("INBOX", "Messages and action-needed notices", ShowInboxDesk, false, green, muted, edge);
+        var teamButton = AddNavigationButton("TEAM  ▾", "Open team workspace", ToggleTeamNavigation, false, green, muted, edge);
+        _teamNavigationGroup = new VBoxContainer { Visible = false };
+        _teamNavigationGroup.AddThemeConstantOverride("separation", 1);
+        _shellNavigation.AddChild(_teamNavigationGroup);
+        AddTeamNavigationButton("Roster", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await SetRosterViewMode(false); }, muted, edge);
+        AddTeamNavigationButton("Depth Chart", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await SetRosterViewMode(true); }, muted, edge);
+        AddTeamNavigationButton("Practice Squad", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowPracticeSquadWorkspaceAsync(); }, muted, edge);
+        AddTeamNavigationButton("Team Standings", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowTeamStandingsWorkspaceAsync(); }, muted, edge);
+        AddTeamNavigationButton("Team History", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowTeamHistoryWorkspaceAsync(); }, muted, edge);
+        AddTeamNavigationButton("Staff", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowStaffWorkspaceAsync(); }, muted, edge);
+        AddTeamNavigationButton("Team Stats", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowTeamStatsWorkspaceAsync(); }, muted, edge);
+        AddTeamNavigationButton("Injuries", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowInjuriesWorkspaceAsync(); }, muted, edge);
+        AddTeamNavigationButton("Development", async () => await ShowDevelopmentWorkspaceAsync(), muted, edge);
+        var financesButton = AddNavigationButton("FINANCES  ▾", "Team finances, contracts, and accounting", ToggleFinancesNavigation, false, green, muted, edge);
+        _financesNavigationGroup = new VBoxContainer { Visible = false }; _financesNavigationGroup.AddThemeConstantOverride("separation", 1); _shellNavigation.AddChild(_financesNavigationGroup);
+        AddFinancesNavigationButton("Team Finances", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowTeamFinancesWorkspaceAsync(); }, muted, edge);
+        AddFinancesNavigationButton("Contracts", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowContractsWorkspaceAsync(); }, muted, edge);
+        AddFinancesNavigationButton("Accounting", async () => { await SelectMainTab(ROSTER_TAB_INDEX); await ShowAccountingWorkspaceAsync(); }, muted, edge);
+        _shellPrimaryNavigation[LEAGUE_TAB_INDEX] = AddNavigationButton("LEAGUE  ▾", "League reference and competition", ToggleLeagueNavigation, false, green, muted, edge);
+        _leagueNavigationGroup = new VBoxContainer { Visible = false }; _leagueNavigationGroup.AddThemeConstantOverride("separation", 1); _shellNavigation.AddChild(_leagueNavigationGroup);
+        AddLeagueNavigationButton("Standings", async () => await OpenFullLeagueStandingsAsync(), muted, edge);
+        AddLeagueNavigationButton("Stats", async () => await ShowLeagueStatsWorkspaceAsync(), muted, edge);
+        AddLeagueNavigationButton("Schedule & Results", async () => await ShowLeagueScheduleWorkspaceAsync(), muted, edge);
+        AddLeagueNavigationButton("News", async () => await ShowLeagueNewsWorkspaceAsync(), muted, edge);
+        AddLeagueNavigationButton("Player Search", async () => await ShowLeaguePlayerSearchAsync(), muted, edge);
+        AddLeagueNavigationButton("History", async () => await ShowLeagueHistoryArchiveAsync(), muted, edge);
+        AddLeagueNavigationButton("Awards", async () => await ShowLeagueAwardsAsync(), muted, edge);
+        AddNavigationButton("SCOUTING  ▾", "Scouting, college football, and draft", ToggleScoutingNavigation, false, green, muted, edge);
+        _scoutingNavigationGroup = new VBoxContainer { Visible = false }; _shellNavigation.AddChild(_scoutingNavigationGroup);
+        AddScoutingNavigationButton("Scouting Board", ShowDraftBoard, muted, edge);
+        AddScoutingNavigationButton("Draft Board", ShowDraftBoard, muted, edge);
+        AddScoutingNavigationButton("College Football", ShowCollegeFullRankings, muted, edge);
+        AddScoutingNavigationButton("Draft", ShowDraftBoard, muted, edge);
+        AddScoutingNavigationButton("UDFA Market", ShowUdfaMarket, muted, edge);
+        AddNavigationButton("TRADE CENTER  ▾", "Trades, market planning, free agency, waivers and transactions", ToggleTradeNavigation, false, green, muted, edge);
+        _tradeNavigationGroup = new VBoxContainer { Visible = false }; _tradeNavigationGroup.AddThemeConstantOverride("separation", 1); _shellNavigation.AddChild(_tradeNavigationGroup);
+        AddTradeNavigationButton("Trades", ShowTradeDialog, muted, edge);
+        AddTradeNavigationButton("Trade Block / Finder", ShowTradeFinderDialog, muted, edge);
+        AddTradeNavigationButton("Free Agency", ShowFreeAgency, muted, edge);
+        AddTradeNavigationButton("Waivers", ShowWaiversDialog, muted, edge);
+        AddTradeNavigationButton("League Transactions", ShowLeagueTransactionsDialog, muted, edge);
+        var spacer = new Control { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _shellNavigation.AddChild(spacer);
+        RefreshWorkstationContext();
+    }
+
+    private void ToggleTeamNavigation() => ToggleNavigationGroup(_teamNavigationGroup);
+
+    private void ToggleFinancesNavigation() => ToggleNavigationGroup(_financesNavigationGroup);
+
+    private void ToggleLeagueNavigation() => ToggleNavigationGroup(_leagueNavigationGroup);
+    private void ToggleScoutingNavigation() => ToggleNavigationGroup(_scoutingNavigationGroup);
+    private void ToggleTradeNavigation() => ToggleNavigationGroup(_tradeNavigationGroup);
+
+    private void ToggleNavigationGroup(Control selectedGroup)
+    {
+        if (selectedGroup == null) return;
+        var shouldOpen = !selectedGroup.Visible;
+        foreach (var group in new[] { _teamNavigationGroup, _financesNavigationGroup, _leagueNavigationGroup, _scoutingNavigationGroup, _tradeNavigationGroup })
+            if (group != null) group.Visible = false;
+        selectedGroup.Visible = shouldOpen;
+    }
+
+    private void AddTeamNavigationButton(string title, Action action, Color muted, Color edge)
+    {
+        if (_teamNavigationGroup == null) return;
+        var button = CreateShellButton("   " + title, muted, edge);
+        button.CustomMinimumSize = new Vector2(210, 26);
+        button.AddThemeFontSizeOverride("font_size", 12);
+        button.Pressed += action;
+        _teamNavigationGroup.AddChild(button);
+    }
+
+    private void AddFinancesNavigationButton(string title, Action action, Color muted, Color edge)
+    {
+        if (_financesNavigationGroup == null) return;
+        var button = CreateShellButton("   " + title, muted, edge); button.CustomMinimumSize = new Vector2(210, 26); button.AddThemeFontSizeOverride("font_size", 12); button.Pressed += action; _financesNavigationGroup.AddChild(button);
+    }
+
+    private void AddLeagueNavigationButton(string title, Action action, Color muted, Color edge)
+    {
+        if (_leagueNavigationGroup == null) return;
+        var button = CreateShellButton("   " + title, muted, edge); button.CustomMinimumSize = new Vector2(210, 26); button.AddThemeFontSizeOverride("font_size", 12); button.Pressed += action; _leagueNavigationGroup.AddChild(button);
+    }
+    private void AddScoutingNavigationButton(string title, Action action, Color muted, Color edge) { if (_scoutingNavigationGroup == null) return; var button = CreateShellButton("   " + title, muted, edge); button.CustomMinimumSize = new Vector2(210, 26); button.AddThemeFontSizeOverride("font_size", 12); button.Pressed += action; _scoutingNavigationGroup.AddChild(button); }
+    private void AddTradeNavigationButton(string title, Action action, Color muted, Color edge) { if (_tradeNavigationGroup == null) return; var button = CreateShellButton("   " + title, muted, edge); button.CustomMinimumSize = new Vector2(210, 26); button.AddThemeFontSizeOverride("font_size", 12); button.Pressed += action; _tradeNavigationGroup.AddChild(button); }
+
+    private Button AddNavigationButton(string title, string tooltip, Action action, bool active, Color green, Color muted, Color edge)
+    {
+        var button = CreateShellButton(title, active ? new Color("f4eddf") : muted, edge);
+        button.TooltipText = tooltip;
+        button.CustomMinimumSize = new Vector2(210, 34);
+        if (active)
+            button.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color("193d37"), green, 0, 1));
+        button.Pressed += action;
+        _shellNavigation.AddChild(button);
+        return button;
+    }
+
+    private static Control CreateNavigationRule(Color edge)
+        => new ColorRect { Color = edge, CustomMinimumSize = new Vector2(0, 1), MouseFilter = MouseFilterEnum.Ignore };
+
+    private static TextureRect CreateTeamLogoTexture(Vector2 minimumSize)
+    {
+        return new TextureRect
+        {
+            CustomMinimumSize = minimumSize,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
+            MouseFilter = MouseFilterEnum.Ignore,
+            Visible = false,
+        };
+    }
+
+    private static string TeamLogoPath(string abbreviation)
+    {
+        var safe = new string((abbreviation ?? "")
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToUpperInvariant)
+            .ToArray());
+        return string.IsNullOrWhiteSpace(safe) ? "" : $"res://Assets/team_logos/{safe}.png";
+    }
+
+    private static void SetTeamLogo(TextureRect target, string abbreviation)
+    {
+        if (target == null)
+            return;
+
+        var path = TeamLogoPath(abbreviation);
+        var texture = !string.IsNullOrWhiteSpace(path) && ResourceLoader.Exists(path)
+            ? GD.Load<Texture2D>(path)
+            : null;
+        target.Texture = texture;
+        target.Visible = texture != null;
+    }
+
+    private static Button CreateShellButton(string text, Color textColor, Color edge)
+    {
+        var button = new Button { Text = text, Alignment = HorizontalAlignment.Left };
+        button.AddThemeColorOverride("font_color", textColor);
+        button.AddThemeColorOverride("font_hover_color", new Color("f4eddf"));
+        button.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0), 0, 0));
+        button.AddThemeStyleboxOverride("hover", CreateSurfaceStyle(new Color("162c3c"), edge, 0, 1));
+        return button;
+    }
+
+    private static StyleBoxFlat CreateSurfaceStyle(Color background, Color border, int cornerRadius, int borderWidth)
+    {
+        var style = new StyleBoxFlat { BgColor = background, BorderColor = border };
+        style.BorderWidthLeft = borderWidth;
+        style.BorderWidthTop = borderWidth;
+        style.BorderWidthRight = borderWidth;
+        style.BorderWidthBottom = borderWidth;
+        style.CornerRadiusTopLeft = cornerRadius;
+        style.CornerRadiusTopRight = cornerRadius;
+        style.CornerRadiusBottomLeft = cornerRadius;
+        style.CornerRadiusBottomRight = cornerRadius;
+        style.ContentMarginLeft = 10;
+        style.ContentMarginRight = 10;
+        style.ContentMarginTop = 6;
+        style.ContentMarginBottom = 6;
+        return style;
+    }
+
+    // The project uses a bespoke workstation shell.  Godot's data-entry controls do
+    // not inherit Button/Panel overrides, so they need their own treatment rather
+    // than falling back to the editor-gray theme in dialogs and tables.
+    private static void ApplyDataControlTheme(Control control, Color slate, Color edge, Color ink, Color muted, Color green)
+    {
+        var field = CreateSurfaceStyle(new Color("091927"), edge, 3, 1);
+        var fieldFocus = CreateSurfaceStyle(new Color("102a38"), green, 3, 1);
+        var selected = CreateSurfaceStyle(new Color("193d37"), green, 3, 1);
+
+        switch (control)
+        {
+            case ItemList list:
+                list.AddThemeStyleboxOverride("panel", field);
+                list.AddThemeStyleboxOverride("selected", selected);
+                list.AddThemeStyleboxOverride("selected_focus", selected);
+                list.AddThemeColorOverride("font_color", ink);
+                list.AddThemeColorOverride("font_selected_color", new Color("f4eddf"));
+                break;
+            case Tree tree:
+                tree.AddThemeStyleboxOverride("panel", field);
+                tree.AddThemeStyleboxOverride("selected", selected);
+                tree.AddThemeStyleboxOverride("selected_focus", selected);
+                tree.AddThemeStyleboxOverride("cursor", fieldFocus);
+                tree.AddThemeStyleboxOverride("cursor_unfocused", field);
+                tree.AddThemeColorOverride("font_color", ink);
+                tree.AddThemeColorOverride("font_selected_color", new Color("f4eddf"));
+                tree.AddThemeColorOverride("title_button_color", muted);
+                break;
+            case LineEdit lineEdit:
+                lineEdit.AddThemeStyleboxOverride("normal", field);
+                lineEdit.AddThemeStyleboxOverride("focus", fieldFocus);
+                lineEdit.AddThemeColorOverride("font_color", ink);
+                lineEdit.AddThemeColorOverride("font_placeholder_color", muted);
+                lineEdit.AddThemeColorOverride("caret_color", green);
+                break;
+            case OptionButton optionButton:
+                optionButton.AddThemeStyleboxOverride("normal", field);
+                optionButton.AddThemeStyleboxOverride("hover", fieldFocus);
+                optionButton.AddThemeStyleboxOverride("pressed", fieldFocus);
+                optionButton.AddThemeStyleboxOverride("focus", fieldFocus);
+                optionButton.AddThemeColorOverride("font_color", ink);
+                ApplyPopupMenuTheme(optionButton.GetPopup(), slate, edge, ink, muted, green);
+                break;
+            case SpinBox spinBox:
+                ApplyDataControlTheme(spinBox.GetLineEdit(), slate, edge, ink, muted, green);
+                break;
+            case TabContainer tabs:
+                ApplyTabBarTheme(tabs.GetTabBar(), slate, edge, ink, muted, green);
+                break;
+        }
+    }
+
+    private static void ApplyPopupMenuTheme(PopupMenu menu, Color slate, Color edge, Color ink, Color muted, Color green)
+    {
+        if (menu == null)
+            return;
+        menu.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("0d2031"), edge, 3, 1));
+        menu.AddThemeStyleboxOverride("hover", CreateSurfaceStyle(new Color("193d37"), green, 3, 1));
+        menu.AddThemeColorOverride("font_color", ink);
+        menu.AddThemeColorOverride("font_hover_color", new Color("f4eddf"));
+        menu.AddThemeColorOverride("font_accelerator_color", muted);
+    }
+
+    private static void ApplyTabBarTheme(TabBar tabBar, Color slate, Color edge, Color ink, Color muted, Color green)
+    {
+        if (tabBar == null)
+            return;
+        tabBar.AddThemeStyleboxOverride("tab_unselected", CreateSurfaceStyle(new Color("0d2031"), edge, 3, 1));
+        tabBar.AddThemeStyleboxOverride("tab_hovered", CreateSurfaceStyle(new Color("162c3c"), edge, 3, 1));
+        tabBar.AddThemeStyleboxOverride("tab_selected", CreateSurfaceStyle(new Color("193d37"), green, 3, 1));
+        tabBar.AddThemeColorOverride("font_unselected_color", muted);
+        tabBar.AddThemeColorOverride("font_hovered_color", ink);
+        tabBar.AddThemeColorOverride("font_selected_color", new Color("f4eddf"));
+    }
+
+    private static void ApplyWorkstationTheme(Node node, Color slate, Color edge, Color ink, Color muted, Color green)
+    {
+        if (node is PopupMenu menu)
+            ApplyPopupMenuTheme(menu, slate, edge, ink, muted, green);
+        if (node is Control control)
+            ApplyDataControlTheme(control, slate, edge, ink, muted, green);
+        if (node is PanelContainer panel)
+            panel.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(slate, edge, 0, 1));
+        else if (node is Button button)
+        {
+            button.AddThemeColorOverride("font_color", ink);
+            button.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color("142a39"), edge, 0, 1));
+            button.AddThemeStyleboxOverride("hover", CreateSurfaceStyle(new Color("1b3a44"), green, 0, 1));
+        }
+        else if (node is Label label)
+            label.AddThemeColorOverride("font_color", muted);
+        else if (node is RichTextLabel richText)
+            richText.AddThemeColorOverride("default_color", ink);
+
+        foreach (var child in node.GetChildren())
+            ApplyWorkstationTheme(child, slate, edge, ink, muted, green);
+    }
+
+    private void MakeOverviewScrollable()
+    {
+        var overview = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab");
+        if (overview == null || _franchiseHome != null) return;
+        foreach (var child in overview.GetChildren())
+            if (child is CanvasItem item) item.Visible = false;
+
+        var scroll = new ScrollContainer { Name = "FranchiseHomeScroll", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, VerticalScrollMode = ScrollContainer.ScrollMode.Auto };
+        scroll.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        overview.AddChild(scroll);
+        _franchiseHome = new VBoxContainer { Name = "FranchiseHome", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _franchiseHome.AddThemeConstantOverride("separation", 8);
+        scroll.AddChild(_franchiseHome);
+        var header = new HBoxContainer();
+        var title = HomeLabel("FRANCHISE HOME", 20, new Color("f4eddf")); title.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        header.AddChild(title);
+        var edit = CreateShellButton("EDIT DASHBOARD", new Color("9cadb8"), new Color("254258"));
+        edit.Pressed += ToggleDashboardEdit;
+        header.AddChild(edit); _franchiseHome.AddChild(header);
+        _dashboardEditorBar = new HBoxContainer { Visible = false };
+        _dashboardEditorBar.AddThemeConstantOverride("separation", 6);
+        _dashboardTilePicker = new OptionButton { TooltipText = "Choose the dashboard module to edit." };
+        _dashboardTilePicker.ItemSelected += _ => UpdateDashboardEditor();
+        _dashboardEditorBar.AddChild(_dashboardTilePicker);
+        AddEditorButton("MOVE ◀", () => MoveSelectedDashboardTile(-1));
+        AddEditorButton("MOVE ▶", () => MoveSelectedDashboardTile(1));
+        AddEditorButton("RESIZE", ToggleSelectedDashboardTileSize);
+        AddEditorButton("REMOVE", RemoveSelectedDashboardTile);
+        AddEditorButton("ADD MODULE", RestoreDashboardTile);
+        AddEditorButton("RESET", ResetDashboardLayout);
+        AddEditorButton("SAVE", SaveDashboardLayout);
+        _franchiseHome.AddChild(_dashboardEditorBar);
+        _dashboardEditHint = HomeLabel("Edit mode: select a module, then move, resize, remove, or restore it. Changes snap to the 3 × 2 dashboard grid.", 11, new Color("9cadb8"));
+        _dashboardEditHint.Visible = false;
+        _franchiseHome.AddChild(_dashboardEditHint);
+        var savedLayout = new ConfigFile();
+        if (savedLayout.Load("user://dashboard_layout.cfg") == Error.Ok)
+        {
+            _homeConferenceIndex = (int)savedLayout.GetValue("home", "conference", 0);
+            _homeProspectPanelIndex = (int)savedLayout.GetValue("home", "prospect_panel", 0);
+            var savedOrder = (string)savedLayout.GetValue("home", "tile_order", string.Join(",", _dashboardTileOrder));
+            var known = new[] { "standings", "profile", "news", "prospects", "leaders" };
+            var order = savedOrder.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(known.Contains).Distinct().ToList();
+            if (order.Count == known.Length)
+            {
+                _dashboardTileOrder.Clear();
+                _dashboardTileOrder.AddRange(order);
+            }
+            var hidden = (string)savedLayout.GetValue("home", "hidden_tiles", "");
+            foreach (var tile in hidden.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(known.Contains))
+                _dashboardHiddenTiles.Add(tile);
+            _dashboardFeaturedTileWide = (bool)savedLayout.GetValue("home", "featured_wide", true);
+        }
+        BuildFranchiseDashboardGrid();
+    }
+
+    private Label HomeLabel(string text, int size = 13, Color? color = null)
+    {
+        var label = new Label { Text = text, AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        label.AddThemeFontSizeOverride("font_size", size);
+        label.AddThemeColorOverride("font_color", color ?? new Color("c5d1d8"));
+        return label;
+    }
+
+    private PanelContainer CreateHomeTile(string title, Action action, string actionText = "OPEN")
+    {
+        var panel = new PanelContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        panel.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("0d2031"), new Color("254258"), 0, 1));
+        var box = new VBoxContainer(); box.AddThemeConstantOverride("separation", 5); panel.AddChild(box);
+        var header = new HBoxContainer();
+        var label = HomeLabel(title, 13, new Color("f4eddf")); label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; header.AddChild(label);
+        var button = CreateShellButton(actionText, new Color("7fbf88"), new Color("254258")); button.AddThemeFontSizeOverride("font_size", 11); button.Pressed += action; header.AddChild(button);
+        box.AddChild(header); box.AddChild(CreateNavigationRule(new Color("254258")));
+        return panel;
+    }
+
+    private static VBoxContainer AddTileBody(PanelContainer panel)
+    {
+        var box = panel.GetChild<VBoxContainer>(0);
+        var body = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        body.AddThemeConstantOverride("separation", 2); box.AddChild(body); return body;
+    }
+
+    private void AddEditorButton(string text, Action action)
+    {
+        var button = CreateShellButton(text, new Color("c5d1d8"), new Color("254258")); button.AddThemeFontSizeOverride("font_size", 11); button.Pressed += action; _dashboardEditorBar.AddChild(button);
+    }
+
+    private void BuildFranchiseDashboardGrid()
+    {
+        if (_franchiseHome == null) return;
+        _dashboardTileGrid?.QueueFree();
+        _dashboardTileGrid = new VBoxContainer { Name = "DashboardTileGrid", SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _dashboardTileGrid.AddThemeConstantOverride("separation", 8);
+        _franchiseHome.AddChild(_dashboardTileGrid);
+        _homeStandingsBody = _homeProfileBody = _homeNewsBody = _homeProspectsBody = _homeLeadersBody = null;
+
+        var visible = _dashboardTileOrder.Where(tile => !_dashboardHiddenTiles.Contains(tile)).ToList();
+        var top = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        top.AddThemeConstantOverride("separation", 8);
+        var bottom = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        bottom.AddThemeConstantOverride("separation", 8);
+        foreach (var tile in visible.Take(2))
+        {
+            var panel = CreateDashboardTile(tile);
+            panel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            panel.SizeFlagsStretchRatio = _dashboardFeaturedTileWide && tile == visible.FirstOrDefault() ? 2f : 1f;
+            top.AddChild(panel);
+        }
+        foreach (var tile in visible.Skip(2).Take(3))
+        {
+            var panel = CreateDashboardTile(tile);
+            panel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            bottom.AddChild(panel);
+        }
+        if (top.GetChildCount() > 0) _dashboardTileGrid.AddChild(top);
+        if (bottom.GetChildCount() > 0) _dashboardTileGrid.AddChild(bottom);
+        UpdateDashboardEditor();
+        RenderFranchiseHome();
+    }
+
+    private PanelContainer CreateDashboardTile(string tile)
+    {
+        PanelContainer panel;
+        VBoxContainer body;
+        switch (tile)
+        {
+            case "standings": panel = CreateHomeTile("CONFERENCE STANDINGS", async () => await OpenFullLeagueStandingsAsync()); body = AddTileBody(panel); _homeStandingsBody = body; break;
+            case "profile": panel = CreateHomeTile("GENERAL MANAGER", ShowFranchiseSettings, "VIEW PROFILE"); body = AddTileBody(panel); _homeProfileBody = body; break;
+            case "news": panel = CreateHomeTile("TOP LEAGUE NEWS", async () => await SelectMainTab(LEAGUE_TAB_INDEX), "VIEW ALL NEWS"); body = AddTileBody(panel); _homeNewsBody = body; break;
+            case "prospects": panel = CreateHomeTile("TOP PROSPECTS / COLLEGE", ShowDraftBoard); body = AddTileBody(panel); _homeProspectsBody = body; break;
+            default: panel = CreateHomeTile("TEAM STAT LEADERS", async () => await SelectMainTab(ROSTER_TAB_INDEX)); body = AddTileBody(panel); _homeLeadersBody = body; break;
+        }
+        return panel;
+    }
+
+    private void ToggleDashboardEdit()
+    {
+        _dashboardEditMode = !_dashboardEditMode;
+        if (_dashboardEditorBar != null) _dashboardEditorBar.Visible = _dashboardEditMode;
+        if (_dashboardEditHint != null) _dashboardEditHint.Visible = _dashboardEditMode;
+        UpdateDashboardEditor();
+    }
+
+    private void UpdateDashboardEditor()
+    {
+        if (_dashboardTilePicker == null) return;
+        var selected = _dashboardTilePicker.Selected >= 0 ? _dashboardTilePicker.GetItemText(_dashboardTilePicker.Selected) : "";
+        _dashboardTilePicker.Clear();
+        foreach (var tile in _dashboardTileOrder)
+            _dashboardTilePicker.AddItem($"{TileDisplayName(tile)}{(_dashboardHiddenTiles.Contains(tile) ? " (hidden)" : "")}");
+        var index = _dashboardTileOrder.FindIndex(tile => TileDisplayName(tile) == selected || $"{TileDisplayName(tile)} (hidden)" == selected);
+        _dashboardTilePicker.Select(index >= 0 ? index : 0);
+    }
+
+    private string SelectedDashboardTile() => _dashboardTilePicker == null || _dashboardTilePicker.Selected < 0 ? "standings" : _dashboardTileOrder[_dashboardTilePicker.Selected];
+    private static string TileDisplayName(string tile) => tile switch { "standings" => "Conference Standings", "profile" => "GM Profile", "news" => "League News", "prospects" => "Prospects / College", _ => "Team Leaders" };
+    private void MoveSelectedDashboardTile(int direction)
+    {
+        var tile = SelectedDashboardTile(); var index = _dashboardTileOrder.IndexOf(tile); var target = Math.Clamp(index + direction, 0, _dashboardTileOrder.Count - 1);
+        if (index == target) return;
+        _dashboardTileOrder.RemoveAt(index); _dashboardTileOrder.Insert(target, tile); BuildFranchiseDashboardGrid();
+    }
+    private void ToggleSelectedDashboardTileSize() { _dashboardFeaturedTileWide = !_dashboardFeaturedTileWide; BuildFranchiseDashboardGrid(); }
+    private void RemoveSelectedDashboardTile() { _dashboardHiddenTiles.Add(SelectedDashboardTile()); BuildFranchiseDashboardGrid(); }
+    private void RestoreDashboardTile()
+    {
+        var hidden = _dashboardTileOrder.FirstOrDefault(tile => _dashboardHiddenTiles.Contains(tile));
+        if (!string.IsNullOrWhiteSpace(hidden)) _dashboardHiddenTiles.Remove(hidden);
+        BuildFranchiseDashboardGrid();
+    }
+    private void ResetDashboardLayout()
+    {
+        _dashboardTileOrder.Clear(); _dashboardTileOrder.AddRange(new[] { "standings", "news", "profile", "prospects", "leaders" });
+        _dashboardHiddenTiles.Clear(); _dashboardFeaturedTileWide = true; _homeConferenceIndex = 0; _homeProspectPanelIndex = 0; _homeLeaderCategory = 0; BuildFranchiseDashboardGrid();
+    }
+    private void SaveDashboardLayout()
+    {
+        var config = new ConfigFile(); config.SetValue("home", "conference", _homeConferenceIndex); config.SetValue("home", "prospect_panel", _homeProspectPanelIndex);
+        config.SetValue("home", "tile_order", string.Join(",", _dashboardTileOrder)); config.SetValue("home", "hidden_tiles", string.Join(",", _dashboardHiddenTiles)); config.SetValue("home", "featured_wide", _dashboardFeaturedTileWide); config.Save("user://dashboard_layout.cfg");
+    }
+
+    private static void ClearTile(VBoxContainer body) { if (body == null) return; foreach (var child in body.GetChildren()) child.QueueFree(); }
+
+    private void RenderFranchiseHome()
+    {
+        if (_franchiseHome == null) return;
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        RenderHomeStandings(league); RenderHomeProfile(league); RenderHomeNews(league); RenderHomeProspects(league); RenderHomeLeaders(league);
+    }
+
+    private void RenderHomeStandings(LeagueState league)
+    {
+        ClearTile(_homeStandingsBody); if (_homeStandingsBody == null) return;
+        if (league == null) { _homeStandingsBody.AddChild(HomeLabel("Standings will appear when a franchise is loaded.")); return; }
+        var conferences = league.Teams.Select(t => t.Conference).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().OrderBy(x => x).ToList();
+        if (conferences.Count == 0) { _homeStandingsBody.AddChild(HomeLabel("No conference data available.")); return; }
+        var user = league.Teams.FirstOrDefault(t => t.TeamId == league.UserTeamId); var initial = conferences.FindIndex(c => c == user?.Conference);
+        if (_homeConferenceIndex < 0 || _homeConferenceIndex >= conferences.Count) _homeConferenceIndex = initial >= 0 ? initial : 0;
+        var conference = conferences[_homeConferenceIndex];
+        var standings = _nativeGameCoreContext == null
+            ? new List<TeamStanding>()
+            : new StandingsService(_nativeGameCoreContext).BuildStandings(league);
+        var controls = new HBoxContainer();
+        var left = CreateShellButton("‹", new Color("f4eddf"), new Color("254258")); left.Pressed += () => { _homeConferenceIndex = (_homeConferenceIndex + conferences.Count - 1) % conferences.Count; RenderFranchiseHome(); }; controls.AddChild(left);
+        var indicator = HomeLabel($"{conference.ToUpperInvariant()}  •  {_homeConferenceIndex + 1} of {conferences.Count}", 12, new Color("7fbf88")); indicator.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; indicator.HorizontalAlignment = HorizontalAlignment.Center; controls.AddChild(indicator);
+        var right = CreateShellButton("›", new Color("f4eddf"), new Color("254258")); right.Pressed += () => { _homeConferenceIndex = (_homeConferenceIndex + 1) % conferences.Count; RenderFranchiseHome(); }; controls.AddChild(right); _homeStandingsBody.AddChild(controls);
+        var divisionsRow = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        divisionsRow.AddThemeConstantOverride("separation", 8);
+        foreach (var division in standings.Where(t => t.Conference == conference).GroupBy(t => t.Division).OrderBy(g => g.Key))
+        {
+            var column = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+            column.AddThemeConstantOverride("separation", 0);
+            column.AddChild(HomeLabel($"{division.Key.ToUpperInvariant(),-16}  W  L  T   PCT   PF  PA", 10, new Color("9cadb8")));
+            foreach (var team in division.OrderByDescending(t => t.WinPct).ThenByDescending(t => t.PointDifferential))
+            {
+                var row = new HBoxContainer();
+                row.AddThemeConstantOverride("separation", 4);
+                var mark = CreateTeamLogoTexture(new Vector2(18, 18));
+                mark.TooltipText = team.TeamName;
+                SetTeamLogo(mark, team.Abbreviation);
+                row.AddChild(mark);
+                var record = $"{team.Wins,2} {team.Losses,2} {team.Ties,2}  {team.WinPct,4:.000}  {team.PointsFor,3} {team.PointsAgainst,3}";
+                row.AddChild(HomeLabel($"{team.Abbreviation,-4} {record}", 11, team.TeamId == league.UserTeamId ? new Color("f0c96a") : new Color("d7e0e4")));
+                column.AddChild(row);
+            }
+            divisionsRow.AddChild(column);
+        }
+        _homeStandingsBody.AddChild(divisionsRow);
+    }
+
+    private void RenderHomeProfile(LeagueState league)
+    {
+        ClearTile(_homeProfileBody); if (_homeProfileBody == null) return;
+        var profile = league?.FranchiseMetadata?.GmProfileSnapshot;
+        var gm = profile?.Name ?? "User GM"; var team = league?.Teams?.FirstOrDefault(t => t.TeamId == league.UserTeamId);
+        var identity = new HBoxContainer();
+        identity.AddThemeConstantOverride("separation", 8);
+        var mark = CreateTeamLogoTexture(new Vector2(52, 52));
+        mark.TooltipText = team?.Name ?? "Franchise logo";
+        SetTeamLogo(mark, team?.Abbreviation);
+        identity.AddChild(mark);
+        var identityText = new VBoxContainer();
+        identityText.AddChild(HomeLabel(gm, 17, new Color("f4eddf")));
+        identityText.AddChild(HomeLabel(team == null ? "Franchise not selected" : team.Name));
+        identity.AddChild(identityText);
+        _homeProfileBody.AddChild(identity);
+        _homeProfileBody.AddChild(HomeLabel($"TEAM RECORD   {_dashboardTeamRecord}", 12, new Color("7fbf88")));
+        if (profile?.Attributes != null)
+        {
+            _homeProfileBody.AddChild(HomeLabel($"NEG {profile.Attributes.Negotiation}   PLAYER MGMT {profile.Attributes.PlayerManagement}", 11));
+            _homeProfileBody.AddChild(HomeLabel($"SCOUT {profile.Attributes.ScoutingJudgment}   LEADERSHIP {profile.Attributes.Leadership}", 11));
+        }
+        else
+            _homeProfileBody.AddChild(HomeLabel("GM attributes unavailable in this save.", 11, new Color("9cadb8")));
+    }
+
+    private void RenderHomeNews(LeagueState league)
+    {
+        ClearTile(_homeNewsBody); if (_homeNewsBody == null) return;
+        if (league == null) { _homeNewsBody.AddChild(HomeLabel("League news will appear when a franchise is loaded.")); return; }
+        BuildLeagueNewsStories();
+        if (_leagueNewsStories.Count == 0) { _homeNewsBody.AddChild(HomeLabel("League desk is quiet. Advance the calendar for new stories.", 14, new Color("f4eddf"))); return; }
+        foreach (var story in _leagueNewsStories.Take(5).Select((story, index) => (story, index)))
+        {
+            _homeNewsBody.AddChild(HomeLabel(story.index == 0 ? story.story.Headline.ToUpperInvariant() : story.story.Headline, story.index == 0 ? 14 : 11, story.index == 0 ? new Color("f4eddf") : new Color("d7e0e4")));
+            if (story.index == 0) _homeNewsBody.AddChild(HomeLabel(story.story.Summary, 11, new Color("9cadb8")));
+        }
+    }
+
+    private void RenderHomeProspects(LeagueState league)
+    {
+        ClearTile(_homeProspectsBody); if (_homeProspectsBody == null) return;
+        var headers = new[] { "NOTABLE PROSPECTS", "ANALYST DRAFT BOARD", "COLLEGE RANKINGS" };
+        var nav = new HBoxContainer(); var prev = CreateShellButton("‹", new Color("f4eddf"), new Color("254258")); prev.Pressed += () => { _homeProspectPanelIndex = (_homeProspectPanelIndex + 2) % 3; RenderFranchiseHome(); }; nav.AddChild(prev);
+        var caption = HomeLabel($"{headers[_homeProspectPanelIndex]}  •  {_homeProspectPanelIndex + 1} of 3", 11, new Color("7fbf88")); caption.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; caption.HorizontalAlignment = HorizontalAlignment.Center; nav.AddChild(caption);
+        var next = CreateShellButton("›", new Color("f4eddf"), new Color("254258")); next.Pressed += () => { _homeProspectPanelIndex = (_homeProspectPanelIndex + 1) % 3; RenderFranchiseHome(); }; nav.AddChild(next); _homeProspectsBody.AddChild(nav);
+        if (league == null) { _homeProspectsBody.AddChild(HomeLabel("Scouting data unavailable.")); return; }
+        if (_homeProspectPanelIndex == 2)
+            foreach (var team in (league.CollegeUniverse?.Teams ?? new List<CollegeTeamState>()).Where(t => t.Ranking > 0).OrderBy(t => t.Ranking).Take(8)) _homeProspectsBody.AddChild(HomeLabel($"#{team.Ranking,-2} {team.Name}  {team.Wins}-{team.Losses}", 12));
+        else
+        {
+            _homeProspectsBody.AddChild(HomeLabel("#   PLAYER                  POS   COLLEGE", 10, new Color("9cadb8")));
+            var rank = 0;
+            foreach (var prospect in (league.CollegeProspects ?? new List<CollegeProspectState>()).Where(p => string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.Potential).ThenByDescending(p => p.Overall).Take(7))
+            {
+                rank++;
+                _homeProspectsBody.AddChild(HomeLabel($"{rank,-3} {prospect.Name,-22} {prospect.Position,-5} {prospect.College}", 11));
+            }
+        }
+    }
+
+    private void RenderHomeLeaders(LeagueState league)
+    {
+        ClearTile(_homeLeadersBody); if (_homeLeadersBody == null) return;
+        var team = league?.Teams?.FirstOrDefault(t => t.TeamId == league.UserTeamId);
+        if (team == null) { _homeLeadersBody.AddChild(HomeLabel("Team leaders unavailable.")); return; }
+        var players = team.Roster ?? new List<PlayerState>();
+        var tabs = new HBoxContainer(); tabs.AddThemeConstantOverride("separation", 4); _homeLeadersBody.AddChild(tabs);
+        var categories = new[] { "OFFENSE", "DEFENSE", "SPECIAL TEAMS" };
+        for (var index = 0; index < categories.Length; index++)
+        {
+            var category = index;
+            var tab = CreateShellButton(categories[index], index == _homeLeaderCategory ? new Color("f4eddf") : new Color("748792"), new Color("254258"));
+            tab.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            if (index == _homeLeaderCategory) tab.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color("193d37"), new Color("4f9b55"), 0, 1));
+            tab.Pressed += () => { _homeLeaderCategory = category; RenderHomeLeaders(_nativeGameCoreContext?.ActiveLeague); };
+            tabs.AddChild(tab);
+        }
+        if (_homeLeaderCategory == 0)
+        {
+            AddLeader("PASS", players.OrderByDescending(p => p.SeasonStats?.PassingYards ?? 0).FirstOrDefault(), p => p.SeasonStats?.PassingYards ?? 0, "YDS");
+            AddLeader("RUSH", players.OrderByDescending(p => p.SeasonStats?.RushingYards ?? 0).FirstOrDefault(), p => p.SeasonStats?.RushingYards ?? 0, "YDS");
+            AddLeader("REC", players.OrderByDescending(p => p.SeasonStats?.ReceivingYards ?? 0).FirstOrDefault(), p => p.SeasonStats?.ReceivingYards ?? 0, "YDS");
+            AddLeader("PASS TD", players.OrderByDescending(p => p.SeasonStats?.PassingTouchdowns ?? 0).FirstOrDefault(), p => p.SeasonStats?.PassingTouchdowns ?? 0, "TD");
+        }
+        else if (_homeLeaderCategory == 1)
+        {
+            AddLeader("TACKLES", players.OrderByDescending(p => p.SeasonStats?.Tackles ?? 0).FirstOrDefault(), p => p.SeasonStats?.Tackles ?? 0, "TKL");
+            AddLeader("SACKS", players.OrderByDescending(p => p.SeasonStats?.Sacks ?? 0).FirstOrDefault(), p => p.SeasonStats?.Sacks ?? 0, "SK");
+            AddLeader("INTERCEPTIONS", players.OrderByDescending(p => p.SeasonStats?.Interceptions ?? 0).FirstOrDefault(), p => p.SeasonStats?.Interceptions ?? 0, "INT");
+        }
+        else
+            _homeLeadersBody.AddChild(HomeLabel("Special-teams statistics are not tracked by the current simulation model.", 11, new Color("9cadb8")));
+    }
+
+    private void AddLeader(string category, PlayerState player, Func<PlayerState, int> value, string unit)
+    { if (_homeLeadersBody == null) return; _homeLeadersBody.AddChild(HomeLabel(player == null ? $"{category,-13} —" : $"{category,-13} {player.Name} ({player.Position})   {value(player):N0} {unit}", 11)); }
+
+    private void RefreshWorkstationContext()
+    {
+        var activeTeam = _nativeGameCoreContext?.ActiveLeague?.Teams?
+            .FirstOrDefault(team => string.Equals(team.TeamId, _nativeGameCoreContext.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var abbreviation = !string.IsNullOrWhiteSpace(_dashboardTeamAbbreviation)
+            ? _dashboardTeamAbbreviation
+            : activeTeam?.Abbreviation ?? "";
+        SetTeamLogo(_shellTeamLogo, abbreviation);
+        SetTeamLogo(_railTeamLogo, abbreviation);
+        if (_shellCalendar != null)
+            _shellCalendar.Text = string.IsNullOrWhiteSpace(_calendarText?.Text) ? "LEAGUE CONTEXT LOADING" : _calendarText.Text.ToUpperInvariant();
+        if (_shellTeam != null)
+            _shellTeam.Text = !string.IsNullOrWhiteSpace(_dashboardTeamName) ? _dashboardTeamName.ToUpperInvariant() : string.IsNullOrWhiteSpace(_lblUserTeam?.Text) ? "FRANCHISE" : _lblUserTeam.Text.ToUpperInvariant();
+        if (_shellTeamContext != null)
+        {
+            var conference = activeTeam?.Conference ?? "";
+            var division = activeTeam?.Division ?? "";
+            var context = string.Join("  •  ", new[] { conference, division }
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+            _shellTeamContext.Text = !string.IsNullOrWhiteSpace(context)
+                ? context.ToUpperInvariant()
+                : "CONTROLLED TEAM";
+        }
+        if (_shellRecord != null)
+            _shellRecord.Text = _dashboardTeamRecord ?? "0-0";
+        if (_shellInboxBadge != null)
+        {
+            var count = _inboxMessages?.Count ?? 0;
+            _shellInboxBadge.Text = count > 0 ? $"INBOX  {count}!" : "INBOX  0";
+            _shellInboxBadge.AddThemeColorOverride("font_color", count > 0 ? new Color("f0c96a") : new Color("d7e0e4"));
+        }
+        if (_shellAdvance != null && _calendarText != null)
+            _shellAdvance.Text = _inboxMessages != null && _inboxMessages.Count > 0 ? "REVIEW INBOX" : "ADVANCE";
+    }
+
+    private void ApplyLifecyclePresentation()
+    {
+        var slate = new Color("101f2d");
+        var edge = new Color("294559");
+        var ink = new Color("f4eddf");
+        var muted = new Color("aeb9bd");
+        var green = new Color("4f9b55");
+        var gold = new Color("c99a45");
+
+        foreach (var path in new[]
+        {
+            "StartupPanel/CenterWrap/Panel",
+            "GameDayPopup/CenterWrap/Panel",
+            "PostGameRecapPopup/CenterWrap/Panel",
+            "BoxScorePopup/CenterWrap/Panel",
+        })
+        {
+            var panel = GetNodeOrNull<PanelContainer>(path);
+            if (panel != null)
+                ApplyWorkstationTheme(panel, slate, edge, ink, muted, green);
+        }
+
+        foreach (var path in new[]
+        {
+            "StartupPanel/CenterWrap/Panel/Margin/Content/Title",
+            "GameDayPopup/CenterWrap/Panel/Margin/Content/LblGameDayTitle",
+            "PostGameRecapPopup/CenterWrap/Panel/Margin/Content/LblPostGameTitle",
+        })
+        {
+            var title = GetNodeOrNull<Label>(path);
+            if (title != null)
+                title.AddThemeColorOverride("font_color", ink);
+        }
+
+        foreach (var path in new[]
+        {
+            "StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupContinue",
+            "StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupNewGame",
+            "GameDayPopup/CenterWrap/Panel/Margin/Content/ButtonRow/BtnGameDaySim",
+            "PostGameRecapPopup/CenterWrap/Panel/Margin/Content/ButtonRow/BtnPostGameBoxScore",
+        })
+        {
+            var button = GetNodeOrNull<Button>(path);
+            if (button == null)
+                continue;
+            button.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color("193d37"), green, 0, 1));
+            button.AddThemeStyleboxOverride("hover", CreateSurfaceStyle(new Color("245142"), green, 0, 1));
+        }
+
+        var warning = GetNodeOrNull<Label>("StartupPanel/CenterWrap/Panel/Margin/Content/LblStartupWarning");
+        if (warning != null)
+            warning.AddThemeColorOverride("font_color", gold);
+    }
+
     public override async void _Ready()
     {
         if (OS.GetCmdlineUserArgs().Contains("--gamecore-smoke-test", StringComparer.Ordinal))
         {
+            if (!ValidateTeamLogoAssets(out var logoError))
+            {
+                GD.PushError($"[Asset smoke] {logoError}");
+                GetTree().Quit(1);
+                return;
+            }
+            GD.Print("[Asset smoke] PASS 32 installed team logos load as nearest-filtered textures.");
             var smokeResult = await Task.Run(() => GameCoreSmokeTest.Run(GetTeamSeedPath()));
             foreach (var step in smokeResult.Steps)
                 GD.Print($"[GameCore smoke] {step}");
@@ -355,7 +1425,7 @@ public partial class DashboardController : Control
             window.MinSize = new Vector2I(1152, 648);
 
         // Existing nodes
-        _serverStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/ContinueBlock/ServerStatus");
+        _serverStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/ContinueBlock/ServerStatus");
         _calendarTitle = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/CalendarBlock/CalendarTitle");
         _calendarText = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/CalendarBlock/CalendarText");
         _mainTabs = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs");
@@ -369,7 +1439,7 @@ public partial class DashboardController : Control
         _lblUserTeam = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/FrontOfficeBlock/LblUserTeam");
         _lblGameStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/GameBlock/GameStatus");
         _lblGameNext = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/GameBlock/GameNext");
-        _continueStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/ContinueBlock/ContinueStatus");
+        _continueStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/ContinueBlock/ContinueStatus");
         _debugPanel = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/DebugPanel");
         _debugOutputLabel = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugOutputLabel");
         _stateDump = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/DebugPanel/StateDump");
@@ -381,7 +1451,7 @@ public partial class DashboardController : Control
         _simUntilSelect = GetNodeOrWarn<OptionButton>("AppMargin/MainPadding/MainLayout/ActionButtonRow/SimUntilSelect", "SimUntilSelect not found; skipping Sim Until binding.");
         _btnSimUntil = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnSimUntil", "BtnSimUntil not found; skipping Sim Until binding.");
         _btnSaveGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnSaveGame");
-        _btnToggleDebug = GetNodeOrWarn<CheckButton>("AppMargin/MainPadding/MainLayout/DebugToggleRow/BtnToggleDebug");
+        _btnToggleDebug = GetNodeOrWarn<CheckButton>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnToggleDebug");
         _btnRefresh = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnRefresh");
         _btnAdvanceDay = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnAdvanceDay");
         _btnNewGame = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnNewGame");
@@ -391,7 +1461,9 @@ public partial class DashboardController : Control
         _btnRunGameCoreSmokeTest = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/DebugPanel/DebugToolsRow/BtnRunGameCoreSmokeTest");
         _btnColumns = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/ActionButtonRow/BtnColumns", "BtnColumns not found; skipping columns menu binding.");
         _popupColumns = GetNodeOrWarn<PopupMenu>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/PopupColumns");
+        _rosterPane = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane");
         _playerReportPanel = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel");
+        _squadWorkspaceHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/SquadWorkspaceHeader");
         _lblPlayerHeader = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/LblPlayerHeader");
         _lblRosterEvaluation = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/LblRosterEvaluation");
         _rtlPlayerStats = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/PlayerReportPanel/RtlPlayerStats");
@@ -459,10 +1531,19 @@ public partial class DashboardController : Control
         CreateFranchiseSetupDialog();
         CreateFreeAgencyDialog();
         CreateFreeAgencyButton();
+        CreateTradeControls();
+        CreateTradeFinderControls();
+        CreateWaiversControls();
+        CreateLeagueTransactionsControls();
         CreateRosterContractControls();
+        RehomeRosterActions();
         CreateRosterManagementControls();
+        CreateMarketDeskDialog();
+        CreateInboxDeskDialog();
+        CreateFranchiseSettingsDialog();
         CreateTrainingCampControls();
         CreateDraftBoard();
+        CreateUdfaMarket();
 
         // NEW nodes (make sure you added these nodes under MainTabs)
         _teamList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/TeamList");
@@ -475,16 +1556,41 @@ public partial class DashboardController : Control
         _posFilter = GetNodeOrWarn<OptionButton>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/FilterRow/PosFilter");
         _btnClearFilters = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/FilterRow/BtnClearFilters");
         _rosterTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/RosterTree");
+        ConfigureRosterWorkspacePresentation();
         _depthChartPanel = GetNodeOrWarn<Control>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel");
         _depthChartSummary = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartSummary");
         _btnAutoFillDepthChart = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow/BtnAutoFillDepthChart");
-        _btnDepthChartMoveUp = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow/BtnDepthChartMoveUp");
-        _btnDepthChartMoveDown = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow/BtnDepthChartMoveDown");
         _btnDepthChartSetStarter = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow/BtnDepthChartSetStarter");
         _depthChartActionStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow/DepthChartActionStatus");
         _depthChartSelectionStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartSelectionStatus");
         _depthChartTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartTree");
+        ConfigureDepthChartWorkspacePresentation();
+        CreateDevelopmentWorkspace();
+        CreateInjuriesWorkspace();
+        CreateStaffWorkspace();
+        CreateStaffDetailProfileDialog();
+        CreateTeamHistoryWorkspace();
+        CreateTeamSeasonRecapDialog();
+        CreateTeamStandingsWorkspace();
+        CreateTeamStatsWorkspace();
+        CreateTeamFinancesWorkspace();
+        CreateContractsWorkspace();
+        CreateAccountingWorkspace();
+        CreatePracticeSquadWorkspace();
+        CreateLeagueStatsWorkspace();
+        CreateLeagueScheduleWorkspace();
+        CreateLeagueNewsWorkspace();
+        CreateLeaguePlayerSearchWorkspace();
+        CreateLeagueHistoryArchiveWorkspace();
+        CreateLeagueAwardsWorkspace();
+        CreateCollegeRankingsWorkspace();
+        CreateCollegeLeadersWorkspace();
+        CreateCollegePostseasonProjectionsWorkspace();
+        CreateCollegeBigBoardsWorkspace();
+        CreateCollegeAwardsWorkspace();
+        CreateCollegeNewsWorkspace();
         _standingsTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/StandingsTab/StandingsTree");
+        _standingsTree.ItemActivated += () => _ = OpenSelectedLeagueStandingsTeam();
         _overviewStandingsSnapshot = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/OverviewTab/OverviewContentMargin/OverviewContent/OverviewRow/OverviewLeftColumn/StandingsPanel/StandingsMargin/StandingsContent/OverviewStandingsSnapshot");
         _resultsListPanel = GetNodeOrWarn<VBoxContainer>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/ResultsListPanel");
         _resultsList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/ResultsListPanel/ResultsList");
@@ -495,6 +1601,8 @@ public partial class DashboardController : Control
         _boxScoreLeadersList = GetNodeOrWarn<ItemList>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreLeadersList");
         _btnBoxScoreBack = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ResultsTab/BoxScorePanel/BoxScoreHeaderRow/BtnBoxScoreBack");
         _scheduleList = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleList");
+        _leagueContextSummary = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueContextSummary");
+        _scheduleInspector = GetNodeOrWarn<RichTextLabel>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleInspector");
         _lblScheduleActionStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleActionRow/LblScheduleActionStatus");
         _btnScheduleAction = GetNodeOrWarn<Button>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/ScheduleTab/ScheduleActionRow/BtnScheduleAction");
         _injuriesTree = GetNodeOrWarn<Tree>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel/LeagueHubTabs/Injuries/InjuriesTree");
@@ -521,7 +1629,7 @@ public partial class DashboardController : Control
         if (_btnContinue != null)
             _btnContinue.Pressed += async () => await ContinueUntilPause();
         if (_btnInbox != null)
-            _btnInbox.Pressed += async () => await SelectMainTab(0);
+            _btnInbox.Pressed += ShowInboxDesk;
         if (_btnLeagueShortcut != null)
             _btnLeagueShortcut.Pressed += async () => await SelectMainTab(1);
         if (_btnRosterShortcut != null)
@@ -542,12 +1650,10 @@ public partial class DashboardController : Control
             _btnDepthChartViewMode.Pressed += async () => await SetRosterViewMode(true);
         if (_btnAutoFillDepthChart != null)
             _btnAutoFillDepthChart.Pressed += async () => await AutoFillDepthChart();
-        if (_btnDepthChartMoveUp != null)
-            _btnDepthChartMoveUp.Pressed += async () => await UpdateDepthChart("move_up");
-        if (_btnDepthChartMoveDown != null)
-            _btnDepthChartMoveDown.Pressed += async () => await UpdateDepthChart("move_down");
         if (_btnDepthChartSetStarter != null)
             _btnDepthChartSetStarter.Pressed += async () => await UpdateDepthChart("set_starter");
+        if (_depthChartTree is DepthChartTree draggableDepthChart)
+            draggableDepthChart.PlayerDropped += (position, playerId, targetPlayerId, insertAfter) => _ = ReorderDepthChartByDrop(position, playerId, targetPlayerId, insertAfter);
         if (_newGameTeamPicker != null)
         {
             _newGameTeamPicker.Confirmed += async () => await OnNewGameTeamPickerConfirmed();
@@ -582,6 +1688,7 @@ public partial class DashboardController : Control
         {
             _rosterTree.ColumnTitleClicked += OnRosterColumnTitleClicked;
             _rosterTree.ItemSelected += () => OnRosterItemSelected(_rosterTree.GetSelected());
+            _rosterTree.ItemActivated += () => OnRosterItemSelected(_rosterTree.GetSelected());
         }
         if (_depthChartTree != null)
             _depthChartTree.ItemSelected += () => OnDepthChartItemSelected(_depthChartTree.GetSelected());
@@ -591,6 +1698,8 @@ public partial class DashboardController : Control
             _rosterSearch.TextChanged += OnRosterSearchTextChanged;
         if (_posFilter != null)
             _posFilter.ItemSelected += OnPosFilterItemSelected;
+        if (_rosterStatusFilter != null)
+            _rosterStatusFilter.ItemSelected += OnRosterStatusFilterItemSelected;
         if (_btnClearFilters != null)
             _btnClearFilters.Pressed += OnClearFiltersPressed;
         if (_overviewActionButton != null)
@@ -598,7 +1707,7 @@ public partial class DashboardController : Control
         if (_btnGameDayCancel != null)
             _btnGameDayCancel.Pressed += CloseGameDayPopup;
         if (_btnGameDayWatch != null)
-            _btnGameDayWatch.Pressed += OnWatchGamePressed;
+            _btnGameDayWatch.Pressed += async () => await OnWatchGamePressed();
         if (_btnGameDaySim != null)
             _btnGameDaySim.Pressed += async () => await OnGameDaySimPressed();
         if (_btnPostGameBoxScore != null)
@@ -622,6 +1731,9 @@ public partial class DashboardController : Control
         if (_btnHubRefresh != null)
             _btnHubRefresh.Pressed += async () => await RefreshLeagueHub();
 
+        MakeOverviewScrollable();
+        CreateWorkstationShell();
+        ApplyLifecyclePresentation();
         UpdateRosterViewModeUi();
         if (_btnOverviewTab != null)
             _btnOverviewTab.Pressed += async () => await SelectMainTab(0);
@@ -647,6 +1759,8 @@ public partial class DashboardController : Control
         SetupHistoryView();
         ConfigureBoxScoreTree(_boxScorePopupQuarterTree);
         ConfigureBoxScoreTree(_boxScorePopupTeamStatsTree);
+        ConfigureLiveGameObserver();
+        ConfigurePostGameHub();
         SetupResultsWeekOptions(new List<string>(), "");
         SetReportPlaceholder("Select a player to view the scout report.");
         LoadRosterSplitOffset();
@@ -664,6 +1778,32 @@ public partial class DashboardController : Control
         SetMainTab(0);
 
         await EnsureNativeGameCoreAndRefresh();
+    }
+
+    private static bool ValidateTeamLogoAssets(out string error)
+    {
+        error = "";
+        var expected = new[]
+        {
+            "ATL", "BAL", "BOS", "BUF", "CHA", "CHI", "CIN", "CLE", "DAL", "DEN", "DET", "GB", "HOU", "IND", "KC", "LA",
+            "LV", "MIA", "MIN", "NOR", "NY", "ORL", "PHI", "PHX", "PIT", "POR", "SD", "SEA", "SF", "TB", "TEN", "WAS",
+        };
+        foreach (var abbreviation in expected)
+        {
+            var path = TeamLogoPath(abbreviation);
+            if (!ResourceLoader.Exists(path))
+            {
+                error = $"Missing installed team logo: {path}";
+                return false;
+            }
+            var texture = ResourceLoader.Load<Texture2D>(path);
+            if (texture == null || texture.GetWidth() <= 0 || texture.GetHeight() <= 0)
+            {
+                error = $"Unable to load team logo texture: {path}";
+                return false;
+            }
+        }
+        return true;
     }
 
     private async Task EnsureNativeGameCoreAndRefresh()
@@ -707,7 +1847,12 @@ public partial class DashboardController : Control
 
     private void UpdateNativeSourceStatus()
     {
-        SetDebugOutputStatus("Runtime: C# GameCore");
+        var diagnostics = SimulationDiagnosticsService.AnalyzeRegularSeason(_nativeGameCoreContext?.ActiveLeague);
+        var summary = diagnostics.CompletedRegularSeasonGames == 0
+            ? "regular-season diagnostics pending"
+            : $"{diagnostics.CompletedRegularSeasonGames} games · {diagnostics.PointsPerTeamGame:0.0} pts/team/game · {diagnostics.HomeWinRate:P0} home wins · max margin {diagnostics.LargestScoreMargin}";
+        SetDebugOutputStatus($"Runtime: C# GameCore | Balance: {summary}");
+        SetStateDumpText($"DEVELOPER-ONLY BALANCE DIAGNOSTICS\n{summary}\nDerived from persisted completed regular-season results; read-only and not a tuning recommendation.");
         UpdateNativeSaveLoadButtons();
     }
 
@@ -796,13 +1941,13 @@ public partial class DashboardController : Control
         if (_btnStartupContinue != null)
         {
             _btnStartupContinue.Disabled = !hasAutosave;
-            _btnStartupContinue.Text = corruptAutosave ? "Try Load Autosave Again" : "Continue / Load Autosave";
+            _btnStartupContinue.Text = corruptAutosave ? "RETRY AUTOSAVE" : "CONTINUE FRANCHISE";
         }
 
         if (_btnStartupLoadGame != null)
         {
             _btnStartupLoadGame.Disabled = !hasAnySave;
-            _btnStartupLoadGame.Text = hasAnySave ? "Load Game" : "Load Game (No Save Found)";
+            _btnStartupLoadGame.Text = hasAnySave ? "LOAD SAVE" : "LOAD SAVE (NONE FOUND)";
         }
     }
 
@@ -1288,6 +2433,7 @@ public partial class DashboardController : Control
         var teamName = team != null ? FmtString(GetFirstNonNil(team, "name"), "") : "";
         var record = team != null ? FmtString(GetFirstNonNil(team, "record"), "0-0") : "0-0";
         _dashboardTeamName = teamName;
+        _dashboardTeamAbbreviation = teamLabel;
         _dashboardTeamRecord = record;
         if (!string.IsNullOrWhiteSpace(teamLabel))
             _gmTeamLabel = teamLabel;
@@ -1302,10 +2448,12 @@ public partial class DashboardController : Control
         _dashboardCapRoom = FormatDashboardCapRoom(teamStatus);
         RenderFrontOfficeLabel();
         RenderOverviewSnapshotCards();
+        RenderFranchiseHome();
         RenderPlayoffPicture(ComposeOverviewPlayoffSummary(playoffSummary, seasonCompletionSummary), _dashboardPlayoffBracket);
         _inboxMessages = ConvertDashboardActionItems(actionItems);
         UpdateInboxList();
         UpdateContinueButtonAvailability();
+        RefreshWorkstationContext();
     }
 
     private void ApplyDashboardUnavailableState(string message)
@@ -1320,11 +2468,13 @@ public partial class DashboardController : Control
         if (_lblGameNext != null)
             _lblGameNext.Text = "Next: unavailable";
         _dashboardTeamName = "";
+        _dashboardTeamAbbreviation = "";
         _dashboardTeamRecord = "0-0";
         _dashboardRosterSize = null;
         _dashboardInjuryCount = null;
         _dashboardCapRoom = "N/A";
         _dashboardTeam = new Godot.Collections.Dictionary();
+        RefreshWorkstationContext();
         _dashboardCalendar = new Godot.Collections.Dictionary();
         _dashboardNextGame = new Godot.Collections.Dictionary();
         _dashboardRecentResults = new Godot.Collections.Array();
@@ -1336,6 +2486,7 @@ public partial class DashboardController : Control
         _teamShortById.Clear();
         RenderFrontOfficeLabel();
         RenderOverviewSnapshotCards();
+        RenderFranchiseHome();
         RenderPlayoffPicture("Playoff bracket not generated yet.", null);
         _inboxMessages = new Godot.Collections.Array();
         UpdateInboxList();
@@ -2090,6 +3241,19 @@ public partial class DashboardController : Control
             _rosterTabPanel.Visible = activeTab == ROSTER_TAB_INDEX;
 
         UpdateMainTabButtons(activeTab);
+        UpdateShellNavigation(activeTab);
+    }
+
+    private void UpdateShellNavigation(int activeTab)
+    {
+        foreach (var item in _shellPrimaryNavigation)
+        {
+            var isActive = item.Key == activeTab;
+            item.Value.AddThemeColorOverride("font_color", isActive ? new Color("f4eddf") : new Color("9cadb8"));
+            item.Value.AddThemeStyleboxOverride("normal", isActive
+                ? CreateSurfaceStyle(new Color("193d37"), new Color("4f9b55"), 0, 1)
+                : CreateSurfaceStyle(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0), 0, 0));
+        }
     }
 
     private void UpdateMainTabButtons(int activeTab)
@@ -2204,6 +3368,7 @@ public partial class DashboardController : Control
         _gmReputation = null;
         _gmJobSecurity = null;
         _dashboardTeamName = "";
+        _dashboardTeamAbbreviation = "";
         _dashboardTeamRecord = "0-0";
         _dashboardRosterSize = null;
         _dashboardInjuryCount = null;
@@ -2414,41 +3579,392 @@ public partial class DashboardController : Control
     private void CreateDraftBoard()
     {
         var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
-        if (actionRow == null) return;
+        if (actionRow == null)
+            return;
         _btnDraftBoard = new Button { Text = "Draft Board" };
         actionRow.AddChild(_btnDraftBoard);
         _btnDraftBoard.Pressed += ShowDraftBoard;
-        _draftBoardDialog = new AcceptDialog { Title = "Draft Board", MinSize = new Vector2I(820, 560) };
-        AddChild(_draftBoardDialog); _draftBoardDialog.GetOkButton().Visible = false;
+        _draftBoardDialog = new AcceptDialog { Title = "Scouting & Draft Board", MinSize = new Vector2I(1040, 650), Exclusive = false };
+        AddChild(_draftBoardDialog);
+        _draftBoardDialog.GetOkButton().Visible = false;
         var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         _draftBoardDialog.AddChild(content);
-        _draftStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_draftStatus);
-        _draftProspectList = new ItemList { CustomMinimumSize = new Vector2(760, 300), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        content.AddChild(_draftProspectList);
+        var title = new Label { Text = "SCOUTING & DRAFT BOARD" };
+        title.AddThemeFontSizeOverride("font_size", 20);
+        content.AddChild(title);
+        content.AddChild(new Label { Text = "Public combine and pro-day data are facts. Scouting ranges, traits, interviews, and reports are estimates, never hidden ratings." });
+        _draftStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_draftStatus);
+        _draftPickContext = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_draftPickContext);
+        _draftOwnedPicks = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_draftOwnedPicks);
+        _btnStartDraft = new Button { Text = "START DRAFT", TooltipText = "Open the live Draft Stage and advance CPU selections until your team is on the clock.", CustomMinimumSize = new Vector2(0, 38) };
+        _btnStartDraft.Pressed += async () => await StartDraftFromWarRoom();
+        content.AddChild(_btnStartDraft);
+        var filters = new HBoxContainer();
+        filters.AddChild(new Label { Text = "FILTER" });
+        _draftSearch = new LineEdit { PlaceholderText = "Search prospect or college", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        filters.AddChild(_draftSearch);
+        _draftPositionFilter = new OptionButton { CustomMinimumSize = new Vector2(110, 0) };
+        filters.AddChild(_draftPositionFilter);
+        content.AddChild(filters);
+        _draftSearch.TextChanged += _ => RefreshDraftProspectList();
+        _draftPositionFilter.ItemSelected += _ => RefreshDraftProspectList();
+        var body = new HSplitContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, SplitOffset = 520 };
+        content.AddChild(body);
+        var board = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        board.AddChild(new Label { Text = "PROSPECT BOARD" });
+        _draftProspectList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        board.AddChild(_draftProspectList);
         _draftProspectList.ItemSelected += index => { _selectedDraftProspectId = _draftProspectList.GetItemMetadata((int)index).ToString(); UpdateDraftProspectDetail(); UpdateDraftStatus(); };
-        _draftProspectDetail = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(760, 120), FitContent = true };
-        content.AddChild(_draftProspectDetail);
-        _btnMakeDraftPick = new Button { Text = "Make Pick", Disabled = true }; content.AddChild(_btnMakeDraftPick);
+        board.AddChild(new Label { Text = "DRAFT ORDER" });
+        _draftOrderList = new ItemList { CustomMinimumSize = new Vector2(0, 130) };
+        board.AddChild(_draftOrderList);
+        board.AddChild(new Label { Text = "RECENT PICKS / LEAGUE WIRE" });
+        _draftRecentPicks = new ItemList { CustomMinimumSize = new Vector2(0, 90) };
+        board.AddChild(_draftRecentPicks);
+        body.AddChild(board);
+        var inspector = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        inspector.AddChild(new Label { Text = "TEAM DRAFT BOARD · MAX 100" });
+        var boardFilters = new HBoxContainer(); inspector.AddChild(boardFilters);
+        _teamDraftBoardPositionFilter = new OptionButton { CustomMinimumSize = new Vector2(130, 0) }; _teamDraftBoardPositionFilter.AddItem("All positions"); _teamDraftBoardPositionFilter.ItemSelected += _ => RefreshTeamDraftBoard(_nativeGameCoreContext?.ActiveLeague); boardFilters.AddChild(_teamDraftBoardPositionFilter);
+        _teamDraftBoardConfidenceFilter = new OptionButton { CustomMinimumSize = new Vector2(140, 0) }; foreach (var label in new[] { "All confidence", "High", "Medium", "Low" }) _teamDraftBoardConfidenceFilter.AddItem(label); _teamDraftBoardConfidenceFilter.ItemSelected += _ => RefreshTeamDraftBoard(_nativeGameCoreContext?.ActiveLeague); boardFilters.AddChild(_teamDraftBoardConfidenceFilter);
+        _teamDraftBoardFilterSummary = new Label { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; boardFilters.AddChild(_teamDraftBoardFilterSummary);
+        _teamDraftBoardList = new TeamDraftBoardList { CustomMinimumSize = new Vector2(0, 130), AllowReselect = true };
+        _teamDraftBoardList.ItemSelected += SelectTeamDraftBoardProspect;
+        ((TeamDraftBoardList)_teamDraftBoardList).ProspectDropped += MoveTeamDraftBoardProspect;
+        inspector.AddChild(_teamDraftBoardList);
+        var boardActions = new HBoxContainer(); inspector.AddChild(boardActions);
+        var addBoard = new Button { Text = "ADD / REMOVE" }; addBoard.Pressed += async () => await ToggleSelectedTeamDraftBoardProspect(); boardActions.AddChild(addBoard);
+        boardActions.AddChild(new Label { Text = "Drag prospects to rank them" });
+        var boardContext = new HBoxContainer(); inspector.AddChild(boardContext);
+        _teamDraftBoardTag = new OptionButton { CustomMinimumSize = new Vector2(105, 0) }; _teamDraftBoardTag.AddItem("No tag"); _teamDraftBoardTag.AddItem("Target"); _teamDraftBoardTag.AddItem("Avoid"); boardContext.AddChild(_teamDraftBoardTag);
+        _teamDraftBoardTier = new LineEdit { PlaceholderText = "Tier (e.g. Day One)", MaxLength = 32, CustomMinimumSize = new Vector2(150, 0) }; boardContext.AddChild(_teamDraftBoardTier);
+        _teamDraftBoardNote = new LineEdit { PlaceholderText = "Private note (240 characters)", MaxLength = 240, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; boardContext.AddChild(_teamDraftBoardNote);
+        var saveContext = new Button { Text = "SAVE CONTEXT" }; saveContext.Pressed += async () => await SaveSelectedTeamDraftBoardContext(); boardContext.AddChild(saveContext);
+        inspector.AddChild(new Label { Text = "PROSPECT INSPECTOR" });
+        _draftProspectDetail = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        inspector.AddChild(_draftProspectDetail);
+        var draftActions = new HBoxContainer(); inspector.AddChild(draftActions);
+        _btnMakeDraftPick = new Button { Text = "MAKE DRAFT PICK", Disabled = true, CustomMinimumSize = new Vector2(0, 34), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        draftActions.AddChild(_btnMakeDraftPick);
         _btnMakeDraftPick.Pressed += MakeDraftPick;
+        _btnTradeCurrentDraftPick = new Button { Text = "SHOP CURRENT PICK", Disabled = true, Visible = false, CustomMinimumSize = new Vector2(0, 34), TooltipText = "Open the existing Trade Block / Finder with the current owned pick selected. No offer is generated until you submit it." };
+        _btnTradeCurrentDraftPick.Pressed += OpenCurrentDraftPickTradeMarket;
+        draftActions.AddChild(_btnTradeCurrentDraftPick);
+        body.AddChild(inspector);
+        CreateDraftAnnouncementDialog();
     }
 
-    private void ShowDraftBoard() { RefreshDraftBoard(); _draftBoardDialog.PopupCentered(new Vector2I(820, 560)); }
+    private void CreateDraftAnnouncementDialog()
+    {
+        _draftAnnouncementDialog = new AcceptDialog { Title = "Draft Selection", MinSize = new Vector2I(620, 420), Exclusive = true };
+        AddChild(_draftAnnouncementDialog);
+        _draftAnnouncementDialog.GetOkButton().Text = "NEXT PICK";
+        _draftAnnouncementDialog.Confirmed += ShowNextDraftAnnouncement;
+        _draftAnnouncementDialog.Canceled += () => _pendingDraftAnnouncements.Clear();
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _draftAnnouncementDialog.AddChild(content);
+        _draftAnnouncementKicker = HomeLabel("DRAFT SELECTION", 13, new Color("f0c96a")); content.AddChild(_draftAnnouncementKicker);
+        var identity = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; content.AddChild(identity);
+        _draftAnnouncementLogo = CreateTeamLogoTexture(new Vector2(112, 112)); identity.AddChild(_draftAnnouncementLogo);
+        _draftAnnouncementHeadline = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _draftAnnouncementHeadline.AddThemeFontSizeOverride("font_size", 24); identity.AddChild(_draftAnnouncementHeadline);
+        _draftAnnouncementBody = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 165), SizeFlagsVertical = Control.SizeFlags.ExpandFill }; content.AddChild(_draftAnnouncementBody);
+        var controls = new HBoxContainer(); content.AddChild(controls);
+        _draftShortAnnouncements = new CheckBox { Text = "Use short announcements for subsequent picks", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _draftShortAnnouncements.Toggled += value => { if (!_syncingDraftAnnouncementPreference) _ = SaveDraftAnnouncementPreference(value); }; controls.AddChild(_draftShortAnnouncements);
+        var skipRemaining = new Button { Text = "SKIP REMAINING" }; skipRemaining.Pressed += () => { _pendingDraftAnnouncements.Clear(); _draftAnnouncementDialog.Hide(); RefreshDraftBoard(); }; controls.AddChild(skipRemaining);
+        ApplyWorkstationTheme(_draftAnnouncementDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private async Task SaveDraftAnnouncementPreference(bool useShortAnnouncements)
+    {
+        if (_nativeGameCoreContext?.ActiveLeague?.Draft == null)
+            return;
+        _nativeGameCoreContext.ActiveLeague.Draft.UseShortDraftAnnouncements = useShortAnnouncements;
+        await SaveNativeAutosave("Draft announcement preference saved.");
+    }
+
+    private void QueueDraftAnnouncements(IEnumerable<DraftClassRecapEntry> entries)
+    {
+        foreach (var entry in entries ?? Enumerable.Empty<DraftClassRecapEntry>())
+            if (entry != null) _pendingDraftAnnouncements.Enqueue(entry);
+        if (_pendingDraftAnnouncements.Count > 0 && _draftAnnouncementDialog?.Visible != true)
+            ShowNextDraftAnnouncement();
+    }
+
+    private void ShowNextDraftAnnouncement()
+    {
+        if (_pendingDraftAnnouncements.Count == 0)
+        {
+            _draftAnnouncementDialog.Hide();
+            RefreshDraftBoard();
+            return;
+        }
+        var entry = _pendingDraftAnnouncements.Dequeue();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, entry.TeamId, StringComparison.OrdinalIgnoreCase));
+        var shortMode = league?.Draft?.UseShortDraftAnnouncements == true || entry.OverallPick > 10;
+        _syncingDraftAnnouncementPreference = true;
+        _draftShortAnnouncements.ButtonPressed = league?.Draft?.UseShortDraftAnnouncements == true;
+        _syncingDraftAnnouncementPreference = false;
+        _draftAnnouncementKicker.Text = shortMode ? "QUICK PICK ANNOUNCEMENT" : "FEATURED TOP-TEN SELECTION";
+        _draftAnnouncementHeadline.Text = $"WITH PICK #{entry.OverallPick}\n{team?.Name?.ToUpperInvariant() ?? entry.TeamName.ToUpperInvariant()} SELECT\n{entry.Name.ToUpperInvariant()} · {entry.Position}";
+        var publicRank = entry.PublicBoardRank > 0 ? $"Public Analyst Board rank: #{entry.PublicBoardRank}" : "Public Analyst Board rank: outside the published top 50";
+        _draftAnnouncementBody.Text = shortMode
+            ? $"{entry.College}\nRound {entry.Round}, pick {entry.PickInRound}."
+            : $"{entry.College} · Age {entry.Age}\nRound {entry.Round}, pick {entry.PickInRound}\n{publicRank}\nPublic combine {entry.CombineScore}/100 · pro day {entry.ProDayScore}/100\n\n{(string.IsNullOrWhiteSpace(entry.PublicReaction) ? "No notable public-board reaction accompanied this selection." : entry.PublicReaction)}";
+        _draftAnnouncementLogo.Texture = LoadTeamLogo(team?.Abbreviation ?? "");
+        _draftAnnouncementDialog.GetOkButton().Text = _pendingDraftAnnouncements.Count > 0 ? "NEXT PICK" : "RETURN TO DRAFT";
+        _draftAnnouncementDialog.PopupCentered(new Vector2I(620, 420));
+    }
+
+    private void ShowDraftBoard() { RefreshDraftBoard(); _draftBoardDialog.PopupCentered(new Vector2I(1040, 650)); }
     private void RefreshDraftBoard()
     {
-        EnsureNativeGameCoreServices(); var league = _nativeGameCoreContext?.ActiveLeague;
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
         if (league == null) { _draftStatus.Text = "Start or load a franchise to view the draft board."; return; }
-        var draft = new DraftService(_nativeGameCoreContext); draft.PrepareDraftBoard(); if (string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase)) draft.AdvanceCpuPicksUntilUserTurn(); _draftProspectList.Clear();
-        var evaluations = new ProspectEvaluationService(_nativeGameCoreContext);
-        foreach (var p in league.CollegeProspects.Where(p => p != null && string.IsNullOrWhiteSpace(p.DraftedByTeamId)).OrderByDescending(p => p.ScoutedOverall).ThenBy(p => p.Name))
-        {
-            var evaluation = evaluations.GetEvaluation(p.ProspectId);
-            _draftProspectList.AddItem($"{p.Position,-4} {p.Name,-24} Est {evaluation.EstimatedOverall,-5} POT {evaluation.EstimatedPotential,-5} {evaluation.Confidence} confidence");
-            _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, p.ProspectId);
-        }
+        var draft = new DraftService(_nativeGameCoreContext);
+        draft.PrepareDraftBoard();
+        var liveDraft = string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase);
+        var preDraft = string.Equals(league.Calendar?.Phase, ScheduleService.DraftPrepPendingPhase, StringComparison.OrdinalIgnoreCase);
+        _btnStartDraft.Visible = preDraft;
+        _btnStartDraft.Disabled = !preDraft;
+        if (liveDraft)
+            draft.AdvanceCpuPicksUntilUserTurn();
+        RefreshDraftPositionFilter(league);
         _selectedDraftProspectId = "";
-        if (_draftProspectDetail != null)
-            _draftProspectDetail.Text = "Select a prospect to review public combine/pro-day results and your scouting evaluation. Estimates are not hidden ratings.";
+        RefreshDraftProspectList();
+        RefreshTeamDraftBoard(league);
+        RefreshDraftOrder(league, draft.GetCurrentPick());
+        RefreshOwnedDraftPicks(league);
+        RefreshDraftRecentPicks(league);
+        _draftProspectDetail.Text = "Select a prospect to review public facts and scouting estimates. Hidden player ratings are never shown here.";
         UpdateDraftStatus();
+    }
+
+    private void RefreshDraftPositionFilter(LeagueState league)
+    {
+        var selected = _draftPositionFilter.Selected >= 0 ? _draftPositionFilter.GetItemText(_draftPositionFilter.Selected) : "All positions";
+        _draftPositionFilter.Clear();
+        _draftPositionFilter.AddItem("All positions");
+        foreach (var position in league.CollegeProspects.Where(prospect => prospect != null).Select(prospect => prospect.Position).Where(position => !string.IsNullOrWhiteSpace(position)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(position => position, StringComparer.OrdinalIgnoreCase))
+            _draftPositionFilter.AddItem(position);
+        var index = Enumerable.Range(0, _draftPositionFilter.ItemCount).FirstOrDefault(item => string.Equals(_draftPositionFilter.GetItemText(item), selected, StringComparison.OrdinalIgnoreCase));
+        _draftPositionFilter.Select(index);
+    }
+
+    private void RefreshDraftProspectList()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null || _draftProspectList == null || _draftPositionFilter == null)
+            return;
+        var search = _draftSearch?.Text?.Trim() ?? "";
+        var position = _draftPositionFilter.GetItemText(Math.Max(0, _draftPositionFilter.Selected));
+        _draftProspectList.Clear();
+        var evaluations = new ProspectEvaluationService(_nativeGameCoreContext);
+        foreach (var prospect in league.CollegeProspects.Where(prospect => prospect != null && string.IsNullOrWhiteSpace(prospect.DraftedByTeamId))
+                     .Where(prospect => string.Equals(position, "All positions", StringComparison.OrdinalIgnoreCase) || string.Equals(prospect.Position, position, StringComparison.OrdinalIgnoreCase))
+                     .Where(prospect => string.IsNullOrWhiteSpace(search) || prospect.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || prospect.College.Contains(search, StringComparison.OrdinalIgnoreCase))
+                     .OrderByDescending(prospect => prospect.ScoutedOverall).ThenBy(prospect => prospect.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var evaluation = evaluations.GetEvaluation(prospect.ProspectId);
+            _draftProspectList.AddItem($"{prospect.Position,-4} {prospect.Name,-24} EST OVR {evaluation.EstimatedOverall,-5} POT {evaluation.EstimatedPotential,-5} {evaluation.Confidence}");
+            _draftProspectList.SetItemMetadata(_draftProspectList.ItemCount - 1, prospect.ProspectId);
+        }
+    }
+
+    private void RefreshDraftOrder(LeagueState league, DraftPickState currentPick)
+    {
+        _draftOrderList.Clear();
+        foreach (var pick in league.Draft.Picks.Where(pick => pick != null).OrderBy(pick => pick.OverallPick).Take(32))
+        {
+            var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase));
+            var marker = currentPick != null && pick.OverallPick == currentPick.OverallPick ? "ON CLOCK " : string.IsNullOrWhiteSpace(pick.ProspectId) ? "" : "DONE ";
+            _draftOrderList.AddItem($"{marker}#{pick.OverallPick,3} R{pick.Round} {team?.Abbreviation ?? pick.TeamId}");
+        }
+    }
+
+    private void RefreshDraftRecentPicks(LeagueState league)
+    {
+        if (_draftRecentPicks == null)
+            return;
+        _draftRecentPicks.Clear();
+        var recent = (league?.Draft?.RecapEntries ?? new List<DraftClassRecapEntry>()).OrderByDescending(entry => entry.OverallPick).Take(8).OrderBy(entry => entry.OverallPick).ToList();
+        foreach (var entry in recent)
+        {
+            var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate.TeamId, entry.TeamId, StringComparison.OrdinalIgnoreCase));
+            var reaction = string.IsNullOrWhiteSpace(entry.PublicReaction) ? "" : $"\n      {entry.PublicReaction}";
+            _draftRecentPicks.AddItem($"#{entry.OverallPick,3}  {team?.Abbreviation ?? entry.TeamId,-4}  {entry.Position,-4} {entry.Name}{reaction}");
+        }
+        if (recent.Count == 0)
+            _draftRecentPicks.AddItem("The live draft wire will populate after the first selection.");
+    }
+
+    private void RefreshTeamDraftBoard(LeagueState league)
+    {
+        if (_teamDraftBoardList == null)
+            return;
+        RefreshTeamDraftBoardPositionFilter(league);
+        _teamDraftBoardList.Clear();
+        var board = league?.Draft?.UserBoardProspectIds ?? new List<string>();
+        var visible = 0;
+        var positionFilter = _teamDraftBoardPositionFilter?.Selected > 0 ? _teamDraftBoardPositionFilter.GetItemText(_teamDraftBoardPositionFilter.Selected) : "";
+        var confidenceFilter = _teamDraftBoardConfidenceFilter?.Selected > 0 ? _teamDraftBoardConfidenceFilter.GetItemText(_teamDraftBoardConfidenceFilter.Selected) : "";
+        var evaluations = new ProspectEvaluationService(_nativeGameCoreContext);
+        var draftService = new DraftService(_nativeGameCoreContext);
+        for (var boardIndex = 0; boardIndex < board.Count; boardIndex++)
+        {
+            var prospectId = board[boardIndex];
+            var prospect = league.CollegeProspects.FirstOrDefault(candidate => string.Equals(candidate?.ProspectId, prospectId, StringComparison.OrdinalIgnoreCase));
+            if (prospect == null || !string.IsNullOrWhiteSpace(prospect.DraftedByTeamId))
+                continue;
+            var evaluation = evaluations.GetEvaluation(prospect.ProspectId);
+            var confidence = evaluation?.Confidence?.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "Low";
+            if (!string.IsNullOrWhiteSpace(positionFilter) && !string.Equals(prospect.Position, positionFilter, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (!string.IsNullOrWhiteSpace(confidenceFilter) && !string.Equals(confidence, confidenceFilter, StringComparison.OrdinalIgnoreCase))
+                continue;
+            visible++;
+            league.Draft.UserBoardTags.TryGetValue(prospect.ProspectId, out var tag);
+            league.Draft.UserBoardTiers.TryGetValue(prospect.ProspectId, out var tier);
+            var tagText = string.IsNullOrWhiteSpace(tag) ? "" : $" [{tag.ToUpperInvariant()}]";
+            var tierText = string.IsNullOrWhiteSpace(tier) ? "" : $" · {tier}";
+            var context = draftService.GetUserBoardNeedContext(prospect.ProspectId);
+            _teamDraftBoardList.AddItem($"{boardIndex + 1,2}. {prospect.Position,-4} {prospect.Name}{tagText}{tierText} · NEED {context?.NeedLevel?.ToUpperInvariant() ?? "N/A"} · CONF {confidence.ToUpperInvariant()} · {prospect.College}");
+            _teamDraftBoardList.SetItemMetadata(_teamDraftBoardList.ItemCount - 1, prospect.ProspectId);
+        }
+        if (_teamDraftBoardFilterSummary != null)
+            _teamDraftBoardFilterSummary.Text = $"Showing {visible} of {board.Count}";
+        if (visible == 0)
+            _teamDraftBoardList.AddItem(board.Count == 0 ? "Add prospects from the main board to create your private ranking." : "No team-board prospects match these filters.");
+    }
+
+    private void RefreshTeamDraftBoardPositionFilter(LeagueState league)
+    {
+        if (_teamDraftBoardPositionFilter == null)
+            return;
+        var selected = _teamDraftBoardPositionFilter.Selected > 0 ? _teamDraftBoardPositionFilter.GetItemText(_teamDraftBoardPositionFilter.Selected) : "All positions";
+        var positions = (league?.Draft?.UserBoardProspectIds ?? new List<string>())
+            .Select(id => league?.CollegeProspects?.FirstOrDefault(prospect => string.Equals(prospect?.ProspectId, id, StringComparison.OrdinalIgnoreCase))?.Position)
+            .Where(position => !string.IsNullOrWhiteSpace(position)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(position => position, StringComparer.OrdinalIgnoreCase).ToList();
+        _teamDraftBoardPositionFilter.Clear();
+        _teamDraftBoardPositionFilter.AddItem("All positions");
+        foreach (var position in positions) _teamDraftBoardPositionFilter.AddItem(position);
+        for (var index = 0; index < _teamDraftBoardPositionFilter.ItemCount; index++)
+            if (string.Equals(_teamDraftBoardPositionFilter.GetItemText(index), selected, StringComparison.OrdinalIgnoreCase)) { _teamDraftBoardPositionFilter.Select(index); return; }
+        _teamDraftBoardPositionFilter.Select(0);
+    }
+
+    private async Task ToggleSelectedTeamDraftBoardProspect()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedDraftProspectId)) { _draftStatus.Text = "Select a prospect first."; return; }
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var draft = new DraftService(_nativeGameCoreContext);
+        var onBoard = league?.Draft?.UserBoardProspectIds?.Contains(_selectedDraftProspectId, StringComparer.OrdinalIgnoreCase) == true;
+        var changed = onBoard ? draft.RemoveFromUserBoard(_selectedDraftProspectId) : draft.AddToUserBoard(_selectedDraftProspectId);
+        _draftStatus.Text = draft.LastMessage;
+        if (!changed) return;
+        await SaveNativeAutosave("Team draft board saved.");
+        RefreshTeamDraftBoard(league);
+    }
+
+    private async Task MoveSelectedTeamDraftBoardProspect(int direction)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedDraftProspectId)) { _draftStatus.Text = "Select a team-board prospect first."; return; }
+        var draft = new DraftService(_nativeGameCoreContext);
+        if (!draft.MoveOnUserBoard(_selectedDraftProspectId, direction)) { _draftStatus.Text = draft.LastMessage; return; }
+        await SaveNativeAutosave("Team draft board order saved.");
+        RefreshTeamDraftBoard(_nativeGameCoreContext.ActiveLeague);
+        _draftStatus.Text = draft.LastMessage;
+    }
+
+    private async void MoveTeamDraftBoardProspect(string prospectId, string targetProspectId, bool insertAfter)
+    {
+        var draft = new DraftService(_nativeGameCoreContext);
+        if (!draft.MoveOnUserBoard(prospectId, targetProspectId, insertAfter)) { _draftStatus.Text = draft.LastMessage; return; }
+        _selectedDraftProspectId = prospectId;
+        await SaveNativeAutosave("Team draft board order saved.");
+        RefreshTeamDraftBoard(_nativeGameCoreContext.ActiveLeague);
+        SelectTeamDraftBoardProspectById(prospectId);
+        _draftStatus.Text = draft.LastMessage;
+    }
+
+    private void SelectTeamDraftBoardProspectById(string prospectId)
+    {
+        for (var index = 0; index < _teamDraftBoardList.ItemCount; index++)
+        {
+            var metadata = _teamDraftBoardList.GetItemMetadata(index);
+            if (metadata.VariantType == Variant.Type.String && metadata.AsString().Equals(prospectId, StringComparison.OrdinalIgnoreCase))
+            {
+                _teamDraftBoardList.Select(index);
+                return;
+            }
+        }
+    }
+
+    private void SelectTeamDraftBoardProspect(long index)
+    {
+        var metadata = _teamDraftBoardList.GetItemMetadata((int)index);
+        if (IsNil(metadata)) return;
+        _selectedDraftProspectId = metadata.AsString();
+        var draft = _nativeGameCoreContext?.ActiveLeague?.Draft;
+        var tag = draft?.UserBoardTags != null && draft.UserBoardTags.TryGetValue(_selectedDraftProspectId, out var savedTag) ? savedTag : "";
+        _teamDraftBoardTag.Select(string.Equals(tag, "target", StringComparison.OrdinalIgnoreCase) ? 1 : string.Equals(tag, "avoid", StringComparison.OrdinalIgnoreCase) ? 2 : 0);
+        _teamDraftBoardTier.Text = draft?.UserBoardTiers != null && draft.UserBoardTiers.TryGetValue(_selectedDraftProspectId, out var tier) ? tier : "";
+        _teamDraftBoardNote.Text = draft?.UserBoardNotes != null && draft.UserBoardNotes.TryGetValue(_selectedDraftProspectId, out var note) ? note : "";
+        UpdateDraftProspectDetail();
+        var need = new DraftService(_nativeGameCoreContext).GetUserBoardNeedContext(_selectedDraftProspectId);
+        if (need != null)
+            _draftProspectDetail.Text += $"\n\nTEAM CONTEXT\nNeed: {need.NeedLevel} · Role path: {need.RolePath}\n{need.Explanation}";
+        UpdateDraftStatus();
+    }
+
+    private async Task SaveSelectedTeamDraftBoardContext()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedDraftProspectId)) { _draftStatus.Text = "Select a team-board prospect first."; return; }
+        var tag = _teamDraftBoardTag.Selected switch { 1 => "target", 2 => "avoid", _ => "" };
+        var draft = new DraftService(_nativeGameCoreContext);
+        if (!draft.SetUserBoardContext(_selectedDraftProspectId, tag, _teamDraftBoardNote.Text, _teamDraftBoardTier.Text)) { _draftStatus.Text = draft.LastMessage; return; }
+        await SaveNativeAutosave("Private team draft board context saved.");
+        RefreshTeamDraftBoard(_nativeGameCoreContext.ActiveLeague);
+        _draftStatus.Text = draft.LastMessage;
+    }
+
+    private void RefreshOwnedDraftPicks(LeagueState league)
+    {
+        if (_draftOwnedPicks == null)
+            return;
+        var owned = (league?.Draft?.Picks ?? new List<DraftPickState>())
+            .Where(pick => pick != null && string.Equals(pick.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(pick.ProspectId))
+            .OrderBy(pick => pick.OverallPick)
+            .Select(pick => $"R{pick.Round}.{pick.PickInRound} (#{pick.OverallPick})")
+            .ToList();
+        _draftOwnedPicks.Text = owned.Count == 0
+            ? "YOUR REMAINING PICKS: none"
+            : $"YOUR REMAINING PICKS: {string.Join("  ·  ", owned)}";
+    }
+
+    private async Task StartDraftFromWarRoom()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null || !string.Equals(league.Calendar?.Phase, ScheduleService.DraftPrepPendingPhase, StringComparison.OrdinalIgnoreCase))
+        {
+            _draftStatus.Text = "The draft can only be started from Draft Prep.";
+            return;
+        }
+        _btnStartDraft.Disabled = true;
+        _draftStatus.Text = "Opening the live Draft Stage…";
+        var response = new ContinueService(_nativeGameCoreContext).Continue();
+        if (response?.Ok != true || !string.Equals(league.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase))
+        {
+            _draftStatus.Text = string.IsNullOrWhiteSpace(response?.Error) ? "The draft could not be opened." : response.Error;
+            _btnStartDraft.Disabled = false;
+            return;
+        }
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft Stage opened.", autosaveToo: true);
+        RefreshDraftBoard();
     }
 
     private void UpdateDraftProspectDetail()
@@ -2459,15 +3975,35 @@ public partial class DashboardController : Control
         var evaluation = new ProspectEvaluationService(_nativeGameCoreContext).GetEvaluation(_selectedDraftProspectId);
         _draftProspectDetail.Text = evaluation == null
             ? "Prospect evaluation unavailable."
-            : $"Known facts\n{evaluation.KnownFacts}\n\nTeam evaluation (estimate)\nOVR: {evaluation.EstimatedOverall} | Potential: {evaluation.EstimatedPotential} | {evaluation.Confidence} confidence\nTrait: {evaluation.Trait}\nInterview: {evaluation.Interview}\n{evaluation.Report}";
+            : $"PUBLIC FACTS\n{evaluation.KnownFacts}\n\n{new CollegeUniverseService(_nativeGameCoreContext).GetCompactProspectContext(_selectedDraftProspectId)}\n\nTEAM SCOUTING ESTIMATE - NOT HIDDEN RATINGS\nEstimated OVR range: {evaluation.EstimatedOverall}\nEstimated potential range: {evaluation.EstimatedPotential}\nConfidence: {evaluation.Confidence}\n\nTRAIT\n{evaluation.Trait}\n\nINTERVIEW\n{evaluation.Interview}\n\nSCOUT REPORT\n{evaluation.Report}";
     }
     private void UpdateDraftStatus()
     {
         var league = _nativeGameCoreContext?.ActiveLeague; var draft = new DraftService(_nativeGameCoreContext); var pick = draft.GetCurrentPick();
-        var canPick = pick != null && string.Equals(league?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(_selectedDraftProspectId);
+        var liveDraft = string.Equals(league?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase);
+        var userOwnsCurrentPick = pick != null && string.Equals(pick.TeamId, league?.UserTeamId, StringComparison.OrdinalIgnoreCase);
+        var canPick = userOwnsCurrentPick && liveDraft && !string.IsNullOrWhiteSpace(_selectedDraftProspectId);
         _btnMakeDraftPick.Disabled = !canPick; _draftStatus.Text = pick == null ? "Draft complete." : string.Equals(pick.TeamId, league?.UserTeamId, StringComparison.OrdinalIgnoreCase) ? $"Your pick: Round {pick.Round}, Pick {pick.PickInRound}. { (canPick ? "Select this prospect." : "Choose a prospect.") }" : $"CPU team is on the clock for Round {pick.Round}, Pick {pick.PickInRound}.";
+        if (_btnTradeCurrentDraftPick != null) { _btnTradeCurrentDraftPick.Visible = liveDraft; _btnTradeCurrentDraftPick.Disabled = !userOwnsCurrentPick; }
+        if (_draftPickContext != null)
+            _draftPickContext.Text = pick == null ? "Draft order complete." : $"PICK CONTEXT: Overall #{pick.OverallPick} | Round {pick.Round}, pick {pick.PickInRound} | Owner {league?.Teams.FirstOrDefault(team => string.Equals(team?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase))?.Name ?? pick.TeamId}";
     }
-    private async void MakeDraftPick() { var league = _nativeGameCoreContext.ActiveLeague; var draft = new DraftService(_nativeGameCoreContext); if (draft.MakePick(league.UserTeamId, _selectedDraftProspectId)) { await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft pick saved.", true); RefreshDraftBoard(); } else { _draftStatus.Text = draft.LastMessage; } }
+
+    private void OpenCurrentDraftPickTradeMarket()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var pick = new DraftService(_nativeGameCoreContext).GetCurrentPick();
+        if (pick == null || !string.Equals(league?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase) || !string.Equals(pick.TeamId, league?.UserTeamId, StringComparison.OrdinalIgnoreCase))
+        {
+            _draftStatus.Text = "Only the current unused pick owned by your team can be opened from the live Draft Stage.";
+            return;
+        }
+        _tradeFinderSelectedAssets.Clear();
+        _tradeFinderSelectedAssets.Add($"K:{pick.OverallPick}");
+        ShowTradeFinderDialog();
+        SetPrimaryStatus($"Current pick #{pick.OverallPick} is selected. Submit the asset only if you want clubs to generate concrete offers.");
+    }
+    private async void MakeDraftPick() { var league = _nativeGameCoreContext.ActiveLeague; var draft = new DraftService(_nativeGameCoreContext); var recapCount = league.Draft?.RecapEntries?.Count ?? 0; if (draft.MakePick(league.UserTeamId, _selectedDraftProspectId)) { var announcements = (league.Draft?.RecapEntries ?? new List<DraftClassRecapEntry>()).Skip(recapCount).OrderBy(entry => entry.OverallPick).ToList(); await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Draft pick saved.", true); RefreshDraftBoard(); QueueDraftAnnouncements(announcements); } else { _draftStatus.Text = draft.LastMessage; } }
 
     private void CreateRosterContractControls()
     {
@@ -2478,18 +4014,18 @@ public partial class DashboardController : Control
         _btnOfferExtension = new Button { Text = "Offer Extension" };
         _btnApplyFranchiseTag = new Button { Text = "Apply Franchise Tag", TooltipText = "Available only during the Franchise Tag phase." };
         _btnReleaseSelectedPlayer = new Button { Text = "Release Selected" };
-        var waiveSelectedPlayer = new Button { Text = "Waive Selected" };
-        var moveSelectedPlayerToIr = new Button { Text = "Move to IR" };
+        _btnWaiveSelectedPlayer = new Button { Text = "Waive Selected" };
+        _btnMoveSelectedPlayerToIr = new Button { Text = "Move to IR" };
         actionRow.AddChild(_btnOfferExtension);
         actionRow.AddChild(_btnApplyFranchiseTag);
         actionRow.AddChild(_btnReleaseSelectedPlayer);
-        actionRow.AddChild(waiveSelectedPlayer);
-        actionRow.AddChild(moveSelectedPlayerToIr);
+        actionRow.AddChild(_btnWaiveSelectedPlayer);
+        actionRow.AddChild(_btnMoveSelectedPlayerToIr);
         _btnOfferExtension.Pressed += ShowExtensionOffer;
         _btnApplyFranchiseTag.Pressed += async () => await ApplyFranchiseTagToSelectedPlayer();
-        _btnReleaseSelectedPlayer.Pressed += async () => await ReleaseSelectedPlayer();
-        waiveSelectedPlayer.Pressed += async () => await WaiveSelectedPlayer();
-        moveSelectedPlayerToIr.Pressed += async () => await MoveSelectedPlayerToIr();
+        _btnReleaseSelectedPlayer.Pressed += ShowReleaseConfirmation;
+        _btnWaiveSelectedPlayer.Pressed += async () => await WaiveSelectedPlayer();
+        _btnMoveSelectedPlayerToIr.Pressed += async () => await MoveSelectedPlayerToIr();
 
         _extensionDialog = new AcceptDialog { Title = "Offer Contract Extension", MinSize = new Vector2I(480, 300) };
         AddChild(_extensionDialog);
@@ -2507,6 +4043,48 @@ public partial class DashboardController : Control
         _extensionStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         content.AddChild(_extensionStatus);
         _extensionDialog.Confirmed += async () => await SubmitExtensionOffer();
+
+        _releaseDialog = new ConfirmationDialog { Title = "Confirm Player Release", MinSize = new Vector2I(560, 390) };
+        _releaseDialog.GetOkButton().Text = "RELEASE PLAYER";
+        AddChild(_releaseDialog);
+        _releaseDetails = new RichTextLabel { BbcodeEnabled = false, FitContent = false, CustomMinimumSize = new Vector2(520, 285), AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        _releaseDialog.AddChild(_releaseDetails);
+        _releaseDialog.Confirmed += async () => await ConfirmSelectedPlayerRelease();
+
+        _rosterContextMenu = new PopupMenu { Name = "RosterContextMenu" };
+        _rosterContractMenu = new PopupMenu { Name = "RosterContractActions" };
+        AddChild(_rosterContextMenu);
+        _rosterContextMenu.AddSubmenuNodeItem("Contract", _rosterContractMenu);
+        _rosterContractMenu.AddItem("Offer Extension", 1);
+        _rosterContractMenu.AddItem("Release", 2);
+        _rosterContractMenu.IdPressed += id =>
+        {
+            if (id == 1) ShowExtensionOffer();
+            else if (id == 2) ShowReleaseConfirmation();
+        };
+        if (_rosterTree != null) _rosterTree.GuiInput += OnRosterTreeContextInput;
+    }
+
+    private void RehomeRosterActions()
+    {
+        if (_playerReportPanel == null || _squadPlayerActions != null)
+            return;
+
+        _squadPlayerActions = new HBoxContainer { Name = "SquadPlayerActions" };
+        _squadPlayerActions.AddThemeConstantOverride("separation", 6);
+        _playerReportPanel.AddChild(_squadPlayerActions);
+        _playerReportPanel.MoveChild(_squadPlayerActions, 0);
+        var backToRoster = new Button { Text = "‹  BACK TO ROSTER", CustomMinimumSize = new Vector2(150, 28) };
+        backToRoster.Pressed += () => SetReportPlaceholder("Select a player to open the player profile.");
+        _squadPlayerActions.AddChild(backToRoster);
+        foreach (var action in new[] { _btnOfferExtension, _btnApplyFranchiseTag, _btnReleaseSelectedPlayer, _btnWaiveSelectedPlayer, _btnMoveSelectedPlayerToIr })
+        {
+            if (action == null)
+                continue;
+            action.Reparent(_squadPlayerActions);
+            action.CustomMinimumSize = new Vector2(0, 28);
+            action.AddThemeFontSizeOverride("font_size", 12);
+        }
     }
 
     private void ShowExtensionOffer()
@@ -2579,7 +4157,21 @@ public partial class DashboardController : Control
         await RefreshAll();
     }
 
-    private async Task ReleaseSelectedPlayer()
+    private void OnRosterTreeContextInput(InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mouse || mouse.ButtonIndex != MouseButton.Right || !mouse.Pressed || _rosterTree == null)
+            return;
+        var item = _rosterTree.GetItemAtPosition(mouse.Position);
+        if (item == null || IsNil(item.GetMetadata(0))) return;
+        item.Select(0);
+        OnRosterItemSelected(item);
+        var popupPosition = _rosterTree.GetScreenPosition() + mouse.Position;
+        _rosterContextMenu.Position = new Vector2I(Mathf.RoundToInt(popupPosition.X), Mathf.RoundToInt(popupPosition.Y));
+        _rosterContextMenu.Popup();
+        GetViewport().SetInputAsHandled();
+    }
+
+    private void ShowReleaseConfirmation()
     {
         var player = GetSelectedNativeRosterPlayer();
         if (player == null)
@@ -2588,13 +4180,41 @@ public partial class DashboardController : Control
             return;
         }
 
-        var result = new ContractService(_nativeGameCoreContext).ReleasePlayer(player.PlayerId);
+        ShowReleaseConfirmationForPlayer(player.PlayerId);
+    }
+
+    private void ShowReleaseConfirmationForPlayer(string playerId)
+    {
+        if (string.IsNullOrWhiteSpace(playerId)) return;
+
+        var preview = new ContractService(_nativeGameCoreContext).PreviewRelease(playerId);
+        if (!preview.Ok)
+        {
+            SetPrimaryStatus(preview.Error);
+            return;
+        }
+        _releasePlayerId = preview.PlayerId;
+        _releaseDetails.Text =
+            $"{preview.PlayerName} · {preview.Position}\n\n" +
+            $"CURRENT CONTRACT\nType: {preview.ContractType}\nYears remaining: {preview.YearsRemaining}\nAnnual salary: {GameCoreStateHelper.FormatCapRoom(preview.AnnualSalary)}\nRecorded guarantee: {GameCoreStateHelper.FormatCapRoom(preview.GuaranteedSalary)}\n\n" +
+            $"FINANCIAL EFFECT IN THIS SAVE\nCommitted payroll: {GameCoreStateHelper.FormatCapRoom(preview.PayrollBefore)} → {GameCoreStateHelper.FormatCapRoom(preview.PayrollAfter)}\nCap room: {GameCoreStateHelper.FormatCapRoom(preview.CapRoomBefore)} → {GameCoreStateHelper.FormatCapRoom(preview.CapRoomAfter)}\n\n" +
+            $"ROSTER EFFECT\nActive roster: {preview.RosterCountBefore} → {preview.RosterCountAfter}\nThe player will enter free agency and be removed from every saved depth-chart assignment. This action is recorded in league transactions.";
+        _releaseDialog.PopupCentered(new Vector2I(560, 390));
+    }
+
+    private async Task ConfirmSelectedPlayerRelease()
+    {
+        if (string.IsNullOrWhiteSpace(_releasePlayerId)) return;
+
+        var result = new ContractService(_nativeGameCoreContext).ReleasePlayer(_releasePlayerId);
         SetPrimaryStatus(result.Message);
         if (!result.Accepted)
             return;
 
+        _releasePlayerId = "";
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Player release saved.", autosaveToo: true);
         await RefreshAll();
+        if (_finalCutdownDialog?.Visible == true) RenderFinalCutdown();
     }
 
     private async Task WaiveSelectedPlayer()
@@ -2656,49 +4276,1124 @@ public partial class DashboardController : Control
         _btnFreeAgency.Pressed += ShowFreeAgency;
     }
 
+    private void CreateMarketDeskDialog()
+    {
+        _marketDeskDialog = new AcceptDialog
+        {
+            Name = "MarketDeskDialog",
+            Title = "Transactions & Market",
+            MinSize = new Vector2I(1040, 650),
+            Exclusive = false,
+        };
+        AddChild(_marketDeskDialog);
+        _marketDeskDialog.GetOkButton().Visible = false;
+
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _marketDeskDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("MARKET DESK", "Review roster capacity, cap room, phase availability, and the latest franchise ledger before making an explicit move."));
+        _marketDeskSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_marketDeskSummary);
+
+        var body = new HSplitContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, SplitOffset = 590 };
+        content.AddChild(body);
+        var actions = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        body.AddChild(actions);
+        actions.AddChild(CreateMarketHeading("ACTION WORKSPACES", "Each workspace uses GameCore validation. Nothing changes until you submit an action."));
+        actions.AddChild(CreateMarketAction("FREE AGENCY", "Search available players, inspect asking prices, and submit a contract offer.", ShowFreeAgency));
+        actions.AddChild(CreateMarketAction("TRADE DESK", "Build a player/pick proposal and review the deterministic counterparty rationale.", ShowTradeDialog));
+        actions.AddChild(CreateMarketAction("WAIVERS & PRACTICE SQUAD", "Claim waived players, sign eligible developmental players, or promote a squad member on a permanent active-roster contract.", ShowRosterManagement));
+        actions.AddChild(CreateMarketAction("CONTRACTS & TAGS", "Open the squad inspector to negotiate, tag, release, waive, or move a selected player to IR.", async () => await SelectMainTab(ROSTER_TAB_INDEX)));
+
+        var ledger = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        body.AddChild(ledger);
+        ledger.AddChild(CreateMarketHeading("RECENT TRANSACTION LEDGER", "Persisted franchise activity, newest first."));
+        _marketDeskHistory = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        ledger.AddChild(_marketDeskHistory);
+        _marketDeskStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_marketDeskStatus);
+        ApplyWorkstationTheme(_marketDeskDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void CreateFranchiseSettingsDialog()
+    {
+        _franchiseSettingsDialog = new AcceptDialog
+        {
+            Name = "FranchiseSettingsDialog",
+            Title = "Franchise Settings & Profile",
+            MinSize = new Vector2I(980, 620),
+            Exclusive = false,
+        };
+        AddChild(_franchiseSettingsDialog);
+        _franchiseSettingsDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _franchiseSettingsDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("FRANCHISE UTILITIES", "Review the active GM identity and save state. Profile changes remain part of new-franchise setup; display choices retain their existing owners."));
+        var tabs = new TabContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(tabs);
+
+        var profileTab = new VBoxContainer { Name = "Profile" };
+        tabs.AddChild(profileTab);
+        profileTab.AddChild(new Label { Text = "ACTIVE FRANCHISE PROFILE" });
+        _franchiseProfileSummary = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        profileTab.AddChild(_franchiseProfileSummary);
+        var setupButton = new Button { Text = "NEW FRANCHISE PROFILE SETUP", TooltipText = "Profile selection and editing occur when starting a new franchise." };
+        setupButton.Pressed += () => SetPrimaryStatus("GM profiles are selected during New Franchise setup to preserve the active franchise snapshot.");
+        profileTab.AddChild(setupButton);
+
+        var saveTab = new VBoxContainer { Name = "Save & Display" };
+        tabs.AddChild(saveTab);
+        saveTab.AddChild(CreateMarketHeading("SAVE MANAGEMENT", "Named saves and autosaves continue to use the existing native GameCore save service."));
+        var saveActions = new HBoxContainer();
+        saveTab.AddChild(saveActions);
+        var saveButton = new Button { Text = "SAVE FRANCHISE", CustomMinimumSize = new Vector2(180, 38) };
+        saveButton.Pressed += async () => { await SaveNativeGame(); RefreshFranchiseSettingsUi(); };
+        saveActions.AddChild(saveButton);
+        var loadButton = new Button { Text = "LOAD FRANCHISE", CustomMinimumSize = new Vector2(180, 38) };
+        loadButton.Pressed += async () => { await LoadNativeGame(); RefreshFranchiseSettingsUi(); };
+        saveActions.AddChild(loadButton);
+        _franchiseSaveStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        saveTab.AddChild(_franchiseSaveStatus);
+        saveTab.AddChild(CreateMarketHeading("DISPLAY PREFERENCES", "Roster columns, filters, and panel sizing are already persisted in ui.cfg and remain controlled in the Squad workspace."));
+        var displayButton = new Button { Text = "OPEN SQUAD DISPLAY CONTROLS" };
+        displayButton.Pressed += async () =>
+        {
+            _franchiseSettingsDialog.Hide();
+            await SelectMainTab(ROSTER_TAB_INDEX);
+            SetPrimaryStatus("Roster display controls are available in Squad.");
+        };
+        saveTab.AddChild(displayButton);
+
+        var developerTab = new VBoxContainer { Name = "Developer" };
+        tabs.AddChild(developerTab);
+        developerTab.AddChild(CreateMarketHeading("DEVELOPER DIAGNOSTICS", "Developer-only tools are separate from normal franchise actions. Visibility is session-only and uses the existing diagnostics panel."));
+        _franchiseDeveloperToggle = new CheckButton { Text = "SHOW DEVELOPER TOOLS" };
+        _franchiseDeveloperToggle.Toggled += ApplyDebugPanelVisibility;
+        developerTab.AddChild(_franchiseDeveloperToggle);
+        developerTab.AddChild(new Label { Text = "The developer panel exposes refresh, simulation, save, load, reset, and smoke-test controls already present in this build.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        ApplyWorkstationTheme(_franchiseSettingsDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowFranchiseSettings()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Franchise utilities are available in the Native C# GameCore.");
+            return;
+        }
+
+        RefreshFranchiseSettingsUi();
+        _franchiseSettingsDialog.PopupCentered(new Vector2I(980, 620));
+    }
+
+    private void RefreshFranchiseSettingsUi()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var profile = league?.FranchiseMetadata?.GmProfileSnapshot;
+        var world = league?.FranchiseMetadata?.World;
+        if (_franchiseProfileSummary != null)
+        {
+            _franchiseProfileSummary.Text = league == null
+                ? "No active franchise is loaded. Start or load a franchise to view its immutable profile snapshot."
+                : $"GM: {profile?.Name ?? "User GM"}\nFranchise: {league.Teams.FirstOrDefault(team => string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase))?.Name ?? "Unassigned"}\n\nNegotiation {profile?.Attributes?.Negotiation ?? 0} | Player Management {profile?.Attributes?.PlayerManagement ?? 0}\nScouting {profile?.Attributes?.ScoutingJudgment ?? 0} | Leadership {profile?.Attributes?.Leadership ?? 0}\n\nAppearance: {profile?.Appearance?.Outfit ?? "Unspecified"}\nWorld: {world?.Source.ToString() ?? "Unknown"} roster | Seed {world?.Seed.ToString() ?? "Unknown"}\n\nThe active franchise stores a profile snapshot; reusable profile editing is intentionally kept in New Franchise setup.";
+        }
+        if (_franchiseSaveStatus != null)
+        {
+            var saves = IsNativeRuntimeSource() ? GetNativeGameCoreSaveService() : null;
+            var named = saves?.SaveExists(GameCoreSaveService.NamedSaveFileName) == true ? "available" : "not found";
+            var autosave = saves?.SaveExists() == true ? "available" : "not found";
+            _franchiseSaveStatus.Text = $"Named franchise save: {named}. Autosave: {autosave}. Successful explicit saves also update the existing autosave.";
+        }
+        if (_franchiseDeveloperToggle != null)
+            _franchiseDeveloperToggle.SetPressedNoSignal(_debugPanel?.Visible ?? false);
+    }
+
+    private void CreateInboxDeskDialog()
+    {
+        _inboxDeskDialog = new AcceptDialog
+        {
+            Name = "InboxDeskDialog",
+            Title = "Inbox & Decision Queue",
+            MinSize = new Vector2I(1040, 630),
+            Exclusive = false,
+        };
+        AddChild(_inboxDeskDialog);
+        _inboxDeskDialog.GetOkButton().Visible = false;
+
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _inboxDeskDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("INBOX & DECISION QUEUE", "Only active actions from the current franchise state are shown. Select an item to review its context and open the existing workflow."));
+        var toolbar = new HBoxContainer();
+        content.AddChild(toolbar);
+        _inboxDeskCount = new Label { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        toolbar.AddChild(_inboxDeskCount);
+        _inboxCategoryFilter = new OptionButton { TooltipText = "Filter active decisions by presentation category." };
+        _inboxCategoryFilter.AddItem("All active");
+        _inboxCategoryFilter.AddItem("High priority");
+        _inboxCategoryFilter.AddItem("Game day");
+        _inboxCategoryFilter.AddItem("Roster");
+        _inboxCategoryFilter.AddItem("League & offseason");
+        _inboxCategoryFilter.ItemSelected += _ => RefreshInboxDesk();
+        toolbar.AddChild(_inboxCategoryFilter);
+
+        var split = new HSplitContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, SplitOffset = 430 };
+        content.AddChild(split);
+        _inboxQueueList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        _inboxQueueList.ItemSelected += OnInboxDeskItemSelected;
+        split.AddChild(_inboxQueueList);
+        var detail = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        split.AddChild(detail);
+        _inboxDeskSubject = new Label();
+        _inboxDeskSubject.AddThemeFontSizeOverride("font_size", 18);
+        detail.AddChild(_inboxDeskSubject);
+        _inboxDeskContext = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        detail.AddChild(_inboxDeskContext);
+        _inboxDeskBody = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        detail.AddChild(_inboxDeskBody);
+        _inboxDeskAction = new Button { Text = "OPEN WORKFLOW", CustomMinimumSize = new Vector2(0, 36) };
+        _inboxDeskAction.Pressed += async () =>
+        {
+            _inboxDeskDialog.Hide();
+            await OnInboxPrimaryActionPressed();
+        };
+        detail.AddChild(_inboxDeskAction);
+        ApplyWorkstationTheme(_inboxDeskDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowInboxDesk()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("The decision queue is available in the Native C# GameCore.");
+            return;
+        }
+
+        RefreshInboxDesk();
+        _inboxDeskDialog.PopupCentered(new Vector2I(1040, 630));
+    }
+
+    private void OnInboxDeskItemSelected(long index)
+    {
+        if (_inboxQueueList == null || index < 0 || index >= _inboxQueueList.ItemCount)
+            return;
+        var messageId = _inboxQueueList.GetItemMetadata((int)index).ToString();
+        if (TrySelectInboxMessage(messageId))
+            RefreshInboxDesk();
+    }
+
+    private void RefreshInboxDesk()
+    {
+        if (_inboxDeskDialog == null || _inboxQueueList == null)
+            return;
+
+        var filterIndex = _inboxCategoryFilter?.Selected ?? -1;
+        var category = _inboxCategoryFilter != null && filterIndex >= 0 ? _inboxCategoryFilter.GetItemText(filterIndex) : "All active";
+        var entries = new List<Godot.Collections.Dictionary>();
+        for (var i = 0; i < (_inboxMessages?.Count ?? 0); i++)
+        {
+            if (TryGetDictionary((Variant)_inboxMessages[i], out var message) && ShouldShowInboxMessage(message, category))
+                entries.Add(message);
+        }
+
+        _inboxQueueList.Clear();
+        foreach (var message in entries)
+        {
+            var priority = FmtString(GetFirstNonNil(message, "severity"), "info").ToUpperInvariant();
+            var state = GetBoolValue(GetFirstNonNil(message, "read"), false) ? "READ" : "ACTIVE";
+            _inboxQueueList.AddItem($"{priority,-7} {ResolveInboxCategory(message),-18} {GetMessageSubject(message)}\n{state} | {GetMessageBody(message)}");
+            _inboxQueueList.SetItemMetadata(_inboxQueueList.ItemCount - 1, GetMessageId(message));
+        }
+
+        _inboxDeskCount.Text = entries.Count == 0 ? "No active decisions." : $"{entries.Count} active decision(s) | authoritative franchise queue";
+        var selectedIndex = entries.FindIndex(message => string.Equals(GetMessageId(message), _selectedInboxMessageId, StringComparison.OrdinalIgnoreCase));
+        if (selectedIndex >= 0)
+            _inboxQueueList.Select(selectedIndex);
+        UpdateInboxDeskDetail(_selectedInboxActionItem);
+    }
+
+    private static bool ShouldShowInboxMessage(Godot.Collections.Dictionary message, string category)
+    {
+        if (string.Equals(category, "High priority", StringComparison.OrdinalIgnoreCase))
+        {
+            var severity = FmtString(GetFirstNonNil(message, "severity"), "info");
+            return string.Equals(severity, "danger", StringComparison.OrdinalIgnoreCase) || string.Equals(severity, "warning", StringComparison.OrdinalIgnoreCase);
+        }
+        if (string.Equals(category, "Game day", StringComparison.OrdinalIgnoreCase))
+            return IsGameDayMessage(message);
+        if (string.Equals(category, "Roster", StringComparison.OrdinalIgnoreCase))
+            return IsRosterInvalidMessage(message) || IsDepthChartInvalidMessage(message) || IsInjuryDepthAdvisoryMessage(message) || IsOpeningWeekReadinessMessage(message) || IsWaiverClaimConfirmationMessage(message);
+        if (string.Equals(category, "League & offseason", StringComparison.OrdinalIgnoreCase))
+            return IsPostseasonPendingMessage(message) || IsSeasonCompleteMessage(message) || IsOffseasonPendingMessage(message);
+        return true;
+    }
+
+    private static string ResolveInboxCategory(Godot.Collections.Dictionary message)
+    {
+        if (IsGameDayMessage(message)) return "GAME DAY";
+        if (IsRosterInvalidMessage(message) || IsDepthChartInvalidMessage(message) || IsInjuryDepthAdvisoryMessage(message) || IsOpeningWeekReadinessMessage(message) || IsWaiverClaimConfirmationMessage(message)) return "ROSTER";
+        if (IsSeasonCompleteMessage(message) || IsPostseasonPendingMessage(message)) return "LEAGUE";
+        if (IsOffseasonPendingMessage(message)) return "OFFSEASON";
+        return "FRANCHISE";
+    }
+
+    private void UpdateInboxDeskDetail(Godot.Collections.Dictionary message)
+    {
+        if (_inboxDeskSubject == null || _inboxDeskContext == null || _inboxDeskBody == null || _inboxDeskAction == null)
+            return;
+        if (message == null)
+        {
+            _inboxDeskSubject.Text = "No active decision selected";
+            _inboxDeskContext.Text = "The queue shows only current authoritative action items.";
+            _inboxDeskBody.Text = "";
+            _inboxDeskAction.Disabled = true;
+            return;
+        }
+
+        var severity = FmtString(GetFirstNonNil(message, "severity"), "info").ToUpperInvariant();
+        var action = ResolveInboxPrimaryActionLabel(message);
+        _inboxDeskSubject.Text = GetMessageSubject(message);
+        _inboxDeskContext.Text = $"{severity} PRIORITY | {ResolveInboxCategory(message)} | {FmtString(GetFirstNonNil(message, "primary_action", "primaryAction"), "Review action")}";
+        _inboxDeskBody.Text = GetMessageBody(message);
+        var canRoute = IsGameDayMessage(message) || IsRosterInvalidMessage(message) || IsDepthChartInvalidMessage(message) || IsInjuryDepthAdvisoryMessage(message) || IsOpeningWeekReadinessMessage(message) || IsWaiverClaimConfirmationMessage(message) || IsPostseasonPendingMessage(message) || IsSeasonCompleteMessage(message) || IsOffseasonPendingMessage(message);
+        _inboxDeskAction.Text = canRoute ? action.ToUpperInvariant() : "NO WORKFLOW AVAILABLE";
+        _inboxDeskAction.Disabled = !canRoute;
+    }
+
+    private static Control CreateMarketHeading(string title, string description)
+    {
+        var heading = new VBoxContainer();
+        var titleLabel = new Label { Text = title };
+        titleLabel.AddThemeFontSizeOverride("font_size", 15);
+        titleLabel.AddThemeColorOverride("font_color", new Color("f4eddf"));
+        heading.AddChild(titleLabel);
+        heading.AddChild(new Label { Text = description, AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        return heading;
+    }
+
+    private static Button CreateMarketAction(string title, string description, Action action)
+    {
+        var button = new Button { Text = $"{title}\n{description}", TooltipText = description, CustomMinimumSize = new Vector2(0, 68), Alignment = HorizontalAlignment.Left };
+        button.Pressed += action;
+        return button;
+    }
+
+    private void ShowMarketDesk()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Transactions are available in the Native C# GameCore.");
+            return;
+        }
+
+        RefreshMarketDeskUi();
+        _marketDeskDialog.PopupCentered(new Vector2I(1040, 650));
+    }
+
+    private void RefreshMarketDeskUi()
+    {
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null)
+        {
+            _marketDeskSummary.Text = "Start or load a franchise to access market actions.";
+            _marketDeskHistory.Text = "No franchise ledger is available.";
+            _marketDeskStatus.Text = "GameCore franchise required.";
+            return;
+        }
+
+        var contracts = new ContractService(_nativeGameCoreContext);
+        var phaseStatus = ContractPhaseRules.GetStatus(league);
+        var rosterStatus = new RosterService(_nativeGameCoreContext).GetTeamRoster(team.TeamId).RosterStatus;
+        var rosterNeeds = rosterStatus == null
+            ? "Roster status unavailable"
+            : rosterStatus.Issues?.Count > 0
+                ? string.Join("; ", rosterStatus.Issues)
+                : rosterStatus.OpenSlots > 0 ? $"{rosterStatus.OpenSlots} active-roster slot(s) open" : "Active roster at capacity";
+        _marketDeskSummary.Text = $"{team.Name} | Phase: {league.Calendar?.Phase ?? "Unavailable"} | Cap room: {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))} | Active: {team.Roster.Count}/53 | Practice squad: {team.PracticeSquad.Count}/16 | Free agents: {league.FreeAgents.Count} | Waivers: {league.Waivers.Count}\nRoster needs: {rosterNeeds}";
+        var history = _nativeDashboardService.GetTransactionHistory();
+        _marketDeskHistory.Text = history.Ok && history.Transactions.Count > 0
+            ? string.Join("\n", history.Transactions.Take(12).Select(transaction => $"{transaction.DateLabel} | {transaction.Type} | {transaction.PlayerName}\n{transaction.Details}"))
+            : "No transactions recorded.";
+        _marketDeskStatus.Text = phaseStatus.Explanation;
+    }
+
     private void CreateFreeAgencyDialog()
     {
         _freeAgencyDialog = new AcceptDialog
         {
             Name = "FreeAgencyDialog",
-            Title = "Free Agency",
-            MinSize = new Vector2I(940, 620),
+            Title = "Trade Center > Free Agency",
+            MinSize = new Vector2I(1040, 650),
             Exclusive = false,
         };
         AddChild(_freeAgencyDialog);
         _freeAgencyDialog.GetOkButton().Visible = false;
 
-        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
         _freeAgencyDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("FREE AGENCY", "Search and compare actual free agents. Player selection opens profile context; contract terms remain in the existing negotiation workflow."));
         _freeAgencyCapSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         content.AddChild(_freeAgencyCapSummary);
 
-        var body = new HSplitContainer { CustomMinimumSize = new Vector2(860, 430), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        content.AddChild(body);
-        _freeAgentList = new ItemList { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
-        body.AddChild(_freeAgentList);
-        _freeAgentList.ItemSelected += OnFreeAgentSelected;
+        var controls = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        controls.AddThemeConstantOverride("separation", 6);
+        content.AddChild(controls);
+        controls.AddChild(HomeLabel("SEARCH", 11, new Color("9cadb8")));
+        _freeAgencySearch = new LineEdit { PlaceholderText = "Player name", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, ClearButtonEnabled = true };
+        _freeAgencySearch.TextChanged += _ => RenderFreeAgentTable();
+        controls.AddChild(_freeAgencySearch);
+        controls.AddChild(HomeLabel("POSITION", 11, new Color("9cadb8")));
+        _freeAgencyPositionFilter = new OptionButton();
+        _freeAgencyPositionFilter.AddItem("All positions");
+        foreach (var position in new[] { "QB", "RB", "WR", "TE", "OT", "OG", "C", "DL", "LB", "CB", "S", "K", "P" }) _freeAgencyPositionFilter.AddItem(position);
+        _freeAgencyPositionFilter.ItemSelected += _ => RenderFreeAgentTable();
+        controls.AddChild(_freeAgencyPositionFilter);
+        _freeAgencyColumnsMenu = new MenuButton { Text = "COLUMNS / VIEW", TooltipText = "Initial comparison columns use only tracked free-agent data. The anchored Player column remains first." };
+        _freeAgencyColumnsMenu.GetPopup().AddItem("Player, Pos, Age, Overall, Potential, Ask, Status");
+        _freeAgencyColumnsMenu.GetPopup().SetItemDisabled(0, true);
+        controls.AddChild(_freeAgencyColumnsMenu);
 
-        var detail = new VBoxContainer { CustomMinimumSize = new Vector2(340, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        body.AddChild(detail);
-        _freeAgentDetail = new RichTextLabel { CustomMinimumSize = new Vector2(320, 170), FitContent = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        detail.AddChild(_freeAgentDetail);
-        _freeAgentAnnualOffer = CreateMoneyOffer(1m, 40m);
-        _freeAgentGuaranteeOffer = CreateMoneyOffer(0m, 80m);
-        _freeAgentYearsOffer = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1, Value = 2 };
-        detail.AddChild(SetupRow("Annual ($M)", _freeAgentAnnualOffer));
-        detail.AddChild(SetupRow("Guaranteed ($M)", _freeAgentGuaranteeOffer));
-        detail.AddChild(SetupRow("Years", _freeAgentYearsOffer));
-        _btnSubmitFreeAgentOffer = new Button { Text = "Submit Offer" };
-        detail.AddChild(_btnSubmitFreeAgentOffer);
-        _btnSubmitFreeAgentOffer.Pressed += async () => await SubmitFreeAgentOffer();
+        var tableScroll = new ScrollContainer { CustomMinimumSize = new Vector2(860, 390), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto };
+        content.AddChild(tableScroll);
+        _freeAgentList = new Tree { Columns = 7, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(960, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _freeAgentList.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _freeAgentList.SetColumnTitle(0, "PLAYER"); _freeAgentList.SetColumnTitle(1, "POS"); _freeAgentList.SetColumnTitle(2, "AGE"); _freeAgentList.SetColumnTitle(3, "OVR"); _freeAgentList.SetColumnTitle(4, "POT"); _freeAgentList.SetColumnTitle(5, "ASK / YR"); _freeAgentList.SetColumnTitle(6, "STATUS");
+        for (var column = 0; column < 7; column++) _freeAgentList.SetColumnExpand(column, column == 0);
+        _freeAgentList.SetColumnCustomMinimumWidth(0, 165); _freeAgentList.SetColumnCustomMinimumWidth(1, 48); _freeAgentList.SetColumnCustomMinimumWidth(2, 44); _freeAgentList.SetColumnCustomMinimumWidth(3, 45); _freeAgentList.SetColumnCustomMinimumWidth(4, 45); _freeAgentList.SetColumnCustomMinimumWidth(5, 78); _freeAgentList.SetColumnCustomMinimumWidth(6, 86);
+        _freeAgentList.ItemSelected += OnFreeAgentSelected;
+        _freeAgentList.ItemActivated += ShowFreeAgentNegotiation;
+        _freeAgentList.ColumnTitleClicked += OnFreeAgentColumnTitleClicked;
+        _freeAgentList.GuiInput += OnFreeAgentTableInput;
+        tableScroll.AddChild(_freeAgentList);
 
         _freeAgencyStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         content.AddChild(_freeAgencyStatus);
+        ApplyWorkstationTheme(_freeAgencyDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+
+        _freeAgentContextMenu = new PopupMenu { Name = "FreeAgentContextMenu" };
+        AddChild(_freeAgentContextMenu);
+        _freeAgentContextMenu.AddItem("View Player Details", 1);
+        _freeAgentContextMenu.AddItem("Make Offer", 2);
+        _freeAgentContextMenu.IdPressed += id => { if (id == 1) ShowSelectedFreeAgentDetails(); else if (id == 2) ShowFreeAgentNegotiation(); };
+
+        _freeAgentNegotiationDialog = new AcceptDialog { Name = "FreeAgentNegotiationDialog", Title = "Free Agency > Contract Negotiation", MinSize = new Vector2I(600, 470), Exclusive = false };
+        AddChild(_freeAgentNegotiationDialog);
+        _freeAgentNegotiationDialog.GetOkButton().Visible = false;
+        var negotiation = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _freeAgentNegotiationDialog.AddChild(negotiation);
+        negotiation.AddChild(CreateMarketHeading("CONTRACT NEGOTIATION", "Set the complete offer here. The free-agency table remains a comparison list rather than a permanent offer panel."));
+        _freeAgentNegotiationContext = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 145), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        negotiation.AddChild(_freeAgentNegotiationContext);
+        _freeAgentAnnualOffer = CreateMoneyOffer(.25m, 40m);
+        _freeAgentGuaranteeOffer = CreateMoneyOffer(0m, 80m);
+        _freeAgentYearsOffer = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1, Value = 2 };
+        _freeAgentContractType = new OptionButton();
+        _freeAgentContractType.ItemSelected += _ => RefreshFreeAgentNegotiationTerms();
+        negotiation.AddChild(SetupRow("Contract type", _freeAgentContractType));
+        negotiation.AddChild(SetupRow("Annual salary ($M)", _freeAgentAnnualOffer));
+        negotiation.AddChild(SetupRow("Guaranteed ($M)", _freeAgentGuaranteeOffer));
+        negotiation.AddChild(SetupRow("Contract years", _freeAgentYearsOffer));
+        var negotiationActions = new HBoxContainer(); negotiation.AddChild(negotiationActions);
+        _btnSubmitFreeAgentOffer = new Button { Text = "SUBMIT OFFER", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _btnSubmitFreeAgentOffer.Pressed += async () => await SubmitFreeAgentOffer(); negotiationActions.AddChild(_btnSubmitFreeAgentOffer);
+        var cancelOffer = new Button { Text = "CANCEL" }; cancelOffer.Pressed += _freeAgentNegotiationDialog.Hide; negotiationActions.AddChild(cancelOffer);
+        ApplyWorkstationTheme(_freeAgentNegotiationDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
     }
 
     private static SpinBox CreateMoneyOffer(decimal minimum, decimal maximum)
         => new() { MinValue = (double)minimum, MaxValue = (double)maximum, Step = 0.25d, Rounded = false };
+
+    private void CreateUdfaMarket()
+    {
+        _udfaMarketDialog = new AcceptDialog { Name = "UdfaMarketDialog", Title = "Scouting > UDFA Market", MinSize = new Vector2I(980, 620), Exclusive = false };
+        AddChild(_udfaMarketDialog); _udfaMarketDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _udfaMarketDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("UNDRAFTED FREE AGENTS", "Review the real post-draft rookie market. Contract offers and optional rookie-minicamp invitations are separate explicit actions."));
+        _udfaMarketSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_udfaMarketSummary);
+        var scroll = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; content.AddChild(scroll);
+        _udfaMarketTree = new Tree { Columns = 8, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(920, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        var headers = new[] { "PLAYER", "POS", "AGE", "OVR", "POT", "PLAYSTYLE / TRAIT", "ASK / YR", "MINICAMP" }; var widths = new[] { 190, 50, 50, 50, 50, 190, 100, 115 };
+        for (var column = 0; column < headers.Length; column++) { _udfaMarketTree.SetColumnTitle(column, headers[column]); _udfaMarketTree.SetColumnCustomMinimumWidth(column, widths[column]); _udfaMarketTree.SetColumnExpand(column, column is 0 or 5); }
+        _udfaMarketTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); _udfaMarketTree.ItemSelected += OnUdfaSelected; _udfaMarketTree.ItemActivated += OpenSelectedUdfaOffer; scroll.AddChild(_udfaMarketTree);
+        var actions = new HBoxContainer(); actions.AddThemeConstantOverride("separation", 8); content.AddChild(actions);
+        _udfaOfferContract = new Button { Text = "OFFER CONTRACT", Disabled = true, TooltipText = "Open one negotiation with the required undrafted-rookie contract type included." }; _udfaOfferContract.Pressed += OpenSelectedUdfaOffer; actions.AddChild(_udfaOfferContract);
+        _udfaInvite = new Button { Text = "INVITE TO ROOKIE MINICAMP", Disabled = true }; _udfaInvite.Pressed += async () => await ToggleSelectedUdfaInvitation(); actions.AddChild(_udfaInvite);
+        var close = new Button { Text = "CLOSE", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; close.Pressed += _udfaMarketDialog.Hide; actions.AddChild(close);
+        _udfaMarketStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_udfaMarketStatus);
+        ApplyWorkstationTheme(_udfaMarketDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowUdfaMarket()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("The UDFA market is available in the Native C# GameCore."); return; }
+        RefreshUdfaMarket(); var viewport = GetViewportRect().Size; _udfaMarketDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 760, 1240), Mathf.Clamp((int)(viewport.Y * .88f), 540, 760)));
+    }
+
+    private void RefreshUdfaMarket()
+    {
+        _selectedUdfaPlayerId = ""; _udfaMarketTree.Clear(); _udfaOfferContract.Disabled = true; _udfaInvite.Disabled = true;
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(candidate => candidate.TeamId == league.UserTeamId);
+        if (league == null || team == null) { _udfaMarketSummary.Text = "No active franchise is loaded."; _udfaMarketStatus.Text = "Load a franchise to review undrafted rookies."; return; }
+        var state = new RookieMinicampService(_nativeGameCoreContext).GetState(); var invited = state.InvitedPlayerIds.ToHashSet(StringComparer.OrdinalIgnoreCase); var players = league.FreeAgents.Where(UndraftedFreeAgentService.IsUndraftedRookie).OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase).ToList(); var contracts = new ContractService(_nativeGameCoreContext);
+        _udfaMarketSummary.Text = $"{team.Name} · Rookie Signing · {players.Count} unsigned UDFA(s) · Minicamp invitations {invited.Count}/{RookieMinicampService.InvitationLimit} · Active roster {team.Roster.Count}/{RosterService.RosterLimit} · Cap room {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))}";
+        var root = _udfaMarketTree.CreateItem(); var index = 0;
+        foreach (var player in players) { var row = _udfaMarketTree.CreateItem(root); row.SetMetadata(0, player.PlayerId); row.SetText(0, player.Name); row.SetText(1, player.Position); row.SetText(2, player.Age.ToString()); row.SetText(3, player.Overall.ToString()); row.SetText(4, player.Potential.ToString()); row.SetText(5, string.IsNullOrWhiteSpace(player.Trait) ? "No known trait" : player.Trait); row.SetText(6, GameCoreStateHelper.FormatCapRoom(contracts.GetRequiredAnnualSalary(player, team))); row.SetText(7, invited.Contains(player.PlayerId) ? "INVITED" : "—"); for (var column = 0; column < 8; column++) row.SetCustomBgColor(column, index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); index++; }
+        if (players.Count == 0) AddHistoryEmptyRow(_udfaMarketTree, root, string.Equals(league.Calendar?.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase) ? "No unsigned undrafted rookies remain." : "The UDFA market opens when the seven-round draft is complete.");
+        _udfaMarketStatus.Text = string.Equals(league.Calendar?.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase) ? "Select a player to offer the supported three-year UDFA contract or manage one of ten optional minicamp invitations." : "UDFA actions are closed outside Rookie Signing.";
+    }
+
+    private void OnUdfaSelected()
+    {
+        var selected = _udfaMarketTree?.GetSelected(); _selectedUdfaPlayerId = selected == null || IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString(); var league = _nativeGameCoreContext?.ActiveLeague; var open = !string.IsNullOrWhiteSpace(_selectedUdfaPlayerId) && string.Equals(league?.Calendar?.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase); _udfaOfferContract.Disabled = !open; _udfaInvite.Disabled = !open; if (!open) return; var invited = new RookieMinicampService(_nativeGameCoreContext).GetState().InvitedPlayerIds.Contains(_selectedUdfaPlayerId, StringComparer.OrdinalIgnoreCase); _udfaInvite.Text = invited ? "WITHDRAW MINICAMP INVITE" : "INVITE TO ROOKIE MINICAMP";
+    }
+
+    private void OpenSelectedUdfaOffer()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedUdfaPlayerId)) return; _selectedFreeAgentId = _selectedUdfaPlayerId; ShowFreeAgentNegotiation();
+    }
+
+    private async Task ToggleSelectedUdfaInvitation()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedUdfaPlayerId)) return; var service = new RookieMinicampService(_nativeGameCoreContext); var invited = service.GetState().InvitedPlayerIds.Contains(_selectedUdfaPlayerId, StringComparer.OrdinalIgnoreCase); var result = invited ? service.Withdraw(_selectedUdfaPlayerId) : service.Invite(_selectedUdfaPlayerId); _udfaMarketStatus.Text = result.Message; if (!result.Accepted) return; await SaveNativeAutosave("Native autosave updated."); RefreshUdfaMarket();
+    }
+
+    private void CreateTradeControls()
+    {
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
+        if (actionRow == null)
+            return;
+
+        _btnTrades = new Button { Text = "Trades", TooltipText = "Submit a player and draft-pick proposal to one CPU team." };
+        actionRow.AddChild(_btnTrades);
+        _btnTrades.Pressed += ShowTradeDialog;
+        _tradeDialog = new AcceptDialog { Name = "TradeDialog", Title = "Trade Center > Build a Trade", MinSize = new Vector2I(1080, 640), Exclusive = false };
+        AddChild(_tradeDialog);
+        _tradeDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            AnchorsPreset = (int)LayoutPreset.FullRect,
+            OffsetLeft = 12,
+            OffsetTop = 10,
+            OffsetRight = -12,
+            OffsetBottom = -48,
+        };
+        _tradeDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("BUILD A TRADE", "Choose a partner, select real player/pick assets on each side, then review the opposing GM reaction before sending the offer."));
+        _tradePartnerSelect = new OptionButton();
+        content.AddChild(SetupRow("Counterparty", _tradePartnerSelect));
+        _tradePartnerSelect.ItemSelected += _ => RefreshTradeAssets();
+        content.AddChild(new Label { Text = "Select one or more assets on each side. Trades are available only in Free Agency and Draft Prep." });
+        _tradePartnerEvaluation = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 54) };
+        content.AddChild(_tradePartnerEvaluation);
+        var assets = new HSplitContainer { CustomMinimumSize = new Vector2(0, 300), SizeFlagsVertical = Control.SizeFlags.ExpandFill, SplitOffset = 510 };
+        content.AddChild(assets);
+        var offered = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        assets.AddChild(offered);
+        offered.AddChild(new Label { Text = "YOUR TEAM · OFFERED ASSETS" });
+        _tradeOfferAssets = new ItemList { SelectMode = ItemList.SelectModeEnum.Multi, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _tradeOfferAssets.MultiSelected += (_, _) => UpdateTradePackagePreview();
+        offered.AddChild(_tradeOfferAssets);
+        var requested = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        assets.AddChild(requested);
+        requested.AddChild(new Label { Text = "PARTNER TEAM · REQUESTED ASSETS" });
+        _tradeRequestAssets = new ItemList { SelectMode = ItemList.SelectModeEnum.Multi, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _tradeRequestAssets.MultiSelected += (_, _) => UpdateTradePackagePreview();
+        requested.AddChild(_tradeRequestAssets);
+        var submit = new Button { Text = "SEND TRADE OFFER", CustomMinimumSize = new Vector2(0, 38) };
+        content.AddChild(submit);
+        submit.Pressed += async () => await SubmitTradeProposal();
+        _tradeRationale = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 48) };
+        content.AddChild(_tradeRationale);
+        _tradeStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_tradeStatus);
+        ApplyWorkstationTheme(_tradeDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void CreateWaiversControls()
+    {
+        _waiversDialog = new AcceptDialog { Name = "WaiversDialog", Title = "Trade Center > Waivers", MinSize = new Vector2I(900, 570), Exclusive = false };
+        AddChild(_waiversDialog);
+        _waiversDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            AnchorsPreset = (int)LayoutPreset.FullRect,
+            OffsetLeft = 12,
+            OffsetTop = 10,
+            OffsetRight = -12,
+            OffsetBottom = -48,
+        };
+        _waiversDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("WAIVERS", "A short-lived claim market. Submit a claim here; a winning user opportunity is finalized or cancelled later from its Action Required inbox item."));
+        _waiversSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_waiversSummary);
+        var tableScroll = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto };
+        content.AddChild(tableScroll);
+        _waiversTree = new Tree { Columns = 6, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(760, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _waiversTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _waiversTree.SetColumnTitle(0, "PLAYER"); _waiversTree.SetColumnTitle(1, "POS"); _waiversTree.SetColumnTitle(2, "OVR"); _waiversTree.SetColumnTitle(3, "CONTRACT / CAP"); _waiversTree.SetColumnTitle(4, "WAIVER STATUS"); _waiversTree.SetColumnTitle(5, "EXPIRES");
+        for (var column = 0; column < 6; column++) _waiversTree.SetColumnExpand(column, column == 0 || column == 4);
+        _waiversTree.SetColumnCustomMinimumWidth(0, 160); _waiversTree.SetColumnCustomMinimumWidth(1, 45); _waiversTree.SetColumnCustomMinimumWidth(2, 45); _waiversTree.SetColumnCustomMinimumWidth(3, 105); _waiversTree.SetColumnCustomMinimumWidth(4, 115); _waiversTree.SetColumnCustomMinimumWidth(5, 90);
+        _waiversTree.ItemSelected += OnWaiverMarketSelected;
+        _waiversTree.ItemActivated += () => OnWaiverMarketSelected();
+        tableScroll.AddChild(_waiversTree);
+        var actions = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; actions.AddThemeConstantOverride("separation", 8); content.AddChild(actions);
+        actions.AddChild(new Label { Text = "Conditional release:" });
+        _waiverConditionalReleasePicker = new OptionButton { CustomMinimumSize = new Vector2(260, 0), TooltipText = "Released only if this claim is won and finalized." };
+        _waiverConditionalReleasePicker.ItemSelected += _ => OnWaiverMarketSelected();
+        actions.AddChild(_waiverConditionalReleasePicker);
+        _btnClaimWaiverMarket = new Button { Text = "SUBMIT CLAIM", TooltipText = "Submit a claim without immediately transferring the player. A winning opportunity requires later confirmation." }; _btnClaimWaiverMarket.Pressed += async () => await ClaimSelectedWaiverMarket(); actions.AddChild(_btnClaimWaiverMarket);
+        var refresh = new Button { Text = "REFRESH WAIVERS" }; refresh.Pressed += RefreshWaiversUi; actions.AddChild(refresh);
+        var close = new Button { Text = "CLOSE", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; close.Pressed += _waiversDialog.Hide; actions.AddChild(close);
+        _waiversStatus = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 54) }; content.AddChild(_waiversStatus);
+        ApplyWorkstationTheme(_waiversDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowWaiversDialog()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Waivers are available in the Native C# GameCore."); return; }
+        RefreshWaiversUi();
+        var viewport = GetViewportRect().Size;
+        _waiversDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 720, 1240), Mathf.Clamp((int)(viewport.Y * .86f), 500, 740)));
+    }
+
+    private void RefreshWaiversUi()
+    {
+        EnsureNativeGameCoreServices();
+        _waiversTree.Clear(); _selectedWaiverMarketPlayerId = ""; _btnClaimWaiverMarket.Disabled = true;
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var user = league?.Teams?.FirstOrDefault(team => string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || user == null)
+        {
+            _waiversSummary.Text = "Waiver market unavailable — no active franchise is loaded."; _waiversStatus.Text = "Load or start a franchise to review current waiver claims."; return;
+        }
+        _waiverConditionalReleasePicker.Clear();
+        _waiverConditionalReleasePicker.AddItem("No conditional release");
+        _waiverConditionalReleasePicker.SetItemMetadata(0, "");
+        foreach (var rosterPlayer in user.Roster.OrderBy(player => player.Position, StringComparer.OrdinalIgnoreCase).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            _waiverConditionalReleasePicker.AddItem($"{rosterPlayer.Position} {rosterPlayer.Name} — {GameCoreStateHelper.FormatCapRoom(rosterPlayer.Contract?.AnnualSalary ?? 0m)}");
+            _waiverConditionalReleasePicker.SetItemMetadata(_waiverConditionalReleasePicker.ItemCount - 1, rosterPlayer.PlayerId);
+        }
+        var activeWeek = league.Calendar?.AbsoluteWeek ?? 0;
+        var activeWaivers = (league.Waivers ?? new List<WaiverClaimState>()).Where(waiver => waiver?.Player != null && (waiver.ExpiresAbsoluteWeek > activeWeek || waiver.PendingConfirmation)).ToList();
+        _waiversSummary.Text = $"{user.Name} | Active roster {user.Roster.Count}/53 | Cap room {GameCoreStateHelper.FormatCapRoom(user.CapRoom)} | Active waiver claims {activeWaivers.Count}";
+        if (activeWaivers.Count == 0)
+        {
+            _waiversStatus.Text = "NO PLAYERS ON WAIVERS\nThere are no active waiver claims in the current league week. Expired claims move to free agency when the game advances."; return;
+        }
+        var root = _waiversTree.CreateItem();
+        var rowIndex = 0;
+        foreach (var group in activeWaivers.GroupBy(waiver => waiver.WaivedByTeamId).OrderBy(group => league.Teams.FirstOrDefault(team => string.Equals(team.TeamId, group.Key, StringComparison.OrdinalIgnoreCase))?.Name ?? group.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            var waivedBy = league.Teams.FirstOrDefault(team => string.Equals(team.TeamId, group.Key, StringComparison.OrdinalIgnoreCase))?.Name ?? "Waiving team unavailable";
+            var heading = _waiversTree.CreateItem(root); heading.SetText(0, waivedBy); heading.SetText(4, "WAIVED PLAYERS"); heading.SetSelectable(0, false);
+            heading.SetCustomColor(0, new Color("8fcf98")); heading.SetCustomColor(4, new Color("8fcf98"));
+            foreach (var waiver in group.OrderByDescending(item => item.Player.Overall).ThenBy(item => item.Player.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                var player = waiver.Player; var expiresIn = waiver.ExpiresAbsoluteWeek - activeWeek;
+                var row = _waiversTree.CreateItem(heading);
+                var status = waiver.PendingConfirmation
+                    ? string.Equals(waiver.PendingClaimTeamId, user.TeamId, StringComparison.OrdinalIgnoreCase) ? "AWAITING YOUR CONFIRMATION" : "PENDING LEAGUE DECISION"
+                    : waiver.DeclinedTeamIds?.Any(teamId => string.Equals(teamId, user.TeamId, StringComparison.OrdinalIgnoreCase)) == true ? "DECLINED BY YOUR TEAM"
+                    : waiver.Claims?.Any(claim => string.Equals(claim?.TeamId, user.TeamId, StringComparison.OrdinalIgnoreCase)) == true ? "YOUR CLAIM SUBMITTED" : "CLAIMS OPEN";
+                row.SetText(0, player.Name); row.SetText(1, player.Position); row.SetText(2, player.Overall.ToString()); row.SetText(3, GameCoreStateHelper.FormatCapRoom(player.Contract?.AnnualSalary ?? 0m)); row.SetText(4, status); row.SetText(5, waiver.PendingConfirmation ? "PAUSED" : $"Week {waiver.ExpiresAbsoluteWeek} ({expiresIn} left)");
+                row.SetMetadata(0, player.PlayerId);
+                for (var column = 0; column < 6; column++) row.SetCustomBgColor(column, rowIndex % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+                row.SetTextAlignment(2, HorizontalAlignment.Right); row.SetTextAlignment(3, HorizontalAlignment.Right); rowIndex++;
+            }
+        }
+        _waiversStatus.Text = "Select a player to review claim eligibility. Claims are blocked when the active roster is full, the inherited contract exceeds cap room, or the current phase disallows roster moves.";
+    }
+
+    private void OnWaiverMarketSelected()
+    {
+        var selected = _waiversTree?.GetSelected();
+        if (selected == null || IsNil(selected.GetMetadata(0))) return;
+        _selectedWaiverMarketPlayerId = selected.GetMetadata(0).AsString();
+        var league = _nativeGameCoreContext?.ActiveLeague; var user = league?.Teams?.FirstOrDefault(team => string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var waiver = league?.Waivers?.FirstOrDefault(item => string.Equals(item?.Player?.PlayerId, _selectedWaiverMarketPlayerId, StringComparison.OrdinalIgnoreCase));
+        if (user == null || waiver?.Player == null) return;
+        var contracts = new ContractService(_nativeGameCoreContext);
+        var conditionalReleaseId = GetSelectedWaiverConditionalReleaseId();
+        var conditionalRelease = user.Roster.FirstOrDefault(player => string.Equals(player.PlayerId, conditionalReleaseId, StringComparison.OrdinalIgnoreCase));
+        var projectedRosterCount = user.Roster.Count - (conditionalRelease == null ? 0 : 1) + 1;
+        var projectedCapRoom = contracts.GetCapRoom(user) + Math.Max(0m, conditionalRelease?.Contract?.AnnualSalary ?? 0m);
+        var reason = waiver.PendingConfirmation
+            ? string.Equals(waiver.PendingClaimTeamId, user.TeamId, StringComparison.OrdinalIgnoreCase) ? "Your winning opportunity is awaiting finalization or cancellation from Action Required." : "This player already has a pending winning opportunity."
+            : waiver.DeclinedTeamIds?.Any(teamId => string.Equals(teamId, user.TeamId, StringComparison.OrdinalIgnoreCase)) == true ? "Your team already declined this opportunity."
+            : waiver.Claims?.Any(claim => string.Equals(claim?.TeamId, user.TeamId, StringComparison.OrdinalIgnoreCase)) == true ? "Your claim is submitted and will resolve in the original league waiver order when the period closes."
+            : !ContractPhaseRules.CanManageRoster(league, out var phaseError) ? phaseError
+            : projectedRosterCount > RosterService.RosterLimit ? $"Projected roster remains over {RosterService.RosterLimit}; select a conditional release."
+            : (waiver.Player.Contract?.AnnualSalary ?? 0m) > projectedCapRoom ? "Inherited contract exceeds projected cap room, including the selected conditional release."
+            : $"Eligible to submit. Projected final roster: {projectedRosterCount}/{RosterService.RosterLimit}; projected cap room before the claim: {GameCoreStateHelper.FormatCapRoom(projectedCapRoom)}. No transfer or release occurs until finalization.";
+        _btnClaimWaiverMarket.Disabled = !reason.StartsWith("Eligible", StringComparison.Ordinal);
+        _waiversStatus.Text = $"SELECTED | {waiver.Player.Name} ({waiver.Player.Position})\n{reason}\nShared profile routing for non-rostered waiver players is unavailable until the player is claimed; player facts are shown in this claim list.";
+    }
+
+    private async Task ClaimSelectedWaiverMarket()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedWaiverMarketPlayerId)) { _waiversStatus.Text = "Select a waived player before claiming."; return; }
+        var result = new TransactionService(_nativeGameCoreContext).SubmitWaiverClaim(_selectedWaiverMarketPlayerId, null, new ContractService(_nativeGameCoreContext), GetSelectedWaiverConditionalReleaseId());
+        _waiversStatus.Text = result?.Message ?? "Waiver claim failed.";
+        if (result?.Accepted != true) return;
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Pending waiver claim saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshWaiversUi();
+        _waiversStatus.Text = $"CLAIM SUBMITTED\n{result.Message} Current cap room: {GameCoreStateHelper.FormatCapRoom(result.CapRoomAfterSigning)}";
+    }
+
+    private string GetSelectedWaiverConditionalReleaseId()
+    {
+        if (_waiverConditionalReleasePicker == null || _waiverConditionalReleasePicker.Selected < 0)
+            return "";
+        var metadata = _waiverConditionalReleasePicker.GetItemMetadata(_waiverConditionalReleasePicker.Selected);
+        return IsNil(metadata) ? "" : metadata.AsString();
+    }
+
+    private void CreateLeagueTransactionsControls()
+    {
+        _leagueTransactionsDialog = new AcceptDialog { Name = "LeagueTransactionsDialog", Title = "Trade Center > League Transactions", MinSize = new Vector2I(1040, 620), Exclusive = false };
+        AddChild(_leagueTransactionsDialog); _leagueTransactionsDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _leagueTransactionsDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("LEAGUE TRANSACTIONS", "Authoritative chronological log of persisted player-movement and contract events. Live trade-market responses remain in Trade Block / Finder."));
+        var filters = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; filters.AddThemeConstantOverride("separation", 6); content.AddChild(filters);
+        filters.AddChild(HomeLabel("TYPE", 11, new Color("9cadb8"))); _leagueTransactionsTypeFilter = new OptionButton(); _leagueTransactionsTypeFilter.ItemSelected += _ => RenderLeagueTransactions(); filters.AddChild(_leagueTransactionsTypeFilter);
+        filters.AddChild(HomeLabel("TEAM", 11, new Color("9cadb8"))); _leagueTransactionsTeamFilter = new OptionButton(); _leagueTransactionsTeamFilter.ItemSelected += _ => RenderLeagueTransactions(); filters.AddChild(_leagueTransactionsTeamFilter);
+        filters.AddChild(HomeLabel("PLAYER", 11, new Color("9cadb8"))); _leagueTransactionsPlayerSearch = new LineEdit { PlaceholderText = "Filter player or summary", ClearButtonEnabled = true, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _leagueTransactionsPlayerSearch.TextChanged += _ => RenderLeagueTransactions(); filters.AddChild(_leagueTransactionsPlayerSearch);
+        var scroll = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; content.AddChild(scroll);
+        _leagueTransactionsTree = new Tree { Columns = 6, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(980, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _leagueTransactionsTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _leagueTransactionsTree.SetColumnTitle(0, "DATE"); _leagueTransactionsTree.SetColumnTitle(1, "TYPE"); _leagueTransactionsTree.SetColumnTitle(2, "PLAYER"); _leagueTransactionsTree.SetColumnTitle(3, "TEAM"); _leagueTransactionsTree.SetColumnTitle(4, "SUMMARY / CONTEXT"); _leagueTransactionsTree.SetColumnTitle(5, "PHASE");
+        for (var column = 0; column < 6; column++) _leagueTransactionsTree.SetColumnExpand(column, column == 4);
+        _leagueTransactionsTree.SetColumnCustomMinimumWidth(0, 110); _leagueTransactionsTree.SetColumnCustomMinimumWidth(1, 130); _leagueTransactionsTree.SetColumnCustomMinimumWidth(2, 150); _leagueTransactionsTree.SetColumnCustomMinimumWidth(3, 145); _leagueTransactionsTree.SetColumnCustomMinimumWidth(4, 300); _leagueTransactionsTree.SetColumnCustomMinimumWidth(5, 115);
+        _leagueTransactionsTree.ItemActivated += () => _ = OpenSelectedLeagueTransactionContext(); scroll.AddChild(_leagueTransactionsTree);
+        var actions = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; content.AddChild(actions); var refresh = new Button { Text = "REFRESH LOG" }; refresh.Pressed += RefreshLeagueTransactionsUi; actions.AddChild(refresh); var close = new Button { Text = "CLOSE", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; close.Pressed += _leagueTransactionsDialog.Hide; actions.AddChild(close);
+        _leagueTransactionsStatus = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 42) }; content.AddChild(_leagueTransactionsStatus);
+        ApplyWorkstationTheme(_leagueTransactionsDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowLeagueTransactionsDialog()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("League Transactions is available in the Native C# GameCore."); return; }
+        RefreshLeagueTransactionsUi(); var viewport = GetViewportRect().Size; _leagueTransactionsDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .94f), 760, 1320), Mathf.Clamp((int)(viewport.Y * .88f), 540, 780)));
+    }
+
+    private void RefreshLeagueTransactionsUi()
+    {
+        EnsureNativeGameCoreServices(); var league = _nativeGameCoreContext?.ActiveLeague;
+        var priorType = _leagueTransactionsTypeFilter?.Selected > 0 ? _leagueTransactionsTypeFilter.GetItemText(_leagueTransactionsTypeFilter.Selected) : "";
+        var priorTeamId = _leagueTransactionsTeamFilter?.Selected > 0 ? _leagueTransactionsTeamFilter.GetItemMetadata(_leagueTransactionsTeamFilter.Selected).ToString() : "";
+        _leagueTransactionsTypeFilter.Clear(); _leagueTransactionsTeamFilter.Clear(); _leagueTransactionsTypeFilter.AddItem("All types"); _leagueTransactionsTeamFilter.AddItem("All teams");
+        if (league == null) { _leagueTransactionsTree.Clear(); _leagueTransactionsStatus.Text = "No active franchise is loaded. Load or start a franchise to view its persistent league transaction log."; return; }
+        foreach (var type in (league.Transactions ?? new List<TransactionRecord>()).Where(item => !string.IsNullOrWhiteSpace(item?.Type)).Select(item => item.Type).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(type => type, StringComparer.OrdinalIgnoreCase)) _leagueTransactionsTypeFilter.AddItem(type);
+        foreach (var team in league.Teams.Where(team => team != null).OrderBy(team => team.Name, StringComparer.OrdinalIgnoreCase)) { _leagueTransactionsTeamFilter.AddItem(team.Name); _leagueTransactionsTeamFilter.SetItemMetadata(_leagueTransactionsTeamFilter.ItemCount - 1, team.TeamId); }
+        for (var index = 1; index < _leagueTransactionsTypeFilter.ItemCount; index++) if (string.Equals(_leagueTransactionsTypeFilter.GetItemText(index), priorType, StringComparison.OrdinalIgnoreCase)) { _leagueTransactionsTypeFilter.Select(index); break; }
+        for (var index = 1; index < _leagueTransactionsTeamFilter.ItemCount; index++) if (string.Equals(_leagueTransactionsTeamFilter.GetItemMetadata(index).ToString(), priorTeamId, StringComparison.OrdinalIgnoreCase)) { _leagueTransactionsTeamFilter.Select(index); break; }
+        RenderLeagueTransactions();
+    }
+
+    private void RenderLeagueTransactions()
+    {
+        if (_leagueTransactionsTree == null) return; _leagueTransactionsTree.Clear(); var league = _nativeGameCoreContext?.ActiveLeague; if (league == null) return;
+        var selectedType = _leagueTransactionsTypeFilter.Selected <= 0 ? "" : _leagueTransactionsTypeFilter.GetItemText(_leagueTransactionsTypeFilter.Selected);
+        var selectedTeamId = _leagueTransactionsTeamFilter.Selected <= 0 ? "" : _leagueTransactionsTeamFilter.GetItemMetadata(_leagueTransactionsTeamFilter.Selected).ToString();
+        var search = _leagueTransactionsPlayerSearch?.Text?.Trim() ?? "";
+        var records = (league.Transactions ?? new List<TransactionRecord>()).Where(record => record != null && (string.IsNullOrWhiteSpace(selectedType) || string.Equals(record.Type, selectedType, StringComparison.OrdinalIgnoreCase)) && (string.IsNullOrWhiteSpace(selectedTeamId) || string.Equals(record.TeamId, selectedTeamId, StringComparison.OrdinalIgnoreCase)) && (string.IsNullOrWhiteSpace(search) || (record.PlayerName ?? "").Contains(search, StringComparison.OrdinalIgnoreCase) || (record.Details ?? "").Contains(search, StringComparison.OrdinalIgnoreCase))).OrderByDescending(record => record.SeasonYear).ThenByDescending(record => record.TransactionId, StringComparer.OrdinalIgnoreCase).ToList();
+        var root = _leagueTransactionsTree.CreateItem(); var index = 0;
+        foreach (var record in records)
+        {
+            var row = _leagueTransactionsTree.CreateItem(root); row.SetText(0, string.IsNullOrWhiteSpace(record.DateLabel) ? "Date unavailable" : record.DateLabel); row.SetText(1, string.IsNullOrWhiteSpace(record.Type) ? "Type unavailable" : record.Type); row.SetText(2, string.IsNullOrWhiteSpace(record.PlayerName) ? "Player unavailable" : record.PlayerName); row.SetText(3, string.IsNullOrWhiteSpace(record.TeamName) ? "Team unavailable" : record.TeamName); row.SetText(4, string.IsNullOrWhiteSpace(record.Details) ? "Recorded detail unavailable" : record.Details); row.SetText(5, string.IsNullOrWhiteSpace(record.Phase) ? "Phase unavailable" : record.Phase); row.SetMetadata(0, record.PlayerId); row.SetMetadata(1, record.TeamId); row.SetMetadata(2, record.TransactionId);
+            for (var column = 0; column < 6; column++) row.SetCustomBgColor(column, index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); index++;
+        }
+        _leagueTransactionsStatus.Text = index == 0 ? "NO MATCHING TRANSACTIONS\nNo persisted transaction records match the active filters." : $"{index} persisted transaction record(s) shown · newest first. Select an entry to open supported player/team context.";
+    }
+
+    private async Task OpenSelectedLeagueTransactionContext()
+    {
+        var selected = _leagueTransactionsTree?.GetSelected(); if (selected == null) return; var playerId = IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString(); var teamId = IsNil(selected.GetMetadata(1)) ? "" : selected.GetMetadata(1).AsString();
+        if (!string.IsNullOrWhiteSpace(playerId)) { _leagueTransactionsDialog.Hide(); await SelectMainTab(ROSTER_TAB_INDEX); await TrySelectTeamInRoster(teamId); TrySelectRosterPlayer(playerId); return; }
+        _leagueTransactionsStatus.Text = "The selected record has no persisted player route. Its recorded team, date, type, phase, and detail remain visible in the log.";
+    }
+
+    private void CreateTradeFinderControls()
+    {
+        _tradeFinderDialog = new AcceptDialog { Name = "TradeFinderDialog", Title = "Trade Center > Trade Block / Finder", MinSize = new Vector2I(940, 620), Exclusive = false };
+        AddChild(_tradeFinderDialog);
+        _tradeFinderDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            AnchorsPreset = (int)LayoutPreset.FullRect,
+            OffsetLeft = 12,
+            OffsetTop = 10,
+            OffsetRight = -12,
+            OffsetBottom = -48,
+        };
+        _tradeFinderDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("TRADE BLOCK / FINDER", "Select up to eight owned players or unused picks, optionally name a position to target, then submit the package. Offers appear only after submission."));
+        _tradeFinderSelectionStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        content.AddChild(_tradeFinderSelectionStatus);
+        var requestRow = new HBoxContainer(); requestRow.AddChild(new Label { Text = "OPTIONAL RETURN POSITION" });
+        _tradeFinderRequestedPosition = new OptionButton();
+        foreach (var position in new[] { "Any", "QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S", "K", "P" }) _tradeFinderRequestedPosition.AddItem(position);
+        requestRow.AddChild(_tradeFinderRequestedPosition); content.AddChild(requestRow);
+
+        var split = new HSplitContainer { CustomMinimumSize = new Vector2(0, 350), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, SplitOffset = 470 };
+        content.AddChild(split);
+        var assets = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        assets.AddThemeConstantOverride("separation", 5);
+        split.AddChild(assets);
+        assets.AddChild(HomeLabel("YOUR TRADEABLE ASSETS", 13, new Color("f4eddf")));
+        assets.AddChild(new Label { Text = "Select one or more assets you are willing to move. Session selection is carried into Build a Trade; no trade occurs here.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        _tradeFinderAssets = new ItemList { SelectMode = ItemList.SelectModeEnum.Multi, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
+        _tradeFinderAssets.MultiSelected += (_, _) => UpdateTradeFinderSelection();
+        assets.AddChild(_tradeFinderAssets);
+
+        var offers = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        offers.AddThemeConstantOverride("separation", 5);
+        split.AddChild(offers);
+        offers.AddChild(HomeLabel("INTERESTED GM OFFERS", 13, new Color("f4eddf")));
+        _tradeFinderOffers = new Tree { Columns = 3, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _tradeFinderOffers.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _tradeFinderOffers.SetColumnTitle(0, "PARTNER"); _tradeFinderOffers.SetColumnTitle(1, "CORE OFFER"); _tradeFinderOffers.SetColumnTitle(2, "STATUS");
+        _tradeFinderOffers.SetColumnExpand(0, true); _tradeFinderOffers.SetColumnExpand(1, true); _tradeFinderOffers.SetColumnExpand(2, true);
+        _tradeFinderOffers.SetColumnCustomMinimumWidth(0, 110); _tradeFinderOffers.SetColumnCustomMinimumWidth(1, 180); _tradeFinderOffers.SetColumnCustomMinimumWidth(2, 115);
+        _tradeFinderOffers.ItemSelected += UpdateTradeMarketOfferActions;
+        _tradeFinderOffers.ItemActivated += () => _ = AcceptSelectedTradeMarketOffer();
+        offers.AddChild(_tradeFinderOffers);
+        _tradeFinderStatus = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(0, 58) };
+        offers.AddChild(_tradeFinderStatus);
+
+        var actions = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        actions.AddThemeConstantOverride("separation", 8);
+        content.AddChild(actions);
+        var clear = new Button { Text = "CLEAR SELECTION" }; clear.Pressed += ClearTradeFinderSelection; actions.AddChild(clear);
+        var refresh = new Button { Text = "SUBMIT ASSETS TO MARKET" }; refresh.Pressed += async () => await SubmitTradeFinderMarket(); actions.AddChild(refresh);
+        _tradeFinderAcceptOffer = new Button { Text = "ACCEPT OFFER", Disabled = true, TooltipText = "Accept the selected concrete offer and complete the validated trade." };
+        _tradeFinderAcceptOffer.Pressed += async () => await AcceptSelectedTradeMarketOffer(); actions.AddChild(_tradeFinderAcceptOffer);
+        _tradeFinderRejectOffer = new Button { Text = "REJECT OFFER", Disabled = true };
+        _tradeFinderRejectOffer.Pressed += async () => await RejectSelectedTradeMarketOffer(); actions.AddChild(_tradeFinderRejectOffer);
+        _tradeFinderWithdraw = new Button { Text = "WITHDRAW PACKAGE", Disabled = true };
+        _tradeFinderWithdraw.Pressed += async () => await WithdrawTradeMarketPackage(); actions.AddChild(_tradeFinderWithdraw);
+        var build = new Button { Text = "OPEN BUILD A TRADE", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, TooltipText = "Carry the selected user assets into the proposal builder." };
+        build.Pressed += OpenTradeFinderSelectionInBuilder;
+        actions.AddChild(build);
+        var close = new Button { Text = "CLOSE" }; close.Pressed += _tradeFinderDialog.Hide; actions.AddChild(close);
+        ApplyWorkstationTheme(_tradeFinderDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowTradeFinderDialog()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Trade Block / Finder is available in the Native C# GameCore.");
+            return;
+        }
+        RefreshTradeFinderUi();
+        var viewport = GetViewportRect().Size;
+        _tradeFinderDialog.PopupCentered(new Vector2I(
+            Mathf.Clamp((int)(viewport.X * 0.92f), 760, 1240),
+            Mathf.Clamp((int)(viewport.Y * 0.88f), 540, 760)));
+    }
+
+    private void RefreshTradeFinderUi()
+    {
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        _tradeFinderAssets.Clear();
+        _tradeFinderOffers.Clear();
+        if (league == null)
+        {
+            _tradeFinderSelectionStatus.Text = "No active franchise is loaded.";
+            _tradeFinderStatus.Text = "Load or start a franchise to search the trade market.";
+            return;
+        }
+        new DraftService(_nativeGameCoreContext).PrepareDraftBoard();
+        var user = league.Teams.FirstOrDefault(team => string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        PopulateTradeAssets(_tradeFinderAssets, league, user);
+        for (var index = 0; index < _tradeFinderAssets.ItemCount; index++)
+        {
+            var key = _tradeFinderAssets.GetItemMetadata(index).ToString();
+            _tradeFinderAssets.Select(index, _tradeFinderSelectedAssets.Contains(key, StringComparer.Ordinal));
+        }
+        UpdateTradeFinderSelection();
+        RefreshTradeFinderInterest();
+    }
+
+    private void UpdateTradeFinderSelection()
+    {
+        _tradeFinderSelectedAssets.Clear();
+        if (_tradeFinderAssets != null)
+            foreach (var index in _tradeFinderAssets.GetSelectedItems())
+                _tradeFinderSelectedAssets.Add(_tradeFinderAssets.GetItemMetadata(index).ToString());
+        var count = _tradeFinderSelectedAssets.Count;
+        _tradeFinderSelectionStatus.Text = count == 0
+            ? "SELECTED ASSETS: none · Select real players or unused picks to begin a market check."
+            : count > TradeMarketService.MaxSubmittedAssets
+                ? $"SELECTED ASSETS: {count} · Reduce the package to {TradeMarketService.MaxSubmittedAssets} assets before submission."
+                : $"SELECTED ASSETS: {count}/{TradeMarketService.MaxSubmittedAssets} · No offers are generated until you submit this package.";
+    }
+
+    private void ClearTradeFinderSelection()
+    {
+        _tradeFinderAssets?.DeselectAll();
+        UpdateTradeFinderSelection();
+        RefreshTradeFinderInterest();
+    }
+
+    private void RefreshTradeFinderInterest()
+    {
+        _tradeFinderOffers?.Clear();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null)
+        {
+            _tradeFinderStatus.Text = "MARKET STATUS\nNo active franchise is loaded.";
+            return;
+        }
+        RenderTradeMarketState(new TradeMarketService(_nativeGameCoreContext).GetState());
+    }
+
+    private async Task SubmitTradeFinderMarket()
+    {
+        UpdateTradeFinderSelection();
+        var players = new List<string>(); var picks = new List<int>();
+        foreach (var asset in _tradeFinderSelectedAssets)
+        {
+            if (asset.StartsWith("P:", StringComparison.Ordinal)) players.Add(asset[2..]);
+            else if (asset.StartsWith("K:", StringComparison.Ordinal) && int.TryParse(asset[2..], out var pick)) picks.Add(pick);
+        }
+        var position = _tradeFinderRequestedPosition != null && _tradeFinderRequestedPosition.Selected >= 0
+            ? _tradeFinderRequestedPosition.GetItemText(_tradeFinderRequestedPosition.Selected)
+            : "Any";
+        var response = new TradeMarketService(_nativeGameCoreContext).Submit(players, picks, position);
+        RenderTradeMarketState(response);
+        if (!response.Ok) { SetPrimaryStatus(response.Error); return; }
+        await SaveNativeAutosave("Native autosave updated.");
+        SetPrimaryStatus(response.Offers.Count > 0 ? $"Trade package submitted; {response.Offers.Count} offer(s) received." : "Trade package submitted; no teams made an offer.");
+    }
+
+    private void RenderTradeMarketState(TradeMarketResponse response)
+    {
+        _tradeFinderOffers.Clear();
+        _selectedTradeMarketOfferId = "";
+        UpdateTradeMarketOfferActions();
+        if (response?.Ok != true)
+        {
+            _tradeFinderStatus.Text = $"MARKET STATUS\n{response?.Error ?? "Trade market unavailable."}";
+            return;
+        }
+        if (!response.Submitted)
+        {
+            if (_tradeFinderWithdraw != null) _tradeFinderWithdraw.Disabled = true;
+            _tradeFinderStatus.Text = "MARKET STATUS\nNo package has been submitted. Select assets and use Submit Assets to Market; selection alone never generates offers.";
+            return;
+        }
+        if (_tradeFinderWithdraw != null) _tradeFinderWithdraw.Disabled = false;
+        SelectSetupOption(_tradeFinderRequestedPosition, string.IsNullOrWhiteSpace(response.RequestedPosition) ? "Any" : response.RequestedPosition);
+        var root = _tradeFinderOffers.CreateItem();
+        foreach (var offer in response.Offers)
+        {
+            var row = _tradeFinderOffers.CreateItem(root); row.SetText(0, offer.PartnerTeamName); row.SetText(1, string.Join(" + ", offer.PartnerAssets)); row.SetText(2, offer.Status.ToUpperInvariant()); row.SetMetadata(0, offer.OfferId); row.SetMetadata(1, offer.PartnerTeamId);
+        }
+        var submitted = string.Join(" + ", response.OfferedAssets);
+        var target = string.IsNullOrWhiteSpace(response.RequestedPosition) ? "best available return" : response.RequestedPosition;
+        _tradeFinderStatus.Text = response.Offers.Count == 0
+            ? $"SUBMITTED {response.SubmittedDate}\n{submitted}\nTarget: {target}. No clubs submitted a valid offer."
+            : $"SUBMITTED {response.SubmittedDate} · {response.Offers.Count} RECEIVED OFFER(S)\nShopping: {submitted}\nTarget: {target}. Select an open response to accept or reject it, or withdraw the full package.";
+    }
+
+    private void UpdateTradeMarketOfferActions()
+    {
+        var selected = _tradeFinderOffers?.GetSelected();
+        _selectedTradeMarketOfferId = selected == null || IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString();
+        var isOpen = selected != null && string.Equals(selected.GetText(2), "OPEN", StringComparison.OrdinalIgnoreCase);
+        if (_tradeFinderAcceptOffer != null) _tradeFinderAcceptOffer.Disabled = !isOpen;
+        if (_tradeFinderRejectOffer != null) _tradeFinderRejectOffer.Disabled = !isOpen;
+    }
+
+    private async Task AcceptSelectedTradeMarketOffer()
+    {
+        UpdateTradeMarketOfferActions();
+        if (string.IsNullOrWhiteSpace(_selectedTradeMarketOfferId)) return;
+        var result = new TradeMarketService(_nativeGameCoreContext).AcceptOffer(_selectedTradeMarketOfferId);
+        if (!result.Ok || !result.Accepted)
+        {
+            _tradeFinderStatus.Text = $"OFFER NOT COMPLETED\n{result.Message}\n{result.Rationale}";
+            SetPrimaryStatus(result.Message);
+            return;
+        }
+        RenderTradeMarketState(new TradeMarketService(_nativeGameCoreContext).GetState());
+        if (string.Equals(_nativeGameCoreContext?.ActiveLeague?.Calendar?.Phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase) && _draftBoardDialog?.Visible == true)
+            RefreshDraftBoard();
+        await SaveNativeAutosave("Native autosave updated.");
+        SetPrimaryStatus("Trade-market offer accepted and completed.");
+    }
+
+    private async Task RejectSelectedTradeMarketOffer()
+    {
+        UpdateTradeMarketOfferActions();
+        if (string.IsNullOrWhiteSpace(_selectedTradeMarketOfferId)) return;
+        var response = new TradeMarketService(_nativeGameCoreContext).RejectOffer(_selectedTradeMarketOfferId);
+        RenderTradeMarketState(response);
+        if (!response.Ok) { SetPrimaryStatus(response.Error); return; }
+        await SaveNativeAutosave("Native autosave updated.");
+        SetPrimaryStatus("Trade-market offer rejected.");
+    }
+
+    private async Task WithdrawTradeMarketPackage()
+    {
+        var response = new TradeMarketService(_nativeGameCoreContext).Withdraw();
+        RenderTradeMarketState(response);
+        if (!response.Ok) { SetPrimaryStatus(response.Error); return; }
+        await SaveNativeAutosave("Native autosave updated.");
+        SetPrimaryStatus("Trade-market package withdrawn.");
+    }
+
+    private void OpenTradeFinderSelectionInBuilder()
+    {
+        UpdateTradeFinderSelection();
+        _pendingTradeOfferAssets.Clear();
+        _pendingTradeOfferAssets.AddRange(_tradeFinderSelectedAssets);
+        _tradeFinderDialog.Hide();
+        ShowTradeDialog();
+    }
+
+    private void ShowTradeDialog()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            SetPrimaryStatus("Trades are available in the Native C# GameCore.");
+            return;
+        }
+        RefreshTradeUi();
+        var viewport = GetViewportRect().Size;
+        var dialogSize = new Vector2I(
+            Mathf.Clamp((int)(viewport.X * 0.92f), 900, 1240),
+            Mathf.Clamp((int)(viewport.Y * 0.88f), 560, 760));
+        _tradeDialog.PopupCentered(dialogSize);
+    }
+
+    private void RefreshTradeUi()
+    {
+        EnsureNativeGameCoreServices();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null)
+        {
+            _tradeStatus.Text = "Start or load a franchise to propose a trade.";
+            return;
+        }
+
+        new DraftService(_nativeGameCoreContext).PrepareDraftBoard();
+        _tradePartnerSelect.Clear();
+        foreach (var team in league.Teams.Where(team => team != null && !string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase)).OrderBy(team => team.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            _tradePartnerSelect.AddItem(team.Name);
+            _tradePartnerSelect.SetItemMetadata(_tradePartnerSelect.ItemCount - 1, team.TeamId);
+        }
+        RefreshTradeAssets();
+        _tradeRationale.Text = "Select assets to preview package value plus projected cap and roster effects. No league state changes until an accepted submission.";
+        _tradeStatus.Text = ContractPhaseRules.CanProposeTrades(league, out var error) ? "Build an offer, then submit it explicitly. No roster changes occur until a proposal is accepted." : error;
+    }
+
+    private void RefreshTradeAssets()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null || _tradePartnerSelect.ItemCount == 0)
+            return;
+        var user = league.Teams.FirstOrDefault(team => string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var partnerId = _tradePartnerSelect.GetItemMetadata(_tradePartnerSelect.Selected).ToString();
+        var partner = league.Teams.FirstOrDefault(team => string.Equals(team.TeamId, partnerId, StringComparison.OrdinalIgnoreCase));
+        PopulateTradeAssets(_tradeOfferAssets, league, user);
+        PopulateTradeAssets(_tradeRequestAssets, league, partner);
+        ApplyPendingTradeFinderAssets();
+        var evaluation = new FrontOfficeEvaluationService(_nativeGameCoreContext).EvaluateTeam(partnerId);
+        _tradePartnerEvaluation.Text = evaluation.Ok
+            ? $"COUNTERPARTY FRONT OFFICE REPORT | {evaluation.TeamName}\nCap room: {GameCoreStateHelper.FormatCapRoom(evaluation.CapRoom)} | Roster: {evaluation.RosterSize}/53 | Avg age: {evaluation.AverageAge} | Avg potential: {evaluation.AveragePotential} | Expiring: {evaluation.ExpiringContracts} | Picks: {evaluation.DraftPicksAvailable}\n{evaluation.Rationale}"
+            : evaluation.Error;
+        UpdateTradePackagePreview();
+    }
+
+    private void ApplyPendingTradeFinderAssets()
+    {
+        if (_tradeOfferAssets == null || _pendingTradeOfferAssets.Count == 0)
+            return;
+        for (var index = 0; index < _tradeOfferAssets.ItemCount; index++)
+        {
+            var assetKey = _tradeOfferAssets.GetItemMetadata(index).ToString();
+            if (_pendingTradeOfferAssets.Contains(assetKey, StringComparer.Ordinal))
+                _tradeOfferAssets.Select(index, false);
+        }
+        _pendingTradeOfferAssets.Clear();
+    }
+
+    private void UpdateTradePackagePreview()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null || _tradeOfferAssets == null || _tradeRequestAssets == null || _tradeRationale == null) return;
+        if (_tradePartnerSelect.ItemCount == 0) return;
+        var proposal = new TradeProposal { ProposingTeamId = league.UserTeamId, ReceivingTeamId = _tradePartnerSelect.GetItemMetadata(_tradePartnerSelect.Selected).ToString() };
+        AddSelectedTradeAssets(_tradeOfferAssets, proposal.ProposingPlayerIds, proposal.ProposingPickOverallNumbers);
+        AddSelectedTradeAssets(_tradeRequestAssets, proposal.ReceivingPlayerIds, proposal.ReceivingPickOverallNumbers);
+        var preview = new TransactionService(_nativeGameCoreContext).PreviewUserTradeProposal(proposal, new ContractService(_nativeGameCoreContext));
+        _tradeRationale.Text = preview.Ok ? $"PACKAGE PREVIEW\n{preview.Rationale}\n{preview.Message}\nFinal transaction validation and the counterparty decision occur only after explicit submission." : $"PACKAGE PREVIEW\n{preview.Message}";
+    }
+
+    private static void PopulateTradeAssets(ItemList list, LeagueState league, TeamState team)
+    {
+        list.Clear();
+        if (team == null)
+            return;
+        foreach (var player in team.Roster.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            list.AddItem($"Player | {player.Position,-4} {player.Name,-24} OVR {player.Overall,2} Age {player.Age,2}");
+            list.SetItemMetadata(list.ItemCount - 1, $"P:{player.PlayerId}");
+        }
+        foreach (var pick in league.Draft.Picks.Where(pick => pick != null && string.Equals(pick.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(pick.ProspectId)).OrderBy(pick => pick.OverallPick))
+        {
+            list.AddItem($"Pick   | Round {pick.Round}, pick {pick.PickInRound} (overall {pick.OverallPick}) | originally {pick.OriginalTeamId}");
+            list.SetItemMetadata(list.ItemCount - 1, $"K:{pick.OverallPick}");
+        }
+    }
+
+    private async Task SubmitTradeProposal()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        if (league == null || _tradePartnerSelect.ItemCount == 0)
+            return;
+        var proposal = new TradeProposal { ProposingTeamId = league.UserTeamId, ReceivingTeamId = _tradePartnerSelect.GetItemMetadata(_tradePartnerSelect.Selected).ToString() };
+        AddSelectedTradeAssets(_tradeOfferAssets, proposal.ProposingPlayerIds, proposal.ProposingPickOverallNumbers);
+        AddSelectedTradeAssets(_tradeRequestAssets, proposal.ReceivingPlayerIds, proposal.ReceivingPickOverallNumbers);
+        var result = new TransactionService(_nativeGameCoreContext).SubmitUserTradeProposal(proposal, new ContractService(_nativeGameCoreContext));
+        _tradeStatus.Text = result.Message;
+        _tradeRationale.Text = result.Rationale;
+        if (!result.Accepted)
+            return;
+
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Trade proposal saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshTradeUi();
+        _tradeStatus.Text = result.Message;
+        _tradeRationale.Text = result.Rationale;
+    }
+
+    private static void AddSelectedTradeAssets(ItemList list, List<string> playerIds, List<int> pickNumbers)
+    {
+        foreach (var index in list.GetSelectedItems())
+        {
+            var value = list.GetItemMetadata(index).ToString();
+            if (value.StartsWith("P:", StringComparison.Ordinal))
+                playerIds.Add(value[2..]);
+            else if (value.StartsWith("K:", StringComparison.Ordinal) && int.TryParse(value[2..], out var overallPick))
+                pickNumbers.Add(overallPick);
+        }
+    }
 
     private void ShowFreeAgency()
     {
@@ -2709,7 +5404,8 @@ public partial class DashboardController : Control
         }
 
         RefreshFreeAgencyUi();
-        _freeAgencyDialog.PopupCentered(new Vector2I(940, 620));
+        var viewport = GetViewportRect().Size;
+        _freeAgencyDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 760, 1240), Mathf.Clamp((int)(viewport.Y * .88f), 540, 760)));
     }
 
     private void RefreshFreeAgencyUi()
@@ -2721,44 +5417,120 @@ public partial class DashboardController : Control
         {
             _freeAgencyCapSummary.Text = "Start or load a franchise to access free agency.";
             _freeAgentList.Clear();
-            _freeAgentDetail.Text = "";
             return;
         }
 
         var contracts = new ContractService(_nativeGameCoreContext);
         var phaseStatus = ContractPhaseRules.GetStatus(league);
         _freeAgencyCapSummary.Text = $"{team.Name} | Cap room: {GameCoreStateHelper.FormatCapRoom(contracts.GetCapRoom(team))} | Active roster: {team.Roster.Count}/53 | Free agents: {league.FreeAgents.Count}\n{phaseStatus.Explanation}";
-        _freeAgentList.Clear();
-        foreach (var player in league.FreeAgents.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
-        {
-            var asking = contracts.GetRequiredAnnualSalary(player, team) / 1_000_000m;
-            _freeAgentList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age,2}  Ask ${asking:0.00}M");
-            _freeAgentList.SetItemMetadata(_freeAgentList.ItemCount - 1, player.PlayerId);
-        }
-
         _selectedFreeAgentId = "";
-        _freeAgentDetail.Text = "Select a player to review their asking price and make an offer.";
-        _freeAgencyStatus.Text = phaseStatus.CanSignFreeAgents ? "Negotiation adjusts asking price by a small amount based on your GM profile." : phaseStatus.Explanation;
-        _btnSubmitFreeAgentOffer.Disabled = true;
+        _freeAgencyStatus.Text = phaseStatus.CanSignFreeAgents ? "Right-click a player and choose Make Offer. Selecting a row alone never submits or reveals an offer panel." : phaseStatus.Explanation;
+        RenderFreeAgentTable();
     }
 
-    private void OnFreeAgentSelected(long index)
+    private void RenderFreeAgentTable()
     {
         var league = _nativeGameCoreContext?.ActiveLeague;
         var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
-        if (league == null || team == null || index < 0 || index >= _freeAgentList.ItemCount)
+        if (league == null || team == null || _freeAgentList == null)
             return;
+        var search = _freeAgencySearch?.Text?.Trim() ?? "";
+        var position = _freeAgencyPositionFilter == null || _freeAgencyPositionFilter.Selected <= 0 ? "" : _freeAgencyPositionFilter.GetItemText(_freeAgencyPositionFilter.Selected);
+        var contracts = new ContractService(_nativeGameCoreContext);
+        IEnumerable<PlayerState> players = league.FreeAgents.Where(player => player != null && (string.IsNullOrWhiteSpace(search) || player.Name.Contains(search, StringComparison.OrdinalIgnoreCase)) && (string.IsNullOrWhiteSpace(position) || string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase)));
+        players = _freeAgentSortColumn switch
+        {
+            1 => _freeAgentSortDescending ? players.OrderByDescending(player => player.Position) : players.OrderBy(player => player.Position),
+            2 => _freeAgentSortDescending ? players.OrderByDescending(player => player.Age) : players.OrderBy(player => player.Age),
+            3 => _freeAgentSortDescending ? players.OrderByDescending(player => player.Overall) : players.OrderBy(player => player.Overall),
+            4 => _freeAgentSortDescending ? players.OrderByDescending(player => player.Potential) : players.OrderBy(player => player.Potential),
+            5 => _freeAgentSortDescending ? players.OrderByDescending(player => contracts.GetRequiredAnnualSalary(player, team)) : players.OrderBy(player => contracts.GetRequiredAnnualSalary(player, team)),
+            _ => _freeAgentSortDescending ? players.OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase) : players.OrderBy(player => player.Name, StringComparer.OrdinalIgnoreCase),
+        };
+        _freeAgentList.Clear();
+        var root = _freeAgentList.CreateItem();
+        var rowIndex = 0;
+        foreach (var player in players)
+        {
+            var asking = contracts.GetRequiredAnnualSalary(player, team) / 1_000_000m;
+            var item = _freeAgentList.CreateItem(root);
+            item.SetText(0, player.Name); item.SetText(1, player.Position); item.SetText(2, player.Age.ToString()); item.SetText(3, player.Overall.ToString()); item.SetText(4, player.Potential.ToString()); item.SetText(5, $"${asking:0.00}M"); item.SetText(6, string.IsNullOrWhiteSpace(player.Status) ? "Unavailable" : player.Status);
+            item.SetMetadata(0, player.PlayerId);
+            for (var column = 0; column < 7; column++) item.SetCustomBgColor(column, rowIndex % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+            for (var column = 2; column <= 5; column++) item.SetTextAlignment(column, HorizontalAlignment.Right);
+            rowIndex++;
+        }
+        if (rowIndex == 0) _freeAgencyStatus.Text = "No free agents match the current search and position filters.";
+    }
 
-        _selectedFreeAgentId = _freeAgentList.GetItemMetadata((int)index).ToString();
+    private void OnFreeAgentSelected()
+    {
+        var selected = _freeAgentList?.GetSelected();
+        if (selected == null || IsNil(selected.GetMetadata(0))) return;
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null) return;
+        _selectedFreeAgentId = selected.GetMetadata(0).AsString();
         var player = league.FreeAgents.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _selectedFreeAgentId, StringComparison.OrdinalIgnoreCase));
-        if (player == null)
-            return;
-
+        if (player == null) return;
         var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
+        _freeAgentAnnualOffer.Value = (double)(required / 1_000_000m); _freeAgentGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m); _freeAgentYearsOffer.Value = 2; _freeAgentYearsOffer.Editable = true;
+        _freeAgencyStatus.Text = $"Selected: {player.Name} · {player.Position} · OVR {player.Overall} · estimated ask ${required / 1_000_000m:0.00}M/year. Right-click for player details or Make Offer.";
+    }
+
+    private void OnFreeAgentColumnTitleClicked(long column, long _) { if (column < 0 || column > 6) return; _freeAgentSortDescending = _freeAgentSortColumn == column ? !_freeAgentSortDescending : column != 0; _freeAgentSortColumn = (int)column; RenderFreeAgentTable(); }
+    private void OnFreeAgentTableInput(InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mouse || mouse.ButtonIndex != MouseButton.Right || !mouse.Pressed || _freeAgentList == null) return;
+        var item = _freeAgentList.GetItemAtPosition(mouse.Position);
+        if (item == null || IsNil(item.GetMetadata(0))) return;
+        item.Select(0); OnFreeAgentSelected();
+        var popupPosition = _freeAgentList.GetScreenPosition() + mouse.Position;
+        _freeAgentContextMenu.Position = new Vector2I(Mathf.RoundToInt(popupPosition.X), Mathf.RoundToInt(popupPosition.Y));
+        _freeAgentContextMenu.Popup();
+        GetViewport().SetInputAsHandled();
+    }
+
+    private void ShowSelectedFreeAgentDetails()
+    {
+        var player = _nativeGameCoreContext?.ActiveLeague?.FreeAgents?.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _selectedFreeAgentId, StringComparison.OrdinalIgnoreCase));
+        if (player == null) return;
+        var team = _nativeGameCoreContext.ActiveLeague.Teams.First(candidate => string.Equals(candidate.TeamId, _nativeGameCoreContext.ActiveLeague.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
+        _freeAgencyStatus.Text = $"{player.Name} · {player.Position} · Age {player.Age} · OVR {player.Overall} · Potential {player.Potential} · {player.Status} · Morale {player.Morale} ({player.MoraleTrend}) · estimated ask {GameCoreStateHelper.FormatCapRoom(required)}/year.";
+    }
+
+    private void ShowFreeAgentNegotiation()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedFreeAgentId)) return;
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var player = league?.FreeAgents?.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _selectedFreeAgentId, StringComparison.OrdinalIgnoreCase));
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (player == null || team == null) return;
+        var canSignActive = ContractPhaseRules.CanSignFreeAgent(league, player, out var activeError);
+        var canOfferPracticeSquad = player.Age <= 25 && ContractPhaseRules.CanManageRoster(league, out _);
+        if (!canSignActive && !canOfferPracticeSquad) { SetPrimaryStatus(activeError); return; }
+        var required = new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
+        var isUdfa = UndraftedFreeAgentService.IsUndraftedRookie(player);
+        _freeAgentContractType.Clear();
+        if (canSignActive)
+        {
+            _freeAgentContractType.AddItem(isUdfa ? "Undrafted Rookie Contract" : "Active Roster");
+            _freeAgentContractType.SetItemMetadata(_freeAgentContractType.ItemCount - 1, "active");
+        }
+        if (canOfferPracticeSquad && !isUdfa)
+        {
+            _freeAgentContractType.AddItem("Practice Squad");
+            _freeAgentContractType.SetItemMetadata(_freeAgentContractType.ItemCount - 1, "practice_squad");
+        }
+        _freeAgentContractType.Select(0);
         _freeAgentAnnualOffer.Value = (double)(required / 1_000_000m);
         _freeAgentGuaranteeOffer.Value = (double)(required * 0.30m / 1_000_000m);
-        _freeAgentDetail.Text = $"[b]{player.Name}[/b]\n{player.Position} | OVR {player.Overall} | Age {player.Age}\nMorale: {player.Morale} ({player.MoraleTrend})\n\nEstimated asking price: ${required / 1_000_000m:0.00}M annually\nOffer at least 15% of annual salary as guaranteed money.";
-        _btnSubmitFreeAgentOffer.Disabled = !ContractPhaseRules.GetStatus(league).CanSignFreeAgents;
+        _freeAgentYearsOffer.Value = isUdfa ? 3 : 2;
+        _freeAgentYearsOffer.Editable = !isUdfa;
+        RefreshFreeAgentNegotiationTerms();
+        _btnSubmitFreeAgentOffer.Disabled = false;
+        _freeAgentNegotiationDialog.PopupCentered(new Vector2I(600, 470));
     }
 
     private async Task SubmitFreeAgentOffer()
@@ -2768,23 +5540,57 @@ public partial class DashboardController : Control
             return;
 
         var service = new ContractService(_nativeGameCoreContext);
-        var result = service.SignFreeAgent(_selectedFreeAgentId, league.UserTeamId, new ContractOffer
-        {
-            AnnualSalary = (decimal)_freeAgentAnnualOffer.Value * 1_000_000m,
-            GuaranteedSalary = (decimal)_freeAgentGuaranteeOffer.Value * 1_000_000m,
-            Years = (int)_freeAgentYearsOffer.Value,
-        });
+        var contractType = GetSelectedFreeAgentContractType();
+        var result = contractType == "practice_squad"
+            ? new TransactionService(_nativeGameCoreContext).SignToPracticeSquad(_selectedFreeAgentId, league.UserTeamId, service, (decimal)_freeAgentAnnualOffer.Value * 1_000_000m)
+            : service.SignFreeAgent(_selectedFreeAgentId, league.UserTeamId, new ContractOffer
+            {
+                AnnualSalary = (decimal)_freeAgentAnnualOffer.Value * 1_000_000m,
+                GuaranteedSalary = (decimal)_freeAgentGuaranteeOffer.Value * 1_000_000m,
+                Years = (int)_freeAgentYearsOffer.Value,
+            });
         var transactionMessage = result.Accepted
             ? $"Accepted: {result.Message} Cap room after signing: {GameCoreStateHelper.FormatCapRoom(result.CapRoomAfterSigning)}"
             : $"{result.Message} Estimated requirement: {GameCoreStateHelper.FormatCapRoom(result.RequiredAnnualSalary)}";
         _freeAgencyStatus.Text = transactionMessage;
+        _freeAgentNegotiationContext.Text += $"\n\nLATEST RESPONSE\n{transactionMessage}";
         if (!result.Accepted)
             return;
 
+        _freeAgentNegotiationDialog.Hide();
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Free-agent signing saved.", autosaveToo: true);
         await RefreshAll();
         RefreshFreeAgencyUi();
+        if (_udfaMarketDialog?.Visible == true) RefreshUdfaMarket();
         _freeAgencyStatus.Text = transactionMessage;
+    }
+
+    private string GetSelectedFreeAgentContractType()
+    {
+        if (_freeAgentContractType == null || _freeAgentContractType.Selected < 0)
+            return "active";
+        var metadata = _freeAgentContractType.GetItemMetadata(_freeAgentContractType.Selected);
+        return IsNil(metadata) ? "active" : metadata.AsString();
+    }
+
+    private void RefreshFreeAgentNegotiationTerms()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var player = league?.FreeAgents?.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _selectedFreeAgentId, StringComparison.OrdinalIgnoreCase));
+        if (player == null || team == null || _freeAgentNegotiationContext == null)
+            return;
+        var practiceSquad = GetSelectedFreeAgentContractType() == "practice_squad";
+        var requirement = practiceSquad
+            ? new TransactionService(_nativeGameCoreContext).GetPracticeSquadRequiredSalary(player.PlayerId, team.TeamId)
+            : new ContractService(_nativeGameCoreContext).GetRequiredAnnualSalary(player, team);
+        _freeAgentAnnualOffer.Value = (double)(requirement / 1_000_000m);
+        _freeAgentGuaranteeOffer.Value = practiceSquad ? 0 : (double)(requirement * .30m / 1_000_000m);
+        _freeAgentGuaranteeOffer.Editable = !practiceSquad;
+        _freeAgentYearsOffer.Value = practiceSquad ? 1 : UndraftedFreeAgentService.IsUndraftedRookie(player) ? 3 : 2;
+        _freeAgentYearsOffer.Editable = !practiceSquad && !UndraftedFreeAgentService.IsUndraftedRookie(player);
+        var typeLabel = practiceSquad ? "Practice Squad · required 1 year" : UndraftedFreeAgentService.IsUndraftedRookie(player) ? "Undrafted Rookie Contract · required 3 years" : "Active Roster";
+        _freeAgentNegotiationContext.Text = $"{player.Name} · {player.Position} · Age {player.Age} · OVR {player.Overall} · Potential {player.Potential}\nStatus: {player.Status} · Morale: {player.Morale} ({player.MoraleTrend})\nContract type: {typeLabel}\nEstimated requirement: {GameCoreStateHelper.FormatCapRoom(requirement)} per year\nTeam cap room: {GameCoreStateHelper.FormatCapRoom(new ContractService(_nativeGameCoreContext).GetCapRoom(team))}\n\nSubmitting is the only action that can sign the player. Closing this window changes nothing.";
     }
 
     private void CreateRosterManagementControls()
@@ -2797,11 +5603,12 @@ public partial class DashboardController : Control
         actionRow.AddChild(_btnRosterManagement);
         _btnRosterManagement.Pressed += ShowRosterManagement;
 
-        _rosterManagementDialog = new AcceptDialog { Name = "RosterManagementDialog", Title = "Roster Moves", MinSize = new Vector2I(940, 620), Exclusive = false };
+        _rosterManagementDialog = new AcceptDialog { Name = "RosterManagementDialog", Title = "Waivers, Practice Squad & Ledger", MinSize = new Vector2I(1040, 650), Exclusive = false };
         AddChild(_rosterManagementDialog);
         _rosterManagementDialog.GetOkButton().Visible = false;
         var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         _rosterManagementDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("ROSTER TRANSACTIONS", "Claims, practice-squad signings, and permanent active-roster promotions are explicit actions validated for ownership, eligibility, cap, roster limit, and phase."));
         var tabs = new TabContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         content.AddChild(tabs);
 
@@ -2811,13 +5618,16 @@ public partial class DashboardController : Control
         _waiverClaimList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
         waiversTab.AddChild(_waiverClaimList);
         _waiverClaimList.ItemSelected += index => _selectedWaiverPlayerId = _waiverClaimList.GetItemMetadata((int)index).ToString();
-        var claimButton = new Button { Text = "Claim Selected Waiver" };
+        var claimButton = new Button { Text = "Submit Claim" };
         waiversTab.AddChild(claimButton);
         claimButton.Pressed += async () => await ClaimSelectedWaiver();
+        var waiverDecisionRow = new HBoxContainer(); waiverDecisionRow.AddThemeConstantOverride("separation", 8); waiversTab.AddChild(waiverDecisionRow);
+        var finalizeClaim = new Button { Text = "FINALIZE PENDING CLAIM", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; finalizeClaim.Pressed += async () => await FinalizeSelectedWaiverClaim(); waiverDecisionRow.AddChild(finalizeClaim);
+        var cancelClaim = new Button { Text = "CANCEL PENDING CLAIM" }; cancelClaim.Pressed += async () => await CancelSelectedWaiverClaim(); waiverDecisionRow.AddChild(cancelClaim);
 
         var practiceTab = new VBoxContainer { Name = "Practice Squad" };
         tabs.AddChild(practiceTab);
-        practiceTab.AddChild(new Label { Text = "Eligible free agents are age 25 or younger. Elevations require an active-roster opening." });
+        practiceTab.AddChild(new Label { Text = "Eligible free agents are age 25 or younger. Submit a one-year practice-squad offer; the player weighs salary and positional opportunity. No signing is automatic." });
         var practiceSplit = new HSplitContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         practiceTab.AddChild(practiceSplit);
         var candidates = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
@@ -2825,8 +5635,12 @@ public partial class DashboardController : Control
         candidates.AddChild(new Label { Text = "Eligible Free Agents" });
         _practiceSquadFreeAgentList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
         candidates.AddChild(_practiceSquadFreeAgentList);
-        _practiceSquadFreeAgentList.ItemSelected += index => _selectedPracticeSquadFreeAgentId = _practiceSquadFreeAgentList.GetItemMetadata((int)index).ToString();
-        var signButton = new Button { Text = "Sign to Practice Squad" };
+        _practiceSquadFreeAgentList.ItemSelected += OnPracticeSquadCandidateSelected;
+        var offerRow = new HBoxContainer(); candidates.AddChild(offerRow);
+        offerRow.AddChild(new Label { Text = "Annual offer:" });
+        _practiceSquadAnnualOffer = new SpinBox { MinValue = 250_000, MaxValue = 1_000_000, Step = 25_000, Value = 300_000, CustomMinimumSize = new Vector2(170, 0) };
+        offerRow.AddChild(_practiceSquadAnnualOffer);
+        var signButton = new Button { Text = "Make Practice Squad Offer" };
         candidates.AddChild(signButton);
         signButton.Pressed += async () => await SignSelectedPracticeSquadPlayer();
         var squad = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
@@ -2835,7 +5649,7 @@ public partial class DashboardController : Control
         _practiceSquadList = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill, AllowReselect = true };
         squad.AddChild(_practiceSquadList);
         _practiceSquadList.ItemSelected += index => _selectedPracticeSquadPlayerId = _practiceSquadList.GetItemMetadata((int)index).ToString();
-        var elevateButton = new Button { Text = "Elevate to Active Roster" };
+        var elevateButton = new Button { Text = "Sign Permanently to Active Roster" };
         squad.AddChild(elevateButton);
         elevateButton.Pressed += async () => await ElevateSelectedPracticeSquadPlayer();
 
@@ -2845,6 +5659,14 @@ public partial class DashboardController : Control
         transactionsTab.AddChild(_transactionHistoryText);
         _rosterManagementStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         content.AddChild(_rosterManagementStatus);
+        ApplyWorkstationTheme(_rosterManagementDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+
+        _practiceSquadActiveSigningDialog = new ConfirmationDialog { Title = "Confirm Permanent Active-Roster Signing", MinSize = new Vector2I(600, 430) };
+        _practiceSquadActiveSigningDialog.GetOkButton().Text = "SIGN TO ACTIVE ROSTER";
+        AddChild(_practiceSquadActiveSigningDialog);
+        _practiceSquadActiveSigningDetails = new RichTextLabel { BbcodeEnabled = false, FitContent = false, CustomMinimumSize = new Vector2(560, 320), AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        _practiceSquadActiveSigningDialog.AddChild(_practiceSquadActiveSigningDetails);
+        _practiceSquadActiveSigningDialog.Confirmed += async () => await ConfirmPracticeSquadActiveSigning();
     }
 
     private void ShowRosterManagement()
@@ -2856,7 +5678,7 @@ public partial class DashboardController : Control
         }
 
         RefreshRosterManagementUi();
-        _rosterManagementDialog.PopupCentered(new Vector2I(940, 620));
+        _rosterManagementDialog.PopupCentered(new Vector2I(1040, 650));
     }
 
     private void RefreshRosterManagementUi()
@@ -2877,13 +5699,22 @@ public partial class DashboardController : Control
         foreach (var waiver in league.Waivers.Where(waiver => waiver?.Player != null).OrderByDescending(waiver => waiver.Player.Overall))
         {
             var player = waiver.Player;
-            _waiverClaimList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Contract {GameCoreStateHelper.FormatCapRoom(player.Contract?.AnnualSalary ?? 0m)}  Expires week {waiver.ExpiresAbsoluteWeek}");
+            var conditionalRelease = team.Roster.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, waiver.ConditionalReleasePlayerId, StringComparison.OrdinalIgnoreCase));
+            var submitted = waiver.Claims?.Any(claim => string.Equals(claim?.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase)) == true;
+            var pending = waiver.PendingConfirmation ? $"  PENDING CONFIRMATION: {waiver.PendingClaimTeamId}{(conditionalRelease == null ? "" : $" | Release if finalized: {conditionalRelease.Name}")}" : submitted ? "  YOUR CLAIM SUBMITTED" : "";
+            _waiverClaimList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Contract {GameCoreStateHelper.FormatCapRoom(player.Contract?.AnnualSalary ?? 0m)}  Expires week {waiver.ExpiresAbsoluteWeek}{pending}");
             _waiverClaimList.SetItemMetadata(_waiverClaimList.ItemCount - 1, player.PlayerId);
+            if (waiver.PendingConfirmation && string.Equals(waiver.PendingClaimTeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase))
+            {
+                _selectedWaiverPlayerId = player.PlayerId;
+                _waiverClaimList.Select(_waiverClaimList.ItemCount - 1);
+            }
         }
         _practiceSquadFreeAgentList.Clear();
         foreach (var player in league.FreeAgents.Where(player => player.Age <= 25).OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
         {
-            _practiceSquadFreeAgentList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age}");
+            var requiredSalary = new TransactionService(_nativeGameCoreContext).GetPracticeSquadRequiredSalary(player.PlayerId, team.TeamId);
+            _practiceSquadFreeAgentList.AddItem($"{player.Position,-4} {player.Name,-24} OVR {player.Overall,2}  Age {player.Age}  Ask {GameCoreStateHelper.FormatCapRoom(requiredSalary)}");
             _practiceSquadFreeAgentList.SetItemMetadata(_practiceSquadFreeAgentList.ItemCount - 1, player.PlayerId);
         }
         _practiceSquadList.Clear();
@@ -2897,7 +5728,13 @@ public partial class DashboardController : Control
         _transactionHistoryText.Text = history.Ok && history.Transactions.Count > 0
             ? string.Join("\n", history.Transactions.Select(transaction => $"{transaction.DateLabel} | {transaction.TeamName} | {transaction.PlayerName} | {transaction.Type}: {transaction.Details}"))
             : "No transactions recorded.";
-        _rosterManagementStatus.Text = $"{team.Name}: active {team.Roster.Count}/53, practice squad {team.PracticeSquad.Count}/16, waivers {league.Waivers.Count}.";
+        var topCallUp = (team.PracticeSquad ?? new List<PlayerState>()).OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault();
+        var callUpContext = team.Roster.Count >= RosterService.RosterLimit
+            ? "Call-up guidance: no active-roster opening; release or move a player before a permanent signing."
+            : topCallUp == null
+                ? "Call-up guidance: no practice-squad player is available for a permanent active-roster signing."
+                : $"Call-up guidance: active opening available; highest-rated permanent-signing option is {topCallUp.Name} ({topCallUp.Position}, OVR {topCallUp.Overall}).";
+        _rosterManagementStatus.Text = $"{team.Name}: active {team.Roster.Count}/53, practice squad {team.PracticeSquad.Count}/16, waivers {league.Waivers.Count}.\n{callUpContext}";
     }
 
     private async Task ClaimSelectedWaiver()
@@ -2907,8 +5744,22 @@ public partial class DashboardController : Control
             _rosterManagementStatus.Text = "Select a waived player first.";
             return;
         }
-        var result = new TransactionService(_nativeGameCoreContext).ClaimWaiver(_selectedWaiverPlayerId, null, new ContractService(_nativeGameCoreContext));
-        await CompleteRosterManagementAction(result, "Waiver claim saved.");
+        var result = new TransactionService(_nativeGameCoreContext).SubmitWaiverClaim(_selectedWaiverPlayerId, null, new ContractService(_nativeGameCoreContext));
+        await CompleteRosterManagementAction(result, "Pending waiver claim saved.");
+    }
+
+    private async Task FinalizeSelectedWaiverClaim()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedWaiverPlayerId)) { _rosterManagementStatus.Text = "Select the player with the pending waiver confirmation."; return; }
+        var result = new TransactionService(_nativeGameCoreContext).FinalizeWaiverClaim(_selectedWaiverPlayerId, null, new ContractService(_nativeGameCoreContext));
+        await CompleteRosterManagementAction(result, "Waiver claim finalized.");
+    }
+
+    private async Task CancelSelectedWaiverClaim()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedWaiverPlayerId)) { _rosterManagementStatus.Text = "Select the player with the pending waiver confirmation."; return; }
+        var result = new TransactionService(_nativeGameCoreContext).CancelWaiverClaim(_selectedWaiverPlayerId, null, new ContractService(_nativeGameCoreContext));
+        await CompleteRosterManagementAction(result, "Waiver opportunity cancelled.");
     }
 
     private async Task SignSelectedPracticeSquadPlayer()
@@ -2918,8 +5769,19 @@ public partial class DashboardController : Control
             _rosterManagementStatus.Text = "Select an eligible free agent first.";
             return;
         }
-        var result = new TransactionService(_nativeGameCoreContext).SignToPracticeSquad(_selectedPracticeSquadFreeAgentId, null, new ContractService(_nativeGameCoreContext));
+        var result = new TransactionService(_nativeGameCoreContext).SignToPracticeSquad(_selectedPracticeSquadFreeAgentId, null, new ContractService(_nativeGameCoreContext), (decimal)(_practiceSquadAnnualOffer?.Value ?? 0));
         await CompleteRosterManagementAction(result, "Practice-squad signing saved.");
+    }
+
+    private void OnPracticeSquadCandidateSelected(long index)
+    {
+        _selectedPracticeSquadFreeAgentId = _practiceSquadFreeAgentList.GetItemMetadata((int)index).ToString();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var requiredSalary = new TransactionService(_nativeGameCoreContext).GetPracticeSquadRequiredSalary(_selectedPracticeSquadFreeAgentId, league?.UserTeamId);
+        if (_practiceSquadAnnualOffer != null && requiredSalary > 0m)
+            _practiceSquadAnnualOffer.Value = (double)requiredSalary;
+        if (_rosterManagementStatus != null && requiredSalary > 0m)
+            _rosterManagementStatus.Text = $"Practice-squad ask: {GameCoreStateHelper.FormatCapRoom(requiredSalary)} for one year. The requirement reflects the player's ability, morale, and opportunity at their position.";
     }
 
     private async Task ElevateSelectedPracticeSquadPlayer()
@@ -2929,8 +5791,40 @@ public partial class DashboardController : Control
             _rosterManagementStatus.Text = "Select a practice-squad player first.";
             return;
         }
-        var result = new TransactionService(_nativeGameCoreContext).ElevatePracticeSquadPlayer(_selectedPracticeSquadPlayerId, null, new ContractService(_nativeGameCoreContext));
-        await CompleteRosterManagementAction(result, "Practice-squad elevation saved.");
+        ShowPracticeSquadActiveSigningConfirmation(_selectedPracticeSquadPlayerId);
+        await Task.CompletedTask;
+    }
+
+    private void ShowPracticeSquadActiveSigningConfirmation(string playerId)
+    {
+        var preview = new ContractService(_nativeGameCoreContext).PreviewPracticeSquadActiveSigning(playerId);
+        if (!preview.Ok)
+        {
+            if (_rosterManagementStatus != null) _rosterManagementStatus.Text = preview.Error;
+            if (_practiceSquadWorkspaceStatus != null) _practiceSquadWorkspaceStatus.Text = preview.Error;
+            SetPrimaryStatus(preview.Error);
+            return;
+        }
+
+        _practiceSquadActiveSigningPlayerId = preview.PlayerId;
+        _practiceSquadActiveSigningDetails.Text = $"{preview.PlayerName} · {preview.Position}\n\nTHIS IS A PERMANENT ACTIVE-ROSTER SIGNING\nThe player leaves the practice squad immediately. This is not a temporary game-day elevation and has no automatic reversion.\n\nCONTRACT\n{preview.CurrentContractType}: {GameCoreStateHelper.FormatCapRoom(preview.CurrentAnnualSalary)} annually\nActive Roster: {GameCoreStateHelper.FormatCapRoom(preview.NewAnnualSalary)} annually\n\nROSTER AND CAP\nActive roster: {preview.RosterCountBefore} → {preview.RosterCountAfter}\nCap room: {GameCoreStateHelper.FormatCapRoom(preview.CapRoomBefore)} → {GameCoreStateHelper.FormatCapRoom(preview.CapRoomAfter)}\n\nConfirmation revalidates phase, ownership, cap room, and the active-roster limit, then records the transaction.";
+        _practiceSquadActiveSigningDialog.PopupCentered(new Vector2I(600, 430));
+    }
+
+    private async Task ConfirmPracticeSquadActiveSigning()
+    {
+        if (string.IsNullOrWhiteSpace(_practiceSquadActiveSigningPlayerId)) return;
+        var result = new ContractService(_nativeGameCoreContext).SignPracticeSquadPlayerToActiveRoster(_practiceSquadActiveSigningPlayerId);
+        if (_rosterManagementStatus != null) _rosterManagementStatus.Text = result.Message;
+        if (_practiceSquadWorkspaceStatus != null) _practiceSquadWorkspaceStatus.Text = result.Message;
+        SetPrimaryStatus(result.Message);
+        if (!result.Accepted) return;
+
+        _practiceSquadActiveSigningPlayerId = "";
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Permanent practice-squad promotion saved.", autosaveToo: true);
+        await RefreshAll();
+        if (_rosterManagementDialog?.Visible == true) RefreshRosterManagementUi();
+        if (_practiceSquadViewActive) RenderPracticeSquadWorkspace();
     }
 
     private async Task CompleteRosterManagementAction(ContractTransactionResult result, string saveMessage)
@@ -2959,26 +5853,285 @@ public partial class DashboardController : Control
         var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
         _trainingCampDialog.AddChild(content);
         content.AddChild(new Label { Text = "Choose one position group for focused camp reps. The focus improves readiness and eligible player development once." , AutowrapMode = TextServer.AutowrapMode.WordSmart });
-        _trainingCampPosition = new OptionButton();
-        content.AddChild(SetupRow("Position Focus", _trainingCampPosition));
-        var refreshReport = new Button { Text = "Refresh Camp Report" };
+        var positionFocus = new Button { Text = "Open Position Groups" };
+        content.AddChild(positionFocus); positionFocus.Pressed += ShowTrainingCampPositionFocus;
+        var playerFocus = new Button { Text = "Open Player Focus" };
+        content.AddChild(playerFocus); playerFocus.Pressed += ShowTrainingCampPlayerFocus;
+        var refreshReport = new Button { Text = "Open Weekly Camp Report" };
         content.AddChild(refreshReport);
-        refreshReport.Pressed += async () => await RefreshTrainingCampReport();
+        refreshReport.Pressed += ShowTrainingCampWeeklyReport;
         _trainingCampReport = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(600, 190), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         content.AddChild(_trainingCampReport);
         _trainingCampRoles = new RichTextLabel { BbcodeEnabled = false, CustomMinimumSize = new Vector2(600, 150), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         content.AddChild(_trainingCampRoles);
-        var applyFocus = new Button { Text = "Apply Camp Focus" };
-        content.AddChild(applyFocus);
-        applyFocus.Pressed += async () => await ApplyTrainingCampFocus();
-        var resolveBattles = new Button { Text = "Resolve Position Battles" };
-        content.AddChild(resolveBattles);
-        resolveBattles.Pressed += async () => await ResolvePositionBattles();
+        var cutdown = new Button { Text = "Open Final Roster Cut-Down" };
+        content.AddChild(cutdown);
+        cutdown.Pressed += ShowFinalCutdown;
         var finalize = new Button { Text = "Finalize Legal Roster" };
         content.AddChild(finalize);
         finalize.Pressed += async () => await FinalizeTrainingCampRoster();
         _trainingCampStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
         content.AddChild(_trainingCampStatus);
+        CreateTrainingCampPositionFocusDialog();
+        CreateTrainingCampPlayerFocusDialog();
+        CreateTrainingCampWeeklyReportDialog();
+        CreateFinalCutdownDialog();
+    }
+
+    private void CreateTrainingCampPositionFocusDialog()
+    {
+        _trainingCampPositionFocusDialog = new AcceptDialog { Name = "TrainingCampPositionFocusDialog", Title = "Training Camp > Position Groups", MinSize = new Vector2I(1020, 620), Exclusive = false };
+        AddChild(_trainingCampPositionFocusDialog); _trainingCampPositionFocusDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _trainingCampPositionFocusDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("POSITION GROUPS", "Compare depth, availability, upside, and fatigue before committing the one bounded position-group focus. Staff recommendations inform the choice but never select it for the GM."));
+        _trainingCampPositionFocusSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_trainingCampPositionFocusSummary);
+        _trainingCampPositionFocusTree = new Tree { Columns = 9, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(980, 430), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        ConfigureTrainingCampReportTree(_trainingCampPositionFocusTree, new[] { "POS", "PLAYERS", "NEED", "AVAILABLE", "OUT", "AVG OVR", "AVG POT", "AVG FAT", "STAFF ASSESSMENT / STATUS" }, new[] { 58, 70, 58, 78, 48, 70, 70, 70, 360 }); _trainingCampPositionFocusTree.ItemSelected += OnTrainingCampPositionFocusSelected; content.AddChild(_trainingCampPositionFocusTree);
+        var actions = new HBoxContainer(); actions.AddThemeConstantOverride("separation", 8); content.AddChild(actions);
+        _trainingCampApplyPositionFocus = new Button { Text = "APPLY POSITION FOCUS", Disabled = true, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _trainingCampApplyPositionFocus.Pressed += async () => await ApplyTrainingCampFocus(); actions.AddChild(_trainingCampApplyPositionFocus);
+        var close = new Button { Text = "CLOSE" }; close.Pressed += _trainingCampPositionFocusDialog.Hide; actions.AddChild(close);
+        _trainingCampPositionFocusStatus = new Label { Text = "Select a position group to review the current recommendation. Selection alone changes nothing.", AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_trainingCampPositionFocusStatus);
+        ApplyWorkstationTheme(_trainingCampPositionFocusDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowTrainingCampPositionFocus()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Training-camp position focus is available in the Native C# GameCore."); return; }
+        RenderTrainingCampPositionFocus(); var viewport = GetViewportRect().Size; _trainingCampPositionFocusDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .92f), 820, 1320), Mathf.Clamp((int)(viewport.Y * .86f), 540, 780)));
+    }
+
+    private void RenderTrainingCampPositionFocus()
+    {
+        _trainingCampSelectedFocusPosition = ""; _trainingCampPositionFocusTree.Clear(); _trainingCampApplyPositionFocus.Disabled = true;
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = GameCoreStateHelper.GetUserTeam(league); if (league == null || team == null) { _trainingCampPositionFocusSummary.Text = "No active franchise roster is available."; return; }
+        var camp = new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId).Status; var report = TrainingCampReportService.Build(team); _trainingCampPositionFocusSummary.Text = $"{team.Name} · Active roster {team.Roster.Count}/{RosterService.RosterLimit} · Phase {league.Calendar?.Phase ?? "Unavailable"} · Position focus {(camp.FocusApplied ? camp.FocusPosition : "not assigned")}\n{report.Summary}";
+        var counts = team.Roster.GroupBy(player => player.Position, StringComparer.OrdinalIgnoreCase).ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase); var root = _trainingCampPositionFocusTree.CreateItem(); var index = 0;
+        foreach (var position in report.Positions)
+        {
+            var focused = string.Equals(camp.FocusPosition, position.Position, StringComparison.OrdinalIgnoreCase); var row = _trainingCampPositionFocusTree.CreateItem(root); row.SetMetadata(0, position.Position); row.SetText(0, position.Position); row.SetText(1, counts.GetValueOrDefault(position.Position).ToString()); row.SetText(2, position.RequiredStarters.ToString()); row.SetText(3, position.AvailablePlayers.ToString()); row.SetText(4, position.UnavailablePlayers.ToString()); row.SetText(5, position.AverageOverall.ToString()); row.SetText(6, position.AveragePotential.ToString()); row.SetText(7, position.AverageFatigue.ToString()); row.SetText(8, focused ? $"FOCUSED · {position.Recommendation}" : position.Recommendation); for (var column = 0; column < 9; column++) row.SetCustomBgColor(column, focused ? new Color("193d37") : index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); if (focused) row.SetCustomColor(8, new Color("f0c96a")); index++;
+        }
+        if (index == 0) { var empty = _trainingCampPositionFocusTree.CreateItem(root); empty.SetText(0, "No active-roster position groups are available."); }
+        _trainingCampPositionFocusStatus.Text = camp.FocusApplied ? $"Position focus is already committed to {camp.FocusPosition} for this camp." : "Select one position group. Applying focus is the only action that changes state.";
+    }
+
+    private void OnTrainingCampPositionFocusSelected()
+    {
+        var selected = _trainingCampPositionFocusTree?.GetSelected(); _trainingCampSelectedFocusPosition = selected == null || IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString(); var team = GameCoreStateHelper.GetUserTeam(_nativeGameCoreContext?.ActiveLeague); var camp = team == null ? null : new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId).Status; var report = team == null ? null : TrainingCampReportService.Build(team).Positions.FirstOrDefault(position => string.Equals(position.Position, _trainingCampSelectedFocusPosition, StringComparison.OrdinalIgnoreCase)); var eligible = report != null && report.AvailablePlayers > 0 && camp?.IsAvailable == true && camp.FocusApplied == false; _trainingCampApplyPositionFocus.Disabled = !eligible; _trainingCampPositionFocusStatus.Text = report == null ? "Select a position group to review its recommendation." : camp?.FocusApplied == true ? $"Position focus is already committed to {camp.FocusPosition}." : report.AvailablePlayers <= 0 ? $"{report.Position} has no available active-roster players and cannot receive the focus." : !eligible ? "Position focus is available only during Training Camp Pending." : $"{report.Position}: {report.Recommendation} Applying focus improves readiness for up to three available players and can add at most one overall point per affected player without exceeding potential.";
+    }
+
+    private void CreateTrainingCampPlayerFocusDialog()
+    {
+        _trainingCampPlayerFocusDialog = new AcceptDialog { Name = "TrainingCampPlayerFocusDialog", Title = "Training Camp > Player Focus", MinSize = new Vector2I(1080, 680), Exclusive = false };
+        AddChild(_trainingCampPlayerFocusDialog); _trainingCampPlayerFocusDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _trainingCampPlayerFocusDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("PLAYER FOCUS", "Choose one available active-roster player for additional camp attention. The current bounded system does not expose unapproved drill catalogs or first-team-rep percentages."));
+        _trainingCampPlayerFocusSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_trainingCampPlayerFocusSummary);
+        var filters = new HBoxContainer(); filters.AddThemeConstantOverride("separation", 8); content.AddChild(filters);
+        _trainingCampPlayerFocusSearch = new LineEdit { PlaceholderText = "Search players…", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _trainingCampPlayerFocusSearch.TextChanged += _ => RenderTrainingCampPlayerFocus(); filters.AddChild(_trainingCampPlayerFocusSearch);
+        _trainingCampPlayerFocusPosition = new OptionButton { CustomMinimumSize = new Vector2(150, 0) }; _trainingCampPlayerFocusPosition.ItemSelected += _ => RenderTrainingCampPlayerFocus(); filters.AddChild(_trainingCampPlayerFocusPosition);
+        _trainingCampPlayerFocusTree = new Tree { Columns = 9, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1040, 460), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        ConfigureTrainingCampReportTree(_trainingCampPlayerFocusTree, new[] { "PLAYER", "POS", "AGE", "OVR", "POT", "HEALTH", "FATIGUE", "ROLE / READINESS", "FOCUS STATUS" }, new[] { 190, 52, 50, 50, 50, 120, 70, 250, 150 });
+        _trainingCampPlayerFocusTree.ItemSelected += OnTrainingCampPlayerFocusSelected; content.AddChild(_trainingCampPlayerFocusTree);
+        var actions = new HBoxContainer(); actions.AddThemeConstantOverride("separation", 8); content.AddChild(actions);
+        _trainingCampApplyPlayerFocus = new Button { Text = "APPLY PLAYER FOCUS", Disabled = true, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _trainingCampApplyPlayerFocus.Pressed += async () => await ApplyTrainingCampPlayerFocus(); actions.AddChild(_trainingCampApplyPlayerFocus);
+        var close = new Button { Text = "CLOSE" }; close.Pressed += _trainingCampPlayerFocusDialog.Hide; actions.AddChild(close);
+        _trainingCampPlayerFocusStatus = new Label { Text = "Select a player to review eligibility. Selection alone changes nothing.", AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_trainingCampPlayerFocusStatus);
+        ApplyWorkstationTheme(_trainingCampPlayerFocusDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private void ShowTrainingCampPlayerFocus()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Training-camp player focus is available in the Native C# GameCore."); return; }
+        PopulateTrainingCampPlayerFocusPositions(); RenderTrainingCampPlayerFocus(); var viewport = GetViewportRect().Size; _trainingCampPlayerFocusDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .94f), 860, 1360), Mathf.Clamp((int)(viewport.Y * .9f), 580, 820)));
+    }
+
+    private void PopulateTrainingCampPlayerFocusPositions()
+    {
+        if (_trainingCampPlayerFocusPosition == null) return; var selected = _trainingCampPlayerFocusPosition.Selected >= 0 ? _trainingCampPlayerFocusPosition.GetItemText(_trainingCampPlayerFocusPosition.Selected) : "All positions"; _trainingCampPlayerFocusPosition.Clear(); _trainingCampPlayerFocusPosition.AddItem("All positions"); var team = GameCoreStateHelper.GetUserTeam(_nativeGameCoreContext?.ActiveLeague); foreach (var position in (team?.Roster ?? new List<PlayerState>()).Select(player => player.Position).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(position => position, StringComparer.OrdinalIgnoreCase)) _trainingCampPlayerFocusPosition.AddItem(position); for (var index = 0; index < _trainingCampPlayerFocusPosition.ItemCount; index++) if (string.Equals(_trainingCampPlayerFocusPosition.GetItemText(index), selected, StringComparison.OrdinalIgnoreCase)) { _trainingCampPlayerFocusPosition.Select(index); return; }
+    }
+
+    private void RenderTrainingCampPlayerFocus()
+    {
+        if (_trainingCampPlayerFocusTree == null) return; _trainingCampSelectedFocusPlayerId = ""; _trainingCampPlayerFocusTree.Clear(); if (_trainingCampApplyPlayerFocus != null) _trainingCampApplyPlayerFocus.Disabled = true;
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = GameCoreStateHelper.GetUserTeam(league); if (league == null || team == null) { _trainingCampPlayerFocusSummary.Text = "No active franchise roster is available."; return; }
+        var camp = new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId).Status; var roles = new RosterEvaluationService(_nativeGameCoreContext).GetPlayerRoles(team.TeamId).Players.ToDictionary(player => player.PlayerId, StringComparer.OrdinalIgnoreCase); var search = _trainingCampPlayerFocusSearch?.Text?.Trim() ?? ""; var position = _trainingCampPlayerFocusPosition?.Selected > 0 ? _trainingCampPlayerFocusPosition.GetItemText(_trainingCampPlayerFocusPosition.Selected) : "";
+        _trainingCampPlayerFocusSummary.Text = $"{team.Name} · Active roster {team.Roster.Count}/{RosterService.RosterLimit} · Phase {league.Calendar?.Phase ?? "Unavailable"} · Featured focus {(camp.PlayerFocusApplied ? camp.FocusPlayerName : "not assigned")}";
+        var root = _trainingCampPlayerFocusTree.CreateItem(); var index = 0;
+        foreach (var player in team.Roster.Where(player => string.IsNullOrWhiteSpace(search) || player.Name.Contains(search, StringComparison.OrdinalIgnoreCase)).Where(player => string.IsNullOrWhiteSpace(position) || string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase)).OrderBy(player => player.Position, StringComparer.OrdinalIgnoreCase).ThenByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            roles.TryGetValue(player.PlayerId, out var role); var available = PlayerInjuryService.IsAvailableForGame(player); var focused = string.Equals(camp.FocusPlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase); var row = _trainingCampPlayerFocusTree.CreateItem(root); row.SetMetadata(0, player.PlayerId); row.SetText(0, player.Name); row.SetText(1, player.Position); row.SetText(2, player.Age.ToString()); row.SetText(3, player.Overall.ToString()); row.SetText(4, player.Potential.ToString()); row.SetText(5, available ? "Available" : $"Out · {player.CurrentInjury?.DaysRemaining ?? 0}d"); row.SetText(6, player.Fatigue.ToString()); row.SetText(7, role == null ? "Unassigned" : $"{role.Role} · {role.Readiness}"); row.SetText(8, focused ? "FOCUSED" : camp.PlayerFocusApplied ? "Not selected" : available ? "Eligible" : "Unavailable"); for (var column = 0; column < 9; column++) row.SetCustomBgColor(column, focused ? new Color("193d37") : index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); row.SetCustomColor(5, available ? new Color("8fcf98") : new Color("e58b7a")); row.SetCustomColor(8, focused ? new Color("f0c96a") : new Color("9cadb8")); index++;
+        }
+        if (index == 0) { var empty = _trainingCampPlayerFocusTree.CreateItem(root); empty.SetText(0, "No active-roster players match these filters."); }
+        _trainingCampPlayerFocusStatus.Text = camp.PlayerFocusApplied ? $"Player focus is already committed to {camp.FocusPlayerName} for this camp." : "Select one available player. Applying focus is the only action that changes state.";
+    }
+
+    private void OnTrainingCampPlayerFocusSelected()
+    {
+        var selected = _trainingCampPlayerFocusTree?.GetSelected(); _trainingCampSelectedFocusPlayerId = selected == null || IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString(); var team = GameCoreStateHelper.GetUserTeam(_nativeGameCoreContext?.ActiveLeague); var player = team?.Roster.FirstOrDefault(candidate => string.Equals(candidate.PlayerId, _trainingCampSelectedFocusPlayerId, StringComparison.OrdinalIgnoreCase)); var camp = team == null ? null : new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId).Status; var eligible = player != null && PlayerInjuryService.IsAvailableForGame(player) && camp?.IsAvailable == true && camp.PlayerFocusApplied == false; _trainingCampApplyPlayerFocus.Disabled = !eligible; _trainingCampPlayerFocusStatus.Text = player == null ? "Select a player to review eligibility." : !PlayerInjuryService.IsAvailableForGame(player) ? $"{player.Name} is unavailable and cannot receive focused camp reps." : camp?.PlayerFocusApplied == true ? $"Player focus is already committed to {camp.FocusPlayerName}." : !eligible ? "Player focus is available only during Training Camp Pending." : $"{player.Name}: focus will reduce fatigue by up to 15 and can add at most one overall point without exceeding potential. No depth assignment changes automatically.";
+    }
+
+    private void CreateTrainingCampWeeklyReportDialog()
+    {
+        _trainingCampWeeklyReportDialog = new AcceptDialog { Name = "TrainingCampWeeklyReportDialog", Title = "Training Camp > Weekly Report", MinSize = new Vector2I(1080, 720), Exclusive = false };
+        AddChild(_trainingCampWeeklyReportDialog); _trainingCampWeeklyReportDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _trainingCampWeeklyReportDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("WEEKLY CAMP REPORT", "Current authoritative roster, position-competition, health, and staff-assessment context. Staff identify leaders, but the GM retains every depth-chart decision."));
+        _trainingCampWeeklyReportSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_trainingCampWeeklyReportSummary);
+
+        content.AddChild(HomeLabel("POSITION GROUPS", 13, new Color("f4eddf")));
+        _trainingCampWeeklyPositionTree = new Tree { Columns = 8, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1040, 190), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        ConfigureTrainingCampReportTree(_trainingCampWeeklyPositionTree, new[] { "POS", "NEED", "AVAILABLE", "OUT", "AVG OVR", "AVG POT", "AVG FAT", "STAFF ASSESSMENT" }, new[] { 48, 55, 78, 48, 70, 70, 70, 360 }); content.AddChild(_trainingCampWeeklyPositionTree);
+
+        content.AddChild(HomeLabel("POSITION COMPETITIONS", 13, new Color("f4eddf")));
+        _trainingCampWeeklyBattleTree = new Tree { Columns = 4, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1040, 145), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        ConfigureTrainingCampReportTree(_trainingCampWeeklyBattleTree, new[] { "POS", "LEADER", "CHALLENGER", "STAFF ASSESSMENT" }, new[] { 55, 190, 190, 500 }); content.AddChild(_trainingCampWeeklyBattleTree);
+
+        content.AddChild(HomeLabel("HEALTH & AVAILABILITY", 13, new Color("f4eddf")));
+        _trainingCampWeeklyHealthTree = new Tree { Columns = 5, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1040, 135), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        ConfigureTrainingCampReportTree(_trainingCampWeeklyHealthTree, new[] { "PLAYER", "POS", "STATUS", "FATIGUE", "RECOVERY / WORKLOAD CONTEXT" }, new[] { 210, 55, 120, 75, 480 }); content.AddChild(_trainingCampWeeklyHealthTree);
+
+        var actions = new HBoxContainer(); actions.AddThemeConstantOverride("separation", 8); content.AddChild(actions);
+        var assess = new Button { Text = "UPDATE STAFF ASSESSMENTS" }; assess.Pressed += async () => await ResolvePositionBattles(); actions.AddChild(assess);
+        var refresh = new Button { Text = "REFRESH REPORT" }; refresh.Pressed += async () => await RefreshTrainingCampReport(); actions.AddChild(refresh);
+        var depth = new Button { Text = "VIEW DEPTH CHART", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; depth.Pressed += async () => { _trainingCampWeeklyReportDialog.Hide(); _trainingCampDialog.Hide(); await SelectMainTab(ROSTER_TAB_INDEX); await SetRosterViewMode(true); }; actions.AddChild(depth);
+        var close = new Button { Text = "CLOSE" }; close.Pressed += _trainingCampWeeklyReportDialog.Hide; actions.AddChild(close);
+        _trainingCampWeeklyReportStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_trainingCampWeeklyReportStatus);
+        ApplyWorkstationTheme(_trainingCampWeeklyReportDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private static void ConfigureTrainingCampReportTree(Tree tree, string[] headers, int[] widths)
+    {
+        tree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        for (var column = 0; column < headers.Length; column++) { tree.SetColumnTitle(column, headers[column]); tree.SetColumnCustomMinimumWidth(column, widths[column]); tree.SetColumnExpand(column, column == headers.Length - 1); }
+    }
+
+    private void ShowTrainingCampWeeklyReport()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Training-camp reports are available in the Native C# GameCore."); return; }
+        RenderTrainingCampWeeklyReport(); var viewport = GetViewportRect().Size; _trainingCampWeeklyReportDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .95f), 880, 1380), Mathf.Clamp((int)(viewport.Y * .92f), 620, 860)));
+    }
+
+    private void RenderTrainingCampWeeklyReport()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        _trainingCampWeeklyPositionTree.Clear(); _trainingCampWeeklyBattleTree.Clear(); _trainingCampWeeklyHealthTree.Clear();
+        if (league == null || team == null) { _trainingCampWeeklyReportSummary.Text = "No active franchise camp report is available."; _trainingCampWeeklyReportStatus.Text = "Load a franchise to review training camp."; return; }
+        var status = new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId).Status; var report = status.Report;
+        _trainingCampWeeklyReportSummary.Text = $"{team.Name} · {league.Calendar?.WeekLabel ?? league.Calendar?.Phase ?? "Training Camp"} · Active roster {team.Roster.Count}/{RosterService.RosterLimit} · Position focus {(status.FocusApplied ? status.FocusPosition : "not assigned")} · Player focus {(status.PlayerFocusApplied ? status.FocusPlayerName : "not assigned")}";
+
+        var positionRoot = _trainingCampWeeklyPositionTree.CreateItem(); var positionIndex = 0;
+        foreach (var position in report?.Positions ?? new List<TrainingCampPositionReportDto>())
+        {
+            var item = _trainingCampWeeklyPositionTree.CreateItem(positionRoot); item.SetText(0, position.Position); item.SetText(1, position.RequiredStarters.ToString()); item.SetText(2, position.AvailablePlayers.ToString()); item.SetText(3, position.UnavailablePlayers.ToString()); item.SetText(4, position.AverageOverall.ToString()); item.SetText(5, position.AveragePotential.ToString()); item.SetText(6, position.AverageFatigue.ToString()); item.SetText(7, position.Recommendation); for (var column = 0; column < 8; column++) item.SetCustomBgColor(column, positionIndex % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); positionIndex++;
+        }
+        if (positionIndex == 0) { var empty = _trainingCampWeeklyPositionTree.CreateItem(positionRoot); empty.SetText(0, "Refresh the report to evaluate position groups."); }
+
+        var battleRoot = _trainingCampWeeklyBattleTree.CreateItem(); var battleIndex = 0;
+        foreach (var battle in team.TrainingCamp?.PositionBattles ?? new List<PositionBattleOutcome>())
+        {
+            var item = _trainingCampWeeklyBattleTree.CreateItem(battleRoot); item.SetText(0, battle.Position); item.SetText(1, battle.WinnerName); item.SetText(2, battle.RunnerUpName); item.SetText(3, battle.Explanation); for (var column = 0; column < 4; column++) item.SetCustomBgColor(column, battleIndex % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); battleIndex++;
+        }
+        if (battleIndex == 0) { var empty = _trainingCampWeeklyBattleTree.CreateItem(battleRoot); empty.SetText(0, "No close position competitions are recorded yet. Update staff assessments to evaluate the roster."); }
+
+        var healthRoot = _trainingCampWeeklyHealthTree.CreateItem(); var healthIndex = 0;
+        foreach (var player in team.Roster.Where(player => player.CurrentInjury?.IsActive == true || !string.IsNullOrWhiteSpace(player.Injury) || player.Fatigue >= 20).OrderByDescending(player => player.CurrentInjury?.IsActive == true).ThenByDescending(player => player.Fatigue).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var injured = player.CurrentInjury?.IsActive == true || !string.IsNullOrWhiteSpace(player.Injury); var statusText = injured ? "Out" : player.Fatigue >= 40 ? "Limited" : "Managing workload"; var context = injured ? $"{player.CurrentInjury?.Name ?? player.Injury} · {player.CurrentInjury?.DaysRemaining ?? 0} day(s) remaining" : $"Daily recovery applies; current fatigue {player.Fatigue}."; var item = _trainingCampWeeklyHealthTree.CreateItem(healthRoot); item.SetText(0, player.Name); item.SetText(1, player.Position); item.SetText(2, statusText); item.SetText(3, player.Fatigue.ToString()); item.SetText(4, context); for (var column = 0; column < 5; column++) item.SetCustomBgColor(column, healthIndex % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); item.SetCustomColor(2, injured ? new Color("e58b7a") : new Color("f0c96a")); healthIndex++;
+        }
+        if (healthIndex == 0) { var empty = _trainingCampWeeklyHealthTree.CreateItem(healthRoot); empty.SetText(0, "No active injury or workload concern is recorded."); }
+        _trainingCampWeeklyReportStatus.Text = report?.Positions?.Count > 0 ? report.Summary : "No persisted report yet. Refresh Report derives one from the current roster without changing assignments.";
+    }
+
+    private void CreateFinalCutdownDialog()
+    {
+        _finalCutdownDialog = new AcceptDialog { Name = "FinalCutdownDialog", Title = "Training Camp > Final Roster Cut-Down", MinSize = new Vector2I(1040, 650), Exclusive = false };
+        AddChild(_finalCutdownDialog); _finalCutdownDialog.GetOkButton().Visible = false;
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, AnchorsPreset = (int)LayoutPreset.FullRect, OffsetLeft = 12, OffsetTop = 10, OffsetRight = -12, OffsetBottom = -48 };
+        _finalCutdownDialog.AddChild(content);
+        content.AddChild(CreateMarketHeading("FINAL ROSTER CUT-DOWN", "Build a proposed cut list, review its combined roster and financial effect, then confirm the entire validated batch. Checking a player changes nothing by itself."));
+        _finalCutdownSummary = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_finalCutdownSummary);
+        var scroll = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; content.AddChild(scroll);
+        _finalCutdownTree = new Tree { Columns = 10, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1000, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        var headers = new[] { "CUT", "PLAYER", "POS", "AGE", "OVR", "POT", "CONTRACT", "HEALTH", "ROLE", "READINESS" }; var widths = new[] { 42, 175, 48, 48, 48, 48, 130, 120, 100, 150 };
+        for (var column = 0; column < headers.Length; column++) { _finalCutdownTree.SetColumnTitle(column, headers[column]); _finalCutdownTree.SetColumnCustomMinimumWidth(column, widths[column]); _finalCutdownTree.SetColumnExpand(column, column is 1 or 9); }
+        _finalCutdownTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); _finalCutdownTree.ItemEdited += OnFinalCutdownItemEdited; scroll.AddChild(_finalCutdownTree);
+        var actions = new HBoxContainer(); actions.AddThemeConstantOverride("separation", 8); content.AddChild(actions);
+        _finalCutdownConfirmCuts = new Button { Text = "REVIEW & CONFIRM CUTS", Disabled = true }; _finalCutdownConfirmCuts.Pressed += ShowFinalCutdownBatchConfirmation; actions.AddChild(_finalCutdownConfirmCuts);
+        var finalize = new Button { Text = "FINALIZE LEGAL ROSTER", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; finalize.Pressed += async () => await FinalizeTrainingCampRoster(); actions.AddChild(finalize);
+        var close = new Button { Text = "CLOSE" }; close.Pressed += _finalCutdownDialog.Hide; actions.AddChild(close);
+        _finalCutdownStatus = new Label { Text = "Check players to build a proposed cut list. No cut is executed until the reviewed batch is confirmed.", AutowrapMode = TextServer.AutowrapMode.WordSmart }; content.AddChild(_finalCutdownStatus);
+        ApplyWorkstationTheme(_finalCutdownDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+
+        _finalCutdownBatchDialog = new ConfirmationDialog { Title = "Confirm Final Roster Cuts", MinSize = new Vector2I(640, 470) };
+        _finalCutdownBatchDialog.GetOkButton().Text = "CONFIRM ALL CUTS";
+        AddChild(_finalCutdownBatchDialog);
+        _finalCutdownBatchDetails = new RichTextLabel { BbcodeEnabled = false, FitContent = false, CustomMinimumSize = new Vector2(600, 360), AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        _finalCutdownBatchDialog.AddChild(_finalCutdownBatchDetails);
+        _finalCutdownBatchDialog.Confirmed += async () => await ConfirmFinalCutdownBatch();
+    }
+
+    private void ShowFinalCutdown()
+    {
+        if (!IsNativeRuntimeSource()) { SetPrimaryStatus("Final roster cut-down is available in the Native C# GameCore."); return; }
+        RenderFinalCutdown(); var viewport = GetViewportRect().Size; _finalCutdownDialog.PopupCentered(new Vector2I(Mathf.Clamp((int)(viewport.X * .94f), 820, 1320), Mathf.Clamp((int)(viewport.Y * .9f), 560, 800)));
+    }
+
+    private void RenderFinalCutdown()
+    {
+        _finalCutdownSelectedPlayerIds.Clear(); _finalCutdownTree.Clear(); _finalCutdownConfirmCuts.Disabled = true;
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(candidate => candidate.TeamId == league.UserTeamId);
+        if (league == null || team == null) { _finalCutdownSummary.Text = "No active franchise roster is available."; _finalCutdownStatus.Text = "Load a franchise to review final cuts."; return; }
+        var requiredCuts = Math.Max(0, team.Roster.Count - RosterService.RosterLimit); var roles = new RosterEvaluationService(_nativeGameCoreContext).GetPlayerRoles(team.TeamId); var roleByPlayer = roles.Players.ToDictionary(player => player.PlayerId, StringComparer.OrdinalIgnoreCase);
+        _finalCutdownSummary.Text = $"{team.Name} · Active roster {team.Roster.Count}/{RosterService.RosterLimit} · Required cuts {requiredCuts} · Practice squad {team.PracticeSquad.Count}/16 · Phase {league.Calendar?.Phase ?? "Unavailable"}";
+        var root = _finalCutdownTree.CreateItem(); var index = 0;
+        foreach (var player in team.Roster.OrderBy(player => player.Position, StringComparer.OrdinalIgnoreCase).ThenByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            roleByPlayer.TryGetValue(player.PlayerId, out var feedback); var row = _finalCutdownTree.CreateItem(root); row.SetMetadata(0, player.PlayerId); row.SetCellMode(0, TreeItem.TreeCellMode.Check); row.SetEditable(0, true); row.SetChecked(0, false); row.SetText(1, player.Name); row.SetText(2, player.Position); row.SetText(3, player.Age.ToString()); row.SetText(4, player.Overall.ToString()); row.SetText(5, player.Potential.ToString()); row.SetText(6, $"{GameCoreStateHelper.FormatCapRoom(player.Contract?.AnnualSalary ?? 0m)} · {player.Contract?.YearsRemaining ?? 0} yr"); row.SetText(7, player.CurrentInjury?.IsActive == true ? $"{player.CurrentInjury.Name} · {player.CurrentInjury.DaysRemaining}d" : "Available"); row.SetText(8, feedback?.Role ?? "Unassigned"); row.SetText(9, feedback?.Readiness ?? "Unavailable"); for (var column = 0; column < 10; column++) row.SetCustomBgColor(column, index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); index++;
+        }
+        _finalCutdownStatus.Text = requiredCuts > 0 ? $"Resolve {requiredCuts} explicit roster cut(s) before finalization. Select a player to preview the real financial effect." : team.TrainingCamp?.RosterFinalized == true ? "The legal roster is finalized." : "Roster count is legal. Apply the camp focus and confirm the depth chart before finalization.";
+    }
+
+    private void OnFinalCutdownItemEdited()
+    {
+        var item = _finalCutdownTree?.GetEdited();
+        if (item == null || IsNil(item.GetMetadata(0))) return;
+        var playerId = item.GetMetadata(0).AsString();
+        if (item.IsChecked(0)) _finalCutdownSelectedPlayerIds.Add(playerId); else _finalCutdownSelectedPlayerIds.Remove(playerId);
+        RenderFinalCutdownProjection();
+    }
+
+    private void RenderFinalCutdownProjection()
+    {
+        _finalCutdownConfirmCuts.Disabled = _finalCutdownSelectedPlayerIds.Count == 0;
+        if (_finalCutdownSelectedPlayerIds.Count == 0) { _finalCutdownStatus.Text = "Check players to build a proposed cut list. No cut is executed until the reviewed batch is confirmed."; return; }
+        var preview = new TrainingCampService(_nativeGameCoreContext).PreviewRosterCuts(_finalCutdownSelectedPlayerIds);
+        if (!preview.Ok) { _finalCutdownStatus.Text = preview.Error; return; }
+        var warning = preview.PositionWarnings.Count == 0 ? "Projected depth remains starter-valid." : $"Depth warnings: {string.Join("; ", preview.PositionWarnings)}.";
+        _finalCutdownStatus.Text = $"Proposed cuts: {preview.PlayerIds.Count} · Active roster {preview.RosterCountBefore} → {preview.RosterCountAfter} · Required cuts after proposal {preview.RequiredCutsAfter} · Cap room {GameCoreStateHelper.FormatCapRoom(preview.CapRoomBefore)} → {GameCoreStateHelper.FormatCapRoom(preview.CapRoomAfter)}. {warning}";
+    }
+
+    private void ShowFinalCutdownBatchConfirmation()
+    {
+        var preview = new TrainingCampService(_nativeGameCoreContext).PreviewRosterCuts(_finalCutdownSelectedPlayerIds);
+        if (!preview.Ok) { _finalCutdownStatus.Text = preview.Error; return; }
+        var warnings = preview.PositionWarnings.Count == 0 ? "No projected starter-depth shortage." : string.Join("\n", preview.PositionWarnings.Select(warning => $"• {warning}"));
+        _finalCutdownBatchDetails.Text = $"PROPOSED CUT LIST ({preview.PlayerIds.Count})\n{string.Join("\n", preview.PlayerNames.Select(name => $"• {name}"))}\n\nROSTER EFFECT\nActive roster: {preview.RosterCountBefore} → {preview.RosterCountAfter}\nRequired cuts remaining: {preview.RequiredCutsBefore} → {preview.RequiredCutsAfter}\n\nFINANCIAL EFFECT\nCommitted payroll: {GameCoreStateHelper.FormatCapRoom(preview.PayrollBefore)} → {GameCoreStateHelper.FormatCapRoom(preview.PayrollAfter)}\nCap room: {GameCoreStateHelper.FormatCapRoom(preview.CapRoomBefore)} → {GameCoreStateHelper.FormatCapRoom(preview.CapRoomAfter)}\n\nDEPTH REVIEW\n{warnings}\n\nConfirming validates the entire current list again, then releases every listed player and records each transaction. Cancel returns to the unchanged proposal.";
+        _finalCutdownBatchDialog.PopupCentered(new Vector2I(640, 470));
+    }
+
+    private async Task ConfirmFinalCutdownBatch()
+    {
+        var response = new TrainingCampService(_nativeGameCoreContext).ConfirmRosterCuts(_finalCutdownSelectedPlayerIds);
+        _finalCutdownStatus.Text = response.Message;
+        SetPrimaryStatus(response.Message);
+        if (!response.Ok) return;
+        _finalCutdownSelectedPlayerIds.Clear();
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Final roster cuts saved.", autosaveToo: true);
+        await RefreshAll();
+        RenderFinalCutdown();
     }
 
     private void ShowTrainingCamp()
@@ -3005,9 +6158,6 @@ public partial class DashboardController : Control
         }
 
         var camp = new TrainingCampService(_nativeGameCoreContext).GetStatus(team.TeamId);
-        _trainingCampPosition.Clear();
-        foreach (var position in team.Roster.Select(player => player.Position).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(position => position, StringComparer.OrdinalIgnoreCase))
-            _trainingCampPosition.AddItem(position);
         _trainingCampStatus.Text = camp.Status.IsAvailable
             ? camp.Status.RosterFinalized
                 ? camp.Status.Summary
@@ -3018,23 +6168,46 @@ public partial class DashboardController : Control
             _trainingCampReport.Text += "\n\nBattles:\n" + string.Join("\n", team.TrainingCamp.PositionBattles.Select(battle => $"{battle.Position}: {battle.Explanation}"));
         var roles = new RosterEvaluationService(_nativeGameCoreContext).GetPlayerRoles(team.TeamId);
         _trainingCampRoles.Text = roles.Ok ? string.Join("\n", roles.Players.Select(player => $"{player.Name} ({player.Position}) - {player.Role}, {player.Readiness}. {player.Explanation}")) : roles.Error;
+        if (camp.Status.PlayerFocusApplied)
+            _trainingCampRoles.Text = $"PLAYER FOCUS: {camp.Status.FocusPlayerName}\n\n{_trainingCampRoles.Text}";
     }
 
     private async Task ApplyTrainingCampFocus()
     {
-        if (_trainingCampPosition.ItemCount == 0)
+        if (string.IsNullOrWhiteSpace(_trainingCampSelectedFocusPosition))
         {
-            _trainingCampStatus.Text = "No active-roster position group is available.";
+            _trainingCampPositionFocusStatus.Text = "Select an eligible active-roster position group first.";
             return;
         }
 
-        var response = new TrainingCampService(_nativeGameCoreContext).ApplyPositionFocus(_trainingCampPosition.GetItemText(_trainingCampPosition.Selected));
+        var response = new TrainingCampService(_nativeGameCoreContext).ApplyPositionFocus(_trainingCampSelectedFocusPosition);
         _trainingCampStatus.Text = response.Message;
+        _trainingCampPositionFocusStatus.Text = response.Message;
         if (!response.Ok)
             return;
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp focus saved.", autosaveToo: true);
         await RefreshAll();
         RefreshTrainingCampUi();
+        if (_trainingCampPositionFocusDialog?.Visible == true) RenderTrainingCampPositionFocus();
+    }
+
+    private async Task ApplyTrainingCampPlayerFocus()
+    {
+        if (string.IsNullOrWhiteSpace(_trainingCampSelectedFocusPlayerId))
+        {
+            _trainingCampPlayerFocusStatus.Text = "Select an eligible active-roster player first.";
+            return;
+        }
+
+        var response = new TrainingCampService(_nativeGameCoreContext).ApplyPlayerFocus(_trainingCampSelectedFocusPlayerId);
+        _trainingCampStatus.Text = response.Message;
+        _trainingCampPlayerFocusStatus.Text = response.Message;
+        if (!response.Ok)
+            return;
+        await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp player focus saved.", autosaveToo: true);
+        await RefreshAll();
+        RefreshTrainingCampUi();
+        if (_trainingCampPlayerFocusDialog?.Visible == true) RenderTrainingCampPlayerFocus();
     }
 
     private async Task RefreshTrainingCampReport()
@@ -3045,26 +6218,31 @@ public partial class DashboardController : Control
             return;
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp report saved.", autosaveToo: true);
         RefreshTrainingCampUi();
+        if (_trainingCampWeeklyReportDialog?.Visible == true) RenderTrainingCampWeeklyReport();
     }
 
     private async Task ResolvePositionBattles()
     {
         var outcomes = new PositionBattleService(_nativeGameCoreContext).Resolve();
-        _trainingCampStatus.Text = outcomes.Count == 0 ? "No unresolved contested position groups were found, or your depth-chart choices are protected." : $"{outcomes.Count} position battle(s) resolved.";
+        _trainingCampStatus.Text = outcomes.Count == 0 ? "Staff found no close position competitions to assess." : $"Staff updated {outcomes.Count} position competition assessment(s). No depth assignments changed.";
+        if (_trainingCampWeeklyReportStatus != null) _trainingCampWeeklyReportStatus.Text = _trainingCampStatus.Text;
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Position-battle outcomes saved.", autosaveToo: true);
         await RefreshAll();
         RefreshTrainingCampUi();
+        if (_trainingCampWeeklyReportDialog?.Visible == true) RenderTrainingCampWeeklyReport();
     }
 
     private async Task FinalizeTrainingCampRoster()
     {
         var response = new TrainingCampService(_nativeGameCoreContext).FinalizeRoster();
         _trainingCampStatus.Text = response.Message;
+        if (_finalCutdownStatus != null) _finalCutdownStatus.Text = response.Message;
         if (!response.Ok)
             return;
         await SaveCurrentNativeGame(GameCoreSaveService.NamedSaveFileName, "Training-camp roster decision saved.", autosaveToo: true);
         await RefreshAll();
         RefreshTrainingCampUi();
+        if (_finalCutdownDialog?.Visible == true) RenderFinalCutdown();
     }
 
     private static string FormatTrainingCampReport(TrainingCampReportDto report)
@@ -3584,6 +6762,20 @@ public partial class DashboardController : Control
 
     private async Task SetRosterViewMode(bool showDepthChart)
     {
+        _developmentViewActive = false;
+        _injuriesViewActive = false;
+        _staffViewActive = false;
+        _teamHistoryViewActive = false;
+        _teamStandingsViewActive = false;
+        _teamStatsViewActive = false;
+        _teamFinancesViewActive = false;
+        _contractsViewActive = false;
+        _accountingViewActive = false;
+        _practiceSquadViewActive = false;
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" })
+        {
+            var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = true;
+        }
         _depthChartViewActive = showDepthChart;
         UpdateRosterViewModeUi();
         if (IsRosterTabActive())
@@ -3597,9 +6789,1150 @@ public partial class DashboardController : Control
         if (_btnDepthChartViewMode != null)
             _btnDepthChartViewMode.ButtonPressed = _depthChartViewActive;
         if (_rosterSplit != null)
-            _rosterSplit.Visible = !_depthChartViewActive;
+            _rosterSplit.Visible = !_depthChartViewActive && !_developmentViewActive && !_injuriesViewActive && !_staffViewActive && !_teamHistoryViewActive && !_teamStandingsViewActive && !_teamStatsViewActive && !_teamFinancesViewActive && !_contractsViewActive && !_accountingViewActive && !_practiceSquadViewActive;
         if (_depthChartPanel != null)
-            _depthChartPanel.Visible = _depthChartViewActive;
+            _depthChartPanel.Visible = _depthChartViewActive && !_developmentViewActive && !_injuriesViewActive && !_staffViewActive && !_teamHistoryViewActive && !_teamStandingsViewActive && !_teamStatsViewActive && !_teamFinancesViewActive && !_contractsViewActive && !_accountingViewActive && !_practiceSquadViewActive;
+        if (_developmentWorkspace != null)
+            _developmentWorkspace.Visible = _developmentViewActive;
+        if (_injuriesWorkspace != null)
+            _injuriesWorkspace.Visible = _injuriesViewActive;
+        if (_staffWorkspace != null)
+            _staffWorkspace.Visible = _staffViewActive;
+        if (_teamHistoryWorkspace != null)
+            _teamHistoryWorkspace.Visible = _teamHistoryViewActive;
+        if (_teamStandingsWorkspace != null)
+            _teamStandingsWorkspace.Visible = _teamStandingsViewActive;
+        if (_teamStatsWorkspace != null)
+            _teamStatsWorkspace.Visible = _teamStatsViewActive;
+        if (_teamFinancesWorkspace != null)
+            _teamFinancesWorkspace.Visible = _teamFinancesViewActive;
+        if (_contractsWorkspace != null)
+            _contractsWorkspace.Visible = _contractsViewActive;
+        if (_accountingWorkspace != null)
+            _accountingWorkspace.Visible = _accountingViewActive;
+        if (_practiceSquadWorkspace != null)
+            _practiceSquadWorkspace.Visible = _practiceSquadViewActive;
+    }
+
+    private void ConfigureDepthChartWorkspacePresentation()
+    {
+        if (_depthChartPanel == null || _depthChartTree == null) return;
+        var header = GetNodeOrNull<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartWorkspaceHeader");
+        if (header != null) { header.Text = "TEAM > DEPTH CHART"; header.AddThemeFontSizeOverride("font_size", 18); }
+        var hint = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartWorkspaceHint");
+        if (hint != null) hint.Visible = false;
+        if (_depthChartSummary != null) { _depthChartSummary.AddThemeFontSizeOverride("font_size", 12); _depthChartSummary.AutowrapMode = TextServer.AutowrapMode.Off; }
+        _depthChartTree.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        _depthChartTree.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        _depthChartTree.TooltipText = "Drag a player onto another player in the same position group to reorder the depth chart. Seasonal production is informational.";
+        if (_depthChartActionStatus != null) _depthChartActionStatus.Text = "Drag and drop within a position group to reorder players.";
+        var actionRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/DepthChartPanel/DepthChartActionRow");
+        if (actionRow != null && _btnDepthChartToggleLock == null)
+        {
+            _btnDepthChartToggleLock = new Button { Text = "LOCK POSITION", Disabled = true, CustomMinimumSize = new Vector2(125, 28), TooltipText = "Protect this position group's saved order from Auto-Fill." };
+            _btnDepthChartToggleLock.Pressed += async () => await ToggleSelectedDepthChartLock();
+            actionRow.AddChild(_btnDepthChartToggleLock);
+            actionRow.MoveChild(_btnDepthChartToggleLock, Math.Min(2, actionRow.GetChildCount() - 1));
+        }
+        if (actionRow != null && _btnReturnToLiveGame == null)
+        {
+            _btnReturnToLiveGame = new Button { Text = "RETURN TO LIVE GAME", Visible = false, CustomMinimumSize = new Vector2(170, 28), TooltipText = "Return to the paused observer. Resume when the depth chart is ready." };
+            _btnReturnToLiveGame.Pressed += ReturnToLiveGameObserver;
+            actionRow.AddChild(_btnReturnToLiveGame);
+            actionRow.MoveChild(_btnReturnToLiveGame, 0);
+        }
+        var filterRow = new HBoxContainer { Name = "DepthChartFilterRow" };
+        filterRow.AddThemeConstantOverride("separation", 5);
+        _depthChartPanel.AddChild(filterRow);
+        _depthChartPanel.MoveChild(filterRow, 3);
+        foreach (var entry in new[] { ("OFFENSE", 0), ("DEFENSE", 1), ("SPECIAL TEAMS", 2) })
+        {
+            var button = CreateShellButton(entry.Item1, entry.Item2 == _depthChartUnitFilter ? new Color("f4eddf") : new Color("9cadb8"), new Color("254258"));
+            button.CustomMinimumSize = new Vector2(entry.Item2 == 2 ? 125 : 95, 28);
+            if (entry.Item2 == _depthChartUnitFilter) button.AddThemeStyleboxOverride("normal", CreateSurfaceStyle(new Color("193d37"), new Color("4f9b55"), 0, 1));
+            var unit = entry.Item2;
+            button.Pressed += () => { _depthChartUnitFilter = unit; ConfigureDepthChartFilterButtons(filterRow); RenderFilteredDepthChart(); };
+            filterRow.AddChild(button);
+        }
+        _depthChartSearch = new LineEdit { PlaceholderText = "Search players…", ClearButtonEnabled = true, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(190, 28) };
+        _depthChartSearch.TextChanged += _ => RenderFilteredDepthChart();
+        filterRow.AddChild(_depthChartSearch);
+    }
+
+    private void ConfigureDepthChartFilterButtons(HBoxContainer row)
+    {
+        if (row == null) return;
+        for (var index = 0; index < Math.Min(3, row.GetChildCount()); index++)
+        {
+            if (row.GetChild(index) is not Button button) continue;
+            var active = index == _depthChartUnitFilter;
+            button.AddThemeColorOverride("font_color", active ? new Color("f4eddf") : new Color("9cadb8"));
+            button.AddThemeStyleboxOverride("normal", active ? CreateSurfaceStyle(new Color("193d37"), new Color("4f9b55"), 0, 1) : CreateSurfaceStyle(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0), 0, 0));
+        }
+    }
+
+    private void RenderFilteredDepthChart()
+    {
+        if (_depthChartPayload != null)
+            RenderDepthChartSnapshot(_depthChartPayload);
+    }
+
+    private void CreateDevelopmentWorkspace()
+    {
+        if (_rosterTabPanel == null || _developmentWorkspace != null) return;
+        _developmentWorkspace = new VBoxContainer { Name = "DevelopmentWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _developmentWorkspace.AddThemeConstantOverride("separation", 6);
+        _rosterTabPanel.AddChild(_developmentWorkspace);
+        var header = new HBoxContainer();
+        var title = new Label { Text = "TEAM > DEVELOPMENT", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title);
+        _developmentWindowLabel = new Label { Text = "Trailing 12 months: loading…" }; _developmentWindowLabel.AddThemeColorOverride("font_color", new Color("9cadb8")); header.AddChild(_developmentWindowLabel); _developmentWorkspace.AddChild(header);
+        var filters = new HBoxContainer(); filters.AddThemeConstantOverride("separation", 6);
+        _developmentSearch = new LineEdit { PlaceholderText = "Search player", CustomMinimumSize = new Vector2(200, 28), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _developmentPositionFilter = new OptionButton { CustomMinimumSize = new Vector2(92, 28) };
+        foreach (var option in PosFilterOptions) _developmentPositionFilter.AddItem(option);
+        _developmentTrendFilter = new OptionButton { CustomMinimumSize = new Vector2(128, 28) };
+        foreach (var option in new[] { "All trends", "Breakouts", "Regressions", "No rating history" }) _developmentTrendFilter.AddItem(option);
+        _developmentChangeFilter = new OptionButton { CustomMinimumSize = new Vector2(142, 28) };
+        foreach (var option in new[] { "All changes", "Material change", "No movement history" }) _developmentChangeFilter.AddItem(option);
+        filters.AddChild(_developmentSearch); filters.AddChild(_developmentPositionFilter); filters.AddChild(_developmentTrendFilter); filters.AddChild(_developmentChangeFilter); _developmentWorkspace.AddChild(filters);
+        _developmentTree = new Tree { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row };
+        _developmentTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _developmentWorkspace.AddChild(_developmentTree);
+        _developmentSearch.TextChanged += _ => RenderDevelopmentRows();
+        _developmentPositionFilter.ItemSelected += _ => RenderDevelopmentRows();
+        _developmentTrendFilter.ItemSelected += _ => RenderDevelopmentRows();
+        _developmentChangeFilter.ItemSelected += _ => RenderDevelopmentRows();
+        _developmentTree.ColumnTitleClicked += OnDevelopmentColumnTitleClicked;
+        _developmentTree.ItemSelected += () => _ = OpenSelectedDevelopmentPlayerProfile();
+        _developmentTree.ItemActivated += () => _ = OpenSelectedDevelopmentPlayerProfile();
+    }
+
+    private async Task ShowDevelopmentWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _developmentViewActive = true; _injuriesViewActive = false; _staffViewActive = false; _teamHistoryViewActive = false; _teamStandingsViewActive = false; _teamStatsViewActive = false; _teamFinancesViewActive = false; _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" })
+        {
+            var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false;
+        }
+        BuildDevelopmentRows(); RenderDevelopmentRows();
+        await Task.CompletedTask;
+    }
+
+    private void CreateInjuriesWorkspace()
+    {
+        if (_rosterTabPanel == null || _injuriesWorkspace != null) return;
+        _injuriesWorkspace = new ScrollContainer { Name = "InjuriesWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto, VerticalScrollMode = ScrollContainer.ScrollMode.Disabled };
+        _injuryPanelRow = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _injuryPanelRow.AddThemeConstantOverride("separation", 8); _injuriesWorkspace.AddChild(_injuryPanelRow); _rosterTabPanel.AddChild(_injuriesWorkspace);
+        AddInjuryPanel("Healthy / Available", "healthy", "Healthy rostered players and current availability.", new Color("8fcf98"));
+        AddInjuryPanel("Injured", "injured", "Active injuries and expected recovery.", new Color("f0c96a"));
+        AddInjuryPanel("Injured Reserve", "ir", "Injured reserve and recovery context.", new Color("e58b7a"));
+    }
+
+    private void AddInjuryPanel(string title, string key, string subtitle, Color accent)
+    {
+        var panel = new PanelContainer { CustomMinimumSize = new Vector2(300, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        panel.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("0d2031"), new Color("254258"), 0, 1));
+        var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 4); panel.AddChild(content);
+        var label = new Label { Text = title.ToUpperInvariant() }; label.AddThemeFontSizeOverride("font_size", 14); label.AddThemeColorOverride("font_color", accent); content.AddChild(label);
+        var hint = new Label { Text = subtitle, AutowrapMode = TextServer.AutowrapMode.WordSmart }; hint.AddThemeFontSizeOverride("font_size", 11); hint.AddThemeColorOverride("font_color", new Color("9cadb8")); content.AddChild(hint);
+        var tree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        tree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); tree.ItemSelected += () => _ = OpenSelectedInjuryPlayerProfile(tree); tree.ItemActivated += () => _ = OpenSelectedInjuryPlayerProfile(tree);
+        content.AddChild(tree); _injuryPanelTrees[key] = tree; _injuryPanelRow?.AddChild(panel);
+    }
+
+    private async Task ShowInjuriesWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _injuriesViewActive = true; _developmentViewActive = false; _staffViewActive = false; _teamHistoryViewActive = false; _teamStandingsViewActive = false; _teamStatsViewActive = false; _teamFinancesViewActive = false; _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" }) { var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false; }
+        RenderInjuryPanels(); await Task.CompletedTask;
+    }
+
+    private void RenderInjuryPanels()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var healthy = new List<InjuryRow>(); var injured = new List<InjuryRow>(); var ir = new List<InjuryRow>();
+        foreach (var player in team?.Roster ?? Enumerable.Empty<PlayerState>())
+        {
+            var activeInjury = player.CurrentInjury?.IsActive == true || !string.IsNullOrWhiteSpace(player.Injury);
+            var row = InjuryRow.FromPlayer(player, false);
+            if (activeInjury) injured.Add(row); else healthy.Add(row);
+        }
+        foreach (var player in team?.InjuredReserve ?? Enumerable.Empty<PlayerState>()) ir.Add(InjuryRow.FromPlayer(player, true));
+        PopulateInjuryPanel("healthy", healthy, false); PopulateInjuryPanel("injured", injured, true); PopulateInjuryPanel("ir", ir, true);
+    }
+
+    private void PopulateInjuryPanel(string key, List<InjuryRow> rows, bool recoveryView)
+    {
+        if (!_injuryPanelTrees.TryGetValue(key, out var tree)) return;
+        tree.Clear(); tree.Columns = recoveryView ? 4 : 3; tree.SetColumnTitle(0, "Player"); tree.SetColumnTitle(1, "Pos"); tree.SetColumnTitle(2, recoveryView ? "Injury / Status" : "Availability"); if (recoveryView) tree.SetColumnTitle(3, "Recovery");
+        tree.SetColumnCustomMinimumWidth(0, 115); tree.SetColumnExpand(0, true); tree.SetColumnCustomMinimumWidth(1, 42); tree.SetColumnCustomMinimumWidth(2, 116); if (recoveryView) tree.SetColumnCustomMinimumWidth(3, 72);
+        var root = tree.CreateItem();
+        if (rows.Count == 0) { var empty = tree.CreateItem(root); empty.SetText(0, recoveryView ? "No players in this list." : "No healthy players available."); return; }
+        for (var index = 0; index < rows.Count; index++)
+        {
+            var row = rows[index]; var item = tree.CreateItem(root); item.SetMetadata(0, row.PlayerId); item.SetText(0, row.Name); item.SetText(1, row.Position); item.SetText(2, recoveryView ? row.InjuryStatus : row.Availability); if (recoveryView) item.SetText(3, row.Recovery);
+            for (var column = 0; column < tree.Columns; column++) item.SetCustomBgColor(column, index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+            item.SetCustomColor(2, recoveryView ? new Color("f0c96a") : new Color("8fcf98"));
+        }
+    }
+
+    private async Task OpenSelectedInjuryPlayerProfile(Tree tree)
+    {
+        var selected = tree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) return;
+        var playerId = selected.GetMetadata(0).AsString(); await SetRosterViewMode(false); await RefreshRosterTab(); TrySelectRosterPlayer(playerId);
+    }
+
+    private void CreateStaffWorkspace()
+    {
+        if (_rosterTabPanel == null || _staffWorkspace != null) return;
+        _staffWorkspace = new VBoxContainer { Name = "StaffWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _staffWorkspace.AddThemeConstantOverride("separation", 7);
+        var header = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _staffWorkspace.AddChild(header);
+        var headerText = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        header.AddChild(headerText);
+        var title = new Label { Text = "TEAM > STAFF" }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); headerText.AddChild(title);
+        _staffOrganizationLabel = new Label { Text = "Franchise staffing directory" }; _staffOrganizationLabel.AddThemeFontSizeOverride("font_size", 12); _staffOrganizationLabel.AddThemeColorOverride("font_color", new Color("9cadb8")); headerText.AddChild(_staffOrganizationLabel);
+        var settings = new Button { Text = "FRANCHISE SETTINGS", TooltipText = "Open the existing franchise management utilities.", CustomMinimumSize = new Vector2(160, 30) };
+        settings.Pressed += ShowFranchiseSettings; header.AddChild(settings);
+        var note = new Label { Text = "Staff changes are available only in the Staff Carousel offseason phase. Implemented scouting, development, recovery, conditioning, and coordinator effects are bounded and explained in each profile.", AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        note.AddThemeFontSizeOverride("font_size", 11); note.AddThemeColorOverride("font_color", new Color("9cadb8")); _staffWorkspace.AddChild(note);
+        var management = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _staffWorkspace.AddChild(management);
+        _staffMarketPicker = new OptionButton { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, TooltipText = "Available staff-market candidates." };
+        management.AddChild(_staffMarketPicker);
+        _staffChangeButton = new Button { Text = "SELECT A STAFF ROLE", Disabled = true, CustomMinimumSize = new Vector2(205, 30) };
+        _staffChangeButton.Pressed += async () => await ChangeSelectedStaffAsync(); management.AddChild(_staffChangeButton);
+        _staffChangeStatus = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        _staffChangeStatus.AddThemeFontSizeOverride("font_size", 11); _staffChangeStatus.AddThemeColorOverride("font_color", new Color("9cadb8")); _staffWorkspace.AddChild(_staffChangeStatus);
+        _staffTree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _staffTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _staffTree.ItemSelected += () => OpenSelectedStaffProfile(); _staffTree.ItemActivated += () => OpenSelectedStaffProfile();
+        _staffWorkspace.AddChild(_staffTree); _rosterTabPanel.AddChild(_staffWorkspace);
+    }
+
+    private void CreateStaffDetailProfileDialog()
+    {
+        if (_staffDetailDialog != null) return;
+        _staffDetailDialog = new AcceptDialog { Name = "StaffDetailProfile", Title = "Staff Profile", MinSize = new Vector2I(620, 430), Exclusive = false };
+        _staffDetailDialog.GetOkButton().Text = "CLOSE"; AddChild(_staffDetailDialog);
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _staffDetailDialog.AddChild(content);
+        _staffDetailHeader = new Label(); _staffDetailHeader.AddThemeFontSizeOverride("font_size", 18); _staffDetailHeader.AddThemeColorOverride("font_color", new Color("f4eddf")); content.AddChild(_staffDetailHeader);
+        _staffDetailBody = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        content.AddChild(_staffDetailBody); ApplyWorkstationTheme(_staffDetailDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private async Task ShowStaffWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _staffViewActive = true; _injuriesViewActive = false; _developmentViewActive = false; _teamHistoryViewActive = false; _teamStandingsViewActive = false; _teamStatsViewActive = false; _teamFinancesViewActive = false; _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" })
+        {
+            var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false;
+        }
+        BuildStaffRows(); RenderStaffRows(); UpdateStaffManagementControls(); await Task.CompletedTask;
+    }
+
+    private void BuildStaffRows()
+    {
+        _staffRows.Clear();
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (_staffOrganizationLabel != null) _staffOrganizationLabel.Text = $"{team?.Name ?? "Unassigned franchise"} staff organization · select a role for its profile";
+        var roles = new[]
+        {
+            ("Leadership", "Head Coach"),
+            ("Coaching", "Offensive Coordinator"),
+            ("Coaching", "Defensive Coordinator"),
+            ("Coaching", "Special Teams Coordinator"),
+            ("Personnel", "Director of Player Personnel"),
+            ("Medical", "Medical Director"),
+            ("Performance", "Strength & Conditioning Coach"),
+        };
+        foreach (var (department, role) in roles)
+        {
+            var coach = team?.Coaches?.FirstOrDefault(item => string.Equals(item.Role, role, StringComparison.OrdinalIgnoreCase));
+            _staffRows.Add(StaffRow.FromCoach(department, role, coach));
+        }
+        foreach (var coach in team?.Coaches ?? Enumerable.Empty<CoachState>())
+        {
+            if (_staffRows.Any(row => string.Equals(row.CoachId, coach.CoachId, StringComparison.OrdinalIgnoreCase))) continue;
+            _staffRows.Add(StaffRow.FromCoach("Other Staff", string.IsNullOrWhiteSpace(coach.Role) ? "Unspecified role" : coach.Role, coach));
+        }
+    }
+
+    private void RenderStaffRows()
+    {
+        if (_staffTree == null) return;
+        _staffTree.Clear(); _staffTree.Columns = 4;
+        var headers = new[] { "Staff Position", "Assigned Staff Member", "Tendency", "Aptitude in Current Role" };
+        for (var column = 0; column < headers.Length; column++) _staffTree.SetColumnTitle(column, headers[column]);
+        _staffTree.SetColumnCustomMinimumWidth(0, 190); _staffTree.SetColumnExpand(0, true);
+        _staffTree.SetColumnCustomMinimumWidth(1, 210); _staffTree.SetColumnExpand(1, true);
+        _staffTree.SetColumnCustomMinimumWidth(2, 170); _staffTree.SetColumnExpand(2, true);
+        _staffTree.SetColumnCustomMinimumWidth(3, 190); _staffTree.SetColumnExpand(3, true);
+        var root = _staffTree.CreateItem(); string department = null; var index = 0;
+        foreach (var row in _staffRows)
+        {
+            if (!string.Equals(department, row.Department, StringComparison.OrdinalIgnoreCase))
+            {
+                department = row.Department; var divider = _staffTree.CreateItem(root); divider.SetText(0, department.ToUpperInvariant());
+                for (var column = 0; column < headers.Length; column++) { divider.SetCustomBgColor(column, new Color("163242")); divider.SetCustomColor(column, new Color("8fcf98")); }
+            }
+            var item = _staffTree.CreateItem(root); item.SetMetadata(0, row.CoachId); item.SetMetadata(1, row.Role); item.SetText(0, row.Role); item.SetText(1, row.Member); item.SetText(2, row.Tendency); item.SetText(3, row.Aptitude);
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+            item.SetCustomColor(1, row.IsVacant ? new Color("f0c96a") : new Color("f4eddf")); item.SetCustomColor(3, row.IsVacant ? new Color("f0c96a") : new Color("9cadb8"));
+        }
+    }
+
+    private void OpenSelectedStaffProfile()
+    {
+        var selected = _staffTree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(1))) return;
+        var role = selected.GetMetadata(1).AsString(); var coachId = IsNil(selected.GetMetadata(0)) ? string.Empty : selected.GetMetadata(0).AsString();
+        var row = _staffRows.FirstOrDefault(item => string.Equals(item.Role, role, StringComparison.OrdinalIgnoreCase) && string.Equals(item.CoachId, coachId, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(row.Role)) return;
+        _selectedStaffRole = row.Role; _selectedStaffCoachId = row.CoachId;
+        UpdateStaffManagementControls();
+        _staffDetailHeader.Text = $"{row.Role} · {row.Member}";
+        var strategyNote = row.Role is "Head Coach" or "Offensive Coordinator" or "Defensive Coordinator" or "Special Teams Coordinator"
+            ? "\n\nStrategy, gameplan, and coaching style: unavailable because these staff systems are not modeled."
+            : string.Empty;
+        var staffEffect = row.Role switch
+        {
+            "Director of Player Personnel" => ResolvePersonnelStaffEffect(row),
+            "Head Coach" => ResolveHeadCoachEffect(row),
+            "Medical Director" => ResolveMedicalStaffEffect(row),
+            "Strength & Conditioning Coach" => ResolveConditioningStaffEffect(row),
+            "Offensive Coordinator" or "Defensive Coordinator" => "Paired coordinator strategy can shift simulated team strength by at most 1 point; ratings, fatigue, injuries, and randomness remain primary.",
+            _ => "No gameplay effect is modeled for this role yet.",
+        };
+        _staffDetailBody.Text = $"Role: {row.Role}\nAssigned staff member: {row.Member}\nAge: {row.Age}\nCurrent-role aptitude: {row.Aptitude}\nTendency: {row.Tendency}\n\nCurrent effect: {staffEffect}\n\nStaff changes are available only during the Staff Carousel phase. Staff contracts, strategy, and broader effects are not modeled.{strategyNote}";
+        _staffDetailDialog?.PopupCentered(new Vector2I(620, 430));
+    }
+
+    private static string ResolvePersonnelStaffEffect(StaffRow row)
+    {
+        if (row.IsVacant) return "No personnel scouting support while this role is vacant.";
+        var overall = GetStaffOverall(row.Aptitude);
+        var modifier = Math.Clamp((overall - 65) / 4, -3, 6);
+        return $"Private scouting confidence {modifier:+#;-#;0} (capped; estimates and hidden ratings do not change).";
+    }
+
+    private static string ResolveHeadCoachEffect(StaffRow row)
+    {
+        if (row.IsVacant) return "No Head Coach development support while this role is vacant.";
+        var overall = GetStaffOverall(row.Aptitude);
+        return overall >= 82 ? "Eligible rostered players may receive +1 annual development, capped by potential." : "No additional development bonus below 82 overall.";
+    }
+
+    private static string ResolveMedicalStaffEffect(StaffRow row)
+    {
+        if (row.IsVacant) return "No medical recovery support while this role is vacant.";
+        return GetStaffOverall(row.Aptitude) >= 85 ? "Active injuries recover one additional day at daily recovery; injury occurrence and eligibility do not change." : "No additional recovery day below 85 overall.";
+    }
+
+    private static string ResolveConditioningStaffEffect(StaffRow row)
+    {
+        if (row.IsVacant) return "No conditioning recovery support while this role is vacant.";
+        return GetStaffOverall(row.Aptitude) >= 85 ? "Rostered players recover one additional fatigue point during daily recovery; injury recovery and game workload do not change." : "No additional fatigue recovery below 85 overall.";
+    }
+
+    private static int GetStaffOverall(string aptitude)
+        => (aptitude ?? string.Empty).Split(' ').Select(part => int.TryParse(part, out var value) ? value : 0).FirstOrDefault(value => value > 0);
+
+    private void UpdateStaffManagementControls()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (_staffMarketPicker == null || _staffChangeButton == null || _staffChangeStatus == null) return;
+        _staffMarketPicker.Clear();
+        foreach (var coach in (league?.AvailableCoaches ?? new List<CoachState>()).OrderByDescending(item => item.Overall).ThenBy(item => item.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            _staffMarketPicker.AddItem($"{coach.Name} · OVR {coach.Overall} · Age {coach.Age}");
+            _staffMarketPicker.SetItemMetadata(_staffMarketPicker.ItemCount - 1, coach.CoachId);
+        }
+        var selected = _staffRows.FirstOrDefault(item => string.Equals(item.Role, _selectedStaffRole, StringComparison.OrdinalIgnoreCase) && string.Equals(item.CoachId, _selectedStaffCoachId, StringComparison.OrdinalIgnoreCase));
+        var phaseOpen = StaffService.CanChangeStaff(league, out var phaseError);
+        _staffChangeButton.Disabled = !phaseOpen || string.IsNullOrWhiteSpace(selected.Role) || (!selected.IsVacant && string.IsNullOrWhiteSpace(selected.CoachId)) || (selected.IsVacant && _staffMarketPicker.ItemCount == 0);
+        _staffChangeButton.Text = string.IsNullOrWhiteSpace(selected.Role) ? "SELECT A STAFF ROLE" : selected.IsVacant ? $"HIRE AS {selected.Role.ToUpperInvariant()}" : $"RELEASE {selected.Member.ToUpperInvariant()}";
+        _staffChangeStatus.Text = phaseOpen
+            ? string.IsNullOrWhiteSpace(selected.Role) ? "Select a staff role, then release its occupant or hire into a vacancy." : selected.IsVacant ? $"{selected.Role} is vacant. Select a candidate from the staff market." : $"{selected.Role} is filled. Releasing this staff member creates a market vacancy."
+            : phaseError;
+    }
+
+    private async Task ChangeSelectedStaffAsync()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var selected = _staffRows.FirstOrDefault(item => string.Equals(item.Role, _selectedStaffRole, StringComparison.OrdinalIgnoreCase) && string.Equals(item.CoachId, _selectedStaffCoachId, StringComparison.OrdinalIgnoreCase));
+        if (team == null || string.IsNullOrWhiteSpace(selected.Role)) { SetPrimaryStatus("Select a staff role first."); return; }
+        var service = new StaffService(_nativeGameCoreContext);
+        StaffChangeResult result;
+        if (selected.IsVacant)
+        {
+            if (_staffMarketPicker == null || _staffMarketPicker.Selected < 0 || IsNil(_staffMarketPicker.GetSelectedMetadata())) { SetPrimaryStatus("Select a staff-market candidate first."); return; }
+            result = service.HireCoach(team.TeamId, selected.Role, _staffMarketPicker.GetSelectedMetadata().AsString());
+        }
+        else result = service.ReleaseCoach(team.TeamId, selected.CoachId);
+        SetPrimaryStatus(result.Message);
+        if (result.Ok) { await SaveNativeAutosave("Staff change saved."); BuildStaffRows(); _selectedStaffCoachId = result.Ok && !selected.IsVacant ? string.Empty : _selectedStaffCoachId; RenderStaffRows(); UpdateStaffManagementControls(); }
+    }
+
+    private void CreateTeamHistoryWorkspace()
+    {
+        if (_rosterTabPanel == null || _teamHistoryWorkspace != null) return;
+        _teamHistoryWorkspace = new VBoxContainer { Name = "TeamHistoryWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _teamHistoryWorkspace.AddThemeConstantOverride("separation", 7);
+        var header = new VBoxContainer(); _teamHistoryWorkspace.AddChild(header);
+        var title = new Label { Text = "TEAM > HISTORY" }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title);
+        _teamHistoryOrganizationLabel = new Label { Text = "Franchise archive · completed-season records only" }; _teamHistoryOrganizationLabel.AddThemeFontSizeOverride("font_size", 12); _teamHistoryOrganizationLabel.AddThemeColorOverride("font_color", new Color("9cadb8")); header.AddChild(_teamHistoryOrganizationLabel);
+        _teamHistoryTabs = new TabContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _teamHistoryWorkspace.AddChild(_teamHistoryTabs);
+        _teamSeasonHistoryTree = AddTeamHistoryTab("Season History", "Completed franchise seasons. Select a season for its saved recap.");
+        _teamFinancialHistoryTree = AddTeamHistoryTab("Financial History", "Only saved annual financial records appear here.");
+        _teamDraftHistoryTree = AddTeamHistoryTab("Draft History", "Completed draft selections archived with the franchise.");
+        _teamTransactionHistoryTree = AddTeamHistoryTab("Transaction History", "Chronological persisted franchise transactions.");
+        _teamStaffHistoryTree = AddTeamHistoryTab("Coach / Staff History", "Saved staff tenure and staff-change records.");
+        _teamSeasonHistoryTree.ColumnTitleClicked += OnTeamHistorySeasonColumnClicked;
+        _teamSeasonHistoryTree.ItemSelected += OpenSelectedTeamSeasonRecap;
+        _teamSeasonHistoryTree.ItemActivated += OpenSelectedTeamSeasonRecap;
+        _teamDraftHistoryTree.ItemActivated += () => _ = OpenSelectedHistoryPlayerProfile(_teamDraftHistoryTree);
+        _teamTransactionHistoryTree.ItemActivated += () => _ = OpenSelectedHistoryPlayerProfile(_teamTransactionHistoryTree);
+        _rosterTabPanel.AddChild(_teamHistoryWorkspace);
+    }
+
+    private Tree AddTeamHistoryTab(string name, string hint)
+    {
+        var panel = new VBoxContainer { Name = name, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        var description = new Label { Text = hint, AutowrapMode = TextServer.AutowrapMode.WordSmart }; description.AddThemeFontSizeOverride("font_size", 11); description.AddThemeColorOverride("font_color", new Color("9cadb8")); panel.AddChild(description);
+        var tree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        tree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); panel.AddChild(tree); _teamHistoryTabs.AddChild(panel); return tree;
+    }
+
+    private void CreateTeamSeasonRecapDialog()
+    {
+        if (_teamSeasonRecapDialog != null) return;
+        _teamSeasonRecapDialog = new AcceptDialog { Name = "TeamSeasonRecap", Title = "Season Recap", MinSize = new Vector2I(720, 530), Exclusive = false };
+        _teamSeasonRecapDialog.GetOkButton().Text = "CLOSE"; AddChild(_teamSeasonRecapDialog);
+        var content = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _teamSeasonRecapDialog.AddChild(content);
+        _teamSeasonRecapHeader = new Label(); _teamSeasonRecapHeader.AddThemeFontSizeOverride("font_size", 18); _teamSeasonRecapHeader.AddThemeColorOverride("font_color", new Color("f4eddf")); content.AddChild(_teamSeasonRecapHeader);
+        _teamSeasonRecapBody = new RichTextLabel { BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; content.AddChild(_teamSeasonRecapBody);
+        ApplyWorkstationTheme(_teamSeasonRecapDialog, new Color("101f2d"), new Color("294559"), new Color("f4eddf"), new Color("aeb9bd"), new Color("4f9b55"));
+    }
+
+    private async Task ShowTeamHistoryWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _teamHistoryViewActive = true; _staffViewActive = false; _injuriesViewActive = false; _developmentViewActive = false; _teamStandingsViewActive = false; _teamStatsViewActive = false; _teamFinancesViewActive = false; _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" })
+        {
+            var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false;
+        }
+        BuildTeamHistoryViews(); await Task.CompletedTask;
+    }
+
+    private void BuildTeamHistoryViews()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (_teamHistoryOrganizationLabel != null) _teamHistoryOrganizationLabel.Text = $"{team?.Name ?? "Unassigned franchise"} archive · saved franchise records only";
+        BuildTeamSeasonRows(league, team); RenderTeamSeasonHistory(); RenderUnavailableHistory(_teamFinancialHistoryTree, new[] { "Season", "Revenue", "Payroll / Cap", "Attendance", "Stadium Costs" }, "No annual financial history has been saved for this franchise.");
+        RenderTeamDraftHistory(league, team); RenderTeamTransactionHistory(league, team); RenderTeamStaffHistory(league, team);
+    }
+
+    private void BuildTeamSeasonRows(LeagueState league, TeamState team)
+    {
+        _teamHistorySeasons.Clear(); if (league == null || team == null) return;
+        foreach (var season in league.HistoricalSeasons ?? Enumerable.Empty<SeasonHistoryRecord>())
+        {
+            var record = season?.TeamRecords?.FirstOrDefault(item => string.Equals(item.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase)); if (record == null) continue;
+            var divisionRows = season.TeamRecords.Where(item => string.Equals(item.Division, record.Division, StringComparison.OrdinalIgnoreCase)).OrderByDescending(item => item.WinPercentage).ThenByDescending(item => item.PointsFor - item.PointsAgainst).ThenBy(item => item.TeamName).ToList();
+            var divisionFinish = divisionRows.FindIndex(item => string.Equals(item.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase)) + 1;
+            var seed = season.PlayoffSeeds?.FirstOrDefault(item => string.Equals(item.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase));
+            var teamPlayoffs = season.PlayoffResults?.Where(item => string.Equals(item.HomeTeamId, team.TeamId, StringComparison.OrdinalIgnoreCase) || string.Equals(item.AwayTeamId, team.TeamId, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<SeasonPlayoffResultRecord>();
+            var championship = string.Equals(season.ChampionTeamId, team.TeamId, StringComparison.OrdinalIgnoreCase);
+            var conferenceWinner = teamPlayoffs.Any(item => string.Equals(NormalizeHistoryRound(item.Round), "Conference Championship", StringComparison.OrdinalIgnoreCase) && string.Equals(item.WinnerTeamId, team.TeamId, StringComparison.OrdinalIgnoreCase));
+            var playoffResult = championship ? "League Champions" : conferenceWinner ? "Conference Champions" : teamPlayoffs.Count > 0 ? $"Eliminated: {NormalizeHistoryRound(teamPlayoffs.Last().Round)}" : "Missed playoffs";
+            _teamHistorySeasons.Add(new TeamHistorySeasonRow(season.SeasonYear, $"{record.Wins}-{record.Losses}" + (record.Ties > 0 ? $"-{record.Ties}" : ""), divisionFinish > 0 ? $"{divisionFinish}{OrdinalSuffix(divisionFinish)} · {record.Division}" : "Division finish unavailable", seed == null ? playoffResult : $"Seed {seed.Seed} · {playoffResult}", championship ? "LEAGUE TITLE" : conferenceWinner ? "Conference title" : "No championship", season));
+        }
+    }
+
+    private void RenderTeamSeasonHistory()
+    {
+        if (_teamSeasonHistoryTree == null) return;
+        var headers = new[] { "Season", "Record", "Division Finish", "Playoff Result", "Championship Result" }; ConfigureHistoryTree(_teamSeasonHistoryTree, headers, new[] { 78, 88, 190, 220, 170 });
+        IEnumerable<TeamHistorySeasonRow> rows = _teamHistorySeasons;
+        rows = _teamHistorySortColumn switch { "record" => _teamHistorySortAscending ? rows.OrderBy(row => row.Record) : rows.OrderByDescending(row => row.Record), "division" => _teamHistorySortAscending ? rows.OrderBy(row => row.DivisionFinish) : rows.OrderByDescending(row => row.DivisionFinish), _ => _teamHistorySortAscending ? rows.OrderBy(row => row.Season) : rows.OrderByDescending(row => row.Season) };
+        var root = _teamSeasonHistoryTree.CreateItem(); var index = 0;
+        foreach (var row in rows)
+        {
+            var item = _teamSeasonHistoryTree.CreateItem(root); item.SetMetadata(0, row.Season); item.SetText(0, row.Season.ToString()); item.SetText(1, row.Record); item.SetText(2, row.DivisionFinish); item.SetText(3, row.PlayoffResult); item.SetText(4, row.ChampionshipResult);
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+            var milestone = row.ChampionshipResult == "LEAGUE TITLE" ? new Color("f0c96a") : row.PlayoffResult.Contains("Conference", StringComparison.OrdinalIgnoreCase) ? new Color("8fcf98") : new Color("9cadb8"); item.SetCustomColor(3, milestone); item.SetCustomColor(4, milestone);
+        }
+        if (!_teamHistorySeasons.Any()) AddHistoryEmptyRow(_teamSeasonHistoryTree, root, "No completed seasons have been saved for this franchise yet.");
+    }
+
+    private void RenderUnavailableHistory(Tree tree, string[] headers, string message)
+    {
+        ConfigureHistoryTree(tree, headers, Enumerable.Repeat(150, headers.Length).ToArray()); var root = tree.CreateItem(); AddHistoryEmptyRow(tree, root, message);
+    }
+
+    private void RenderTeamDraftHistory(LeagueState league, TeamState team)
+    {
+        var headers = new[] { "Year", "Pick", "Player", "Position", "Current / Career Outcome" }; ConfigureHistoryTree(_teamDraftHistoryTree, headers, new[] { 70, 90, 210, 90, 260 }); var root = _teamDraftHistoryTree.CreateItem(); var index = 0;
+        var drafts = (league?.HistoricalDrafts ?? new List<DraftState>()).Concat(league?.Draft?.IsCompleted == true ? new[] { league.Draft } : Enumerable.Empty<DraftState>());
+        foreach (var draft in drafts.Where(item => item != null).OrderByDescending(item => item.DraftYear))
+        foreach (var entry in (draft.RecapEntries ?? new List<DraftClassRecapEntry>()).Where(item => string.Equals(item.TeamId, team?.TeamId, StringComparison.OrdinalIgnoreCase)).OrderBy(item => item.OverallPick))
+        {
+            var item = _teamDraftHistoryTree.CreateItem(root); item.SetMetadata(0, entry.PlayerId); item.SetText(0, draft.DraftYear.ToString()); item.SetText(1, $"R{entry.Round} · #{entry.OverallPick}"); item.SetText(2, string.IsNullOrWhiteSpace(entry.Name) ? "Player unavailable" : entry.Name); item.SetText(3, string.IsNullOrWhiteSpace(entry.Position) ? "Unavailable" : entry.Position); item.SetText(4, string.IsNullOrWhiteSpace(entry.RookiePlacement) ? "Career outcome unavailable" : entry.RookiePlacement);
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+        }
+        if (index == 0) AddHistoryEmptyRow(_teamDraftHistoryTree, root, "No completed draft selections have been saved for this franchise.");
+    }
+
+    private void RenderTeamTransactionHistory(LeagueState league, TeamState team)
+    {
+        var headers = new[] { "Season", "Date", "Type", "Player", "Details" }; ConfigureHistoryTree(_teamTransactionHistoryTree, headers, new[] { 72, 130, 150, 190, 300 }); var root = _teamTransactionHistoryTree.CreateItem(); var index = 0;
+        foreach (var transaction in (league?.Transactions ?? new List<TransactionRecord>()).Where(item => string.Equals(item.TeamId, team?.TeamId, StringComparison.OrdinalIgnoreCase)).OrderByDescending(item => item.TransactionId, StringComparer.OrdinalIgnoreCase))
+        {
+            var item = _teamTransactionHistoryTree.CreateItem(root); item.SetMetadata(0, transaction.PlayerId); item.SetText(0, transaction.SeasonYear > 0 ? transaction.SeasonYear.ToString() : "Unavailable"); item.SetText(1, string.IsNullOrWhiteSpace(transaction.DateLabel) ? "Date unavailable" : transaction.DateLabel); item.SetText(2, string.IsNullOrWhiteSpace(transaction.Type) ? "Type unavailable" : transaction.Type); item.SetText(3, string.IsNullOrWhiteSpace(transaction.PlayerName) ? "Player unavailable" : transaction.PlayerName); item.SetText(4, string.IsNullOrWhiteSpace(transaction.Details) ? "Details unavailable" : transaction.Details);
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+        }
+        if (index == 0) AddHistoryEmptyRow(_teamTransactionHistoryTree, root, "No persisted franchise transactions are available.");
+    }
+
+    private void RenderTeamStaffHistory(LeagueState league, TeamState team)
+    {
+        var headers = new[] { "Role / Change", "Staff Member", "Date", "Details" }; ConfigureHistoryTree(_teamStaffHistoryTree, headers, new[] { 170, 210, 130, 330 }); var root = _teamStaffHistoryTree.CreateItem(); var index = 0;
+        foreach (var transaction in (league?.Transactions ?? new List<TransactionRecord>()).Where(item => string.Equals(item.TeamId, team?.TeamId, StringComparison.OrdinalIgnoreCase) && item.Type.StartsWith("staff_", StringComparison.OrdinalIgnoreCase)).OrderByDescending(item => item.TransactionId, StringComparer.OrdinalIgnoreCase))
+        {
+            var item = _teamStaffHistoryTree.CreateItem(root); item.SetText(0, transaction.Type.Replace('_', ' ')); item.SetText(1, string.IsNullOrWhiteSpace(transaction.StaffName) ? "Staff member unavailable" : transaction.StaffName); item.SetText(2, string.IsNullOrWhiteSpace(transaction.DateLabel) ? "Date unavailable" : transaction.DateLabel); item.SetText(3, string.IsNullOrWhiteSpace(transaction.Details) ? "Details unavailable" : transaction.Details);
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+        }
+        if (index == 0) AddHistoryEmptyRow(_teamStaffHistoryTree, root, "No staff changes have been saved for this franchise.");
+    }
+
+    private static void ConfigureHistoryTree(Tree tree, string[] headers, int[] widths)
+    {
+        if (tree == null) return; tree.Clear(); tree.Columns = headers.Length;
+        for (var column = 0; column < headers.Length; column++) { tree.SetColumnTitle(column, headers[column]); tree.SetColumnCustomMinimumWidth(column, widths[Math.Min(column, widths.Length - 1)]); tree.SetColumnExpand(column, column >= 2); }
+    }
+
+    private static void AddHistoryEmptyRow(Tree tree, TreeItem root, string message)
+    {
+        if (tree == null || root == null) return; var empty = tree.CreateItem(root); empty.SetText(0, message); empty.SetCustomColor(0, new Color("9cadb8"));
+    }
+
+    private static string OrdinalSuffix(int value)
+    {
+        var remainder = value % 100;
+        if (remainder is 11 or 12 or 13) return "th";
+        return (value % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" };
+    }
+
+    private void OnTeamHistorySeasonColumnClicked(long column, long mouseButton)
+    {
+        var id = column switch { 1 => "record", 2 => "division", _ => "season" }; _teamHistorySortAscending = _teamHistorySortColumn == id ? !_teamHistorySortAscending : id != "season"; _teamHistorySortColumn = id; RenderTeamSeasonHistory();
+    }
+
+    private void OpenSelectedTeamSeasonRecap()
+    {
+        var selected = _teamSeasonHistoryTree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) return; var year = (int)selected.GetMetadata(0).AsInt64(); var row = _teamHistorySeasons.FirstOrDefault(item => item.Season == year); if (row.Source == null) return;
+        var source = row.Source; _teamSeasonRecapHeader.Text = $"{row.Season} · {row.Record} · {row.ChampionshipResult}";
+        var teamId = _nativeGameCoreContext?.ActiveLeague?.UserTeamId ?? ""; var playoffGames = (source.PlayoffResults ?? new List<SeasonPlayoffResultRecord>()).Where(game => string.Equals(game.HomeTeamId, teamId, StringComparison.OrdinalIgnoreCase) || string.Equals(game.AwayTeamId, teamId, StringComparison.OrdinalIgnoreCase)).ToList();
+        var awards = (source.Awards ?? new List<SeasonAwardRecord>()).Where(award => string.Equals(award.TeamId, teamId, StringComparison.OrdinalIgnoreCase)).ToList();
+        var lines = new List<string> { $"Division finish: {row.DivisionFinish}", $"Playoff result: {row.PlayoffResult}", $"League result: {row.ChampionshipResult}", "", "Postseason path:" };
+        if (playoffGames.Count == 0) lines.Add("No saved postseason games for this franchise."); else foreach (var game in playoffGames) lines.Add($"{NormalizeHistoryRound(game.Round)}: {game.HomeTeamName} {game.HomeScore}, {game.AwayTeamName} {game.AwayScore} · Winner: {game.WinnerTeamName}");
+        lines.Add("\nAwards:"); if (awards.Count == 0) lines.Add("No saved franchise awards for this season."); else foreach (var award in awards) lines.Add($"{award.AwardName}: {award.PlayerName} ({award.Position}) — {award.Summary}");
+        lines.Add("\nSeason leaders: unavailable; team leader snapshots are not saved in the season archive."); lines.Add($"Notable event: {source.ChampionshipGameLabel} — {source.ChampionTeamName} {source.ChampionshipWinnerScore}, {source.RunnerUpTeamName} {source.ChampionshipRunnerUpScore}.");
+        _teamSeasonRecapBody.Text = string.Join("\n", lines); _teamSeasonRecapDialog?.PopupCentered(new Vector2I(720, 530));
+    }
+
+    private async Task OpenSelectedHistoryPlayerProfile(Tree source)
+    {
+        var selected = source?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) return; var playerId = selected.GetMetadata(0).AsString();
+        if (string.IsNullOrWhiteSpace(playerId)) { SetPrimaryStatus("A player profile is not available for this archived record."); return; }
+        await SetRosterViewMode(false); await RefreshRosterTab(); TrySelectRosterPlayer(playerId);
+    }
+
+    private void CreateTeamStandingsWorkspace()
+    {
+        if (_rosterTabPanel == null || _teamStandingsWorkspace != null) return;
+        _teamStandingsWorkspace = new ScrollContainer { Name = "TeamStandingsWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto, VerticalScrollMode = ScrollContainer.ScrollMode.Disabled };
+        var content = new VBoxContainer { CustomMinimumSize = new Vector2(900, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _teamStandingsWorkspace.AddChild(content);
+        var header = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; content.AddChild(header);
+        var titleColumn = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; header.AddChild(titleColumn);
+        var title = new Label { Text = "TEAM > STANDINGS" }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); titleColumn.AddChild(title);
+        _teamStandingsContext = new Label { Text = "Division and conference playoff context" }; _teamStandingsContext.AddThemeFontSizeOverride("font_size", 12); _teamStandingsContext.AddThemeColorOverride("font_color", new Color("9cadb8")); titleColumn.AddChild(_teamStandingsContext);
+        var fullStandings = new Button { Text = "OPEN LEAGUE STANDINGS", TooltipText = "Open the authoritative full-league standings view.", CustomMinimumSize = new Vector2(190, 30) }; fullStandings.Pressed += async () => await OpenFullLeagueStandingsAsync(); header.AddChild(fullStandings);
+        _teamStandingsPanels = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _teamStandingsPanels.AddThemeConstantOverride("separation", 8); content.AddChild(_teamStandingsPanels);
+        _teamDivisionStandingsTree = AddTeamStandingsPanel("DIVISION RACE", "Your division · record and games behind", new Color("8fcf98"));
+        _teamConferencePlayoffTree = AddTeamStandingsPanel("CONFERENCE PLAYOFF PICTURE", "Saved playoff seeds when the season state provides them", new Color("f0c96a"));
+        _rosterTabPanel.AddChild(_teamStandingsWorkspace);
+    }
+
+    private Tree AddTeamStandingsPanel(string heading, string hint, Color accent)
+    {
+        var panel = new PanelContainer { CustomMinimumSize = new Vector2(440, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; panel.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("0d2031"), new Color("254258"), 0, 1)); _teamStandingsPanels.AddChild(panel);
+        var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 4); panel.AddChild(content);
+        var label = new Label { Text = heading }; label.AddThemeFontSizeOverride("font_size", 14); label.AddThemeColorOverride("font_color", accent); content.AddChild(label);
+        var description = new Label { Text = hint, AutowrapMode = TextServer.AutowrapMode.WordSmart }; description.AddThemeFontSizeOverride("font_size", 11); description.AddThemeColorOverride("font_color", new Color("9cadb8")); content.AddChild(description);
+        var tree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; tree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); content.AddChild(tree); return tree;
+    }
+
+    private async Task ShowTeamStandingsWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _teamStandingsViewActive = true; _teamHistoryViewActive = false; _staffViewActive = false; _injuriesViewActive = false; _developmentViewActive = false; _teamStatsViewActive = false; _teamFinancesViewActive = false; _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" }) { var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false; }
+        RenderTeamStandingsContext(); await Task.CompletedTask;
+    }
+
+    private void RenderTeamStandingsContext()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var hasResults = league?.Results?.Any(ScheduleService.CountsTowardRegularSeasonStandings) == true;
+        if (league == null || team == null || !hasResults)
+        {
+            if (_teamStandingsContext != null) _teamStandingsContext.Text = league == null ? "Standings unavailable: no active franchise." : "Preseason / no regular-season standings have been recorded.";
+            RenderTeamStandingsEmpty("No regular-season standings are available yet."); return;
+        }
+        var response = new StandingsService(_nativeGameCoreContext).GetStandings();
+        if (response?.Ok != true) { if (_teamStandingsContext != null) _teamStandingsContext.Text = "Standings unavailable."; RenderTeamStandingsEmpty(response?.Error ?? "Standings could not be loaded."); return; }
+        var user = response.Standings.FirstOrDefault(item => string.Equals(item.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase));
+        if (user == null) { RenderTeamStandingsEmpty("Your franchise has no current standings row."); return; }
+        var division = response.Standings.Where(item => string.Equals(item.Division, user.Division, StringComparison.OrdinalIgnoreCase)).OrderByDescending(item => item.WinPct).ThenByDescending(item => item.PointsFor - item.PointsAgainst).ToList();
+        var leader = division.FirstOrDefault(); var gamesBack = ((leader?.Wins ?? 0) - user.Wins + user.Losses - (leader?.Losses ?? 0)) / 2d;
+        var seeds = response.PlayoffBracket?.ConferenceBrackets?.FirstOrDefault(item => string.Equals(item.Conference, user.Conference, StringComparison.OrdinalIgnoreCase))?.Seeds ?? new List<PlayoffSeedDto>();
+        var userSeed = seeds.FirstOrDefault(item => string.Equals(item.TeamId, user.TeamId, StringComparison.OrdinalIgnoreCase));
+        var postseason = userSeed == null ? "Postseason seed unavailable" : $"Seed {userSeed.Seed} · {(userSeed.IsDivisionWinner ? "division winner" : "wild card")}";
+        if (_teamStandingsContext != null) _teamStandingsContext.Text = $"{team.Name} · {user.Wins}-{user.Losses}{(user.Ties > 0 ? $"-{user.Ties}" : "")} · {gamesBack:0.0} GB · {postseason}";
+        RenderTeamDivisionTable(division, user.TeamId, leader?.TeamId); RenderTeamConferenceTable(seeds, user.TeamId, user.Conference);
+    }
+
+    private void RenderTeamDivisionTable(List<StandingRowDto> rows, string userTeamId, string leaderTeamId)
+    {
+        var headers = new[] { "Team", "W-L-T", "GB", "Status" }; ConfigureHistoryTree(_teamDivisionStandingsTree, headers, new[] { 175, 80, 60, 150 }); var root = _teamDivisionStandingsTree.CreateItem(); var index = 0; var leader = rows.FirstOrDefault();
+        foreach (var row in rows)
+        {
+            var gap = ((leader?.Wins ?? 0) - row.Wins + row.Losses - (leader?.Losses ?? 0)) / 2d; var isUser = string.Equals(row.TeamId, userTeamId, StringComparison.OrdinalIgnoreCase); var item = _teamDivisionStandingsTree.CreateItem(root); item.SetText(0, (isUser ? "◆ " : "") + row.TeamName); item.SetText(1, $"{row.Wins}-{row.Losses}" + (row.Ties > 0 ? $"-{row.Ties}" : "")); item.SetText(2, string.Equals(row.TeamId, leaderTeamId, StringComparison.OrdinalIgnoreCase) ? "—" : gap.ToString("0.0")); item.SetText(3, isUser ? "YOUR TEAM" : string.Equals(row.TeamId, leaderTeamId, StringComparison.OrdinalIgnoreCase) ? "Division leader" : "Division race");
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, isUser ? new Color("193d37") : index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); item.SetTextAlignment(1, HorizontalAlignment.Right); item.SetTextAlignment(2, HorizontalAlignment.Right); if (isUser) item.SetCustomColor(3, new Color("8fcf98"));
+        }
+    }
+
+    private void RenderTeamConferenceTable(List<PlayoffSeedDto> seeds, string userTeamId, string conference)
+    {
+        var headers = new[] { "Seed", "Team", "Record", "Postseason Status" }; ConfigureHistoryTree(_teamConferencePlayoffTree, headers, new[] { 56, 190, 85, 170 }); var root = _teamConferencePlayoffTree.CreateItem();
+        if (seeds == null || seeds.Count == 0) { AddHistoryEmptyRow(_teamConferencePlayoffTree, root, $"No saved {conference} playoff seeds are available in the current season state."); return; }
+        var index = 0;
+        foreach (var seed in seeds.OrderBy(item => item.Seed))
+        {
+            var isUser = string.Equals(seed.TeamId, userTeamId, StringComparison.OrdinalIgnoreCase); var item = _teamConferencePlayoffTree.CreateItem(root); item.SetText(0, seed.Seed.ToString()); item.SetText(1, (isUser ? "◆ " : "") + seed.TeamName); item.SetText(2, $"{seed.Wins}-{seed.Losses}" + (seed.Ties > 0 ? $"-{seed.Ties}" : "")); item.SetText(3, seed.IsDivisionWinner ? "Division winner" : "Wild card");
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, isUser ? new Color("193d37") : index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); item.SetTextAlignment(0, HorizontalAlignment.Right); item.SetTextAlignment(2, HorizontalAlignment.Right); if (isUser) item.SetCustomColor(3, new Color("f0c96a"));
+        }
+    }
+
+    private void RenderTeamStandingsEmpty(string message)
+    {
+        ConfigureHistoryTree(_teamDivisionStandingsTree, new[] { "Team", "W-L-T", "GB", "Status" }, new[] { 175, 80, 60, 150 }); var divisionRoot = _teamDivisionStandingsTree.CreateItem(); AddHistoryEmptyRow(_teamDivisionStandingsTree, divisionRoot, message);
+        ConfigureHistoryTree(_teamConferencePlayoffTree, new[] { "Seed", "Team", "Record", "Postseason Status" }, new[] { 56, 190, 85, 170 }); var conferenceRoot = _teamConferencePlayoffTree.CreateItem(); AddHistoryEmptyRow(_teamConferencePlayoffTree, conferenceRoot, message);
+    }
+
+    private async Task OpenFullLeagueStandingsAsync()
+    {
+        SetLeagueStatsWorkspaceVisible(false);
+        SetLeagueScheduleWorkspaceVisible(false);
+        SetLeagueNewsWorkspaceVisible(false);
+        await SelectMainTab(LEAGUE_TAB_INDEX);
+        if (_leagueHubTabs != null && _leagueHubTabs.GetTabCount() > 0) _leagueHubTabs.CurrentTab = 0;
+    }
+
+    private void CreateLeagueStatsWorkspace()
+    {
+        if (_leagueTabPanel == null || _leagueStatsWorkspace != null) return;
+        _leagueStatsWorkspace = new VBoxContainer { Name = "LeagueStatsWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueStatsWorkspace.AddThemeConstantOverride("separation", 7); _leagueTabPanel.AddChild(_leagueStatsWorkspace);
+        var header = new HBoxContainer(); _leagueStatsWorkspace.AddChild(header); var title = new Label { Text = "LEAGUE > STATS", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title); var standings = new Button { Text = "STANDINGS" }; standings.Pressed += async () => await OpenFullLeagueStandingsAsync(); header.AddChild(standings);
+        var controls = new HBoxContainer(); controls.AddThemeConstantOverride("separation", 6); _leagueStatsWorkspace.AddChild(controls); controls.AddChild(HomeLabel("CATEGORY", 11, new Color("9cadb8"))); _leagueStatsCategory = new OptionButton(); _leagueStatsCategory.AddItem("Player leaders"); _leagueStatsCategory.AddItem("Team comparison"); _leagueStatsCategory.ItemSelected += _ => RenderLeagueStats(); controls.AddChild(_leagueStatsCategory); controls.AddChild(HomeLabel("STATISTIC", 11, new Color("9cadb8"))); _leagueStatsMeasure = new OptionButton(); foreach (var item in new[] { "Passing yards", "Rushing yards", "Receiving yards", "Tackles", "Sacks", "Interceptions", "Points per game" }) _leagueStatsMeasure.AddItem(item); _leagueStatsMeasure.ItemSelected += _ => RenderLeagueStats(); controls.AddChild(_leagueStatsMeasure); controls.AddChild(HomeLabel("VIEW", 11, new Color("9cadb8"))); _leagueStatsViewMode = new OptionButton(); _leagueStatsViewMode.AddItem("Leader table"); _leagueStatsViewMode.AddItem("Comparison tiles"); _leagueStatsViewMode.ItemSelected += _ => RenderLeagueStats(); controls.AddChild(_leagueStatsViewMode);
+        var scroll = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; _leagueStatsWorkspace.AddChild(scroll); _leagueStatsTree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(850, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueStatsTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); _leagueStatsTree.ColumnTitleClicked += (_, _) => RenderLeagueStats(); _leagueStatsTree.ItemActivated += () => _ = OpenSelectedLeagueStatsProfile(); scroll.AddChild(_leagueStatsTree);
+    }
+
+    private async Task ShowLeagueStatsWorkspaceAsync()
+    {
+        await SelectMainTab(LEAGUE_TAB_INDEX); SetLeagueScheduleWorkspaceVisible(false); SetLeagueNewsWorkspaceVisible(false); SetLeagueStatsWorkspaceVisible(true); RenderLeagueStats();
+    }
+
+    private void SetLeagueStatsWorkspaceVisible(bool visible)
+    {
+        _leagueStatsWorkspaceActive = visible; if (_leagueStatsWorkspace != null) _leagueStatsWorkspace.Visible = visible; var hub = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"); if (hub != null) hub.Visible = !visible;
+    }
+
+    private void RenderLeagueStats()
+    {
+        if (_leagueStatsTree == null) return; _leagueStatsTree.Clear(); var league = _nativeGameCoreContext?.ActiveLeague; var category = _leagueStatsCategory?.GetItemText(_leagueStatsCategory.Selected) ?? "Player leaders"; var measure = _leagueStatsMeasure?.GetItemText(_leagueStatsMeasure.Selected) ?? "Passing yards"; var tileView = _leagueStatsViewMode?.Selected == 1;
+        _leagueStatsTree.Columns = tileView ? 3 : 5; var headers = tileView ? new[] { "Scope", "Current season", "Value / Unit" } : new[] { "Rank", category == "Player leaders" ? "Player" : "Team", "Position / Division", "Value", "Scope" }; for (var column = 0; column < headers.Length; column++) { _leagueStatsTree.SetColumnTitle(column, headers[column]); _leagueStatsTree.SetColumnCustomMinimumWidth(column, column == 1 ? 230 : 110); _leagueStatsTree.SetColumnExpand(column, column is 1 or 4); } var root = _leagueStatsTree.CreateItem();
+        if (league == null) { AddHistoryEmptyRow(_leagueStatsTree, root, "No active league statistics are available."); return; }
+        if (category == "Team comparison") RenderLeagueTeamStats(root, league, measure, tileView); else RenderLeaguePlayerStats(root, league, measure, tileView);
+    }
+
+    private void RenderLeaguePlayerStats(TreeItem root, LeagueState league, string measure, bool tileView)
+    {
+        Func<PlayerState, int> value = measure switch { "Rushing yards" => player => player.SeasonStats?.RushingYards ?? 0, "Receiving yards" => player => player.SeasonStats?.ReceivingYards ?? 0, "Tackles" => player => player.SeasonStats?.Tackles ?? 0, "Sacks" => player => player.SeasonStats?.Sacks ?? 0, "Interceptions" => player => player.SeasonStats?.Interceptions ?? 0, _ => player => player.SeasonStats?.PassingYards ?? 0 }; var leaders = league.Teams.SelectMany(team => team.Roster.Select(player => (team, player))).OrderByDescending(item => value(item.player)).Take(tileView ? 6 : 60).ToList(); if (leaders.All(item => value(item.player) == 0)) { AddHistoryEmptyRow(_leagueStatsTree, root, $"No {measure.ToLowerInvariant()} have been recorded in the current season."); return; }
+        var rank = 1; foreach (var (team, player) in leaders) { var item = _leagueStatsTree.CreateItem(root); item.SetMetadata(0, player.PlayerId); item.SetMetadata(1, team.TeamId); if (tileView) { item.SetText(0, $"#{rank++} {player.Name}"); item.SetText(1, $"{team.Name} · {player.Position}"); item.SetText(2, $"{value(player):N0} {measure}"); } else { item.SetText(0, (rank++).ToString()); item.SetText(1, player.Name); item.SetText(2, $"{player.Position} · {team.Name}"); item.SetText(3, value(player).ToString("N0")); item.SetText(4, "Current season · total"); item.SetTextAlignment(0, HorizontalAlignment.Right); item.SetTextAlignment(3, HorizontalAlignment.Right); } }
+    }
+
+    private void RenderLeagueTeamStats(TreeItem root, LeagueState league, string measure, bool tileView)
+    {
+        var completed = (league.Results ?? new List<GameResult>()).Where(ScheduleService.CountsTowardRegularSeasonStandings).ToList(); if (completed.Count == 0) { AddHistoryEmptyRow(_leagueStatsTree, root, "No completed regular-season games are available for team comparison."); return; }
+        var values = league.Teams.Select(team => new { Team = team, Value = measure == "Points per game" ? completed.Where(game => game.HomeTeamId == team.TeamId || game.AwayTeamId == team.TeamId).DefaultIfEmpty().Sum(game => game == null ? 0 : game.HomeTeamId == team.TeamId ? game.HomeScore : game.AwayScore) : 0 }).OrderByDescending(item => item.Value).ToList(); var rank = 1; foreach (var row in values) { var item = _leagueStatsTree.CreateItem(root); item.SetMetadata(1, row.Team.TeamId); if (tileView) { item.SetText(0, $"#{rank++} {row.Team.Name}"); item.SetText(1, row.Team.Division); item.SetText(2, measure == "Points per game" ? $"{row.Value} points · total" : "Unavailable — team aggregate not recorded"); } else { item.SetText(0, (rank++).ToString()); item.SetText(1, row.Team.Name); item.SetText(2, row.Team.Division); item.SetText(3, measure == "Points per game" ? row.Value.ToString() : "Unavailable"); item.SetText(4, measure == "Points per game" ? "Current season · total points" : "Team aggregate not recorded"); } }
+    }
+
+    private async Task OpenSelectedLeagueStatsProfile()
+    {
+        var selected = _leagueStatsTree?.GetSelected(); if (selected == null) return; var playerId = IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString(); var teamId = IsNil(selected.GetMetadata(1)) ? "" : selected.GetMetadata(1).AsString(); if (string.IsNullOrWhiteSpace(teamId)) return; await SelectMainTab(ROSTER_TAB_INDEX); await TrySelectTeamInRoster(teamId); if (!string.IsNullOrWhiteSpace(playerId)) TrySelectRosterPlayer(playerId);
+    }
+
+    private void CreateLeagueScheduleWorkspace()
+    {
+        if (_leagueTabPanel == null || _leagueScheduleWorkspace != null) return;
+        _leagueScheduleWorkspace = new VBoxContainer { Name = "LeagueScheduleWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueScheduleWorkspace.AddThemeConstantOverride("separation", 7); _leagueTabPanel.AddChild(_leagueScheduleWorkspace);
+        var header = new HBoxContainer(); _leagueScheduleWorkspace.AddChild(header); var title = new Label { Text = "LEAGUE > SCHEDULE & RESULTS", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title); header.AddChild(HomeLabel("WEEK", 11, new Color("9cadb8"))); _leagueScheduleWeekPicker = new OptionButton(); _leagueScheduleWeekPicker.ItemSelected += _ => RenderLeagueScheduleWorkspace(); header.AddChild(_leagueScheduleWeekPicker);
+        _leagueScheduleTabs = new TabContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueScheduleWorkspace.AddChild(_leagueScheduleTabs); _leagueWeekScheduleTree = AddLeagueScheduleTab("Weekly Schedule", "Complete league slate for the selected week."); _leaguePlayoffTree = AddLeagueScheduleTab("Playoff Tree", "Current saved postseason bracket and progression."); _leagueWeekScheduleTree.ItemActivated += () => _ = OpenSelectedLeagueScheduleTeam(); _leaguePlayoffTree.ItemActivated += () => _ = OpenSelectedLeagueScheduleTeam();
+    }
+
+    private Tree AddLeagueScheduleTab(string name, string description)
+    {
+        var panel = new VBoxContainer { Name = name, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; var hint = HomeLabel(description, 11, new Color("9cadb8")); panel.AddChild(hint); var tree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; tree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); panel.AddChild(tree); _leagueScheduleTabs.AddChild(panel); return tree;
+    }
+
+    private async Task ShowLeagueScheduleWorkspaceAsync()
+    {
+        await SelectMainTab(LEAGUE_TAB_INDEX); SetLeagueStatsWorkspaceVisible(false); SetLeagueNewsWorkspaceVisible(false); SetLeagueScheduleWorkspaceVisible(true); PopulateLeagueScheduleWeeks(); RenderLeagueScheduleWorkspace();
+    }
+
+    private void SetLeagueScheduleWorkspaceVisible(bool visible)
+    {
+        _leagueScheduleWorkspaceActive = visible; if (_leagueScheduleWorkspace != null) _leagueScheduleWorkspace.Visible = visible; var hub = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"); if (hub != null) hub.Visible = !visible;
+    }
+
+    private void PopulateLeagueScheduleWeeks()
+    {
+        if (_leagueScheduleWeekPicker == null) return; var league = _nativeGameCoreContext?.ActiveLeague; var current = _leagueScheduleWeekPicker.Selected >= 0 ? _leagueScheduleWeekPicker.GetItemText(_leagueScheduleWeekPicker.Selected) : ""; _leagueScheduleWeekPicker.Clear(); var weeks = (league?.Schedule ?? new List<ScheduledGame>()).Select(game => game.AbsoluteWeek).Distinct().OrderBy(week => week).ToList(); if (weeks.Count == 0) { _leagueScheduleWeekPicker.AddItem("No scheduled weeks"); return; } foreach (var week in weeks) _leagueScheduleWeekPicker.AddItem($"Week {week}"); var index = Math.Max(0, weeks.FindIndex(week => string.Equals($"Week {week}", current, StringComparison.OrdinalIgnoreCase))); _leagueScheduleWeekPicker.Select(index);
+    }
+
+    private void RenderLeagueScheduleWorkspace()
+    {
+        var league = _nativeGameCoreContext?.ActiveLeague; ConfigureHistoryTree(_leagueWeekScheduleTree, new[] { "Matchup", "State", "Score / Time", "Week" }, new[] { 320, 130, 160, 80 }); var scheduleRoot = _leagueWeekScheduleTree.CreateItem(); if (league == null || _leagueScheduleWeekPicker?.Selected < 0 || !int.TryParse((_leagueScheduleWeekPicker.GetItemText(_leagueScheduleWeekPicker.Selected) ?? "").Replace("Week ", ""), out var week)) { AddHistoryEmptyRow(_leagueWeekScheduleTree, scheduleRoot, "No league schedule is available."); RenderLeaguePlayoffTree(league); return; }
+        var games = (league.Schedule ?? new List<ScheduledGame>()).Where(game => game.AbsoluteWeek == week).ToList(); if (games.Count == 0) AddHistoryEmptyRow(_leagueWeekScheduleTree, scheduleRoot, "No games are scheduled for this week."); else foreach (var game in games) { var result = (league.Results ?? new List<GameResult>()).FirstOrDefault(item => string.Equals(item.GameId, game.GameId, StringComparison.OrdinalIgnoreCase)); var homeName = league.Teams.FirstOrDefault(team => team.TeamId == game.HomeTeamId)?.Name ?? "Home"; var awayName = league.Teams.FirstOrDefault(team => team.TeamId == game.AwayTeamId)?.Name ?? "Away"; var item = _leagueWeekScheduleTree.CreateItem(scheduleRoot); item.SetMetadata(0, game.HomeTeamId); item.SetMetadata(1, game.AwayTeamId); item.SetText(0, $"{awayName} at {homeName}"); item.SetText(1, result == null ? (string.IsNullOrWhiteSpace(game.Status) ? "Scheduled" : game.Status) : "Final"); item.SetText(2, result == null ? (string.IsNullOrWhiteSpace(game.WeekLabel) ? "Time unavailable" : game.WeekLabel) : $"{result.AwayTeam} {result.AwayScore}, {result.HomeTeam} {result.HomeScore}"); item.SetText(3, $"Week {week}"); if (result != null) item.SetCustomColor(1, new Color("8fcf98")); }
+        RenderLeaguePlayoffTree(league);
+    }
+
+    private void RenderLeaguePlayoffTree(LeagueState league)
+    {
+        ConfigureHistoryTree(_leaguePlayoffTree, new[] { "Round / Seed", "Matchup", "Status", "Result" }, new[] { 170, 290, 130, 180 }); var root = _leaguePlayoffTree.CreateItem(); var bracket = league?.PlayoffBracket; if (bracket?.ConferenceBrackets == null || bracket.ConferenceBrackets.Count == 0) { AddHistoryEmptyRow(_leaguePlayoffTree, root, "Playoff bracket is not yet available for the current season."); return; }
+        foreach (var conference in bracket.ConferenceBrackets) { var conferenceHeader = _leaguePlayoffTree.CreateItem(root); conferenceHeader.SetText(0, (conference.Conference ?? "Conference").ToUpperInvariant()); conferenceHeader.SetCustomColor(0, new Color("f0c96a")); foreach (var round in conference.Rounds ?? new List<PlayoffRound>()) foreach (var game in round.Games ?? new List<PlayoffGame>()) { var homeName = league.Teams.FirstOrDefault(team => team.TeamId == game.HomeTeamId)?.Name ?? "Home"; var awayName = league.Teams.FirstOrDefault(team => team.TeamId == game.AwayTeamId)?.Name ?? "Away"; var winnerName = league.Teams.FirstOrDefault(team => team.TeamId == game.WinnerTeamId)?.Name; var item = _leaguePlayoffTree.CreateItem(root); item.SetMetadata(0, game.HomeTeamId); item.SetMetadata(1, game.AwayTeamId); item.SetText(0, round.Round ?? "Round"); item.SetText(1, $"{awayName} at {homeName}"); item.SetText(2, game.Status ?? "Unavailable"); item.SetText(3, string.IsNullOrWhiteSpace(winnerName) ? "Result unavailable" : $"{winnerName} {game.HomeScore}-{game.AwayScore}"); } }
+    }
+
+    private async Task OpenSelectedLeagueScheduleTeam()
+    {
+        var tree = _leagueScheduleTabs?.CurrentTab == 1 ? _leaguePlayoffTree : _leagueWeekScheduleTree; var selected = tree?.GetSelected(); if (selected == null) return; var teamId = IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString(); if (string.IsNullOrWhiteSpace(teamId)) return; await SelectMainTab(ROSTER_TAB_INDEX); await TrySelectTeamInRoster(teamId);
+    }
+
+    private void CreateLeagueNewsWorkspace()
+    {
+        if (_leagueTabPanel == null || _leagueNewsWorkspace != null) return;
+        _leagueNewsWorkspace = new ScrollContainer { Name = "LeagueNewsWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueTabPanel.AddChild(_leagueNewsWorkspace); _leagueNewsGrid = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueNewsGrid.AddThemeConstantOverride("separation", 8); _leagueNewsWorkspace.AddChild(_leagueNewsGrid);
+    }
+
+    private void CreateLeaguePlayerSearchWorkspace()
+    {
+        if (_leagueTabPanel == null || _leaguePlayerSearchWorkspace != null) return;
+        _leaguePlayerSearchWorkspace = new VBoxContainer { Name = "LeaguePlayerSearchWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leaguePlayerSearchWorkspace.AddThemeConstantOverride("separation", 6); _leagueTabPanel.AddChild(_leaguePlayerSearchWorkspace);
+        var header = new HBoxContainer(); _leaguePlayerSearchWorkspace.AddChild(header); var title = new Label { Text = "LEAGUE > PLAYER SEARCH", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); header.AddChild(title); _leaguePlayerSearchCount = HomeLabel("0 results", 12); header.AddChild(_leaguePlayerSearchCount);
+        var filters = new HBoxContainer(); _leaguePlayerSearchWorkspace.AddChild(filters); _leaguePlayerSearchText = new LineEdit { PlaceholderText = "Search active players…", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _leaguePlayerSearchText.TextChanged += _ => { _leaguePlayerSearchPage = 0; RenderLeaguePlayerSearch(); }; filters.AddChild(_leaguePlayerSearchText); _leaguePlayerPositionFilter = new OptionButton(); _leaguePlayerPositionFilter.AddItem("All positions"); foreach (var position in new[] { "QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S", "K", "P" }) _leaguePlayerPositionFilter.AddItem(position); _leaguePlayerPositionFilter.ItemSelected += _ => { _leaguePlayerSearchPage = 0; RenderLeaguePlayerSearch(); }; filters.AddChild(_leaguePlayerPositionFilter); _leaguePlayerStatusFilter = new OptionButton(); _leaguePlayerStatusFilter.AddItem("All statuses"); _leaguePlayerStatusFilter.AddItem("Active"); _leaguePlayerStatusFilter.AddItem("Injured"); _leaguePlayerStatusFilter.ItemSelected += _ => { _leaguePlayerSearchPage = 0; RenderLeaguePlayerSearch(); }; filters.AddChild(_leaguePlayerStatusFilter); var previous = new Button { Text = "◀" }; previous.Pressed += () => { _leaguePlayerSearchPage = Math.Max(0, _leaguePlayerSearchPage - 1); RenderLeaguePlayerSearch(); }; filters.AddChild(previous); var next = new Button { Text = "▶" }; next.Pressed += () => { _leaguePlayerSearchPage++; RenderLeaguePlayerSearch(); }; filters.AddChild(next);
+        var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; _leaguePlayerSearchWorkspace.AddChild(scroll); _leaguePlayerSearchTree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(850, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leaguePlayerSearchTree.ItemActivated += () => _ = OpenLeagueSearchPlayer(); scroll.AddChild(_leaguePlayerSearchTree);
+    }
+
+    private async Task ShowLeaguePlayerSearchAsync() { await SelectMainTab(LEAGUE_TAB_INDEX); SetLeagueStatsWorkspaceVisible(false); SetLeagueScheduleWorkspaceVisible(false); SetLeagueNewsWorkspaceVisible(false); SetLeaguePlayerSearchVisible(true); RenderLeaguePlayerSearch(); }
+    private void SetLeaguePlayerSearchVisible(bool visible) { if (_leaguePlayerSearchWorkspace != null) _leaguePlayerSearchWorkspace.Visible = visible; var hub = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"); if (hub != null) hub.Visible = !visible; }
+    private void RenderLeaguePlayerSearch()
+    {
+        if (_leaguePlayerSearchTree == null) return; _leaguePlayerSearchTree.Clear(); _leaguePlayerSearchTree.Columns = 6; var headers = new[] { "Player", "Pos", "Team", "Age", "OVR", "Status" }; for (var i = 0; i < headers.Length; i++) { _leaguePlayerSearchTree.SetColumnTitle(i, headers[i]); _leaguePlayerSearchTree.SetColumnCustomMinimumWidth(i, i == 0 ? 210 : 90); _leaguePlayerSearchTree.SetColumnExpand(i, i is 0 or 2); } var root = _leaguePlayerSearchTree.CreateItem(); var league = _nativeGameCoreContext?.ActiveLeague; var text = _leaguePlayerSearchText?.Text ?? ""; var position = _leaguePlayerPositionFilter?.GetItemText(_leaguePlayerPositionFilter.Selected) ?? "All positions"; var status = _leaguePlayerStatusFilter?.GetItemText(_leaguePlayerStatusFilter.Selected) ?? "All statuses"; var players = (league?.Teams ?? new List<TeamState>()).SelectMany(team => team.Roster.Select(player => (team, player))).Where(item => item.player.Name.Contains(text, StringComparison.OrdinalIgnoreCase)).Where(item => position == "All positions" || item.player.Position == position || (position == "OL" && new[] { "LT", "LG", "C", "RG", "RT" }.Contains(item.player.Position)) || (position == "DL" && new[] { "DE", "DT" }.Contains(item.player.Position))).Where(item => status == "All statuses" || (status == "Injured" ? item.player.CurrentInjury?.IsActive == true : item.player.CurrentInjury?.IsActive != true)).OrderByDescending(item => item.player.Overall).ToList(); _leaguePlayerSearchCount.Text = $"{players.Count} results · page {_leaguePlayerSearchPage + 1}"; foreach (var (team, player) in players.Skip(_leaguePlayerSearchPage * 50).Take(50)) { var item = _leaguePlayerSearchTree.CreateItem(root); item.SetMetadata(0, player.PlayerId); item.SetMetadata(1, team.TeamId); item.SetText(0, player.Name); item.SetText(1, player.Position); item.SetText(2, team.Name); item.SetText(3, player.Age.ToString()); item.SetText(4, player.Overall.ToString()); item.SetText(5, player.CurrentInjury?.IsActive == true ? "Injured" : player.Status); } if (root.GetFirstChild() == null) AddHistoryEmptyRow(_leaguePlayerSearchTree, root, "No active players match these supported filters.");
+    }
+    private async Task OpenLeagueSearchPlayer() { var item = _leaguePlayerSearchTree?.GetSelected(); if (item == null || IsNil(item.GetMetadata(0))) return; await SelectMainTab(ROSTER_TAB_INDEX); await TrySelectTeamInRoster(item.GetMetadata(1).AsString()); TrySelectRosterPlayer(item.GetMetadata(0).AsString()); }
+
+    private void CreateLeagueHistoryArchiveWorkspace()
+    {
+        if (_leagueTabPanel == null || _leagueHistoryWorkspace != null) return; _leagueHistoryWorkspace = new VBoxContainer { Name = "LeagueHistoryArchive", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueTabPanel.AddChild(_leagueHistoryWorkspace); var header = new HBoxContainer(); _leagueHistoryWorkspace.AddChild(header); var title = new Label { Text = "LEAGUE > HISTORY", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); header.AddChild(title); header.AddChild(HomeLabel("SEASON", 11, new Color("9cadb8"))); _leagueHistoryYearPicker = new OptionButton(); _leagueHistoryYearPicker.ItemSelected += _ => RenderLeagueHistoryArchive(); header.AddChild(_leagueHistoryYearPicker); _leagueHistoryArchiveTabs = new TabContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueHistoryWorkspace.AddChild(_leagueHistoryArchiveTabs);
+    }
+    private async Task ShowLeagueHistoryArchiveAsync() { await SelectMainTab(LEAGUE_TAB_INDEX); SetLeagueStatsWorkspaceVisible(false); SetLeagueScheduleWorkspaceVisible(false); SetLeagueNewsWorkspaceVisible(false); SetLeaguePlayerSearchVisible(false); _leagueHistoryWorkspace.Visible = true; var hub = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"); if (hub != null) hub.Visible = false; _leagueHistoryYearPicker.Clear(); foreach (var year in (_nativeGameCoreContext?.ActiveLeague?.HistoricalSeasons ?? new List<SeasonHistoryRecord>()).Select(record => record.SeasonYear).OrderByDescending(year => year)) _leagueHistoryYearPicker.AddItem(year.ToString()); RenderLeagueHistoryArchive(); }
+    private void RenderLeagueHistoryArchive()
+    {
+        foreach (var child in _leagueHistoryArchiveTabs.GetChildren()) child.QueueFree(); var records = _nativeGameCoreContext?.ActiveLeague?.HistoricalSeasons ?? new List<SeasonHistoryRecord>(); if (_leagueHistoryYearPicker.Selected < 0) { var empty = new VBoxContainer { Name = "Archive" }; empty.AddChild(HomeLabel("No completed league seasons have been saved yet.", 13)); _leagueHistoryArchiveTabs.AddChild(empty); return; } var year = int.Parse(_leagueHistoryYearPicker.GetItemText(_leagueHistoryYearPicker.Selected)); var season = records.FirstOrDefault(record => record.SeasonYear == year); var college = _nativeGameCoreContext?.ActiveLeague?.CollegeSeasonArchives?.FirstOrDefault(record => record.SeasonYear == year); foreach (var pair in new[] { ("Champions", season == null ? "Unavailable" : $"League Champion: {season.ChampionTeamName}\nRunner-Up: {season.RunnerUpTeamName}\n{season.ChampionshipGameLabel}: {season.ChampionshipWinnerScore}-{season.ChampionshipRunnerUpScore}"), ("Final Standings", season == null ? "Unavailable" : string.Join("\n", season.TeamRecords.OrderBy(record => record.Conference).ThenBy(record => record.Division).ThenByDescending(record => record.WinPercentage).Select(record => $"{record.Conference} {record.Division} · {record.TeamName} {record.Wins}-{record.Losses}-{record.Ties}"))), ("Records & Awards", season == null ? "Unavailable" : string.Join("\n", season.Awards.Select(award => $"{award.AwardName}: {award.PlayerName} ({award.TeamName}) — {award.Summary}"))), ("College Season", college == null ? "Unavailable" : $"College Champion: {college.ChampionTeamName}\n\n{string.Join("\n", college.PostseasonGames.Select(game => $"{game.Label}: {game.AwayScore}-{game.HomeScore}"))}\n\n{string.Join("\n", college.Awards.Select(award => $"{award.AwardName}: {award.PlayerName} ({award.TeamName})"))}") }) { var tab = new VBoxContainer { Name = pair.Item1, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; tab.AddChild(HomeLabel($"{year} · {pair.Item1}", 14, new Color("f4eddf"))); var text = new RichTextLabel { Text = string.IsNullOrWhiteSpace(pair.Item2) ? "No saved record for this subject." : pair.Item2, BbcodeEnabled = false, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; tab.AddChild(text); _leagueHistoryArchiveTabs.AddChild(tab); }
+    }
+
+    private void CreateLeagueAwardsWorkspace() { if (_leagueTabPanel == null || _leagueAwardsWorkspace != null) return; _leagueAwardsWorkspace = new VBoxContainer { Name = "LeagueAwardsWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _leagueAwardsWorkspace.AddThemeConstantOverride("separation", 8); _leagueTabPanel.AddChild(_leagueAwardsWorkspace); }
+    private void CreateCollegeRankingsWorkspace() { if (_collegeRankingsDialog != null) return; _collegeRankingsDialog = new AcceptDialog { Title = "College Football > Full Rankings", MinSize = new Vector2I(900, 600), Exclusive = false }; _collegeRankingsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeRankingsDialog); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeRankingsDialog.AddChild(box); var nav = new HBoxContainer(); box.AddChild(nav); foreach (var item in new[] { "Home", "League Leaders", "Bowl Projections", "Public Boards", "Full Rankings", "Awards", "News" }) { var button = new Button { Text = item.ToUpperInvariant(), Disabled = item != "Full Rankings" && item != "League Leaders" && item != "Bowl Projections" && item != "Public Boards" && item != "Awards" && item != "News" }; if (item == "League Leaders") button.Pressed += ShowCollegeLeaders; if (item == "Bowl Projections") button.Pressed += ShowCollegePostseasonProjections; if (item == "Public Boards") button.Pressed += ShowCollegeBigBoards; if (item == "Awards") button.Pressed += ShowCollegeAwards; if (item == "News") button.Pressed += ShowCollegeNews; nav.AddChild(button); } box.AddChild(HomeLabel("CURRENT COLLEGE SEASON · Full modeled rankings", 11, new Color("9cadb8"))); _collegeRankingsTree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeRankingsTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); box.AddChild(_collegeRankingsTree); }
+    private void CreateCollegeLeadersWorkspace() { if (_collegeLeadersDialog != null) return; _collegeLeadersDialog = new AcceptDialog { Title = "College Football > League Leaders", MinSize = new Vector2I(900, 540), Exclusive = false }; _collegeLeadersDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeLeadersDialog); }
+    private void CreateCollegePostseasonProjectionsWorkspace() { if (_collegePostseasonProjectionsDialog != null) return; _collegePostseasonProjectionsDialog = new AcceptDialog { Title = "College Football > Bowl Projections", MinSize = new Vector2I(900, 540), Exclusive = false }; _collegePostseasonProjectionsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegePostseasonProjectionsDialog); }
+    private void CreateCollegeBigBoardsWorkspace() { if (_collegeBigBoardsDialog != null) return; _collegeBigBoardsDialog = new AcceptDialog { Title = "College Football > Public Boards", MinSize = new Vector2I(900, 600), Exclusive = false }; _collegeBigBoardsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeBigBoardsDialog); }
+    private void CreateCollegeAwardsWorkspace() { if (_collegeAwardsDialog != null) return; _collegeAwardsDialog = new AcceptDialog { Title = "College Football > Awards", MinSize = new Vector2I(900, 540), Exclusive = false }; _collegeAwardsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeAwardsDialog); }
+    private void ShowCollegeLeaders() { foreach (var child in _collegeLeadersDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeLeadersDialog.AddChild(box); var leaders = new CollegeLeadersService(_nativeGameCoreContext).GetLeaders(5); if (!leaders.Ok || leaders.Categories.All(category => category.Leaders.Count == 0)) box.AddChild(HomeLabel(leaders.Message.Length > 0 ? leaders.Message : "College leader statistics are unavailable.", 13)); else { box.AddChild(HomeLabel($"COLLEGE LEAGUE LEADERS · {leaders.SeasonYear}", 18, new Color("f4eddf"))); var row = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; box.AddChild(row); foreach (var category in leaders.Categories) { var panel = new PanelContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel($"{category.Name.ToUpperInvariant()} · {category.StatLabel}", 12, new Color("f0c96a"))); foreach (var entry in category.Leaders) body.AddChild(HomeLabel($"{entry.PlayerName} · {entry.Position} · {entry.Value:N0}", 11)); row.AddChild(panel); } } _collegeLeadersDialog.PopupCentered(new Vector2I(900,540)); }
+    private void ShowCollegePostseasonProjections() { foreach (var child in _collegePostseasonProjectionsDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegePostseasonProjectionsDialog.AddChild(box); var universe = _nativeGameCoreContext?.ActiveLeague?.CollegeUniverse; var teams = universe?.Teams?.Where(team => team != null).ToDictionary(team => team.TeamId, team => team.Name) ?? new Dictionary<string, string>(); if (universe?.Postseason?.Completed == true) { box.AddChild(HomeLabel($"COLLEGE POSTSEASON · {universe.SeasonYear} · FINAL RESULTS", 18, new Color("f4eddf"))); foreach (var game in universe.Postseason.Games) { var panel = new PanelContainer(); var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel(game.Label.ToUpperInvariant(), 12, new Color("f0c96a"))); body.AddChild(HomeLabel($"{teams.GetValueOrDefault(game.AwayTeamId, "Away")} {game.AwayScore}, {teams.GetValueOrDefault(game.HomeTeamId, "Home")} {game.HomeScore}", 12)); box.AddChild(panel); } } else { var projections = new CollegePostseasonProjectionService(_nativeGameCoreContext).GetProjections(); if (!projections.Ok) box.AddChild(HomeLabel(projections.Message, 13)); else { box.AddChild(HomeLabel($"COLLEGE POSTSEASON PROJECTIONS · {projections.SeasonYear}", 18, new Color("f4eddf"))); box.AddChild(HomeLabel("Current-ranking outlook only · no postseason games have been scheduled or simulated.", 11, new Color("9cadb8"))); foreach (var matchup in projections.PlayoffMatchups.Concat(projections.BowlMatchups)) box.AddChild(HomeLabel($"{matchup.Label}: #{matchup.Home.Ranking} {matchup.Home.TeamName} vs #{matchup.Away.Ranking} {matchup.Away.TeamName}", 12)); } } _collegePostseasonProjectionsDialog.PopupCentered(new Vector2I(900,540)); }
+    private void ShowCollegeBigBoards() { foreach (var child in _collegeBigBoardsDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeBigBoardsDialog.AddChild(box); var boards = new CollegeBigBoardService(_nativeGameCoreContext).GetBoards(12); if (!boards.Ok) box.AddChild(HomeLabel(boards.Message, 13)); else { box.AddChild(HomeLabel("PUBLIC COLLEGE BIG BOARDS", 18, new Color("f4eddf"))); box.AddChild(HomeLabel("Public workout, production, team, and declared-outlook context · distinct from private scouting.", 11, new Color("9cadb8"))); var row = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; box.AddChild(row); foreach (var board in boards.Boards) { var panel = new PanelContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel(board.Name.ToUpperInvariant(), 13, new Color("f0c96a"))); foreach (var entry in board.Entries) body.AddChild(HomeLabel($"{entry.Rank}. {entry.Name} · {entry.Position} · {entry.College}", 11)); row.AddChild(panel); } } _collegeBigBoardsDialog.PopupCentered(new Vector2I(900,600)); }
+    private void CreateCollegeNewsWorkspace() { if (_collegeNewsDialog != null) return; _collegeNewsDialog = new AcceptDialog { Title = "College Football > News", MinSize = new Vector2I(900, 580), Exclusive = false }; _collegeNewsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeNewsDialog); }
+    private void ShowCollegeNews() { foreach (var child in _collegeNewsDialog.GetChildren()) child.QueueFree(); var body = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeNewsDialog.AddChild(body); var news = new CollegeNewsService(_nativeGameCoreContext).GetNews(); body.AddChild(HomeLabel($"COLLEGE FOOTBALL > NEWS{(news.Ok ? $" · {news.SeasonYear}" : "")}", 18, new Color("f4eddf"))); body.AddChild(HomeLabel("Authoritative result, ranking, and performance context · no external feeds or generated articles.", 11, new Color("9cadb8"))); var list = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; body.AddChild(list); if (!news.Ok) list.AddItem(news.Message); else foreach (var item in news.Items) list.AddItem($"{item.Category} · {item.Headline}\n{item.Detail}"); _collegeNewsDialog.PopupCentered(new Vector2I(900,580)); }
+    private void ShowCollegeAwards() { foreach (var child in _collegeAwardsDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeAwardsDialog.AddChild(box); var universe = _nativeGameCoreContext?.ActiveLeague?.CollegeUniverse; CollegeAwardsService.EnsureAwards(universe); if (universe == null || universe.Awards.Count == 0) box.AddChild(HomeLabel("College awards are published after the completed eight-week college season.", 13)); else { box.AddChild(HomeLabel($"COLLEGE AWARDS · {universe.SeasonYear} · final results", 18, new Color("f4eddf"))); foreach (var award in universe.Awards) { var panel = new PanelContainer(); var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel(award.AwardName.ToUpperInvariant(), 13, new Color("f0c96a"))); body.AddChild(HomeLabel($"{award.PlayerName} · {award.Position} · {award.TeamName}", 12)); body.AddChild(HomeLabel(award.Summary, 11, new Color("9cadb8"))); box.AddChild(panel); } } _collegeAwardsDialog.PopupCentered(new Vector2I(900,540)); }
+    private void ShowCollegeFullRankings() { var universe = _nativeGameCoreContext?.ActiveLeague?.CollegeUniverse; _collegeRankingsTree.Clear(); _collegeRankingsTree.Columns = 4; foreach (var pair in new[] { ("Rank", 60), ("Team", 290), ("Record", 90), ("Conference", 170) }.Select((x, i) => (x.Item1, x.Item2, i))) { _collegeRankingsTree.SetColumnTitle(pair.i, pair.Item1); _collegeRankingsTree.SetColumnCustomMinimumWidth(pair.i, pair.Item2); _collegeRankingsTree.SetColumnExpand(pair.i, pair.i == 1); } var root = _collegeRankingsTree.CreateItem(); var teams = universe?.Teams?.Where(team => team.Ranking > 0).OrderBy(team => team.Ranking).ToList() ?? new List<CollegeTeamState>(); if (teams.Count == 0) { AddHistoryEmptyRow(_collegeRankingsTree, root, universe == null ? "College season unavailable." : "No current college rankings are available."); } else foreach (var team in teams) { var item = _collegeRankingsTree.CreateItem(root); item.SetText(0, team.Ranking.ToString()); item.SetText(1, team.Name); item.SetText(2, $"{team.Wins}-{team.Losses}"); item.SetText(3, team.Conference); item.SetTextAlignment(0, HorizontalAlignment.Right); item.SetTextAlignment(2, HorizontalAlignment.Right); } _collegeRankingsDialog.PopupCentered(new Vector2I(900, 600)); }
+    private async Task ShowLeagueAwardsAsync() { await SelectMainTab(LEAGUE_TAB_INDEX); SetLeagueStatsWorkspaceVisible(false); SetLeagueScheduleWorkspaceVisible(false); SetLeagueNewsWorkspaceVisible(false); SetLeaguePlayerSearchVisible(false); _leagueHistoryWorkspace.Visible = false; _leagueAwardsWorkspace.Visible = true; var hub = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"); if (hub != null) hub.Visible = false; RenderLeagueAwards(); }
+    private void RenderLeagueAwards() { foreach (var child in _leagueAwardsWorkspace.GetChildren()) child.QueueFree(); var league = _nativeGameCoreContext?.ActiveLeague; _leagueAwardsWorkspace.AddChild(HomeLabel("LEAGUE > AWARDS", 18, new Color("f4eddf"))); var week = league?.Calendar?.AbsoluteWeek ?? 0; if (league == null || week < 9) { _leagueAwardsWorkspace.AddChild(HomeLabel($"Award-race projections open around Week 9. Current context: Week {week}.", 13)); return; } var grid = new HBoxContainer(); _leagueAwardsWorkspace.AddChild(grid); var awards = new (string, Func<PlayerState, int>)[] { ("MOST VALUABLE PLAYER", p => (p.SeasonStats?.PassingYards ?? 0) + (p.SeasonStats?.RushingYards ?? 0) + (p.SeasonStats?.ReceivingYards ?? 0)), ("OFFENSIVE PLAYER", p => (p.SeasonStats?.PassingYards ?? 0) + (p.SeasonStats?.RushingYards ?? 0)), ("DEFENSIVE PLAYER", p => (p.SeasonStats?.Tackles ?? 0) + (p.SeasonStats?.Sacks ?? 0) * 20) }; foreach (var award in awards) { var panel = CreateHomeTile(award.Item1, () => { }); var body = AddTileBody(panel); foreach (var x in league.Teams.SelectMany(t => t.Roster.Select(p => (t,p))).OrderByDescending(x => award.Item2(x.p)).Take(3)) body.AddChild(HomeLabel($"{x.p.Name} · {x.t.Name} · {award.Item2(x.p):N0}", 11)); body.AddChild(HomeLabel("Projection · current season", 10, new Color("9cadb8"))); grid.AddChild(panel); } }
+
+    private async Task ShowLeagueNewsWorkspaceAsync()
+    {
+        await SelectMainTab(LEAGUE_TAB_INDEX); SetLeagueStatsWorkspaceVisible(false); SetLeagueScheduleWorkspaceVisible(false); SetLeagueNewsWorkspaceVisible(true); BuildLeagueNewsStories(); RenderLeagueNewsStories();
+    }
+
+    private void SetLeagueNewsWorkspaceVisible(bool visible)
+    {
+        if (_leagueNewsWorkspace != null) _leagueNewsWorkspace.Visible = visible; var hub = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/LeagueTab/LeagueHubPanel"); if (hub != null) hub.Visible = !visible;
+    }
+
+    private void BuildLeagueNewsStories()
+    {
+        _leagueNewsStories.Clear(); var league = _nativeGameCoreContext?.ActiveLeague; if (league == null) return;
+        foreach (var transaction in (league.Transactions ?? new List<TransactionRecord>()).OrderByDescending(item => item.TransactionId).Take(12)) _leagueNewsStories.Add(new LeagueNewsStory($"{transaction.Type}: {transaction.PlayerName}", string.IsNullOrWhiteSpace(transaction.Details) ? "Transaction detail unavailable." : transaction.Details, transaction.DateLabel, transaction.TeamId, transaction.PlayerId, "transaction"));
+        foreach (var result in (league.Results ?? new List<GameResult>()).OrderByDescending(item => item.AbsoluteWeek).ThenByDescending(item => item.GameId).Take(12)) _leagueNewsStories.Add(new LeagueNewsStory($"Final: {result.AwayTeam} {result.AwayScore}, {result.HomeTeam} {result.HomeScore}", string.IsNullOrWhiteSpace(result.Summary) ? "Completed league game." : result.Summary, result.WeekLabel, result.HomeTeamId, "", "game"));
+        foreach (var team in league.Teams) foreach (var player in team.Roster.Where(player => player.CurrentInjury?.IsActive == true).Take(2)) _leagueNewsStories.Add(new LeagueNewsStory($"Injury update: {player.Name}", $"{team.Name} lists {player.Name} ({player.Position}) with {player.CurrentInjury.Name}. Recovery: {player.CurrentInjury.DaysRemaining} day(s) remaining.", league.Calendar?.CurrentDate ?? "Current season", team.TeamId, player.PlayerId, "injury"));
+        _leagueNewsStories.Sort((left, right) => string.Compare(right.Context, left.Context, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void RenderLeagueNewsStories()
+    {
+        if (_leagueNewsGrid == null) return; foreach (var child in _leagueNewsGrid.GetChildren()) child.QueueFree(); var header = new Label { Text = "LEAGUE > NEWS" }; header.AddThemeFontSizeOverride("font_size", 20); header.AddThemeColorOverride("font_color", new Color("f4eddf")); _leagueNewsGrid.AddChild(header); _leagueNewsGrid.AddChild(HomeLabel("Current league events · neutral imagery is used because no article-image assets are persisted.", 11, new Color("9cadb8")));
+        if (_leagueNewsStories.Count == 0) { _leagueNewsGrid.AddChild(HomeLabel("No recorded league news is available. Transactions, results, injuries, and draft events will appear here when they are saved.", 13)); return; }
+        var lead = CreateLeagueNewsTile(_leagueNewsStories[0], true); _leagueNewsGrid.AddChild(lead); var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 8); _leagueNewsGrid.AddChild(row); foreach (var story in _leagueNewsStories.Skip(1).Take(8)) { var tile = CreateLeagueNewsTile(story, false); tile.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; row.AddChild(tile); if (row.GetChildCount() == 4) { row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 8); _leagueNewsGrid.AddChild(row); } }
+    }
+
+    private PanelContainer CreateLeagueNewsTile(LeagueNewsStory story, bool lead)
+    {
+        var panel = new PanelContainer { CustomMinimumSize = new Vector2(lead ? 0 : 220, lead ? 160 : 120) }; panel.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(lead ? new Color("123044") : new Color("0d2031"), new Color("254258"), 0, 1)); var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 4); panel.AddChild(content); var label = HomeLabel(story.Headline, lead ? 18 : 13, new Color("f4eddf")); label.AutowrapMode = TextServer.AutowrapMode.WordSmart; content.AddChild(label); content.AddChild(HomeLabel(story.Summary, lead ? 13 : 11)); content.AddChild(HomeLabel($"{story.Context} · {story.Kind.ToUpperInvariant()} · Neutral visual", 10, new Color("9cadb8"))); var open = new Button { Text = "OPEN STORY" }; open.Pressed += async () => await OpenLeagueNewsStory(story); content.AddChild(open); return panel;
+    }
+
+    private async Task OpenLeagueNewsStory(LeagueNewsStory story)
+    {
+        if (!string.IsNullOrWhiteSpace(story.TeamId)) { await SelectMainTab(ROSTER_TAB_INDEX); await TrySelectTeamInRoster(story.TeamId); if (!string.IsNullOrWhiteSpace(story.PlayerId)) TrySelectRosterPlayer(story.PlayerId); return; }
+        SetPrimaryStatus(story.Summary);
+    }
+
+    private void CreateTeamStatsWorkspace()
+    {
+        if (_rosterTabPanel == null || _teamStatsWorkspace != null) return;
+        _teamStatsWorkspace = new VBoxContainer { Name = "TeamStatsWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _teamStatsWorkspace.AddThemeConstantOverride("separation", 7);
+        var header = new HBoxContainer(); _teamStatsWorkspace.AddChild(header); var title = new Label { Text = "TEAM > STATS", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title);
+        var edit = new Button { Text = "EDIT ANALYTICS", CustomMinimumSize = new Vector2(135, 30) }; edit.Pressed += ToggleTeamStatsEdit; header.AddChild(edit);
+        var filters = new HBoxContainer(); _teamStatsWorkspace.AddChild(filters); filters.AddChild(HomeLabel("TIMEFRAME", 11, new Color("9cadb8"))); _teamStatsSeasonFilter = new OptionButton(); _teamStatsSeasonFilter.AddItem("Current season"); _teamStatsSeasonFilter.ItemSelected += _ => BuildTeamStatsGrid(); filters.AddChild(_teamStatsSeasonFilter); filters.AddChild(HomeLabel("COMPARISON", 11, new Color("9cadb8"))); _teamStatsComparisonFilter = new OptionButton(); _teamStatsComparisonFilter.AddItem("League average"); _teamStatsComparisonFilter.AddItem("Division rivals"); _teamStatsComparisonFilter.ItemSelected += _ => BuildTeamStatsGrid(); filters.AddChild(_teamStatsComparisonFilter);
+        _teamStatsEditorBar = new HBoxContainer { Visible = false }; _teamStatsEditorBar.AddThemeConstantOverride("separation", 5); _teamStatsWorkspace.AddChild(_teamStatsEditorBar); _teamStatsTilePicker = new OptionButton(); _teamStatsEditorBar.AddChild(_teamStatsTilePicker); AddTeamStatsEditorButton("MOVE ◀", () => MoveTeamStatsTile(-1)); AddTeamStatsEditorButton("MOVE ▶", () => MoveTeamStatsTile(1)); AddTeamStatsEditorButton("RESIZE", () => { _teamStatsFeaturedWide = !_teamStatsFeaturedWide; BuildTeamStatsGrid(); }); AddTeamStatsEditorButton("REMOVE", () => { _teamStatsHiddenTiles.Add(SelectedTeamStatsTile()); BuildTeamStatsGrid(); }); AddTeamStatsEditorButton("ADD TILE", () => { var hidden = _teamStatsTileOrder.FirstOrDefault(_teamStatsHiddenTiles.Contains); if (!string.IsNullOrWhiteSpace(hidden)) _teamStatsHiddenTiles.Remove(hidden); BuildTeamStatsGrid(); }); AddTeamStatsEditorButton("RESET", ResetTeamStatsLayout); AddTeamStatsEditorButton("SAVE", SaveTeamStatsLayout);
+        _teamStatsEditHint = HomeLabel("Edit mode: choose a tile, then move, resize, remove, restore, reset, or save the analytics grid.", 11, new Color("9cadb8")); _teamStatsEditHint.Visible = false; _teamStatsWorkspace.AddChild(_teamStatsEditHint);
+        _teamStatsGrid = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _teamStatsGrid.AddThemeConstantOverride("separation", 8); _teamStatsWorkspace.AddChild(_teamStatsGrid); _rosterTabPanel.AddChild(_teamStatsWorkspace);
+        var config = new ConfigFile(); if (config.Load("user://team_stats_layout.cfg") == Error.Ok) { var order = ((string)config.GetValue("stats", "order", string.Join(",", _teamStatsTileOrder))).Split(',', StringSplitOptions.RemoveEmptyEntries).Where(new[] { "totals", "league_rank", "leaders", "trend" }.Contains).Distinct().ToList(); if (order.Count == 4) { _teamStatsTileOrder.Clear(); _teamStatsTileOrder.AddRange(order); } foreach (var tile in ((string)config.GetValue("stats", "hidden", "")).Split(',', StringSplitOptions.RemoveEmptyEntries)) _teamStatsHiddenTiles.Add(tile); _teamStatsFeaturedWide = (bool)config.GetValue("stats", "wide", true); }
+    }
+
+    private void AddTeamStatsEditorButton(string text, Action action) { var button = CreateShellButton(text, new Color("c5d1d8"), new Color("254258")); button.AddThemeFontSizeOverride("font_size", 11); button.Pressed += action; _teamStatsEditorBar.AddChild(button); }
+    private async Task ShowTeamStatsWorkspaceAsync() { _practiceSquadViewActive = false; _teamStatsViewActive = true; _teamFinancesViewActive = false; _teamStandingsViewActive = _teamHistoryViewActive = _staffViewActive = _injuriesViewActive = _developmentViewActive = _depthChartViewActive = false; UpdateRosterViewModeUi(); foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" }) { var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false; } BuildTeamStatsGrid(); await Task.CompletedTask; }
+    private void ToggleTeamStatsEdit() { _teamStatsEditMode = !_teamStatsEditMode; _teamStatsEditorBar.Visible = _teamStatsEditMode; _teamStatsEditHint.Visible = _teamStatsEditMode; UpdateTeamStatsEditor(); }
+    private string SelectedTeamStatsTile() => _teamStatsTilePicker?.Selected >= 0 ? _teamStatsTileOrder[_teamStatsTilePicker.Selected] : "totals";
+    private void UpdateTeamStatsEditor() { if (_teamStatsTilePicker == null) return; _teamStatsTilePicker.Clear(); foreach (var tile in _teamStatsTileOrder) _teamStatsTilePicker.AddItem($"{TeamStatsTileName(tile)}{(_teamStatsHiddenTiles.Contains(tile) ? " (hidden)" : "")}"); _teamStatsTilePicker.Select(0); }
+    private static string TeamStatsTileName(string tile) => tile switch { "totals" => "Team Totals", "league_rank" => "League Comparison", "leaders" => "Player Contributions", _ => "Game Trend" };
+    private void MoveTeamStatsTile(int direction) { var tile = SelectedTeamStatsTile(); var index = _teamStatsTileOrder.IndexOf(tile); var target = Math.Clamp(index + direction, 0, _teamStatsTileOrder.Count - 1); if (index == target) return; _teamStatsTileOrder.RemoveAt(index); _teamStatsTileOrder.Insert(target, tile); BuildTeamStatsGrid(); }
+    private void ResetTeamStatsLayout() { _teamStatsTileOrder.Clear(); _teamStatsTileOrder.AddRange(new[] { "totals", "league_rank", "leaders", "trend" }); _teamStatsHiddenTiles.Clear(); _teamStatsFeaturedWide = true; BuildTeamStatsGrid(); }
+    private void SaveTeamStatsLayout() { var config = new ConfigFile(); config.SetValue("stats", "order", string.Join(",", _teamStatsTileOrder)); config.SetValue("stats", "hidden", string.Join(",", _teamStatsHiddenTiles)); config.SetValue("stats", "wide", _teamStatsFeaturedWide); config.Save("user://team_stats_layout.cfg"); }
+    private void BuildTeamStatsGrid()
+    {
+        if (_teamStatsGrid == null) return; foreach (var child in _teamStatsGrid.GetChildren()) child.QueueFree(); UpdateTeamStatsEditor(); var visible = _teamStatsTileOrder.Where(tile => !_teamStatsHiddenTiles.Contains(tile)).ToList(); var top = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; var bottom = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; top.AddThemeConstantOverride("separation", 8); bottom.AddThemeConstantOverride("separation", 8);
+        foreach (var tile in visible.Take(2)) { var panel = CreateTeamStatsTile(tile); panel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; panel.SizeFlagsStretchRatio = _teamStatsFeaturedWide && tile == visible.FirstOrDefault() ? 2f : 1f; top.AddChild(panel); }
+        foreach (var tile in visible.Skip(2)) { var panel = CreateTeamStatsTile(tile); panel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; bottom.AddChild(panel); }
+        if (top.GetChildCount() > 0) _teamStatsGrid.AddChild(top); if (bottom.GetChildCount() > 0) _teamStatsGrid.AddChild(bottom);
+    }
+    private PanelContainer CreateTeamStatsTile(string tile)
+    {
+        var action = tile == "leaders" ? (Action)(async () => { await SetRosterViewMode(false); }) : (Action)(async () => await OpenFullLeagueStandingsAsync()); var panel = CreateHomeTile(TeamStatsTileName(tile).ToUpperInvariant(), action, tile == "leaders" ? "OPEN ROSTER" : "OPEN DETAIL"); var body = AddTileBody(panel); var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase)); var games = (league?.Results ?? new List<GameResult>()).Where(ScheduleService.CountsTowardRegularSeasonStandings).Where(game => string.Equals(game.HomeTeamId, team?.TeamId, StringComparison.OrdinalIgnoreCase) || string.Equals(game.AwayTeamId, team?.TeamId, StringComparison.OrdinalIgnoreCase)).OrderBy(game => game.AbsoluteWeek).ToList();
+        body.AddChild(HomeLabel($"Scope: {(_teamStatsComparisonFilter?.Selected == 1 ? "division rivals" : "league average")} · Timeframe: current season · Units: totals / per game", 10, new Color("9cadb8")));
+        if (team == null || games.Count == 0) { body.AddChild(HomeLabel("Unavailable: no completed regular-season games for the selected timeframe.", 12, new Color("9cadb8"))); return panel; }
+        if (tile == "leaders") RenderTeamStatsLeaders(body, team); else if (tile == "trend") RenderTeamStatsTrend(body, games, team.TeamId); else if (tile == "league_rank") RenderTeamStatsComparison(body, league, team, games); else RenderTeamStatsTotals(body, games, team.TeamId); return panel;
+    }
+    private void RenderTeamStatsTotals(VBoxContainer body, List<GameResult> games, string teamId)
+    {
+        var pointsFor = games.Sum(game => game.HomeTeamId == teamId ? game.HomeScore : game.AwayScore); var pointsAgainst = games.Sum(game => game.HomeTeamId == teamId ? game.AwayScore : game.HomeScore); var yards = games.Sum(game => GetGameStat(game, teamId, "total_yards")); var turnovers = games.Sum(game => GetGameStat(game, teamId, "turnovers")); body.AddChild(HomeLabel($"OFFENSE  {pointsFor} pts · {yards:N0} total yards", 13, new Color("f4eddf"))); body.AddChild(HomeLabel($"DEFENSE  {pointsAgainst} pts allowed · {turnovers} takeaways", 12)); body.AddChild(HomeLabel($"RATES    {pointsFor / (double)games.Count:0.0} pts/game · {yards / (double)games.Count:0.0} yards/game", 12)); body.AddChild(HomeLabel("Special teams: unavailable; no special-teams aggregate is recorded.", 11, new Color("9cadb8")));
+    }
+    private static int GetGameStat(GameResult game, string teamId, string baseKey) { var home = string.Equals(game.HomeTeamId, teamId, StringComparison.OrdinalIgnoreCase); return game.BoxScore?.TeamStats?.TryGetValue($"{baseKey}_{(home ? "home" : "away")}", out var value) == true ? value : 0; }
+    private void RenderTeamStatsTrend(VBoxContainer body, List<GameResult> games, string teamId) { body.AddChild(HomeLabel("GAME-BY-GAME POINTS · current season", 12, new Color("f4eddf"))); foreach (var game in games.TakeLast(6)) { var scored = game.HomeTeamId == teamId ? game.HomeScore : game.AwayScore; var allowed = game.HomeTeamId == teamId ? game.AwayScore : game.HomeScore; body.AddChild(HomeLabel($"{game.WeekLabel}: {scored} for / {allowed} against", 11)); } }
+    private void RenderTeamStatsLeaders(VBoxContainer body, TeamState team)
+    {
+        void Add(string label, PlayerState player, int value) => body.AddChild(HomeLabel($"{label,-4} {player?.Name ?? "Unavailable"} · {(player == null ? "—" : value.ToString())}", 12));
+        var roster = team.Roster ?? new List<PlayerState>(); Add("PASS", roster.OrderByDescending(player => player.SeasonStats?.PassingYards ?? 0).FirstOrDefault(), roster.Max(player => player.SeasonStats?.PassingYards ?? 0)); Add("RUSH", roster.OrderByDescending(player => player.SeasonStats?.RushingYards ?? 0).FirstOrDefault(), roster.Max(player => player.SeasonStats?.RushingYards ?? 0)); Add("REC", roster.OrderByDescending(player => player.SeasonStats?.ReceivingYards ?? 0).FirstOrDefault(), roster.Max(player => player.SeasonStats?.ReceivingYards ?? 0)); Add("TACK", roster.OrderByDescending(player => player.SeasonStats?.Tackles ?? 0).FirstOrDefault(), roster.Max(player => player.SeasonStats?.Tackles ?? 0));
+    }
+    private void RenderTeamStatsComparison(VBoxContainer body, LeagueState league, TeamState team, List<GameResult> games)
+    {
+        var userPoints = games.Sum(game => game.HomeTeamId == team.TeamId ? game.HomeScore : game.AwayScore);
+        var allGames = (league.Results ?? new List<GameResult>()).Where(ScheduleService.CountsTowardRegularSeasonStandings).ToList();
+        var useDivision = _teamStatsComparisonFilter?.Selected == 1;
+        var comparisonTeams = useDivision
+            ? league.Teams.Where(candidate => string.Equals(candidate.Division, team.Division, StringComparison.OrdinalIgnoreCase) && !string.Equals(candidate.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase)).ToList()
+            : league.Teams.ToList();
+        var comparisonIds = comparisonTeams.Select(candidate => candidate.TeamId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var comparisonScores = allGames.SelectMany(game => new[]
+        {
+            comparisonIds.Contains(game.HomeTeamId) ? game.HomeScore : (int?)null,
+            comparisonIds.Contains(game.AwayTeamId) ? game.AwayScore : (int?)null,
+        }).Where(score => score.HasValue).Select(score => score.Value).ToList();
+        var comparisonAverage = comparisonScores.Count == 0
+            ? 0
+            : comparisonScores.Average();
+        var comparisonLabel = useDivision ? "Division-rival average" : "League average";
+
+        body.AddChild(HomeLabel("POINTS FOR · league comparison", 12, new Color("f4eddf")));
+        body.AddChild(HomeLabel($"Your team: {userPoints / (double)games.Count:0.0} per game", 13));
+        body.AddChild(HomeLabel($"{comparisonLabel}: {comparisonAverage:0.0} per game", 13));
+        body.AddChild(HomeLabel("Team ranks and opponent-adjusted rates: unavailable; those metrics are not persisted.", 11, new Color("9cadb8")));
+    }
+
+    private void CreateTeamFinancesWorkspace()
+    {
+        if (_rosterTabPanel == null || _teamFinancesWorkspace != null) return;
+        _teamFinancesWorkspace = new VBoxContainer { Name = "TeamFinancesWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _teamFinancesWorkspace.AddThemeConstantOverride("separation", 8); _rosterTabPanel.AddChild(_teamFinancesWorkspace);
+    }
+
+    private async Task ShowTeamFinancesWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _teamFinancesViewActive = true; _contractsViewActive = false; _accountingViewActive = false; _teamStatsViewActive = _teamStandingsViewActive = _teamHistoryViewActive = _staffViewActive = _injuriesViewActive = _developmentViewActive = _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" }) { var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false; }
+        RenderTeamFinancesWorkspace(); await Task.CompletedTask;
+    }
+
+    private void RenderTeamFinancesWorkspace()
+    {
+        if (_teamFinancesWorkspace == null) return; foreach (var child in _teamFinancesWorkspace.GetChildren()) child.QueueFree(); var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var header = new HBoxContainer(); _teamFinancesWorkspace.AddChild(header); var title = new Label { Text = "FINANCES > TEAM FINANCES", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title); var contracts = new Button { Text = "CONTRACTS", TooltipText = "Open multi-year cap planning." }; contracts.Pressed += async () => await ShowContractsWorkspaceAsync(); header.AddChild(contracts); var accounting = new Button { Text = "ACCOUNTING", TooltipText = "Open the current-year financial record." }; accounting.Pressed += async () => await ShowAccountingWorkspaceAsync(); header.AddChild(accounting);
+        var summary = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; summary.AddThemeConstantOverride("separation", 8); _teamFinancesWorkspace.AddChild(summary); var funds = CreateFinancePanel("AVAILABLE FUNDS & CAP"); var attendance = CreateFinancePanel("ATTENDANCE & TICKETING"); summary.AddChild(funds); summary.AddChild(attendance);
+        if (league == null || team == null) { funds.AddChild(HomeLabel("No active franchise finance data is available.", 12)); attendance.AddChild(HomeLabel("Attendance and ticketing are unavailable without an active franchise.", 12)); return; }
+        var contractService = new ContractService(_nativeGameCoreContext); var payroll = contractService.GetCommittedSalary(team); var cap = league.SalaryCap; var capRoom = contractService.GetCapRoom(team); var payrollRank = league.Teams.OrderByDescending(contractService.GetCommittedSalary).ToList().FindIndex(item => item.TeamId == team.TeamId) + 1;
+        funds.AddChild(FinanceLine("Salary cap", GameCoreStateHelper.FormatCapRoom(cap))); funds.AddChild(FinanceLine("Committed payroll", GameCoreStateHelper.FormatCapRoom(payroll))); funds.AddChild(FinanceLine("Available cap room", GameCoreStateHelper.FormatCapRoom(capRoom), capRoom > cap * .1m ? new Color("8fcf98") : new Color("f0c96a"))); funds.AddChild(FinanceLine("Payroll rank", $"{payrollRank} of {league.Teams.Count} · current commitments")); funds.AddChild(HomeLabel("Cash balance, revenue, operating costs, and net outcome are not recorded by the current financial system.", 11, new Color("9cadb8")));
+        attendance.AddChild(HomeLabel("Attendance: unavailable — no attendance system is persisted.", 12)); attendance.AddChild(HomeLabel("Ticket revenue: unavailable — ticket sales are not modeled.", 12)); var ticketTable = new GridContainer { Columns = 3 }; ticketTable.AddChild(HomeLabel("Tier", 11, new Color("f4eddf"))); ticketTable.AddChild(HomeLabel("Price", 11, new Color("f4eddf"))); ticketTable.AddChild(HomeLabel("Control", 11, new Color("f4eddf"))); foreach (var tier in new[] { "Standard", "Premium", "Club" }) { ticketTable.AddChild(HomeLabel(tier, 11)); ticketTable.AddChild(HomeLabel("Unavailable", 11, new Color("9cadb8"))); ticketTable.AddChild(new Button { Text = "NOT MODELED", Disabled = true }); } attendance.AddChild(ticketTable); attendance.AddChild(HomeLabel("No ticket-price setting exists in the current persisted franchise model, so price controls cannot be applied safely.", 11, new Color("9cadb8")));
+        var context = CreateFinancePanel("BUSINESS CONTEXT · CURRENT SEASON"); _teamFinancesWorkspace.AddChild(context); context.AddChild(FinanceLine("Timeframe", $"{league.SeasonYear} · current franchise state")); context.AddChild(FinanceLine("Operating outcome", "Unavailable — revenue and expense ledger not tracked")); context.AddChild(FinanceLine("League attendance rank", "Unavailable — attendance not tracked")); context.AddChild(HomeLabel("Use Contracts for player-cap actions. Accounting remains the future authority for year-to-date revenue and expenses.", 11, new Color("9cadb8")));
+    }
+
+    private VBoxContainer CreateFinancePanel(string heading) { var body = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; body.AddThemeConstantOverride("separation", 5); body.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("0d2031"), new Color("254258"), 0, 1)); body.AddChild(HomeLabel(heading, 13, new Color("f4eddf"))); return body; }
+    private Control FinanceLine(string label, string value, Color? valueColor = null) { var row = new HBoxContainer(); var left = HomeLabel(label, 12); left.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; row.AddChild(left); row.AddChild(HomeLabel(value, 12, valueColor ?? new Color("c5d1d8"))); return row; }
+
+    private void CreatePracticeSquadWorkspace()
+    {
+        if (_rosterTabPanel == null || _practiceSquadWorkspace != null) return;
+        _practiceSquadWorkspace = new VBoxContainer { Name = "PracticeSquadWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _practiceSquadWorkspace.AddThemeConstantOverride("separation", 7);
+        _rosterTabPanel.AddChild(_practiceSquadWorkspace);
+    }
+
+    private async Task ShowPracticeSquadWorkspaceAsync()
+    {
+        _practiceSquadViewActive = true;
+        _developmentViewActive = _injuriesViewActive = _staffViewActive = _teamHistoryViewActive = _teamStandingsViewActive = _teamStatsViewActive = _teamFinancesViewActive = _contractsViewActive = _accountingViewActive = _depthChartViewActive = false;
+        UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" })
+        {
+            var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}");
+            if (control != null) control.Visible = false;
+        }
+        RenderPracticeSquadWorkspace();
+        await Task.CompletedTask;
+    }
+
+    private void RenderPracticeSquadWorkspace()
+    {
+        if (_practiceSquadWorkspace == null) return;
+        foreach (var child in _practiceSquadWorkspace.GetChildren()) child.QueueFree();
+        _practiceSquadWorkspacePlayerId = "";
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var header = new HBoxContainer(); _practiceSquadWorkspace.AddChild(header);
+        var title = new Label { Text = "TEAM > PRACTICE SQUAD", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title);
+        var roster = new Button { Text = "ACTIVE ROSTER" }; roster.Pressed += async () => await SetRosterViewMode(false); header.AddChild(roster);
+        var manage = new Button { Text = "SIGN PLAYERS", TooltipText = "Open the existing validated practice-squad signing market." }; manage.Pressed += ShowRosterManagement; header.AddChild(manage);
+
+        var capRoom = team == null ? 0m : new ContractService(_nativeGameCoreContext).GetCapRoom(team);
+        var activeOpening = team != null && team.Roster.Count < RosterService.RosterLimit;
+        _practiceSquadWorkspace.AddChild(HomeLabel(team == null ? "No active franchise practice squad is available." : $"{team.Name} · Practice squad {team.PracticeSquad.Count}/16 · Active roster {team.Roster.Count}/{RosterService.RosterLimit} · Cap room {GameCoreStateHelper.FormatCapRoom(capRoom)} · {(activeOpening ? "active-roster opening available" : "active roster full")}", 12, new Color("9cadb8")));
+
+        var tableWrap = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; _practiceSquadWorkspace.AddChild(tableWrap);
+        _practiceSquadRosterTree = new Tree { Columns = 9, HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1050, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        var headers = new[] { "PLAYER", "POS", "AGE", "OVR", "POT", "CONTRACT", "HEALTH", "ELIGIBILITY", "ACTIVE SLOT" };
+        var widths = new[] { 190, 50, 48, 48, 48, 130, 120, 150, 110 };
+        for (var column = 0; column < headers.Length; column++) { _practiceSquadRosterTree.SetColumnTitle(column, headers[column]); _practiceSquadRosterTree.SetColumnCustomMinimumWidth(column, widths[column]); _practiceSquadRosterTree.SetColumnExpand(column, column == 0); }
+        _practiceSquadRosterTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1));
+        _practiceSquadRosterTree.ItemSelected += OnPracticeSquadWorkspaceSelected;
+        _practiceSquadRosterTree.ItemActivated += () => _ = ElevatePracticeSquadWorkspacePlayer();
+        tableWrap.AddChild(_practiceSquadRosterTree);
+        var root = _practiceSquadRosterTree.CreateItem();
+        var index = 0;
+        foreach (var player in (team?.PracticeSquad ?? new List<PlayerState>()).OrderByDescending(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var row = _practiceSquadRosterTree.CreateItem(root); row.SetMetadata(0, player.PlayerId); row.SetText(0, player.Name); row.SetText(1, player.Position); row.SetText(2, player.Age.ToString()); row.SetText(3, player.Overall.ToString()); row.SetText(4, player.Potential.ToString()); row.SetText(5, $"{GameCoreStateHelper.FormatCapRoom(player.Contract?.AnnualSalary ?? 0m)} · {player.Contract?.YearsRemaining ?? 0} yr"); row.SetText(6, player.CurrentInjury?.IsActive == true ? $"{player.CurrentInjury.Name} · {player.CurrentInjury.DaysRemaining}d" : "Available"); row.SetText(7, player.Age <= 25 ? "Eligible · signed" : "Grandfathered"); row.SetText(8, activeOpening ? "Available" : "Full");
+            for (var column = 0; column < headers.Length; column++) row.SetCustomBgColor(column, index % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+            index++;
+        }
+        if (index == 0) AddHistoryEmptyRow(_practiceSquadRosterTree, root, "No players are currently assigned to the practice squad.");
+        var actions = new HBoxContainer(); _practiceSquadWorkspace.AddChild(actions);
+        var elevate = new Button { Text = "SIGN PERMANENTLY TO ACTIVE ROSTER", TooltipText = "Review the permanent contract and roster consequences before confirmation." }; elevate.Pressed += async () => await ElevatePracticeSquadWorkspacePlayer(); actions.AddChild(elevate);
+        _practiceSquadWorkspaceStatus = new Label { Text = "Select a player to review a permanent active-roster signing. Temporary game-day elevations are not available until their rules are finalized.", AutowrapMode = TextServer.AutowrapMode.WordSmart, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; actions.AddChild(_practiceSquadWorkspaceStatus);
+    }
+
+    private void OnPracticeSquadWorkspaceSelected()
+    {
+        var selected = _practiceSquadRosterTree?.GetSelected();
+        _practiceSquadWorkspacePlayerId = selected == null || IsNil(selected.GetMetadata(0)) ? "" : selected.GetMetadata(0).AsString();
+        if (string.IsNullOrWhiteSpace(_practiceSquadWorkspacePlayerId) || _practiceSquadWorkspaceStatus == null) return;
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(candidate => candidate.TeamId == league.UserTeamId); var player = team?.PracticeSquad?.FirstOrDefault(candidate => candidate.PlayerId == _practiceSquadWorkspacePlayerId);
+        if (player == null) { _practiceSquadWorkspaceStatus.Text = "Selected player is no longer on the practice squad."; return; }
+        var preview = new ContractService(_nativeGameCoreContext).PreviewPracticeSquadActiveSigning(player.PlayerId);
+        _practiceSquadWorkspaceStatus.Text = preview.Ok ? $"{player.Name}: permanent signing would replace the practice-squad contract with {GameCoreStateHelper.FormatCapRoom(preview.NewAnnualSalary)} annually and use the open active-roster slot." : preview.Error;
+    }
+
+    private async Task ElevatePracticeSquadWorkspacePlayer()
+    {
+        if (string.IsNullOrWhiteSpace(_practiceSquadWorkspacePlayerId)) { if (_practiceSquadWorkspaceStatus != null) _practiceSquadWorkspaceStatus.Text = "Select a practice-squad player first."; return; }
+        ShowPracticeSquadActiveSigningConfirmation(_practiceSquadWorkspacePlayerId);
+        await Task.CompletedTask;
+    }
+
+    private void CreateContractsWorkspace()
+    {
+        if (_rosterTabPanel == null || _contractsWorkspace != null) return;
+        _contractsWorkspace = new VBoxContainer { Name = "ContractsWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _contractsWorkspace.AddThemeConstantOverride("separation", 7); _rosterTabPanel.AddChild(_contractsWorkspace);
+    }
+
+    private async Task ShowContractsWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _contractsViewActive = true; _accountingViewActive = false; _teamFinancesViewActive = _teamStatsViewActive = _teamStandingsViewActive = _teamHistoryViewActive = _staffViewActive = _injuriesViewActive = _developmentViewActive = _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" }) { var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false; }
+        RenderContractsWorkspace(); await Task.CompletedTask;
+    }
+
+    private void RenderContractsWorkspace()
+    {
+        if (_contractsWorkspace == null) return; foreach (var child in _contractsWorkspace.GetChildren()) child.QueueFree(); var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var header = new HBoxContainer(); _contractsWorkspace.AddChild(header); var title = new Label { Text = "FINANCES > CONTRACTS", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title); var finances = new Button { Text = "TEAM FINANCES" }; finances.Pressed += async () => await ShowTeamFinancesWorkspaceAsync(); header.AddChild(finances); var accounting = new Button { Text = "ACCOUNTING" }; accounting.Pressed += async () => await ShowAccountingWorkspaceAsync(); header.AddChild(accounting);
+        _contractsWorkspace.AddChild(HomeLabel(BuildContractRiskSummary(team), 11, new Color("9cadb8")));
+        var tableWrap = new ScrollContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Auto }; _contractsWorkspace.AddChild(tableWrap); _contractsTree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, CustomMinimumSize = new Vector2(1040, 0), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _contractsTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); _contractsTree.ColumnTitleClicked += OnContractsColumnClicked; _contractsTree.ItemActivated += () => _ = OpenSelectedContractPlayerProfile(); tableWrap.AddChild(_contractsTree);
+        if (league == null || team == null) { ConfigureContractsHeaders(0); var root = _contractsTree.CreateItem(); AddHistoryEmptyRow(_contractsTree, root, "No active franchise contract data is available."); return; }
+        ConfigureContractsHeaders(league.SeasonYear); var rows = team.Roster.Where(player => player?.Contract != null && player.Contract.AnnualSalary > 0m); rows = _contractsSortColumn == "player" ? (_contractsSortAscending ? rows.OrderBy(player => player.Name) : rows.OrderByDescending(player => player.Name)) : _contractsSortColumn == "years" ? (_contractsSortAscending ? rows.OrderBy(player => player.Contract.YearsRemaining) : rows.OrderByDescending(player => player.Contract.YearsRemaining)) : (_contractsSortAscending ? rows.OrderBy(player => player.Contract.AnnualSalary) : rows.OrderByDescending(player => player.Contract.AnnualSalary)); var rootItem = _contractsTree.CreateItem(); var index = 0;
+        foreach (var player in rows)
+        {
+            var contract = player.Contract; var item = _contractsTree.CreateItem(rootItem); item.SetMetadata(0, player.PlayerId); item.SetText(0, player.Name); item.SetText(1, player.Position); item.SetText(2, GameCoreStateHelper.FormatCapRoom(contract.AnnualSalary)); item.SetText(3, contract.YearsRemaining.ToString()); item.SetText(4, contract.ContractType); item.SetText(5, GameCoreStateHelper.FormatCapRoom(contract.GuaranteedSalary));
+            for (var year = 0; year < 3; year++) item.SetText(6 + year, year < contract.YearsRemaining ? GameCoreStateHelper.FormatCapRoom(contract.AnnualSalary) : "—");
+            for (var column = 0; column < 9; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); item.SetTextAlignment(2, HorizontalAlignment.Right); item.SetTextAlignment(3, HorizontalAlignment.Right); item.SetTextAlignment(5, HorizontalAlignment.Right); for (var column = 6; column < 9; column++) item.SetTextAlignment(column, HorizontalAlignment.Right);
+        }
+        var services = new ContractService(_nativeGameCoreContext); var summary = _contractsTree.CreateItem(rootItem); summary.SetText(0, "AVAILABLE CAP SPACE"); for (var year = 0; year < 3; year++) summary.SetText(6 + year, year == 0 ? GameCoreStateHelper.FormatCapRoom(services.GetCapRoom(team)) : "Unavailable"); var dead = _contractsTree.CreateItem(rootItem); dead.SetText(0, "DEAD CAP"); for (var year = 0; year < 3; year++) dead.SetText(6 + year, "Unavailable");
+    }
+
+    private void ConfigureContractsHeaders(int season) { var headers = new[] { "Player", "Pos", "Current Cap Hit", "Years", "Type", "Guaranteed", (season + 1).ToString(), (season + 2).ToString(), (season + 3).ToString() }; _contractsTree.Clear(); _contractsTree.Columns = headers.Length; var widths = new[] { 190, 55, 115, 55, 120, 110, 110, 110, 110 }; for (var column = 0; column < headers.Length; column++) { _contractsTree.SetColumnTitle(column, headers[column]); _contractsTree.SetColumnCustomMinimumWidth(column, widths[column]); _contractsTree.SetColumnExpand(column, column == 0); } }
+    private static string BuildContractRiskSummary(TeamState team)
+    {
+        var contracts = team?.Roster?.Where(player => player?.Contract?.AnnualSalary > 0m).ToList() ?? new List<PlayerState>();
+        if (contracts.Count == 0) return "Contract risk summary: unavailable; no active contract commitments are recorded.";
+        var expiring = contracts.Count(player => player.Contract.YearsRemaining <= 1);
+        var veteranCost = contracts.Where(player => player.Age >= 32 && player.Contract.AnnualSalary >= 10_000_000m).Sum(player => player.Contract.AnnualSalary);
+        return $"Contract risk summary (informational): {expiring} expiring commitment(s) within one year · {GameCoreStateHelper.FormatCapRoom(veteranCost)} in age-32+ commitments at $10M+ annually. Uses current salary, years, and age only; no future-cap or dead-cap estimate is stored.";
+    }
+    private void OnContractsColumnClicked(long column, long mouse) { var key = column switch { 0 => "player", 3 => "years", _ => "current" }; _contractsSortAscending = _contractsSortColumn == key ? !_contractsSortAscending : false; _contractsSortColumn = key; RenderContractsWorkspace(); }
+    private async Task OpenSelectedContractPlayerProfile() { var selected = _contractsTree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) return; var playerId = selected.GetMetadata(0).AsString(); await SetRosterViewMode(false); await RefreshRosterTab(); TrySelectRosterPlayer(playerId); }
+
+    private void CreateAccountingWorkspace()
+    {
+        if (_rosterTabPanel == null || _accountingWorkspace != null) return;
+        _accountingWorkspace = new VBoxContainer { Name = "AccountingWorkspace", Visible = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _accountingWorkspace.AddThemeConstantOverride("separation", 7); _rosterTabPanel.AddChild(_accountingWorkspace);
+    }
+
+    private async Task ShowAccountingWorkspaceAsync()
+    {
+        _practiceSquadViewActive = false; _accountingViewActive = true; _contractsViewActive = _teamFinancesViewActive = _teamStatsViewActive = _teamStandingsViewActive = _teamHistoryViewActive = _staffViewActive = _injuriesViewActive = _developmentViewActive = _depthChartViewActive = false; UpdateRosterViewModeUi();
+        foreach (var path in new[] { "SquadWorkspaceHeader", "SquadWorkspaceHint", "RosterSummary", "RosterModeRow" }) { var control = GetNodeOrNull<Control>($"AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/{path}"); if (control != null) control.Visible = false; }
+        RenderAccountingWorkspace(); await Task.CompletedTask;
+    }
+
+    private void RenderAccountingWorkspace()
+    {
+        if (_accountingWorkspace == null) return; foreach (var child in _accountingWorkspace.GetChildren()) child.QueueFree(); var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var header = new HBoxContainer(); _accountingWorkspace.AddChild(header); var title = new Label { Text = "FINANCES > ACCOUNTING", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; title.AddThemeFontSizeOverride("font_size", 18); title.AddThemeColorOverride("font_color", new Color("f4eddf")); header.AddChild(title); var finances = new Button { Text = "TEAM FINANCES" }; finances.Pressed += async () => await ShowTeamFinancesWorkspaceAsync(); header.AddChild(finances); var contracts = new Button { Text = "CONTRACTS" }; contracts.Pressed += async () => await ShowContractsWorkspaceAsync(); header.AddChild(contracts);
+        var summary = new HBoxContainer(); summary.AddThemeConstantOverride("separation", 12); _accountingWorkspace.AddChild(summary); var income = HomeLabel($"CURRENT FINANCIAL YEAR: {league?.SeasonYear.ToString() ?? "Unavailable"}\nRecorded revenue: unavailable\nRecorded expenses: unavailable\nNet result: unavailable", 12, new Color("c5d1d8")); income.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; summary.AddChild(income); var detailHint = HomeLabel("Only current player contract commitments are persisted as a directly supported finance-related value. Category drill-down is available for that recorded aggregate.", 11, new Color("9cadb8")); detailHint.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; summary.AddChild(detailHint);
+        var split = new HSplitContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill, SplitOffset = 700 }; _accountingWorkspace.AddChild(split); _accountingLedgerTree = new Tree { HideRoot = true, ColumnTitlesVisible = true, SelectMode = Tree.SelectModeEnum.Row, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _accountingLedgerTree.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(new Color("091927"), new Color("254258"), 0, 1)); _accountingLedgerTree.ItemSelected += RenderSelectedAccountingDetail; split.AddChild(_accountingLedgerTree); _accountingDetail = new RichTextLabel { BbcodeEnabled = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill }; split.AddChild(_accountingDetail);
+        ConfigureHistoryTree(_accountingLedgerTree, new[] { "Category", "Type", "Period", "Amount", "Detail" }, new[] { 180, 85, 110, 140, 280 }); var root = _accountingLedgerTree.CreateItem();
+        if (league == null || team == null) { AddHistoryEmptyRow(_accountingLedgerTree, root, "No active franchise accounting data is available."); _accountingDetail.Text = "No active franchise accounting context is available."; return; }
+        var contractsService = new ContractService(_nativeGameCoreContext); var payroll = contractsService.GetCommittedSalary(team); var payrollItem = _accountingLedgerTree.CreateItem(root); payrollItem.SetMetadata(0, "player_payroll"); payrollItem.SetText(0, "Player contract commitments"); payrollItem.SetText(1, "Expense context"); payrollItem.SetText(2, $"{league.SeasonYear} current commitments"); payrollItem.SetText(3, GameCoreStateHelper.FormatCapRoom(payroll)); payrollItem.SetText(4, "Active roster contracts"); payrollItem.SetCustomColor(3, new Color("f0c96a"));
+        foreach (var category in new[] { "Attendance and ticket revenue", "Scouting expenses", "Staff contracts", "Travel", "Stadium operations", "Equipment", "Merchandise" }) { var item = _accountingLedgerTree.CreateItem(root); item.SetText(0, category); item.SetText(1, category.Contains("revenue", StringComparison.OrdinalIgnoreCase) ? "Revenue" : "Expense"); item.SetText(2, $"{league.SeasonYear} current year"); item.SetText(3, "Unavailable"); item.SetText(4, "Not tracked by the saved financial model"); item.SetCustomColor(3, new Color("9cadb8")); }
+        _accountingDetail.Text = "Select a ledger category to see saved detail. Revenue, operational costs, staff contracts, attendance, and scouting spend have no persisted financial entries in this build.";
+    }
+
+    private void RenderSelectedAccountingDetail()
+    {
+        var selected = _accountingLedgerTree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) { if (_accountingDetail != null) _accountingDetail.Text = "No recorded detail is available for this category."; return; }
+        if (!string.Equals(selected.GetMetadata(0).AsString(), "player_payroll", StringComparison.OrdinalIgnoreCase)) { _accountingDetail.Text = "No recorded underlying entries are available for this category."; return; }
+        var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase)); if (team == null) return; var lines = new List<string> { "Player contract commitments", "Current active-contract annual salaries:" }; lines.AddRange(team.Roster.Where(player => player.Contract != null).OrderByDescending(player => player.Contract.AnnualSalary).Take(15).Select(player => $"{player.Name} · {GameCoreStateHelper.FormatCapRoom(player.Contract.AnnualSalary)} · {player.Contract.YearsRemaining} year(s) remaining")); _accountingDetail.Text = string.Join("\n", lines);
+    }
+
+    private void BuildDevelopmentRows()
+    {
+        _developmentRows.Clear(); var league = _nativeGameCoreContext?.ActiveLeague; var team = league?.Teams?.FirstOrDefault(item => string.Equals(item.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        var date = DateTime.TryParse(league?.Calendar?.CurrentDate, out var current) ? current : DateTime.Today;
+        if (_developmentWindowLabel != null) _developmentWindowLabel.Text = $"Trailing 12 months: {date.AddMonths(-12):MMM d, yyyy} – {date:MMM d, yyyy}";
+        foreach (var player in team?.Roster ?? Enumerable.Empty<PlayerState>())
+        {
+            var record = (player.DevelopmentHistory ?? new List<PlayerDevelopmentRecord>()).Where(item => item.SeasonYear >= league.SeasonYear - 1 && item.SeasonYear <= league.SeasonYear).OrderByDescending(item => item.SeasonYear).FirstOrDefault();
+            var movement = record == null ? 0 : record.OverallAfter - record.OverallBefore;
+            _developmentRows.Add(new DevelopmentRow(player.PlayerId, player.Name, player.Position, player.Age, player.Overall, record == null ? "No 12-month rating history" : movement > 0 ? "Improving" : movement < 0 ? "Regressing" : "Stable", record == null ? "Unavailable" : $"OVR {movement:+#;-#;0}", record?.Note ?? "No development notes recorded."));
+        }
+    }
+
+    private void RenderDevelopmentRows()
+    {
+        if (_developmentTree == null) return;
+        var headers = new[] { "Player", "Age", "Position", "Current OVR", "Overall Trend", "Rating Movement", "Coach / Scout Notes" };
+        _developmentTree.Clear(); _developmentTree.Columns = headers.Length;
+        for (var column = 0; column < headers.Length; column++) _developmentTree.SetColumnTitle(column, headers[column]);
+        _developmentTree.SetColumnCustomMinimumWidth(0, 190); _developmentTree.SetColumnExpand(0, true); _developmentTree.SetColumnCustomMinimumWidth(1, 48); _developmentTree.SetColumnCustomMinimumWidth(2, 66); _developmentTree.SetColumnCustomMinimumWidth(3, 82); _developmentTree.SetColumnCustomMinimumWidth(4, 156); _developmentTree.SetColumnCustomMinimumWidth(5, 136); _developmentTree.SetColumnCustomMinimumWidth(6, 220); _developmentTree.SetColumnExpand(6, true);
+        IEnumerable<DevelopmentRow> rows = _developmentRows;
+        var search = _developmentSearch?.Text?.Trim() ?? ""; if (!string.IsNullOrWhiteSpace(search)) rows = rows.Where(row => row.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
+        var position = _developmentPositionFilter?.GetItemText(_developmentPositionFilter.Selected) ?? "All"; if (!string.Equals(position, "All", StringComparison.OrdinalIgnoreCase)) rows = rows.Where(row => MatchesPosFilter(row.Position, position));
+        var trend = _developmentTrendFilter?.GetItemText(_developmentTrendFilter.Selected) ?? "All trends"; if (string.Equals(trend, "No rating history", StringComparison.OrdinalIgnoreCase)) rows = rows.Where(row => row.Trend.StartsWith("No", StringComparison.OrdinalIgnoreCase)); else if (!string.Equals(trend, "All trends", StringComparison.OrdinalIgnoreCase)) rows = Enumerable.Empty<DevelopmentRow>();
+        var change = _developmentChangeFilter?.GetItemText(_developmentChangeFilter.Selected) ?? "All changes"; if (string.Equals(change, "Material change", StringComparison.OrdinalIgnoreCase)) rows = Enumerable.Empty<DevelopmentRow>();
+        rows = SortDevelopmentRows(rows).ToList(); var root = _developmentTree.CreateItem(); var index = 0;
+        foreach (var row in rows)
+        {
+            var item = _developmentTree.CreateItem(root); item.SetMetadata(0, row.PlayerId); item.SetText(0, row.Name); item.SetText(1, row.Age.ToString()); item.SetText(2, row.Position); item.SetText(3, row.Overall.ToString()); item.SetText(4, row.Trend); item.SetText(5, row.Movement); item.SetText(6, row.Notes);
+            for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+            item.SetTextAlignment(1, HorizontalAlignment.Right); item.SetTextAlignment(3, HorizontalAlignment.Right); item.SetCustomColor(4, new Color("9cadb8")); item.SetCustomColor(5, new Color("9cadb8"));
+        }
+        if (_developmentTree.GetRoot().GetFirstChild() == null) { var empty = _developmentTree.CreateItem(root); empty.SetText(0, "No players match these development filters."); }
+    }
+
+    private IEnumerable<DevelopmentRow> SortDevelopmentRows(IEnumerable<DevelopmentRow> rows) => _developmentSortColumn switch { "age" => _developmentSortAscending ? rows.OrderBy(row => row.Age) : rows.OrderByDescending(row => row.Age), "overall" => _developmentSortAscending ? rows.OrderBy(row => row.Overall) : rows.OrderByDescending(row => row.Overall), "position" => _developmentSortAscending ? rows.OrderBy(row => row.Position) : rows.OrderByDescending(row => row.Position), _ => _developmentSortAscending ? rows.OrderBy(row => row.Name) : rows.OrderByDescending(row => row.Name) };
+    private void OnDevelopmentColumnTitleClicked(long column, long mouseButton) { var ids = new[] { "player", "age", "position", "overall", "trend", "movement", "notes" }; if (column < 0 || column >= ids.Length) return; _developmentSortAscending = _developmentSortColumn == ids[column] ? !_developmentSortAscending : true; _developmentSortColumn = ids[column]; RenderDevelopmentRows(); }
+    private async Task OpenSelectedDevelopmentPlayerProfile() { var selected = _developmentTree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) return; var playerId = selected.GetMetadata(0).AsString(); await SetRosterViewMode(false); await RefreshRosterTab(); TrySelectRosterPlayer(playerId); }
+
+    private void OnDepthFieldPlayerPressed(string playerId)
+    {
+        if (string.IsNullOrWhiteSpace(playerId) || _depthChartTree == null) return;
+        var root = _depthChartTree.GetRoot();
+        var item = root?.GetFirstChild();
+        while (item != null)
+        {
+            var child = item.GetFirstChild();
+            while (child != null)
+            {
+                if (TryGetDictionary(child.GetMetadata(0), out var data) && string.Equals(SafeString(data, "player_id", ""), playerId, StringComparison.OrdinalIgnoreCase))
+                { child.Select(0); OnDepthChartItemSelected(child); _depthChartTree.ScrollToItem(child); return; }
+                child = child.GetNext();
+            }
+            item = item.GetNext();
+        }
     }
 
     private async Task RefreshRosterTab()
@@ -3755,6 +8088,7 @@ public partial class DashboardController : Control
         _nativeDashboardService ??= new DashboardService(context);
         _nativeContinueService ??= new ContinueService(context);
         _nativeGameDayService ??= new GameDayService(context);
+        _nativeLiveGameSessionService ??= new LiveGameSessionService(context);
     }
 
     private async Task<GameCoreSaveResult> SaveCurrentNativeGame(string saveName, string successMessage, bool autosaveToo)
@@ -4011,6 +8345,8 @@ public partial class DashboardController : Control
                 ["required_cuts"] = response?.RosterStatus?.RequiredCuts ?? 0,
                 ["open_slots"] = response?.RosterStatus?.OpenSlots ?? 0,
                 ["injured_count"] = response?.RosterStatus?.InjuredCount ?? 0,
+                ["injured_reserve_count"] = response?.RosterStatus?.InjuredReserveCount ?? 0,
+                ["practice_squad_count"] = response?.RosterStatus?.PracticeSquadCount ?? 0,
                 ["issues"] = ConvertStringListToArray(response?.RosterStatus?.Issues),
             },
             ["position_counts"] = new Godot.Collections.Array(),
@@ -4040,11 +8376,30 @@ public partial class DashboardController : Control
                     ["player_id"] = player?.PlayerId ?? "",
                     ["name"] = player?.Name ?? "",
                     ["position"] = player?.Position ?? "",
-                    ["overall"] = player?.Overall ?? 0,
+                    ["overall"] = player?.EstimatedOverall ?? 0,
+                    ["potential"] = player?.EstimatedPotential ?? 0,
+                    ["estimated_overall_range"] = player?.EstimatedOverallRange ?? "Unavailable",
+                    ["estimated_potential_range"] = player?.EstimatedPotentialRange ?? "Unavailable",
+                    ["scouting_confidence"] = player?.ScoutingConfidence ?? "Low",
                     ["age"] = player?.Age ?? 0,
+                    ["fatigue"] = player?.Fatigue ?? 0,
                     ["status"] = player?.Status ?? "",
                     ["injury"] = player?.Injury ?? "",
+                    ["injury_days_remaining"] = player?.InjuryDaysRemaining ?? 0,
+                    ["is_available"] = player?.IsAvailable ?? false,
                     ["depth_role"] = player?.DepthRole ?? "",
+                    ["contract_summary"] = player?.ContractSummary ?? "Unavailable",
+                    ["annual_salary"] = (double)(player?.AnnualSalary ?? 0m),
+                    ["contract_years"] = player?.ContractYearsRemaining ?? 0,
+                    ["morale"] = player?.Morale ?? 0,
+                    ["morale_trend"] = player?.MoraleTrend ?? "Unavailable",
+                    ["games_played"] = player?.GamesPlayed ?? 0,
+                    ["passing_yards"] = player?.PassingYards ?? 0,
+                    ["rushing_yards"] = player?.RushingYards ?? 0,
+                    ["receiving_yards"] = player?.ReceivingYards ?? 0,
+                    ["tackles"] = player?.Tackles ?? 0,
+                    ["sacks"] = player?.Sacks ?? 0,
+                    ["interceptions"] = player?.Interceptions ?? 0,
                 });
             }
         }
@@ -4076,6 +8431,7 @@ public partial class DashboardController : Control
                 {
                     ["position"] = position?.Position ?? "",
                     ["required_starters"] = position?.RequiredStarters ?? 0,
+                    ["is_locked"] = position?.IsLocked ?? false,
                     ["players"] = new Godot.Collections.Array(),
                 };
 
@@ -4089,9 +8445,23 @@ public partial class DashboardController : Control
                             ["player_id"] = player?.PlayerId ?? "",
                             ["name"] = player?.Name ?? "",
                             ["overall"] = player?.Overall ?? 0,
+                            ["estimated_overall"] = player?.EstimatedOverall ?? 0,
+                            ["estimated_overall_range"] = player?.EstimatedOverallRange ?? "Unavailable",
+                            ["scouting_confidence"] = player?.ScoutingConfidence ?? "Low",
                             ["role"] = player?.Role ?? "",
                             ["status"] = player?.Status ?? "",
                             ["injury"] = player?.Injury ?? "",
+                            ["injury_days_remaining"] = player?.InjuryDaysRemaining ?? 0,
+                            ["is_available"] = player?.IsAvailable ?? false,
+                            ["contract_summary"] = player?.ContractSummary ?? "Unavailable",
+                            ["morale"] = player?.Morale ?? 0,
+                            ["morale_trend"] = player?.MoraleTrend ?? "Unavailable",
+                            ["potential"] = player?.Potential ?? 0,
+                            ["passing_yards"] = player?.PassingYards ?? 0,
+                            ["rushing_yards"] = player?.RushingYards ?? 0,
+                            ["receiving_yards"] = player?.ReceivingYards ?? 0,
+                            ["tackles"] = player?.Tackles ?? 0,
+                            ["sacks"] = player?.Sacks ?? 0,
                         });
                     }
                 }
@@ -4117,7 +8487,7 @@ public partial class DashboardController : Control
                 return;
             }
 
-            PopulateStandingsTree(ConvertStandingsResponseToArray(response));
+            PopulateLeagueStandingsReference(response);
         }
         catch (Exception ex)
         {
@@ -4319,14 +8689,12 @@ public partial class DashboardController : Control
                 ["away"] = result?.AwayScore ?? 0,
                 ["home"] = result?.HomeScore ?? 0,
             },
-            ["quarter_scores"] = new Godot.Collections.Dictionary
-            {
-                ["away"] = new Godot.Collections.Array { 0, 0, 0, result?.AwayScore ?? 0 },
-                ["home"] = new Godot.Collections.Array { 0, 0, 0, result?.HomeScore ?? 0 },
-            },
         };
 
         var teamStats = new Godot.Collections.Dictionary();
+        var playByPlay = new Godot.Collections.Array();
+        var playerStats = new Godot.Collections.Array();
+        var typedPlays = new List<GamePlayEventState>();
         if (result?.BoxScore != null)
         {
             foreach (var pair in result.BoxScore)
@@ -4340,9 +8708,76 @@ public partial class DashboardController : Control
                 {
                     boxScore["final_text"] = pair.Value.ToString() ?? "";
                 }
+                else if (pair.Value is IEnumerable<GamePlayEventState> plays && string.Equals(pair.Key, "play_by_play", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var play in plays)
+                    {
+                        typedPlays.Add(play);
+                        playByPlay.Add(new Godot.Collections.Dictionary
+                        {
+                            ["sequence"] = play.Sequence,
+                            ["quarter"] = play.Quarter,
+                            ["clock_seconds"] = play.ClockSeconds,
+                            ["possession_team_id"] = play.PossessionTeamId ?? "",
+                            ["down"] = play.Down,
+                            ["distance"] = play.Distance,
+                            ["yard_line"] = play.YardLine,
+                            ["yards_gained"] = play.YardsGained,
+                            ["description"] = play.Description ?? "",
+                            ["home_score"] = play.HomeScore,
+                            ["away_score"] = play.AwayScore,
+                            ["is_scoring_play"] = play.IsScoringPlay,
+                            ["is_turnover"] = play.IsTurnover,
+                            ["is_injury"] = play.IsInjury,
+                        });
+                    }
+                }
+                else if (pair.Value is IEnumerable<PlayerGameStats> playerLines && string.Equals(pair.Key, "player_stats", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var line in playerLines)
+                    {
+                        playerStats.Add(new Godot.Collections.Dictionary
+                        {
+                            ["player_id"] = line.PlayerId ?? "",
+                            ["player_name"] = line.PlayerName ?? "",
+                            ["team_id"] = line.TeamId ?? "",
+                            ["position"] = line.Position ?? "",
+                            ["passing_yards"] = line.PassingYards,
+                            ["passing_touchdowns"] = line.PassingTouchdowns,
+                            ["rushing_yards"] = line.RushingYards,
+                            ["rushing_touchdowns"] = line.RushingTouchdowns,
+                            ["receiving_yards"] = line.ReceivingYards,
+                            ["receiving_touchdowns"] = line.ReceivingTouchdowns,
+                            ["tackles"] = line.Tackles,
+                            ["sacks"] = line.Sacks,
+                            ["interceptions"] = line.Interceptions,
+                        });
+                    }
+                }
             }
         }
+        var homeQuarterScores = new Godot.Collections.Array();
+        var awayQuarterScores = new Godot.Collections.Array();
+        var priorHome = 0;
+        var priorAway = 0;
+        for (var quarter = 1; quarter <= 4; quarter++)
+        {
+            var quarterEnd = typedPlays.Where(play => play.Quarter == quarter).OrderBy(play => play.Sequence).LastOrDefault();
+            var homeAtEnd = quarterEnd?.HomeScore ?? priorHome;
+            var awayAtEnd = quarterEnd?.AwayScore ?? priorAway;
+            homeQuarterScores.Add(Math.Max(0, homeAtEnd - priorHome));
+            awayQuarterScores.Add(Math.Max(0, awayAtEnd - priorAway));
+            priorHome = homeAtEnd;
+            priorAway = awayAtEnd;
+        }
+        if (homeQuarterScores.Count == 4 && priorHome != (result?.HomeScore ?? 0))
+            homeQuarterScores[3] = GetIntValue(homeQuarterScores[3], 0) + Math.Max(0, (result?.HomeScore ?? 0) - priorHome);
+        if (awayQuarterScores.Count == 4 && priorAway != (result?.AwayScore ?? 0))
+            awayQuarterScores[3] = GetIntValue(awayQuarterScores[3], 0) + Math.Max(0, (result?.AwayScore ?? 0) - priorAway);
+        boxScore["quarter_scores"] = new Godot.Collections.Dictionary { ["away"] = awayQuarterScores, ["home"] = homeQuarterScores };
         boxScore["team_stats"] = teamStats;
+        boxScore["play_by_play"] = playByPlay;
+        boxScore["player_stats"] = playerStats;
         payload["box_score"] = boxScore;
         return payload;
     }
@@ -4540,6 +8975,9 @@ public partial class DashboardController : Control
                 return;
             }
 
+            var recordBook = _nativeDashboardService.GetRecordBook();
+            _recordBookSummary = recordBook?.Ok == true ? BuildRecordBookSummary(recordBook) : "";
+            _historicalArchive = _nativeDashboardService.GetHistoricalArchive() ?? new HistoricalArchiveResponse();
             PopulateHistoryView(response.Seasons ?? new List<LeagueHistorySeasonDto>());
         }
         catch (Exception ex)
@@ -4567,16 +9005,15 @@ public partial class DashboardController : Control
             : $"{teamAbbr} {teamName}".Trim();
         var rosterStatusLabel = GetBoolValue(GetFirstNonNil(rosterStatus, "is_valid"), true) ? "Valid" : "Invalid";
         var issueText = FormatRosterIssues(TryExtractArray(rosterStatus, "issues"));
-        var positionCountText = FormatPositionCounts(positionCounts);
+        var nativeTeam = _nativeGameCoreContext?.ActiveLeague?.Teams.FirstOrDefault(candidate => string.Equals(candidate.TeamId, _currentTeamId, StringComparison.OrdinalIgnoreCase));
 
         if (_rosterSummary != null)
         {
+            var capRoom = nativeTeam == null ? "Unavailable" : GameCoreStateHelper.FormatCapRoom(nativeTeam.CapRoom);
             _rosterSummary.Text =
-                $"Team: {teamLabel} | Status: {rosterStatusLabel} | Players: {SafeIntDisplay(rosterStatus, "roster_size")}/{SafeIntDisplay(rosterStatus, "roster_limit")} | Cuts: {SafeIntDisplay(rosterStatus, "required_cuts")} | Injured: {SafeIntDisplay(rosterStatus, "injured_count")}";
+                $"{teamLabel}   •   ACTIVE {SafeIntDisplay(rosterStatus, "roster_size")}/{SafeIntDisplay(rosterStatus, "roster_limit")}   •   PRACTICE SQUAD {SafeIntDisplay(rosterStatus, "practice_squad_count")}   •   IR {SafeIntDisplay(rosterStatus, "injured_reserve_count")}   •   CAP SPACE {capRoom}";
             if (!string.IsNullOrWhiteSpace(issueText))
-                _rosterSummary.Text += $"\nIssues: {issueText}";
-            if (!string.IsNullOrWhiteSpace(positionCountText))
-                _rosterSummary.Text += $"\nPositions: {positionCountText}";
+                _rosterSummary.Text += $"   •   {rosterStatusLabel.ToUpperInvariant()}: {issueText}";
         }
 
         _currentRoster = players;
@@ -4600,6 +9037,34 @@ public partial class DashboardController : Control
         {
             _rosterSummary.Text = "Team: - | Status: - | Players: -/- | Cuts: - | Injured: -";
         }
+    }
+
+    private static string BuildRosterChemistrySummary(Godot.Collections.Array players)
+    {
+        var traitCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var moraleTotal = 0;
+        var moraleCount = 0;
+        foreach (var entry in players)
+        {
+            if (entry.VariantType != Variant.Type.Dictionary)
+                continue;
+
+            var player = entry.AsGodotDictionary();
+            var trait = SafeString(player, "trait", "");
+            if (!string.IsNullOrWhiteSpace(trait))
+                traitCounts[trait] = traitCounts.TryGetValue(trait, out var count) ? count + 1 : 1;
+            moraleTotal += GetIntValue(GetFirstNonNil(player, "morale"), 50);
+            moraleCount++;
+        }
+
+        if (moraleCount == 0)
+            return "Chemistry context: unavailable.";
+
+        var leadingTrait = traitCounts.OrderByDescending(pair => pair.Value).ThenBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase).FirstOrDefault();
+        var traitContext = string.IsNullOrWhiteSpace(leadingTrait.Key)
+            ? "traits unavailable"
+            : $"leading trait {leadingTrait.Key} ({leadingTrait.Value})";
+        return $"Chemistry context (informational): {traitContext} · average morale {moraleTotal / (double)moraleCount:0}/100 · no gameplay effect.";
     }
 
     private void SetDepthChartPlaceholder()
@@ -4653,6 +9118,7 @@ public partial class DashboardController : Control
 
     private void RenderDepthChartSnapshot(Godot.Collections.Dictionary payload)
     {
+        _depthChartPayload = payload;
         var team = TryExtractObject(payload, "team");
         var status = TryExtractObject(payload, "depth_chart_status", "depthChartStatus");
         var positions = TryExtractArray(payload, "positions") ?? new Godot.Collections.Array();
@@ -4679,14 +9145,15 @@ public partial class DashboardController : Control
         _depthChartTree.Clear();
         _depthChartTree.HideRoot = true;
         _depthChartTree.ColumnTitlesVisible = true;
-        _depthChartTree.Columns = 6;
+        _depthChartTree.Columns = 10;
         _depthChartTree.SelectMode = Tree.SelectModeEnum.Row;
-        _depthChartTree.SetColumnTitle(0, "#");
-        _depthChartTree.SetColumnTitle(1, "Name");
-        _depthChartTree.SetColumnTitle(2, "OVR");
-        _depthChartTree.SetColumnTitle(3, "Role");
-        _depthChartTree.SetColumnTitle(4, "Status");
-        _depthChartTree.SetColumnTitle(5, "Injury");
+        var headers = new[] { "Pos", "#", "Player", "Role", "Health", "Morale", "Staff OVR", "Confidence", "Season Production", "Contract" };
+        for (var headerIndex = 0; headerIndex < headers.Length; headerIndex++) _depthChartTree.SetColumnTitle(headerIndex, headers[headerIndex]);
+        _depthChartTree.SetColumnCustomMinimumWidth(0, 48); _depthChartTree.SetColumnCustomMinimumWidth(1, 34);
+        _depthChartTree.SetColumnCustomMinimumWidth(2, 158); _depthChartTree.SetColumnExpand(2, true);
+        _depthChartTree.SetColumnCustomMinimumWidth(3, 104); _depthChartTree.SetColumnCustomMinimumWidth(4, 108);
+        _depthChartTree.SetColumnCustomMinimumWidth(5, 84); _depthChartTree.SetColumnCustomMinimumWidth(6, 86); _depthChartTree.SetColumnCustomMinimumWidth(7, 82);
+        _depthChartTree.SetColumnCustomMinimumWidth(8, 175); _depthChartTree.SetColumnExpand(8, true); _depthChartTree.SetColumnCustomMinimumWidth(9, 110);
 
         var root = _depthChartTree.CreateItem();
         var selectedStillExists = false;
@@ -4696,34 +9163,59 @@ public partial class DashboardController : Control
                 continue;
 
             var position = SafeString(positionRow, "position", "UNK");
+            if (!DepthChartPositionMatchesUnit(position, _depthChartUnitFilter))
+                continue;
+            var positionLocked = GetBoolValue(GetFirstNonNil(positionRow, "is_locked"), false);
             var requiredStarters = SafeIntDisplay(positionRow, "required_starters", "requiredStarters", fallback: "0");
+            var players = TryExtractArray(positionRow, "players") ?? new Godot.Collections.Array();
+            var search = _depthChartSearch?.Text?.Trim() ?? "";
+            var filteredPlayers = new List<Godot.Collections.Dictionary>();
+            for (var playerIndex = 0; playerIndex < players.Count; playerIndex++)
+            {
+                if (!TryGetDictionary((Variant)players[playerIndex], out var candidate)) continue;
+                if (!string.IsNullOrWhiteSpace(search) && !SafeString(candidate, "name", "").Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                filteredPlayers.Add(candidate);
+            }
+            if (!string.IsNullOrWhiteSpace(search) && filteredPlayers.Count == 0)
+                continue;
             var header = _depthChartTree.CreateItem(root);
-            header.SetText(1, $"{position} (Starters: {requiredStarters})");
-            for (var column = 0; column < 6; column++)
+            header.SetText(0, position);
+            header.SetText(2, $"{position} GROUP  ·  {requiredStarters} starter(s){(positionLocked ? "  ·  LOCKED" : "")}");
+            header.SetCustomBgColor(0, new Color("142f3a"));
+            for (var column = 0; column < headers.Length; column++)
                 header.SetSelectable(column, false);
 
-            var players = TryExtractArray(positionRow, "players") ?? new Godot.Collections.Array();
-            if (players.Count == 0)
+            if (filteredPlayers.Count == 0)
             {
                 var emptyItem = _depthChartTree.CreateItem(header);
                 emptyItem.SetText(1, "No players available");
                 continue;
             }
 
-            for (var playerIndex = 0; playerIndex < players.Count; playerIndex++)
+            for (var playerIndex = 0; playerIndex < filteredPlayers.Count; playerIndex++)
             {
-                if (!TryGetDictionary((Variant)players[playerIndex], out var player))
-                    continue;
+                var player = filteredPlayers[playerIndex];
 
                 var row = _depthChartTree.CreateItem(header);
                 var playerName = SafeString(player, "name", "Unknown Player");
                 var playerId = SafeString(player, "player_id", "");
-                row.SetText(0, (playerIndex + 1).ToString(CultureInfo.InvariantCulture));
-                row.SetText(1, playerName);
-                row.SetText(2, SafeIntDisplay(player, "overall", fallback: "-"));
+                var available = GetBoolValue(GetFirstNonNil(player, "is_available"), true);
+                var injury = SafeString(player, "injury", "");
+                var days = GetIntValue(GetFirstNonNil(player, "injury_days_remaining"), 0);
+                row.SetText(0, position);
+                row.SetText(1, (playerIndex + 1).ToString(CultureInfo.InvariantCulture));
+                row.SetText(2, playerName);
                 row.SetText(3, SafeString(player, "role", "Backup"));
-                row.SetText(4, HumanizeStatus(SafeString(player, "status", "active")));
-                row.SetText(5, SafeString(player, "injury", "Healthy"));
+                row.SetText(4, available ? "Available" : string.IsNullOrWhiteSpace(injury) ? "Unavailable" : days > 0 ? $"{injury} · {days}d" : injury);
+                row.SetText(5, GetIntValue(GetFirstNonNil(player, "morale"), -1) < 0 ? "Unavailable" : $"{GetIntValue(GetFirstNonNil(player, "morale"), 0)} · {SafeString(player, "morale_trend", "")}");
+                row.SetText(6, SafeString(player, "estimated_overall_range", "Unavailable"));
+                row.SetText(7, SafeString(player, "scouting_confidence", "Low"));
+                row.SetText(8, FormatDepthChartProduction(position, player));
+                row.SetText(9, SafeString(player, "contract_summary", "Unavailable"));
+                for (var column = 0; column < headers.Length; column++) row.SetCustomBgColor(column, playerIndex % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+                row.SetTextAlignment(1, HorizontalAlignment.Right);
+                row.SetCustomColor(4, available ? new Color("8fcf98") : new Color("f0c96a"));
+                row.SetCustomColor(7, string.Equals(SafeString(player, "scouting_confidence", "Low"), "High", StringComparison.OrdinalIgnoreCase) ? new Color("8fcf98") : string.Equals(SafeString(player, "scouting_confidence", "Low"), "Low", StringComparison.OrdinalIgnoreCase) ? new Color("e58b7a") : new Color("f0c96a"));
                 row.SetMetadata(
                     0,
                     new Godot.Collections.Dictionary
@@ -4746,10 +9238,41 @@ public partial class DashboardController : Control
             }
         }
 
+        if (root.GetFirstChild() == null)
+        {
+            var empty = _depthChartTree.CreateItem(root);
+            empty.SetText(2, string.IsNullOrWhiteSpace(_depthChartSearch?.Text) ? "No positions are available for this unit." : "No depth-chart players match this search.");
+            for (var column = 0; column < headers.Length; column++) empty.SetSelectable(column, false);
+        }
         if (!selectedStillExists)
             ClearDepthChartSelection();
         else
             UpdateDepthChartSelectionLabel();
+        _depthChartPositions = positions;
+    }
+
+    private static bool DepthChartPositionMatchesUnit(string position, int unit)
+    {
+        var normalized = (position ?? "").Trim().ToUpperInvariant();
+        var offense = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "QB", "RB", "FB", "WR", "TE", "OT", "OG", "C", "LT", "LG", "RG", "RT", "OL" };
+        var specialTeams = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "K", "P", "LS", "KR", "PR" };
+        if (unit == 0) return offense.Contains(normalized);
+        if (unit == 2) return specialTeams.Contains(normalized);
+        return !offense.Contains(normalized) && !specialTeams.Contains(normalized);
+    }
+
+    private static string FormatDepthChartProduction(string position, Godot.Collections.Dictionary player)
+    {
+        var pass = GetIntValue(GetFirstNonNil(player, "passing_yards"), 0);
+        var rush = GetIntValue(GetFirstNonNil(player, "rushing_yards"), 0);
+        var receiving = GetIntValue(GetFirstNonNil(player, "receiving_yards"), 0);
+        var tackles = GetIntValue(GetFirstNonNil(player, "tackles"), 0);
+        var sacks = GetIntValue(GetFirstNonNil(player, "sacks"), 0);
+        if (string.Equals(position, "QB", StringComparison.OrdinalIgnoreCase)) return $"{pass:N0} pass yd · {rush:N0} rush yd";
+        if (new[] { "RB", "FB" }.Contains(position, StringComparer.OrdinalIgnoreCase)) return $"{rush:N0} rush yd · {receiving:N0} rec yd";
+        if (new[] { "WR", "TE" }.Contains(position, StringComparer.OrdinalIgnoreCase)) return $"{receiving:N0} rec yd";
+        if (tackles > 0 || sacks > 0) return $"{tackles} TKL · {sacks} SK";
+        return "No recorded production";
     }
 
     private void SetDepthChartRequestBusy(bool isBusy, string autoFillButtonText = null)
@@ -4760,7 +9283,7 @@ public partial class DashboardController : Control
         if (_btnAutoFillDepthChart == null)
             return;
 
-        _btnAutoFillDepthChart.Disabled = isBusy;
+        _btnAutoFillDepthChart.Disabled = isBusy || _liveGameAdjustmentMode;
         _btnAutoFillDepthChart.Text = isBusy && !string.IsNullOrWhiteSpace(autoFillButtonText)
             ? autoFillButtonText
             : "Auto-Fill Depth Chart";
@@ -4792,6 +9315,11 @@ public partial class DashboardController : Control
             string.IsNullOrWhiteSpace(_selectedDepthChartPlayerId) || string.IsNullOrWhiteSpace(_selectedDepthChartPosition)
                 ? "Selected: none"
                 : $"Selected: {_selectedDepthChartPosition} - {_selectedDepthChartPlayerName}";
+        if (_depthFieldDiagram != null)
+        {
+            _depthFieldDiagram.SelectedPlayerId = _selectedDepthChartPlayerId;
+            _depthFieldDiagram.QueueRedraw();
+        }
     }
 
     private void UpdateDepthChartEditButtons()
@@ -4801,12 +9329,32 @@ public partial class DashboardController : Control
             && !string.IsNullOrWhiteSpace(_selectedDepthChartPosition)
             && !string.IsNullOrWhiteSpace(_selectedDepthChartPlayerId);
 
-        if (_btnDepthChartMoveUp != null)
-            _btnDepthChartMoveUp.Disabled = !canEdit;
-        if (_btnDepthChartMoveDown != null)
-            _btnDepthChartMoveDown.Disabled = !canEdit;
         if (_btnDepthChartSetStarter != null)
             _btnDepthChartSetStarter.Disabled = !canEdit;
+        if (_btnDepthChartToggleLock != null)
+        {
+            var canToggleLock = !_depthChartRequestBusy && !_liveGameAdjustmentMode && !string.IsNullOrWhiteSpace(_selectedDepthChartPosition);
+            _btnDepthChartToggleLock.Disabled = !canToggleLock;
+            _btnDepthChartToggleLock.Text = IsDepthChartPositionLocked(_selectedDepthChartPosition)
+                ? "UNLOCK POSITION"
+                : "LOCK POSITION";
+        }
+    }
+
+    private bool IsDepthChartPositionLocked(string position)
+    {
+        if (string.IsNullOrWhiteSpace(position) || _depthChartPositions == null)
+            return false;
+
+        for (var index = 0; index < _depthChartPositions.Count; index++)
+        {
+            if (!TryGetDictionary((Variant)_depthChartPositions[index], out var group))
+                continue;
+            if (string.Equals(SafeString(group, "position", ""), position, StringComparison.OrdinalIgnoreCase))
+                return GetBoolValue(GetFirstNonNil(group, "is_locked"), false);
+        }
+
+        return false;
     }
 
     private void OnDepthChartItemSelected(TreeItem selected)
@@ -4839,6 +9387,122 @@ public partial class DashboardController : Control
         UpdateDepthChartEditButtons();
     }
 
+    private void RenderDepthFieldDiagram()
+    {
+        if (_depthFieldDiagram == null) return;
+        var slots = new List<DepthFieldSlot>();
+        if (_depthChartPositions != null)
+        {
+            for (var i = 0; i < _depthChartPositions.Count; i++)
+            {
+                if (!TryGetDictionary((Variant)_depthChartPositions[i], out var group)) continue;
+                var position = SafeString(group, "position", "");
+                var players = TryExtractArray(group, "players") ?? new Godot.Collections.Array();
+                for (var p = 0; p < players.Count; p++)
+                {
+                    if (!TryGetDictionary((Variant)players[p], out var player) || !string.Equals(SafeString(player, "role", ""), "Starter", StringComparison.OrdinalIgnoreCase)) continue;
+                    slots.Add(new DepthFieldSlot(SafeString(player, "player_id", ""), SafeString(player, "name", "Unknown"), position, GetBoolValue(GetFirstNonNil(player, "is_available"), true)));
+                }
+            }
+        }
+        _depthFieldDiagram.SetSlots(slots);
+    }
+
+    private async Task ReorderDepthChartByDrop(string position, string playerId, string targetPlayerId, bool insertAfter)
+    {
+        if (_depthChartRequestBusy || string.IsNullOrWhiteSpace(position) || string.IsNullOrWhiteSpace(playerId) || string.IsNullOrWhiteSpace(targetPlayerId))
+            return;
+        if (_liveGameAdjustmentMode)
+        {
+            await ApplyLiveDepthAdjustment(insertAfter ? "move_after" : "move_before", position, playerId, targetPlayerId);
+            return;
+        }
+        if (!IsNativeRuntimeSource())
+        {
+            SetDepthChartActionStatus("Drag-and-drop ordering is available in the Native C# GameCore.");
+            return;
+        }
+
+        SetDepthChartRequestBusy(true);
+        SetDepthChartActionStatus("Saving depth chart order…");
+        try
+        {
+            EnsureNativeGameCoreServices();
+            var response = _nativeDepthChartService.UpdateDepthChart(insertAfter ? "move_after" : "move_before", position, playerId, ResolveNativeRosterDepthChartTeamId(), targetPlayerId);
+            if (response == null || !response.Ok)
+            {
+                var error = string.IsNullOrWhiteSpace(response?.Error) ? "Unable to reorder the depth chart." : response.Error;
+                SetDepthChartActionStatus(error);
+                SetPrimaryStatus(error);
+                return;
+            }
+
+            _selectedDepthChartPosition = position;
+            _selectedDepthChartPlayerId = playerId;
+            RenderDepthChartSnapshot(ConvertDepthChartResponseToPayload(response));
+            await SaveNativeAutosave("Native autosave updated.");
+            await RefreshDashboardState();
+            await RefreshInbox();
+            await RefreshLeagueHub();
+            _dashboardRefreshPendingFromDepthChartEdit = false;
+            SetDepthChartActionStatus("Depth chart order saved.");
+            SetPrimaryStatus("Depth chart order saved.");
+        }
+        catch (Exception ex)
+        {
+            SetDepthChartActionStatus("Unable to reorder the depth chart.");
+            SetPrimaryStatus($"Depth chart reorder failed: {InlineMessage(ex.Message)}");
+        }
+        finally
+        {
+            SetDepthChartRequestBusy(false);
+        }
+    }
+
+    private async Task ToggleSelectedDepthChartLock()
+    {
+        if (_depthChartRequestBusy || string.IsNullOrWhiteSpace(_selectedDepthChartPosition))
+            return;
+        if (!IsNativeRuntimeSource())
+        {
+            SetDepthChartActionStatus("Position locks are available in the Native C# GameCore.");
+            return;
+        }
+
+        var wasLocked = IsDepthChartPositionLocked(_selectedDepthChartPosition);
+        SetDepthChartRequestBusy(true);
+        SetDepthChartActionStatus(wasLocked ? "Unlocking position…" : "Locking position…");
+        try
+        {
+            EnsureNativeGameCoreServices();
+            var response = _nativeDepthChartService.TogglePositionLock(_selectedDepthChartPosition, ResolveNativeRosterDepthChartTeamId());
+            if (response == null || !response.Ok)
+            {
+                var error = string.IsNullOrWhiteSpace(response?.Error) ? "Unable to update the position lock." : response.Error;
+                SetDepthChartActionStatus(error);
+                SetPrimaryStatus(error);
+                return;
+            }
+
+            RenderDepthChartSnapshot(ConvertDepthChartResponseToPayload(response));
+            await SaveNativeAutosave("Native autosave updated.");
+            var message = wasLocked
+                ? $"{_selectedDepthChartPosition} is unlocked for Auto-Fill."
+                : $"{_selectedDepthChartPosition} order is locked against Auto-Fill.";
+            SetDepthChartActionStatus(message);
+            SetPrimaryStatus(message);
+        }
+        catch (Exception ex)
+        {
+            SetDepthChartActionStatus("Unable to update the position lock.");
+            SetPrimaryStatus($"Depth chart lock failed: {InlineMessage(ex.Message)}");
+        }
+        finally
+        {
+            SetDepthChartRequestBusy(false);
+        }
+    }
+
     private async Task UpdateDepthChart(string action)
     {
         if (_depthChartRequestBusy)
@@ -4850,6 +9514,12 @@ public partial class DashboardController : Control
             SetDepthChartActionStatus(selectMessage);
             SetPrimaryStatus(selectMessage);
             UpdateDepthChartEditButtons();
+            return;
+        }
+
+        if (_liveGameAdjustmentMode)
+        {
+            await ApplyLiveDepthAdjustment(action, _selectedDepthChartPosition, _selectedDepthChartPlayerId, null);
             return;
         }
 
@@ -4958,6 +9628,40 @@ public partial class DashboardController : Control
         SetDepthChartActionStatus(message);
         SetPrimaryStatus(message);
         SetDepthChartRequestBusy(false);
+    }
+
+    private async Task ApplyLiveDepthAdjustment(string action, string position, string playerId, string targetPlayerId)
+    {
+        SetDepthChartRequestBusy(true);
+        SetDepthChartActionStatus("Applying adjustment to unplayed events…");
+        try
+        {
+            EnsureNativeGameCoreServices();
+            var response = _nativeLiveGameSessionService.ApplyDepthAdjustment(action, position, playerId, targetPlayerId);
+            if (!response.Ok)
+            {
+                SetDepthChartActionStatus(response.Error);
+                SetPrimaryStatus(response.Error);
+                return;
+            }
+            var chart = _nativeDepthChartService.GetTeamDepthChart(ResolveNativeRosterDepthChartTeamId());
+            if (chart.Ok)
+                RenderDepthChartSnapshot(ConvertDepthChartResponseToPayload(chart));
+            await SaveNativeAutosave("Native autosave updated.");
+            _selectedDepthChartPosition = position;
+            _selectedDepthChartPlayerId = playerId;
+            SetDepthChartActionStatus("Adjustment queued for the next unplayed event. Return to Live Game when ready.");
+            SetPrimaryStatus("Live depth-chart adjustment saved.");
+        }
+        catch (Exception ex)
+        {
+            SetDepthChartActionStatus("Unable to apply live adjustment.");
+            SetPrimaryStatus($"Live depth adjustment failed: {InlineMessage(ex.Message)}");
+        }
+        finally
+        {
+            SetDepthChartRequestBusy(false);
+        }
     }
 
     private void ConfigureRosterTreeForCompactView()
@@ -5428,11 +10132,29 @@ public partial class DashboardController : Control
 
     private async Task RefreshLeagueHub()
     {
+        RefreshLeagueWorkspaceContext();
         await RefreshStandingsAsync();
         await RefreshResultsAsync(GetSelectedResultsWeekKey());
         await RefreshScheduleAsync(_currentTeamId);
         await RefreshInjuryReportAsync(_currentTeamId);
         await RefreshHistoryAsync();
+    }
+
+    private void RefreshLeagueWorkspaceContext()
+    {
+        if (_leagueContextSummary == null)
+            return;
+
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
+        if (league == null || team == null)
+        {
+            _leagueContextSummary.Text = "Start or load a franchise to browse the active league, schedule, injuries, and season archive.";
+            return;
+        }
+
+        var calendar = league.Calendar;
+        _leagueContextSummary.Text = $"{team.Name} | {league.SeasonYear} Season | {calendar?.WeekLabel ?? "Week unavailable"} | {calendar?.Phase ?? "Phase unavailable"} | Active franchise schedule and injury report remain selected while standings, results, and history are browsed.";
     }
 
     private async Task RefreshStandingsAsync()
@@ -5520,10 +10242,33 @@ public partial class DashboardController : Control
             return;
         }
 
+        if (IsOpeningWeekReadinessMessage(selectedMessage))
+        {
+            _depthChartViewActive = false;
+            await SelectMainTab(ROSTER_TAB_INDEX);
+            SetPrimaryStatus("Review the active roster and player availability, then open Depth Chart to confirm the saved order before Week 1.");
+            return;
+        }
+
         if (IsDepthChartInvalidMessage(selectedMessage))
         {
             _depthChartViewActive = true;
             await SelectMainTab(ROSTER_TAB_INDEX);
+            return;
+        }
+
+        if (IsInjuryDepthAdvisoryMessage(selectedMessage))
+        {
+            _depthChartViewActive = true;
+            await SelectMainTab(ROSTER_TAB_INDEX);
+            SetPrimaryStatus("This unit is legal but has no available reserve. Review the saved emergency order; no personnel or depth move was made automatically.");
+            return;
+        }
+
+        if (IsWaiverClaimConfirmationMessage(selectedMessage))
+        {
+            ShowRosterManagement();
+            SetPrimaryStatus("Time is paused for the winning waiver opportunity. Review the inherited contract and finalize or cancel the selected claim.");
             return;
         }
 
@@ -5542,9 +10287,15 @@ public partial class DashboardController : Control
         if (IsOffseasonPendingMessage(selectedMessage))
         {
             var type = FmtString(GetFirstNonNil(selectedMessage, "type"), "");
+            if (string.Equals(type, ScheduleService.DraftPrepPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
+            {
+                ShowDraftBoard();
+                SetPrimaryStatus("Draft preparation remains active. Review the private Team Draft Board; no approval or change is required before starting the draft.");
+                return;
+            }
             if (string.Equals(type, ScheduleService.TrainingCampPendingPhaseKey, StringComparison.OrdinalIgnoreCase))
             {
-                SetPrimaryStatus("Training camp systems are not implemented yet.");
+                ShowTrainingCamp();
                 return;
             }
 
@@ -5695,7 +10446,7 @@ public partial class DashboardController : Control
         if (_lblGameDayRecords != null)
             _lblGameDayRecords.Text = recordLabel;
         if (_lblGameDayStatus != null)
-            _lblGameDayStatus.Text = "Game ready.";
+            _lblGameDayStatus.Text = "Choose full-game simulation or open the incremental live observer.";
         if (_btnGameDaySim != null)
             _btnGameDaySim.Disabled = false;
 
@@ -5712,59 +10463,35 @@ public partial class DashboardController : Control
             _btnGameDaySim.Disabled = false;
     }
 
-    private void OnWatchGamePressed()
+    private void ConfigureLiveGameObserver()
     {
-        if (_lblGameDayStatus != null)
-            _lblGameDayStatus.Text = "Watch Game is coming later.";
-        SetPrimaryStatus("Watch Game is coming later.");
+        if (_liveGameObserver != null)
+            return;
+        _liveGameObserver = new LiveGameObserver { Name = "LiveGameObserver" };
+        _liveGameObserver.ExitRequested += OnLiveGameObserverExit;
+        _liveGameObserver.BoxScoreRequested += OnLiveGameObserverBoxScore;
+        _liveGameObserver.AdvanceRequested += OnLiveGameAdvanceRequested;
+        _liveGameObserver.PauseChanged += OnLiveGamePauseChanged;
+        _liveGameObserver.AdjustmentsRequested += () => _ = OpenLiveGameAdjustments();
+        AddChild(_liveGameObserver);
     }
 
-    private async Task OnGameDaySimPressed()
+    private void ConfigurePostGameHub()
     {
-        if (IsNativeRuntimeSource())
-        {
-            var nativeGameId = FmtString(GetFirstNonNil(_activeGameDayGame, "game_id"), "");
-            if (string.IsNullOrWhiteSpace(nativeGameId))
-                nativeGameId = FmtString(GetFirstNonNil(_dashboardNextGame, "game_id"), "");
-            if (_btnGameDaySim != null)
-                _btnGameDaySim.Disabled = true;
-            if (_lblGameDayStatus != null)
-                _lblGameDayStatus.Text = "Simulating game...";
-            SetPrimaryStatus("Simulating current game...");
-            try
-            {
-                EnsureNativeGameCoreServices();
-                var response = _nativeGameDayService.SimulateCurrentUserGame(nativeGameId);
-                if (response?.Ok != true || response.Result == null)
-                {
-                    var error = string.IsNullOrWhiteSpace(response?.Error) ? "Sim Game failed." : response.Error;
-                    if (_lblGameDayStatus != null)
-                        _lblGameDayStatus.Text = error;
-                    SetPrimaryStatus(error);
-                    return;
-                }
+        if (_postGameHub != null)
+            return;
+        _postGameHub = new PostGameHub { Name = "PostGameHub" };
+        _postGameHub.ReturnRequested += () => _ = ClosePostGameRecapPopupAsync();
+        AddChild(_postGameHub);
+    }
 
-                CloseGameDayPopup();
-                _activeGameDayGame = new Godot.Collections.Dictionary();
-                ShowPostGameRecapFromResult(BuildNativeGameResultDictionary(response.Result));
-                await SaveNativeAutosave("Native autosave updated.");
-                SetPrimaryStatus("Game complete.");
-                await RefreshDashboardState();
-                await RefreshStateSummary();
-                await RefreshInbox();
-                await RefreshLeagueHub();
-            }
-            catch (Exception ex)
-            {
-                if (_lblGameDayStatus != null)
-                    _lblGameDayStatus.Text = "Unable to complete game.";
-                SetPrimaryStatus($"Native Sim Game failed: {InlineMessage(ex.Message)}");
-            }
-            finally
-            {
-                if (_btnGameDaySim != null)
-                    _btnGameDaySim.Disabled = false;
-            }
+    private async Task OnWatchGamePressed()
+    {
+        if (!IsNativeRuntimeSource())
+        {
+            if (_lblGameDayStatus != null)
+                _lblGameDayStatus.Text = "Watch Game requires the Native C# GameCore.";
+            SetPrimaryStatus("Watch Game requires the Native C# GameCore.");
             return;
         }
 
@@ -5773,49 +10500,129 @@ public partial class DashboardController : Control
             gameId = FmtString(GetFirstNonNil(_dashboardNextGame, "game_id"), "");
         if (string.IsNullOrWhiteSpace(gameId))
         {
-            if (_lblGameDayStatus != null)
-                _lblGameDayStatus.Text = "Sim Game is coming soon.";
-            SetPrimaryStatus("Sim Game is coming soon.");
+            SetPrimaryStatus("No current game is available to watch.");
             return;
         }
 
-        if (_btnGameDaySim != null)
-            _btnGameDaySim.Disabled = true;
-        if (_lblGameDayStatus != null)
-            _lblGameDayStatus.Text = "Simulating game...";
-        SetPrimaryStatus("Simulating current game...");
-
-        var payload = new Godot.Collections.Dictionary
+        _btnGameDayWatch.Disabled = true;
+        if (_btnGameDaySim != null) _btnGameDaySim.Disabled = true;
+        if (_lblGameDayStatus != null) _lblGameDayStatus.Text = "Starting incremental game session…";
+        SetPrimaryStatus("Preparing incremental game session...");
+        try
         {
-            { "game_id", gameId }
-        };
-        var json = Json.Stringify(payload);
-        var (status, body) = await PostWithTimeoutAsync("/simulate_user_game", json, REQUEST_TIMEOUT_MS);
+            EnsureNativeGameCoreServices();
+            var scheduledGame = _nativeGameDayService.GetCurrentUserGame();
+            var response = _nativeLiveGameSessionService.Start(gameId);
+            if (response?.Ok != true || response.Session?.Result == null)
+            {
+                var error = string.IsNullOrWhiteSpace(response?.Error) ? "Unable to prepare game playback." : response.Error;
+                if (_lblGameDayStatus != null) _lblGameDayStatus.Text = error;
+                SetPrimaryStatus(error);
+                return;
+            }
 
-        if (_btnGameDaySim != null)
-            _btnGameDaySim.Disabled = false;
-
-        if (status < 200 || status >= 300)
+            _observedGameResult = null;
+            CloseGameDayPopup();
+            await SaveNativeAutosave("Native autosave updated.");
+            var preview = response.Session.Result;
+            _liveGameObserver.StartSession(preview, scheduledGame?.HomeTeamId ?? "", response.Session.PlayedEvents, response.Session.IsPaused, LoadTeamLogo(preview.AwayTeam), LoadTeamLogo(preview.HomeTeam));
+            SetPrimaryStatus("Live game paused and ready.");
+        }
+        catch (Exception ex)
         {
-            if (_lblGameDayStatus != null)
-                _lblGameDayStatus.Text = "Unable to complete game.";
-            SetPrimaryStatus($"Sim Game failed (HTTP {status}).");
+            if (_lblGameDayStatus != null) _lblGameDayStatus.Text = "Unable to prepare game playback.";
+            SetPrimaryStatus($"Watch Game failed: {InlineMessage(ex.Message)}");
+        }
+        finally
+        {
+            _btnGameDayWatch.Disabled = false;
+            if (_btnGameDaySim != null) _btnGameDaySim.Disabled = false;
+        }
+    }
+
+    private void OnLiveGameObserverExit()
+    {
+        if (_observedGameResult != null)
+        {
+            ShowPostGameRecapFromResult(_observedGameResult);
+            _observedGameResult = null;
+            SetPrimaryStatus("Game playback complete.");
+        }
+        else
+            SetPrimaryStatus("Live game saved. Reopen Game Day to continue.");
+    }
+
+    private void OnLiveGamePauseChanged(bool paused)
+    {
+        EnsureNativeGameCoreServices();
+        var response = _nativeLiveGameSessionService.SetPaused(paused);
+        if (!response.Ok)
+            _liveGameObserver.SetSessionError(response.Error);
+        else
+            _ = SaveNativeAutosave("Native autosave updated.");
+    }
+
+    private void OnLiveGameAdvanceRequested()
+    {
+        EnsureNativeGameCoreServices();
+        var response = _nativeLiveGameSessionService.Advance();
+        if (!response.Ok)
+        {
+            _liveGameObserver.SetSessionError(response.Error);
             return;
         }
+        _liveGameObserver.ApplySessionEvent(response.Session.CurrentEvent, response.Session.Completed);
+        if (response.Session.Completed && response.Session.Result != null)
+            _ = FinalizeLiveGameSession(response.Session.Result);
+    }
 
-        var result = ParseCompactResult(body, "Sim Game failed.", out var errorMessage);
-        if (!string.IsNullOrWhiteSpace(errorMessage) || result == null || result.Count == 0)
+    private async Task FinalizeLiveGameSession(GameResultDto result)
+    {
+        _observedGameResult = BuildNativeGameResultDictionary(result);
+        await SaveNativeAutosave("Native autosave updated.");
+        await RefreshDashboardState();
+        await RefreshStateSummary();
+        await RefreshInbox();
+        await RefreshLeagueHub();
+        SetPrimaryStatus("Live game final. Review the box score or continue to postgame.");
+    }
+
+    private async Task OpenLiveGameAdjustments()
+    {
+        EnsureNativeGameCoreServices();
+        var paused = _nativeLiveGameSessionService.SetPaused(true);
+        if (!paused.Ok)
         {
-            if (_lblGameDayStatus != null)
-                _lblGameDayStatus.Text = string.IsNullOrWhiteSpace(errorMessage) ? "Sim Game failed." : errorMessage;
-            SetPrimaryStatus(string.IsNullOrWhiteSpace(errorMessage) ? "Sim Game failed." : errorMessage);
+            _liveGameObserver.SetSessionError(paused.Error);
             return;
         }
+        _liveGameAdjustmentMode = true;
+        _liveGameObserver.PauseForAdjustments();
+        _liveGameObserver.Visible = false;
+        if (_btnReturnToLiveGame != null) _btnReturnToLiveGame.Visible = true;
+        await SelectMainTab(ROSTER_TAB_INDEX);
+        await SetRosterViewMode(true);
+        SetDepthChartActionStatus("LIVE GAME PAUSED · Drag within a position group or set a starter. Changes apply only to unplayed events.");
+        SetPrimaryStatus("Live game paused for depth-chart adjustments.");
+    }
 
-        CloseGameDayPopup();
-        _activeGameDayGame = new Godot.Collections.Dictionary();
-        ShowPostGameRecapFromResult(result);
-        SetPrimaryStatus("Game complete.");
+    private void ReturnToLiveGameObserver()
+    {
+        _liveGameAdjustmentMode = false;
+        if (_btnReturnToLiveGame != null) _btnReturnToLiveGame.Visible = false;
+        if (_btnAutoFillDepthChart != null) _btnAutoFillDepthChart.Disabled = false;
+        UpdateDepthChartEditButtons();
+        if (_liveGameObserver != null) _liveGameObserver.Visible = true;
+        SetPrimaryStatus("Returned to paused live game.");
+    }
+
+    private void OnLiveGameObserverBoxScore()
+    {
+        if (_observedGameResult == null)
+            return;
+        _restoreLiveGameObserverAfterBoxScore = _liveGameObserver?.Visible == true;
+        if (_liveGameObserver != null) _liveGameObserver.Visible = false;
+        ShowBoxScoreFromResult(_observedGameResult);
     }
 
     private async Task OpenCompletedScheduleGameAsync(Godot.Collections.Dictionary game)
@@ -5899,6 +10706,12 @@ public partial class DashboardController : Control
     private void ShowPostGameRecapFromResult(Godot.Collections.Dictionary result, string statusText = "")
     {
         _latestGameResult = result?.Duplicate(true);
+        if (_postGameHub != null)
+        {
+            HidePostGameRecapPopup();
+            _postGameHub.ShowResult(result, LoadTeamLogo(FmtString(GetFirstNonNil(result, "away_team"), "")), LoadTeamLogo(FmtString(GetFirstNonNil(result, "home_team"), "")));
+            return;
+        }
         PopulatePostGameRecap(result);
         if (_lblPostGameStatus != null)
             _lblPostGameStatus.Text = statusText ?? "";
@@ -5936,12 +10749,19 @@ public partial class DashboardController : Control
 
     private void ShowPostGameRecapPopup()
     {
+        if (_postGameHub != null && _latestGameResult != null)
+        {
+            _postGameHub.ShowResult(_latestGameResult, LoadTeamLogo(FmtString(GetFirstNonNil(_latestGameResult, "away_team"), "")), LoadTeamLogo(FmtString(GetFirstNonNil(_latestGameResult, "home_team"), "")));
+            return;
+        }
         if (_postGameRecapPopup != null)
             _postGameRecapPopup.Visible = true;
     }
 
     private void HidePostGameRecapPopup()
     {
+        if (_postGameHub != null)
+            _postGameHub.Visible = false;
         if (_postGameRecapPopup != null)
             _postGameRecapPopup.Visible = false;
     }
@@ -6048,8 +10868,11 @@ public partial class DashboardController : Control
     private void OnBoxScorePopupClosePressed()
     {
         HideBoxScorePopup();
+        if (_restoreLiveGameObserverAfterBoxScore && _liveGameObserver != null)
+            _liveGameObserver.Visible = true;
         if (_restorePostGameRecapAfterBoxScore)
             ShowPostGameRecapPopup();
+        _restoreLiveGameObserverAfterBoxScore = false;
         _restorePostGameRecapAfterBoxScore = false;
         SetPrimaryStatus("Closed box score.");
     }
@@ -7062,6 +11885,19 @@ public partial class DashboardController : Control
             $"Playoff games: {season.TotalPlayoffGames}",
         };
 
+        if (!string.IsNullOrWhiteSpace(_recordBookSummary))
+        {
+            lines.Add("");
+            lines.Add(_recordBookSummary);
+        }
+
+        var archiveSummary = BuildArchiveBrowseSummary(season.SeasonYear);
+        if (!string.IsNullOrWhiteSpace(archiveSummary))
+        {
+            lines.Add("");
+            lines.Add(archiveSummary);
+        }
+
         if (!string.IsNullOrWhiteSpace(season.GeneratedAtLabel))
             lines.Add($"Archived: {season.GeneratedAtLabel}");
 
@@ -7069,6 +11905,14 @@ public partial class DashboardController : Control
         lines.Add("Champion Summary");
         lines.Add($"Winner: {FallbackText(season.ChampionTeamName, "TBD")}");
         lines.Add($"Runner-Up: {FallbackText(season.RunnerUpTeamName, "TBD")}");
+
+        lines.Add("");
+        lines.Add("Season Awards");
+        if (season.Awards == null || season.Awards.Count == 0)
+            lines.Add("No award archive is available.");
+        else
+            foreach (var award in season.Awards)
+                lines.Add($"{FallbackText(award.AwardName, "Award")}: {FallbackText(award.PlayerName, "Unknown")} ({FallbackText(award.Position, "?")}, {FallbackText(award.TeamName, "Team")}) — {FallbackText(award.Summary, "No summary")}");
 
         lines.Add("");
         lines.Add("Final Standings");
@@ -7143,6 +11987,38 @@ public partial class DashboardController : Control
         AppendHistoryRound(lines, season, "Conference Championship");
         AppendHistoryRound(lines, season, "League Championship");
 
+        return string.Join("\n", lines);
+    }
+
+    private static string BuildRecordBookSummary(RecordBookResponse recordBook)
+    {
+        var lines = new List<string> { "Record Book (read-only)" };
+        void Add(string heading, IEnumerable<RecordBookEntryDto> records)
+        {
+            var entry = records?.FirstOrDefault();
+            if (entry != null)
+                lines.Add($"{heading}: {entry.Label} — {entry.SubjectName} ({entry.Value:N0}{(entry.SeasonYear > 0 ? $", {entry.SeasonYear}" : "")})");
+        }
+        Add("Season", recordBook.SeasonRecords);
+        Add("Career", recordBook.CareerRecords);
+        Add("Franchise", recordBook.FranchiseRecords);
+        return lines.Count > 1 ? string.Join("\n", lines) : "";
+    }
+
+    private string BuildArchiveBrowseSummary(int selectedSeasonYear)
+    {
+        if (_historicalArchive?.Ok != true) return "";
+        var lines = new List<string> { "Archive Browser (read-only)", "Compare completed seasons:" };
+        foreach (var championship in (_historicalArchive.Championships ?? new List<HistoricalChampionshipDto>()).Take(8))
+        {
+            var marker = championship.SeasonYear == selectedSeasonYear ? " >" : "";
+            lines.Add($"{marker} {championship.SeasonYear}: {FallbackText(championship.ChampionTeamName, "Champion TBD")} def. {FallbackText(championship.RunnerUpTeamName, "Runner-Up TBD")} {championship.ChampionScore}-{championship.RunnerUpScore}");
+        }
+        lines.Add("Championship archive is listed above; record-book leaders are shown in the Record Book section.");
+        var retirements = _historicalArchive.Retirements ?? new List<HistoricalRetirementDto>();
+        lines.Add(retirements.Count == 0 ? "Retirements: no archived retirements." : "Recent retirements:");
+        foreach (var retirement in retirements.Take(8))
+            lines.Add($"{retirement.SeasonYear}: {FallbackText(retirement.PlayerName, "Unknown")} ({FallbackText(retirement.Position, "?")}, {retirement.Age}) — {FallbackText(retirement.TeamName, "Team")}");
         return string.Join("\n", lines);
     }
 
@@ -7258,6 +12134,42 @@ public partial class DashboardController : Control
     {
         PopulateStandingsTree(_standingsTree, standings);
         PopulateOverviewStandingsSnapshot(standings);
+    }
+
+    private void PopulateLeagueStandingsReference(StandingsResponse response)
+    {
+        if (_standingsTree == null) return;
+        _standingsTree.Clear(); _standingsTree.Columns = 6;
+        var headers = new[] { "Team", "Record", "GB", "PF", "PA", "Playoff Context" };
+        var widths = new[] { 210, 86, 58, 62, 62, 180 };
+        for (var column = 0; column < headers.Length; column++) { _standingsTree.SetColumnTitle(column, headers[column]); _standingsTree.SetColumnCustomMinimumWidth(column, widths[column]); _standingsTree.SetColumnExpand(column, column is 0 or 5); }
+        var root = _standingsTree.CreateItem(); var rows = response?.Standings ?? new List<StandingRowDto>();
+        if (rows.Count == 0) { AddHistoryEmptyRow(_standingsTree, root, "Preseason / no regular-season standings are available."); return; }
+        var userTeamId = _nativeGameCoreContext?.ActiveLeague?.UserTeamId ?? ""; var seedByTeam = (response.PlayoffBracket?.ConferenceBrackets ?? new List<PlayoffConferenceBracketDto>()).SelectMany(bracket => bracket.Seeds ?? new List<PlayoffSeedDto>()).ToDictionary(seed => seed.TeamId, seed => seed, StringComparer.OrdinalIgnoreCase);
+        foreach (var conference in rows.GroupBy(row => row.Conference ?? "Conference", StringComparer.OrdinalIgnoreCase).OrderBy(group => group.Key))
+        {
+            var conferenceHeader = _standingsTree.CreateItem(root); conferenceHeader.SetText(0, conference.Key.ToUpperInvariant()); for (var column = 0; column < headers.Length; column++) { conferenceHeader.SetCustomBgColor(column, new Color("163242")); conferenceHeader.SetCustomColor(column, new Color("8fcf98")); }
+            foreach (var division in conference.GroupBy(row => row.Division ?? "Division", StringComparer.OrdinalIgnoreCase).OrderBy(group => group.Key))
+            {
+                var divisionHeader = _standingsTree.CreateItem(root); divisionHeader.SetText(0, "  " + division.Key); for (var column = 0; column < headers.Length; column++) { divisionHeader.SetCustomBgColor(column, new Color("102737")); divisionHeader.SetCustomColor(column, new Color("c5d1d8")); }
+                var ordered = division.OrderByDescending(row => row.WinPct).ThenByDescending(row => row.PointsFor - row.PointsAgainst).ThenBy(row => row.TeamName).ToList(); var leader = ordered.FirstOrDefault(); var index = 0;
+                foreach (var row in ordered)
+                {
+                    var item = _standingsTree.CreateItem(root); item.SetMetadata(0, row.TeamId); var isUser = string.Equals(row.TeamId, userTeamId, StringComparison.OrdinalIgnoreCase); var gap = ((leader?.Wins ?? 0) - row.Wins + row.Losses - (leader?.Losses ?? 0)) / 2d; seedByTeam.TryGetValue(row.TeamId, out var seed); var playoff = seed == null ? "Seed unavailable" : $"Seed {seed.Seed} · {(seed.IsDivisionWinner ? "division winner" : "wild card")}";
+                    item.SetText(0, (isUser ? "◆ " : "    ") + row.TeamName); item.SetText(1, $"{row.Wins}-{row.Losses}" + (row.Ties > 0 ? $"-{row.Ties}" : "")); item.SetText(2, row.TeamId == leader?.TeamId ? "—" : gap.ToString("0.0")); item.SetText(3, row.PointsFor.ToString()); item.SetText(4, row.PointsAgainst.ToString()); item.SetText(5, playoff);
+                    for (var column = 0; column < headers.Length; column++) item.SetCustomBgColor(column, isUser ? new Color("193d37") : index++ % 2 == 0 ? new Color("0b1a28") : new Color("0d2031")); for (var column = 1; column < 5; column++) item.SetTextAlignment(column, HorizontalAlignment.Right); if (isUser) item.SetCustomColor(5, new Color("f0c96a"));
+                }
+            }
+        }
+        var playoffHeader = _standingsTree.CreateItem(root); playoffHeader.SetText(0, "PLAYOFF PICTURE · saved seeds only"); for (var column = 0; column < headers.Length; column++) { playoffHeader.SetCustomBgColor(column, new Color("3a321a")); playoffHeader.SetCustomColor(column, new Color("f0c96a")); }
+        if (seedByTeam.Count == 0) { var unavailable = _standingsTree.CreateItem(root); unavailable.SetText(0, "No current playoff qualification or cut-line state is saved."); unavailable.SetCustomColor(0, new Color("9cadb8")); }
+        else foreach (var seed in seedByTeam.Values.OrderBy(seed => seed.Conference).ThenBy(seed => seed.Seed)) { var item = _standingsTree.CreateItem(root); item.SetText(0, $"{seed.Conference} · #{seed.Seed} {seed.TeamName}"); item.SetText(1, $"{seed.Wins}-{seed.Losses}" + (seed.Ties > 0 ? $"-{seed.Ties}" : "")); item.SetText(5, seed.IsDivisionWinner ? "Division winner" : "Wild card"); item.SetTextAlignment(1, HorizontalAlignment.Right); }
+    }
+
+    private async Task OpenSelectedLeagueStandingsTeam()
+    {
+        var selected = _standingsTree?.GetSelected(); if (selected == null || IsNil(selected.GetMetadata(0))) return; var teamId = selected.GetMetadata(0).AsString(); if (string.IsNullOrWhiteSpace(teamId)) return;
+        await SelectMainTab(ROSTER_TAB_INDEX); await TrySelectTeamInRoster(teamId);
     }
 
     private void PopulateOverviewStandingsSnapshot(Godot.Collections.Array standings)
@@ -7897,6 +12809,13 @@ public partial class DashboardController : Control
     private void UpdateScheduleActionUi(Godot.Collections.Dictionary game)
     {
         var status = game != null ? FmtString(GetFirstNonNil(game, "status"), "upcoming").Trim().ToLowerInvariant() : "";
+
+        if (_scheduleInspector != null)
+        {
+            _scheduleInspector.Text = game == null
+                ? "Select a game to review matchup context, result status, and available detail actions."
+                : $"MATCHUP DETAIL\n{BuildScheduleMatchupText(game, ResolveNativeScheduleTeamId(_currentTeamId))}\n{GetScheduleWeekText(game)} | {GetScheduleResultText(game)} | Status: {HumanizeStatus(status)}";
+        }
 
         if (_lblScheduleActionStatus != null)
         {
@@ -9139,8 +14058,8 @@ public partial class DashboardController : Control
             sortGetter: row => GetPositionSortOrder(row.Position),
             sortable: true));
         _columns.Add(new RosterColumn(
-            id: "name",
-            title: "Name",
+            id: "player",
+            title: "Player",
             defaultVisible: true,
             width: 220,
             expand: true,
@@ -9149,11 +14068,11 @@ public partial class DashboardController : Control
             sortable: true));
         _columns.Add(new RosterColumn(
             id: "ovr",
-            title: "OVR",
+            title: "Staff OVR",
             defaultVisible: true,
-            width: 60,
+            width: 82,
             expand: false,
-            getter: row => row.Overall > 0 ? row.Overall.ToString() : "-",
+            getter: row => SafeString(row.Source, "estimated_overall_range", row.Overall > 0 ? row.Overall.ToString() : "-"),
             sortGetter: row => row.Overall,
             sortable: true));
         _columns.Add(new RosterColumn(
@@ -9166,9 +14085,33 @@ public partial class DashboardController : Control
             sortGetter: row => row.Age,
             sortable: true));
         _columns.Add(new RosterColumn(
+            id: "position_role", title: "Position / Role", defaultVisible: false, width: 118, expand: false,
+            getter: row => $"{row.PositionDisplay} · {SafeString(row.Source, "depth_role", "Unassigned")}",
+            sortGetter: row => $"{row.Position}|{SafeString(row.Source, "depth_role", "")}", sortable: true));
+        _columns.Add(new RosterColumn(
+            id: "contract", title: "Contract", defaultVisible: true, width: 120, expand: false,
+            getter: row => SafeString(row.Source, "contract_summary", "Unavailable"),
+            sortGetter: row => GetIntValue(GetFirstNonNil(row.Source, "annual_salary"), 0), sortable: true));
+        _columns.Add(new RosterColumn(
+            id: "health", title: "Health", defaultVisible: true, width: 128, expand: false,
+            getter: row => GetRosterHealthText(row),
+            sortGetter: row => GetBoolValue(GetFirstNonNil(row.Source, "is_available"), true) ? 1 : 0, sortable: true));
+        _columns.Add(new RosterColumn(
+            id: "morale", title: "Morale", defaultVisible: true, width: 105, expand: false,
+            getter: row => GetRosterMoraleText(row),
+            sortGetter: row => GetIntValue(GetFirstNonNil(row.Source, "morale"), -1), sortable: true));
+        _columns.Add(new RosterColumn(
+            id: "trait", title: "Trait", defaultVisible: false, width: 145, expand: false,
+            getter: row => SafeString(row.Source, "trait", "Unavailable"),
+            sortGetter: row => SafeString(row.Source, "trait", ""), sortable: true));
+        _columns.Add(new RosterColumn(
+            id: "scout_overall", title: "Scout OVR", defaultVisible: false, width: 92, expand: false,
+            getter: row => "Unavailable",
+            sortGetter: row => 0, sortable: true));
+        _columns.Add(new RosterColumn(
             id: "status",
             title: "Status",
-            defaultVisible: true,
+            defaultVisible: false,
             width: 120,
             expand: false,
             getter: row => row.Status,
@@ -9177,7 +14120,7 @@ public partial class DashboardController : Control
         _columns.Add(new RosterColumn(
             id: "injury",
             title: "Injury",
-            defaultVisible: true,
+            defaultVisible: false,
             width: 180,
             expand: true,
             getter: row => row.Injury,
@@ -9192,11 +14135,87 @@ public partial class DashboardController : Control
             getter: row => row.Id,
             sortGetter: row => row.Id,
             sortable: false));
+        _columns.Add(new RosterColumn("potential", "Potential", false, 82, false,
+            row => SafeString(row.Source, "estimated_potential_range", "Unavailable"),
+            row => GetIntValue(GetFirstNonNil(row.Source, "potential"), 0), true));
+        _columns.Add(new RosterColumn("salary", "Salary", false, 92, false,
+            row => GetFloatValue(GetFirstNonNil(row.Source, "annual_salary"), 0f) > 0f ? $"${GetFloatValue(GetFirstNonNil(row.Source, "annual_salary"), 0f) / 1_000_000f:0.00}M" : "Unavailable",
+            row => GetFloatValue(GetFirstNonNil(row.Source, "annual_salary"), 0f), true));
+        _columns.Add(new RosterColumn("fatigue", "Fatigue", false, 72, false,
+            row => $"{GetIntValue(GetFirstNonNil(row.Source, "fatigue"), 0)}/100",
+            row => GetIntValue(GetFirstNonNil(row.Source, "fatigue"), 0), true));
+        _columns.Add(new RosterColumn("pass_yd", "Pass Yds", false, 80, false,
+            row => GetIntValue(GetFirstNonNil(row.Source, "passing_yards"), 0).ToString(), row => GetIntValue(GetFirstNonNil(row.Source, "passing_yards"), 0), true));
+        _columns.Add(new RosterColumn("rush_yd", "Rush Yds", false, 80, false,
+            row => GetIntValue(GetFirstNonNil(row.Source, "rushing_yards"), 0).ToString(), row => GetIntValue(GetFirstNonNil(row.Source, "rushing_yards"), 0), true));
+        _columns.Add(new RosterColumn("rec_yd", "Rec Yds", false, 80, false,
+            row => GetIntValue(GetFirstNonNil(row.Source, "receiving_yards"), 0).ToString(), row => GetIntValue(GetFirstNonNil(row.Source, "receiving_yards"), 0), true));
+        _columns.Add(new RosterColumn("tackles", "Tackles", false, 72, false,
+            row => GetIntValue(GetFirstNonNil(row.Source, "tackles"), 0).ToString(), row => GetIntValue(GetFirstNonNil(row.Source, "tackles"), 0), true));
+        _columns.Add(new RosterColumn("sacks", "Sacks", false, 64, false,
+            row => GetIntValue(GetFirstNonNil(row.Source, "sacks"), 0).ToString(), row => GetIntValue(GetFirstNonNil(row.Source, "sacks"), 0), true));
 
         InitRosterTree();
         LoadColumnVisibility();
         ApplyColumnVisibility();
         PopulateColumnsMenu();
+    }
+
+    private void ConfigureRosterWorkspacePresentation()
+    {
+        var header = GetNodeOrNull<Label>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/SquadWorkspaceHeader");
+        if (header != null)
+        {
+            header.Text = "TEAM > ROSTER";
+            header.AddThemeFontSizeOverride("font_size", 18);
+            header.AddThemeColorOverride("font_color", new Color("f4eddf"));
+        }
+
+        var hint = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/SquadWorkspaceHint");
+        if (hint != null) hint.Visible = false;
+        if (_rosterSummary != null)
+        {
+            _rosterSummary.AddThemeFontSizeOverride("font_size", 12);
+            _rosterSummary.AutowrapMode = TextServer.AutowrapMode.Off;
+            _rosterSummary.EllipsisChar = "…";
+        }
+
+        var filterRow = GetNodeOrNull<Container>("AppMargin/MainPadding/MainLayout/MainTabs/RosterTab/RosterSplit/RosterPane/FilterRow");
+        if (filterRow == null) return;
+        if (_rosterSearch != null)
+        {
+            _rosterSearch.PlaceholderText = "Search player";
+            _rosterSearch.CustomMinimumSize = new Vector2(190, 28);
+            _rosterSearch.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        }
+        if (_posFilter != null) _posFilter.CustomMinimumSize = new Vector2(88, 28);
+        if (_rosterStatusFilter == null)
+        {
+            _rosterStatusFilter = new OptionButton { Name = "RosterStatusFilter", CustomMinimumSize = new Vector2(108, 28), TooltipText = "Filter by availability or roster status" };
+            foreach (var item in new[] { "All statuses", "Available", "Injured", "Unavailable", "Starter", "Depth" }) _rosterStatusFilter.AddItem(item);
+            filterRow.AddChild(_rosterStatusFilter);
+        }
+        if (_btnColumns != null)
+        {
+            var oldParent = _btnColumns.GetParent();
+            if (oldParent != filterRow)
+            {
+                oldParent?.RemoveChild(_btnColumns);
+                filterRow.AddChild(_btnColumns);
+            }
+            _btnColumns.Text = "COLUMNS / VIEW";
+            _btnColumns.TooltipText = "Show, hide, reorder, and resize roster columns";
+            _btnColumns.CustomMinimumSize = new Vector2(126, 28);
+            _btnColumns.Visible = true;
+        }
+        if (_btnClearFilters != null) { _btnClearFilters.Text = "RESET"; _btnClearFilters.CustomMinimumSize = new Vector2(62, 28); }
+        if (_rosterTree != null)
+        {
+            _rosterTree.CustomMinimumSize = Vector2.Zero;
+            _rosterTree.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+            _rosterTree.AddThemeConstantOverride("item_margin", 2);
+            _rosterTree.TooltipText = "Select a player to open their player profile. Column headers sort the roster.";
+        }
     }
 
     private void InitRosterTree()
@@ -9211,10 +14230,18 @@ public partial class DashboardController : Control
 
     private void LoadColumnVisibility()
     {
-        const int rosterColumnSchemaVersion = 2;
+        const int rosterColumnSchemaVersion = 3;
         _columnVisibility.Clear();
+        _rosterColumnOrder.Clear();
+        _rosterColumnWidths.Clear();
         foreach (var column in _columns)
+        {
             _columnVisibility[column.Id] = column.DefaultVisible;
+            _rosterColumnOrder.Add(column.Id);
+            _rosterColumnWidths[column.Id] = column.Width;
+        }
+        _rosterColumnOrder.Remove("player");
+        _rosterColumnOrder.Insert(0, "player");
 
         var config = new ConfigFile();
         if (config.Load("user://ui.cfg") != Error.Ok)
@@ -9225,18 +14252,34 @@ public partial class DashboardController : Control
             return;
 
         var raw = config.GetValue("ui", "dashboard_roster_columns", "").AsString();
-        if (string.IsNullOrWhiteSpace(raw))
-            return;
+        if (!string.IsNullOrWhiteSpace(raw))
+        {
+            var visibleIds = raw.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var visibleSet = new HashSet<string>(visibleIds, StringComparer.OrdinalIgnoreCase);
+            foreach (var column in _columns)
+                _columnVisibility[column.Id] = visibleSet.Contains(column.Id);
+        }
+        _columnVisibility["player"] = true;
 
-        var visibleIds = raw.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        var visibleSet = new HashSet<string>(visibleIds, StringComparer.OrdinalIgnoreCase);
+        var orderRaw = config.GetValue("ui", "dashboard_roster_column_order", "").AsString();
+        if (!string.IsNullOrWhiteSpace(orderRaw))
+        {
+            var valid = new HashSet<string>(_columns.Select(column => column.Id), StringComparer.OrdinalIgnoreCase);
+            var saved = orderRaw.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(valid.Contains).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            saved.RemoveAll(id => string.Equals(id, "player", StringComparison.OrdinalIgnoreCase));
+            _rosterColumnOrder.Clear(); _rosterColumnOrder.Add("player"); _rosterColumnOrder.AddRange(saved);
+            _rosterColumnOrder.AddRange(_columns.Select(column => column.Id).Where(id => !_rosterColumnOrder.Contains(id, StringComparer.OrdinalIgnoreCase)));
+        }
         foreach (var column in _columns)
-            _columnVisibility[column.Id] = visibleSet.Contains(column.Id);
+        {
+            var width = GetIntValue(config.GetValue("ui", $"dashboard_roster_column_width_{column.Id}", column.Width), column.Width);
+            _rosterColumnWidths[column.Id] = Math.Clamp(width, 48, 360);
+        }
     }
 
     private void SaveColumnVisibility()
     {
-        const int rosterColumnSchemaVersion = 2;
+        const int rosterColumnSchemaVersion = 3;
         var visibleIds = new List<string>();
         foreach (var column in _columns)
         {
@@ -9248,6 +14291,9 @@ public partial class DashboardController : Control
         config.Load("user://ui.cfg");
         config.SetValue("ui", "dashboard_roster_columns_version", rosterColumnSchemaVersion);
         config.SetValue("ui", "dashboard_roster_columns", string.Join(",", visibleIds));
+        config.SetValue("ui", "dashboard_roster_column_order", string.Join(",", _rosterColumnOrder));
+        foreach (var pair in _rosterColumnWidths)
+            config.SetValue("ui", $"dashboard_roster_column_width_{pair.Key}", pair.Value);
         config.Save("user://ui.cfg");
     }
 
@@ -9333,6 +14379,7 @@ public partial class DashboardController : Control
     {
         _rosterSearchText = "";
         _posFilterValue = PosFilterOptions[0];
+        _rosterStatusFilterValue = "All statuses";
 
         try
         {
@@ -9341,6 +14388,7 @@ public partial class DashboardController : Control
             {
                 _rosterSearchText = config.GetValue("ui", "dashboard_roster_search", "").AsString();
                 _posFilterValue = config.GetValue("ui", "dashboard_roster_pos_filter", PosFilterOptions[0]).AsString();
+                _rosterStatusFilterValue = config.GetValue("ui", "dashboard_roster_status_filter", "All statuses").AsString();
             }
         }
         catch (Exception ex)
@@ -9357,6 +14405,14 @@ public partial class DashboardController : Control
             _posFilter.Select(index);
             _posFilterValue = PosFilterOptions[index];
         }
+        if (_rosterStatusFilter != null)
+        {
+            var selected = 0;
+            for (var i = 0; i < _rosterStatusFilter.ItemCount; i++)
+                if (string.Equals(_rosterStatusFilter.GetItemText(i), _rosterStatusFilterValue, StringComparison.OrdinalIgnoreCase)) { selected = i; break; }
+            _rosterStatusFilter.Select(selected);
+            _rosterStatusFilterValue = _rosterStatusFilter.GetItemText(selected);
+        }
         _suppressRosterFilterEvents = false;
     }
 
@@ -9368,6 +14424,7 @@ public partial class DashboardController : Control
             config.Load("user://ui.cfg");
             config.SetValue("ui", "dashboard_roster_search", _rosterSearchText ?? "");
             config.SetValue("ui", "dashboard_roster_pos_filter", _posFilterValue ?? PosFilterOptions[0]);
+            config.SetValue("ui", "dashboard_roster_status_filter", _rosterStatusFilterValue ?? "All statuses");
             config.Save("user://ui.cfg");
         }
         catch (Exception ex)
@@ -9515,6 +14572,9 @@ public partial class DashboardController : Control
             var canUsePrimaryAction = IsGameDayMessage(message)
                 || IsRosterInvalidMessage(message)
                 || IsDepthChartInvalidMessage(message)
+                || IsInjuryDepthAdvisoryMessage(message)
+                || IsOpeningWeekReadinessMessage(message)
+                || IsWaiverClaimConfirmationMessage(message)
                 || IsPostseasonPendingMessage(message)
                 || IsSeasonCompleteMessage(message)
                 || IsOffseasonPendingMessage(message);
@@ -9524,6 +14584,7 @@ public partial class DashboardController : Control
             _overviewActionButton.Text = primaryActionLabel;
             _overviewActionButton.TooltipText = "";
         }
+        RefreshInboxDesk();
     }
 
     private string GetInboxSeverityPrefix(Godot.Collections.Dictionary message)
@@ -9585,6 +14646,33 @@ public partial class DashboardController : Control
 
         var type = FmtString(GetFirstNonNil(message, "type"), "");
         return string.Equals(type, "depth_chart_invalid", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsOpeningWeekReadinessMessage(Godot.Collections.Dictionary message)
+    {
+        if (message == null)
+            return false;
+
+        var type = FmtString(GetFirstNonNil(message, "type"), "");
+        return string.Equals(type, "opening_week_readiness", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsInjuryDepthAdvisoryMessage(Godot.Collections.Dictionary message)
+    {
+        if (message == null)
+            return false;
+
+        var type = FmtString(GetFirstNonNil(message, "type"), "");
+        return string.Equals(type, "injury_depth_advisory", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsWaiverClaimConfirmationMessage(Godot.Collections.Dictionary message)
+    {
+        if (message == null)
+            return false;
+
+        var type = FmtString(GetFirstNonNil(message, "type"), "");
+        return string.Equals(type, "waiver_claim_confirmation", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsPostseasonPendingMessage(Godot.Collections.Dictionary message)
@@ -9700,6 +14788,7 @@ public partial class DashboardController : Control
             _overviewActionButton.Text = "Continue";
             _overviewActionButton.TooltipText = "";
         }
+        RefreshInboxDesk();
     }
 
     private string GetMessageId(Godot.Collections.Dictionary message)
@@ -9915,7 +15004,43 @@ public partial class DashboardController : Control
                 return false;
         }
 
+        var status = _rosterStatusFilterValue ?? "All statuses";
+        if (!string.Equals(status, "All statuses", StringComparison.OrdinalIgnoreCase))
+        {
+            var available = GetBoolValue(GetFirstNonNil(row.Source, "is_available"), true);
+            var injury = SafeString(row.Source, "injury", "");
+            var role = SafeString(row.Source, "depth_role", "");
+            if (string.Equals(status, "Available", StringComparison.OrdinalIgnoreCase) && !available) return false;
+            if (string.Equals(status, "Injured", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(injury)) return false;
+            if (string.Equals(status, "Unavailable", StringComparison.OrdinalIgnoreCase) && available) return false;
+            if (string.Equals(status, "Starter", StringComparison.OrdinalIgnoreCase) && !role.Contains("starter", StringComparison.OrdinalIgnoreCase)) return false;
+            if (string.Equals(status, "Depth", StringComparison.OrdinalIgnoreCase) && role.Contains("starter", StringComparison.OrdinalIgnoreCase)) return false;
+        }
+
         return true;
+    }
+
+    private void OnRosterStatusFilterItemSelected(long index)
+    {
+        if (_suppressRosterFilterEvents || _rosterStatusFilter == null) return;
+        _rosterStatusFilterValue = index >= 0 && index < _rosterStatusFilter.ItemCount ? _rosterStatusFilter.GetItemText((int)index) : "All statuses";
+        SaveRosterFilters(); ApplyRosterFilters();
+    }
+
+    private static string GetRosterHealthText(PlayerRow row)
+    {
+        var available = GetBoolValue(GetFirstNonNil(row.Source, "is_available"), true);
+        var injury = SafeString(row.Source, "injury", "");
+        var days = GetIntValue(GetFirstNonNil(row.Source, "injury_days_remaining"), 0);
+        if (!available) return string.IsNullOrWhiteSpace(injury) ? "Unavailable" : days > 0 ? $"{injury} · {days}d" : injury;
+        return "Available";
+    }
+
+    private static string GetRosterMoraleText(PlayerRow row)
+    {
+        var morale = GetIntValue(GetFirstNonNil(row.Source, "morale"), -1);
+        var trend = SafeString(row.Source, "morale_trend", "Unavailable");
+        return morale < 0 ? "Unavailable" : $"{morale} · {trend}";
     }
 
     private static bool MatchesPosFilter(string pos, string filter)
@@ -9977,8 +15102,10 @@ public partial class DashboardController : Control
     private List<RosterColumn> GetVisibleColumns()
     {
         var visible = new List<RosterColumn>();
-        foreach (var column in _columns)
+        foreach (var id in _rosterColumnOrder)
         {
+            var column = GetColumnById(id);
+            if (column == null) continue;
             var isVisible = _columnVisibility.TryGetValue(column.Id, out var visibleFlag)
                 ? visibleFlag
                 : column.DefaultVisible;
@@ -10002,8 +15129,8 @@ public partial class DashboardController : Control
             var column = visibleColumns[i];
             _rosterTree.SetColumnTitle(i, column.Title);
             _rosterTree.SetColumnExpand(i, column.Expand);
-            if (column.Width > 0)
-                _rosterTree.SetColumnCustomMinimumWidth(i, column.Width);
+            var width = _rosterColumnWidths.TryGetValue(column.Id, out var savedWidth) ? savedWidth : column.Width;
+            if (width > 0) _rosterTree.SetColumnCustomMinimumWidth(i, width);
         }
 
         BuildRosterTree();
@@ -10023,7 +15150,13 @@ public partial class DashboardController : Control
                 ? isVisible
                 : column.DefaultVisible;
             _popupColumns.SetItemChecked(i, visible);
+            if (string.Equals(column.Id, "player", StringComparison.OrdinalIgnoreCase))
+                _popupColumns.SetItemDisabled(i, true);
         }
+        _popupColumns.AddSeparator();
+        _popupColumns.AddItem("Move selected column left", 9001);
+        _popupColumns.AddItem("Move selected column right", 9002);
+        _popupColumns.AddItem("Reset roster view", 9003);
     }
 
     private void OnColumnsPressed()
@@ -10031,6 +15164,8 @@ public partial class DashboardController : Control
         if (_btnColumns == null || _popupColumns == null)
             return;
 
+        CaptureRosterColumnWidths();
+        SaveColumnVisibility();
         PopulateColumnsMenu();
         var pos = (Vector2I)_btnColumns.GlobalPosition + new Vector2I(0, (int)_btnColumns.Size.Y);
         _popupColumns.Position = pos;
@@ -10076,25 +15211,49 @@ public partial class DashboardController : Control
             _rosterSearch.Text = "";
         if (_posFilter != null)
             _posFilter.Select(0);
+        if (_rosterStatusFilter != null)
+            _rosterStatusFilter.Select(0);
         _suppressRosterFilterEvents = false;
 
         _rosterSearchText = "";
         _posFilterValue = PosFilterOptions[0];
+        _rosterStatusFilterValue = "All statuses";
         SaveRosterFilters();
         ApplyRosterFilters();
     }
 
     private void OnColumnMenuIdPressed(long id)
     {
+        if (id >= 9001)
+        {
+            if (id == 9003)
+            {
+                _rosterColumnOrder.Clear();
+                _rosterColumnOrder.AddRange(new[] { "player", "age", "position_role", "contract", "health", "morale", "scout_overall" });
+                _rosterColumnOrder.AddRange(_columns.Select(column => column.Id).Where(columnId => !_rosterColumnOrder.Contains(columnId, StringComparer.OrdinalIgnoreCase)));
+                foreach (var column in _columns) _columnVisibility[column.Id] = column.DefaultVisible;
+                _columnVisibility["player"] = true;
+            }
+            else if (!string.IsNullOrWhiteSpace(_lastRosterColumnId) && !string.Equals(_lastRosterColumnId, "player", StringComparison.OrdinalIgnoreCase))
+            {
+                var oldIndex = _rosterColumnOrder.FindIndex(columnId => string.Equals(columnId, _lastRosterColumnId, StringComparison.OrdinalIgnoreCase));
+                var nextIndex = id == 9001 ? oldIndex - 1 : oldIndex + 1;
+                if (oldIndex > 0 && nextIndex > 0 && nextIndex < _rosterColumnOrder.Count)
+                {
+                    (_rosterColumnOrder[oldIndex], _rosterColumnOrder[nextIndex]) = (_rosterColumnOrder[nextIndex], _rosterColumnOrder[oldIndex]);
+                }
+            }
+            ApplyColumnVisibility(); SaveColumnVisibility(); return;
+        }
         var columnIndex = (int)id;
         if (columnIndex < 0 || columnIndex >= _columns.Count)
             return;
 
-        var column = _columns[columnIndex];
-        var current = _columnVisibility.TryGetValue(column.Id, out var isVisible)
+        var selectedColumn = _columns[columnIndex];
+        var current = _columnVisibility.TryGetValue(selectedColumn.Id, out var isVisible)
             ? isVisible
-            : column.DefaultVisible;
-        _columnVisibility[column.Id] = !current;
+            : selectedColumn.DefaultVisible;
+        _columnVisibility[selectedColumn.Id] = !current;
 
         ApplyColumnVisibility();
         PopulateColumnsMenu();
@@ -10108,6 +15267,9 @@ public partial class DashboardController : Control
             return;
 
         var columnDef = visibleColumns[(int)column];
+        _lastRosterColumnId = columnDef.Id;
+        CaptureRosterColumnWidths();
+        SaveColumnVisibility();
         if (!columnDef.Sortable)
             return;
 
@@ -10128,6 +15290,17 @@ public partial class DashboardController : Control
 
         _rosterTree.DeselectAll();
         SetReportPlaceholder("Select a player to view the scout report.");
+    }
+
+    private void CaptureRosterColumnWidths()
+    {
+        if (_rosterTree == null) return;
+        var visible = GetVisibleColumns();
+        for (var index = 0; index < visible.Count; index++)
+        {
+            var width = _rosterTree.GetColumnWidth(index);
+            if (width > 0) _rosterColumnWidths[visible[index].Id] = Math.Clamp(width, 48, 360);
+        }
     }
 
     private void BuildRosterRows()
@@ -10213,9 +15386,25 @@ public partial class DashboardController : Control
             {
                 var column = visibleColumns[colIndex];
                 item.SetText(colIndex, column.Getter(player));
+                item.SetCustomBgColor(colIndex, i % 2 == 0 ? new Color("0b1a28") : new Color("0d2031"));
+                if (IsNumericRosterColumn(column.Id))
+                    item.SetTextAlignment(colIndex, HorizontalAlignment.Right);
+                if (string.Equals(column.Id, "health", StringComparison.OrdinalIgnoreCase))
+                {
+                    var health = column.Getter(player);
+                    item.SetCustomColor(colIndex, health.StartsWith("Available", StringComparison.OrdinalIgnoreCase) ? new Color("8fcf98") : new Color("f0c96a"));
+                }
+                else if (string.Equals(column.Id, "morale", StringComparison.OrdinalIgnoreCase))
+                {
+                    var morale = GetIntValue(GetFirstNonNil(player.Source, "morale"), -1);
+                    item.SetCustomColor(colIndex, morale < 0 ? new Color("9cadb8") : morale < 40 ? new Color("e58b7a") : new Color("c5d1d8"));
+                }
             }
         }
     }
+
+    private static bool IsNumericRosterColumn(string id)
+        => id is "age" or "ovr" or "potential" or "salary" or "fatigue" or "pass_yd" or "rush_yd" or "rec_yd" or "tackles" or "sacks";
 
     private void OnRosterItemSelected(TreeItem selected)
     {
@@ -10341,25 +15530,35 @@ public partial class DashboardController : Control
 
     private void UpdateReportPanel(Godot.Collections.Dictionary player)
     {
+        if (_rosterPane != null)
+            _rosterPane.Visible = false;
         if (_playerReportPanel != null)
+        {
             _playerReportPanel.Visible = true;
+            _playerReportPanel.CustomMinimumSize = Vector2.Zero;
+        }
 
         var pos = GetString(player, "position");
         var name = GetString(player, "name");
         var age = GetAgeValue(player);
 
         var displayName = string.IsNullOrWhiteSpace(name) ? "Player" : name;
+        if (_squadWorkspaceHeader != null)
+            _squadWorkspaceHeader.Text = $"TEAM  >  ROSTER  >  {displayName.ToUpperInvariant()}";
         var ageText = age > 0 ? age.ToString() : "?";
-        var abilityLabel = GetAbilityLabel(GetOverallValue(player));
-        var upsideLabel = GetUpsideLabel(GetPotValueInt(player));
         var confidenceValue = GetFirstNonNil(player, "confidence", "scout_confidence", "scouting_confidence");
         var confidence = FmtString(confidenceValue, "");
-        if (string.IsNullOrWhiteSpace(confidence))
-            confidence = "Med";
 
         var header = string.IsNullOrWhiteSpace(pos)
-            ? $"{displayName}, Age {ageText} - {abilityLabel} | {upsideLabel} ({confidence})"
-            : $"{displayName} ({pos}), Age {ageText} - {abilityLabel} | {upsideLabel} ({confidence})";
+            ? $"{displayName}  ·  AGE {ageText}"
+            : $"{displayName}  ·  {pos}  ·  AGE {ageText}";
+        if (!string.IsNullOrWhiteSpace(confidence))
+            header += $"  ·  SCOUT CONFIDENCE {confidence.ToUpperInvariant()}";
+
+        var nativePlayer = _nativeGameCoreContext?.ActiveLeague?.Teams.SelectMany(team => team?.Roster ?? Enumerable.Empty<PlayerState>()).FirstOrDefault(candidate => string.Equals(candidate?.PlayerId, GetPlayerId(player), StringComparison.OrdinalIgnoreCase));
+        var playerTeam = _nativeGameCoreContext?.ActiveLeague?.Teams.FirstOrDefault(team => team.Roster.Any(candidate => candidate.PlayerId == nativePlayer?.PlayerId));
+        if (nativePlayer != null)
+            header += $"\n{playerTeam?.Name ?? "Team unavailable"}  ·  {nativePlayer.Status}  ·  Morale {nativePlayer.Morale}/100 ({nativePlayer.MoraleTrend})";
 
         if (_lblPlayerHeader != null)
             _lblPlayerHeader.Text = header;
@@ -10368,17 +15567,86 @@ public partial class DashboardController : Control
             ? FmtString((Variant)player["scout_summary"], "")
             : "";
         if (_rtlScoutSummary != null)
-            _rtlScoutSummary.Text = string.IsNullOrWhiteSpace(summary) ? "No scout summary available." : summary;
+            _rtlScoutSummary.Text = "STAFF EVALUATION\n" + $"Overall: {SafeString(player, "estimated_overall_range", "Unavailable")} | Potential: {SafeString(player, "estimated_potential_range", "Unavailable")} | Confidence: {SafeString(player, "scouting_confidence", "Low")} | Fatigue: {nativePlayer?.Fatigue.ToString() ?? "Unavailable"}\n\nSCOUT & COACH ASSESSMENTS\n" + BuildPlayerInspectorSummary(player, summary);
 
         var report = player.ContainsKey("scout_report")
             ? FmtString((Variant)player["scout_report"], "")
             : "";
         if (_rtlScoutReport != null)
-            _rtlScoutReport.Text = string.IsNullOrWhiteSpace(report) ? "No scout report available." : report;
+        {
+            var trait = string.IsNullOrWhiteSpace(nativePlayer?.Trait) ? "No recorded trait." : nativePlayer.Trait;
+            _rtlScoutReport.Text = $"TRAITS & PERSONALITY\n{trait}\n\nDETAILED SCOUT REPORT\n"
+                + (string.IsNullOrWhiteSpace(report) ? "No staff scouting narrative has been recorded for this player." : report)
+                + $"\n\n{BuildPlayerRecentHistory(nativePlayer)}";
+        }
 
         UpdateRosterEvaluationFeedback(GetPlayerId(player));
         UpdatePlayerStatisticsHistory(GetPlayerId(player));
         UpdateTags(player);
+    }
+
+    private string BuildPlayerRecentHistory(PlayerState player)
+    {
+        if (player == null)
+            return "RECENT HISTORY\nPlayer history is unavailable.";
+
+        var lines = new List<string> { "RECENT HISTORY" };
+        var activeInjury = player.CurrentInjury?.IsActive == true
+            ? $"Current injury: {player.CurrentInjury.Name} · {player.CurrentInjury.DaysRemaining} day(s) remaining"
+            : "Health: no active injury";
+        lines.Add(activeInjury);
+
+        foreach (var injury in (player.InjuryHistory ?? new List<PlayerInjuryRecord>())
+                     .OrderByDescending(record => record.SeasonYear)
+                     .ThenByDescending(record => record.OccurredOn)
+                     .Take(3))
+        {
+            var recovery = string.IsNullOrWhiteSpace(injury.RecoveredOn) ? "recovery pending" : $"recovered {injury.RecoveredOn}";
+            lines.Add($"{injury.SeasonYear}: {injury.Name} · {injury.DaysOut} day(s) · {recovery}");
+        }
+
+        foreach (var development in (player.DevelopmentHistory ?? new List<PlayerDevelopmentRecord>())
+                     .OrderByDescending(record => record.SeasonYear)
+                     .Take(3))
+        {
+            var direction = development.OverallAfter > development.OverallBefore ? "Improved"
+                : development.OverallAfter < development.OverallBefore ? "Regressed"
+                : "Stable";
+            lines.Add($"{development.SeasonYear}: {direction} · {development.Note}");
+        }
+
+        var transactions = _nativeGameCoreContext?.ActiveLeague?.Transactions?
+            .Where(record => string.Equals(record.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(record => record.SeasonYear)
+            .ThenByDescending(record => record.DateLabel)
+            .Take(3)
+            .ToList() ?? new List<TransactionRecord>();
+        foreach (var transaction in transactions)
+            lines.Add($"{transaction.DateLabel}: {transaction.Type} · {(string.IsNullOrWhiteSpace(transaction.Details) ? transaction.TeamName : transaction.Details)}");
+
+        if (lines.Count == 2 && player.CurrentInjury?.IsActive != true)
+            lines.Add("No archived development, injury, or transaction events are recorded yet.");
+        return string.Join("\n", lines);
+    }
+
+    private string BuildPlayerInspectorSummary(Godot.Collections.Dictionary player, string scoutSummary)
+    {
+        var playerId = GetPlayerId(player);
+        var depthRole = SafeString(player, "depth_role", "Unassigned");
+        var fatigue = SafeIntDisplay(player, "fatigue", fallback: "0");
+        var available = GetBoolValue(GetFirstNonNil(player, "is_available"), true);
+        var injury = SafeString(player, "injury", "");
+        var injuryDays = SafeIntDisplay(player, "injury_days_remaining", fallback: "0");
+        var availability = available ? "Available" : string.IsNullOrWhiteSpace(injury) ? "Unavailable" : $"{injury} ({injuryDays}d)";
+        var nativePlayer = _nativeGameCoreContext?.ActiveLeague?.Teams
+            .SelectMany(team => team?.Roster ?? Enumerable.Empty<PlayerState>())
+            .FirstOrDefault(candidate => string.Equals(candidate?.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
+        var contract = nativePlayer?.Contract;
+        var contractText = contract == null || contract.AnnualSalary <= 0m
+            ? "Contract: unavailable"
+            : $"Contract: {contract.ContractType} | ${contract.AnnualSalary / 1_000_000m:0.00}M | {contract.YearsRemaining} yr";
+        var overview = $"Depth: {depthRole} | {availability} | Fatigue: {fatigue}/100\n{contractText}";
+        return string.IsNullOrWhiteSpace(scoutSummary) ? overview : $"{overview}\n{scoutSummary}";
     }
 
     private void UpdatePlayerStatisticsHistory(string playerId)
@@ -10408,7 +15676,7 @@ public partial class DashboardController : Control
             lines.Add("No archived seasons yet.");
         else
             lines.AddRange(response.CareerSeasons.Select(stats => $"{stats.SeasonYear}: {FormatPlayerStatistics(stats)}"));
-        _rtlPlayerStats.Text = string.Join("\n", lines);
+        _rtlPlayerStats.Text = "CURRENT-YEAR STATS\n" + string.Join("\n", lines);
     }
 
     private static string FormatPlayerStatistics(PlayerSeasonHistoryDto stats)
@@ -10492,10 +15760,14 @@ public partial class DashboardController : Control
 
     private void SetReportPlaceholder(string message)
     {
+        if (_rosterPane != null)
+            _rosterPane.Visible = true;
         if (_playerReportPanel != null)
             _playerReportPanel.Visible = false;
+        if (_squadWorkspaceHeader != null)
+            _squadWorkspaceHeader.Text = "TEAM  >  ROSTER";
         if (_lblPlayerHeader != null)
-            _lblPlayerHeader.Text = "Player Report";
+            _lblPlayerHeader.Text = "Player Profile";
         if (_rtlScoutSummary != null)
             _rtlScoutSummary.Text = message;
         if (_rtlScoutReport != null)
@@ -10553,6 +15825,130 @@ public partial class DashboardController : Control
         if (pot <= 94)
             return "All-Pro Upside";
         return "Elite Upside";
+    }
+
+    private readonly record struct DepthFieldSlot(string PlayerId, string Name, string Position, bool Available);
+    private readonly record struct DevelopmentRow(string PlayerId, string Name, string Position, int Age, int Overall, string Trend, string Movement, string Notes);
+    private readonly record struct TeamHistorySeasonRow(int Season, string Record, string DivisionFinish, string PlayoffResult, string ChampionshipResult, SeasonHistoryRecord Source);
+    private readonly record struct LeagueNewsStory(string Headline, string Summary, string Context, string TeamId, string PlayerId, string Kind);
+    private readonly record struct StaffRow(string Department, string Role, string CoachId, string Member, string Tendency, string Aptitude, string Age, bool IsVacant)
+    {
+        public static StaffRow FromCoach(string department, string role, CoachState coach)
+        {
+            if (coach == null)
+                return new StaffRow(department, role, string.Empty, "VACANT", "Tendency unavailable", "Aptitude unavailable", "Unavailable", true);
+            return new StaffRow(
+                department,
+                role,
+                coach.CoachId,
+                string.IsNullOrWhiteSpace(coach.Name) ? "Assigned staff member unavailable" : coach.Name,
+                "Tendency unavailable",
+                coach.Overall > 0 ? $"Overall {coach.Overall} · role aptitude unavailable" : "Aptitude unavailable",
+                coach.Age > 0 ? coach.Age.ToString() : "Unavailable",
+                false);
+        }
+    }
+    private readonly record struct InjuryRow(string PlayerId, string Name, string Position, string Availability, string InjuryStatus, string Recovery)
+    {
+        public static InjuryRow FromPlayer(PlayerState player, bool isInjuredReserve)
+        {
+            var injury = !string.IsNullOrWhiteSpace(player?.CurrentInjury?.Name)
+                ? player.CurrentInjury.Name
+                : !string.IsNullOrWhiteSpace(player?.Injury)
+                    ? player.Injury
+                    : "Injury detail unavailable";
+            var daysRemaining = player?.CurrentInjury?.DaysRemaining ?? 0;
+            var recovery = daysRemaining > 0
+                ? $"{daysRemaining} day{(daysRemaining == 1 ? string.Empty : "s")} remaining"
+                : "Recovery estimate unavailable";
+            var guidance = isInjuredReserve
+                ? "IR: plan without this player; review activation when healthy."
+                : daysRemaining <= 0
+                    ? "Review availability before changing depth."
+                    : daysRemaining <= 3
+                        ? "Near return: keep the current backup ready."
+                        : daysRemaining <= 7
+                            ? "Short absence: review the next depth option."
+                            : "Extended absence: consider a depth-chart or roster response.";
+            var availability = isInjuredReserve
+                ? "Injured Reserve"
+                : PlayerInjuryService.IsAvailableForGame(player)
+                    ? "Available"
+                    : string.IsNullOrWhiteSpace(player?.Status)
+                        ? "Availability unavailable"
+                        : player.Status;
+            var rosterStatus = string.IsNullOrWhiteSpace(player?.Status) ? "Status unavailable" : player.Status;
+            var injuryStatus = isInjuredReserve ? $"{injury} · IR" : $"{injury} · {rosterStatus}";
+            return new InjuryRow(player?.PlayerId ?? string.Empty, player?.Name ?? "Unknown player", player?.Position ?? "—", availability, injuryStatus, $"{recovery} · {guidance}");
+        }
+    }
+
+    private sealed partial class DepthFieldDiagram : Control
+    {
+        private readonly List<DepthFieldSlot> _slots = new();
+        private readonly List<(Rect2 rect, string playerId)> _hitAreas = new();
+        public string SelectedPlayerId { get; set; } = "";
+        public Action<string> PlayerPressed { get; set; }
+
+        public DepthFieldDiagram()
+        {
+            TooltipText = "Starting offense and defense. Select a player to reveal their depth assignment.";
+            MouseFilter = MouseFilterEnum.Stop;
+        }
+
+        public void SetSlots(IEnumerable<DepthFieldSlot> slots)
+        {
+            _slots.Clear(); if (slots != null) _slots.AddRange(slots); QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            var area = GetRect(); var size = Size;
+            DrawRect(new Rect2(Vector2.Zero, size), new Color("08252c"));
+            for (var line = 1; line < 10; line++)
+            {
+                var y = size.Y * line / 10f;
+                DrawLine(new Vector2(12, y), new Vector2(size.X - 12, y), new Color("4d8585", 0.33f), 1f);
+            }
+            DrawString(ThemeDB.FallbackFont, new Vector2(14, 22), "STARTING LINEUP", HorizontalAlignment.Left, -1, 13, new Color("d7e0e4"));
+            DrawString(ThemeDB.FallbackFont, new Vector2(14, size.Y * .5f), "OFFENSE", HorizontalAlignment.Left, -1, 11, new Color("8fcf98"));
+            DrawString(ThemeDB.FallbackFont, new Vector2(14, size.Y * .78f), "DEFENSE", HorizontalAlignment.Left, -1, 11, new Color("8fcf98"));
+            _hitAreas.Clear();
+            var offense = _slots.Where(slot => IsOffense(slot.Position)).ToList();
+            var defense = _slots.Where(slot => !IsOffense(slot.Position)).ToList();
+            DrawSlots(offense, size.Y * .28f, size, true); DrawSlots(defense, size.Y * .68f, size, false);
+        }
+
+        private void DrawSlots(List<DepthFieldSlot> slots, float centerY, Vector2 size, bool offense)
+        {
+            for (var i = 0; i < slots.Count; i++)
+            {
+                var x = 42 + (size.X - 84) * (i + 0.5f) / Math.Max(1, slots.Count);
+                var y = centerY + ((i % 3) - 1) * 38;
+                var rect = new Rect2(x - 40, y - 17, 80, 34);
+                var selected = string.Equals(slots[i].PlayerId, SelectedPlayerId, StringComparison.OrdinalIgnoreCase);
+                var color = selected ? new Color("d2a74b") : slots[i].Available ? new Color("1c5960") : new Color("6d423c");
+                DrawStyleBox(CreateSlotStyle(color, selected), rect);
+                DrawString(ThemeDB.FallbackFont, new Vector2(rect.Position.X + 5, rect.Position.Y + 13), slots[i].Position, HorizontalAlignment.Left, 70, 10, new Color("f4eddf"));
+                var shortName = slots[i].Name.Length > 11 ? slots[i].Name[..11] : slots[i].Name;
+                DrawString(ThemeDB.FallbackFont, new Vector2(rect.Position.X + 5, rect.Position.Y + 27), shortName, HorizontalAlignment.Left, 72, 10, new Color("d7e0e4"));
+                _hitAreas.Add((rect, slots[i].PlayerId));
+            }
+        }
+
+        public override void _GuiInput(InputEvent @event)
+        {
+            if (@event is InputEventMouseButton mouse && mouse.Pressed && mouse.ButtonIndex == MouseButton.Left)
+                foreach (var area in _hitAreas)
+                    if (area.rect.HasPoint(mouse.Position)) { PlayerPressed?.Invoke(area.playerId); AcceptEvent(); return; }
+        }
+
+        private static bool IsOffense(string position) => position is "QB" or "RB" or "FB" or "WR" or "TE" or "LT" or "LG" or "C" or "RG" or "RT";
+        private static StyleBoxFlat CreateSlotStyle(Color fill, bool selected)
+        {
+            var style = new StyleBoxFlat { BgColor = fill, BorderColor = selected ? new Color("ffe3a1") : new Color("70a7a7") };
+            style.BorderWidthLeft = style.BorderWidthRight = style.BorderWidthTop = style.BorderWidthBottom = selected ? 2 : 1; return style;
+        }
     }
 
     private sealed class PlayerRow

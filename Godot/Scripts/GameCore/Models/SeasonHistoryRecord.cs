@@ -16,9 +16,22 @@ public sealed class SeasonHistoryRecord
     public List<SeasonTeamRecord> TeamRecords { get; set; } = new();
     public List<SeasonPlayoffSeedRecord> PlayoffSeeds { get; set; } = new();
     public List<SeasonPlayoffResultRecord> PlayoffResults { get; set; } = new();
+    public List<SeasonAwardRecord> Awards { get; set; } = new();
     public int TotalRegularSeasonGames { get; set; }
     public int TotalPlayoffGames { get; set; }
     public string GeneratedAtLabel { get; set; } = "";
+}
+
+public sealed class SeasonAwardRecord
+{
+    public string AwardName { get; set; } = "";
+    public string PlayerId { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string TeamId { get; set; } = "";
+    public string TeamName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public int Score { get; set; }
+    public string Summary { get; set; } = "";
 }
 
 public sealed class SeasonTeamRecord

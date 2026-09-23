@@ -17,7 +17,9 @@ public sealed class PlayerState
     public List<PlayerInjuryRecord> InjuryHistory { get; set; } = new();
     public int Morale { get; set; } = 50;
     public string MoraleTrend { get; set; } = "Stable";
+    public string Trait { get; set; } = "";
     public PlayerContractState Contract { get; set; } = new();
     public PlayerSeasonStats SeasonStats { get; set; } = new();
     public List<PlayerSeasonStats> CareerStats { get; set; } = new();
+    public List<PlayerDevelopmentRecord> DevelopmentHistory { get; set; } = new();
 }

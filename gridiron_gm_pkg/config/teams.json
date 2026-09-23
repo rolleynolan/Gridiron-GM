@@ -17,7 +17,7 @@
   },
   {
     "city": "Miami",
-    "name": "Tritons",
+    "name": "Neon",
     "abbreviation": "MIA",
     "conference": "Atlas",
     "division": "East",
@@ -41,7 +41,7 @@
   },
   {
     "city": "Tennessee",
-    "name": "Renegades",
+    "name": "Copperheads",
     "abbreviation": "TEN",
     "conference": "Atlas",
     "division": "South",
@@ -49,7 +49,7 @@
   },
   {
     "city": "Las Vegas",
-    "name": "Vipers",
+    "name": "Spades",
     "abbreviation": "LV",
     "conference": "Atlas",
     "division": "West",
@@ -81,7 +81,7 @@
   },
   {
     "city": "Los Angeles",
-    "name": "Paladins",
+    "name": "Condors",
     "abbreviation": "LA",
     "conference": "Nova",
     "division": "West",
@@ -105,7 +105,7 @@
   },
   {
     "city": "Detroit",
-    "name": "Mechanics",
+    "name": "Forge",
     "abbreviation": "DET",
     "conference": "Nova",
     "division": "North",
@@ -113,7 +113,7 @@
   },
   {
     "city": "Seattle",
-    "name": "Eclipse",
+    "name": "Orcas",
     "abbreviation": "SEA",
     "conference": "Nova",
     "division": "West",
@@ -129,7 +129,7 @@
   },
   {
     "city": "Cleveland",
-    "name": "Vanguards",
+    "name": "Rhinos",
     "abbreviation": "CLE",
     "conference": "Atlas",
     "division": "North",
@@ -162,7 +162,7 @@
   {
     "city": "New Orleans",
     "name": "Specters",
-    "abbreviation": "NO",
+    "abbreviation": "NOR",
     "conference": "Atlas",
     "division": "South",
     "id": "5d63bda8-3bf0-41b7-a25c-40582dd4bfd5"
@@ -185,7 +185,7 @@
   },
   {
     "city": "Kansas City",
-    "name": "Kings",
+    "name": "Wolves",
     "abbreviation": "KC",
     "conference": "Atlas",
     "division": "North",
@@ -217,7 +217,7 @@
   },
   {
     "city": "Washington",
-    "name": "Generals",
+    "name": "Wardens",
     "abbreviation": "WAS",
     "conference": "Nova",
     "division": "East",
@@ -241,7 +241,7 @@
   },
   {
     "city": "San Diego",
-    "name": "Armada",
+    "name": "Riptide",
     "abbreviation": "SD",
     "conference": "Atlas",
     "division": "West",
@@ -249,7 +249,7 @@
   },
   {
     "city": "Portland",
-    "name": "Pioneers",
+    "name": "Stags",
     "abbreviation": "POR",
     "conference": "Nova",
     "division": "West",

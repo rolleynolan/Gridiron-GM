@@ -40,7 +40,7 @@ public sealed class DepthChartService
 
         var chart = BuildDepthChart(team);
         var issues = chart
-            .Where(position => position.Players.Count < position.RequiredStarters)
+            .Where(position => position.Players.Count(player => player.IsAvailable) < position.RequiredStarters)
             .Select(position => $"Missing starting {position.Position}.")
             .ToList();
 
@@ -84,6 +84,8 @@ public sealed class DepthChartService
             };
         }
 
+        team.DepthChartLockedPositions ??= new List<string>();
+        var priorChart = team.DepthChart.ToDictionary(pair => pair.Key, pair => pair.Value?.ToList() ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
         team.DepthChart.Clear();
         foreach (var position in team.Roster
                      .Select(player => player.Position)
@@ -91,19 +93,47 @@ public sealed class DepthChartService
                      .OrderBy(position => FootballPositionOrder.GetSortOrder(position))
                      .ThenBy(position => position, StringComparer.OrdinalIgnoreCase))
         {
-            team.DepthChart[position] = team.Roster
+            var defaultOrder = team.Roster
                 .Where(player => string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(PlayerInjuryService.IsAvailableForGame)
                 .ThenByDescending(player => player.Overall)
                 .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
                 .Select(player => player.PlayerId)
                 .ToList();
+            if (team.DepthChartLockedPositions.Contains(position, StringComparer.OrdinalIgnoreCase)
+                && priorChart.TryGetValue(position, out var savedOrder))
+            {
+                var valid = new HashSet<string>(defaultOrder, StringComparer.OrdinalIgnoreCase);
+                var lockedOrder = savedOrder.Where(valid.Contains).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                lockedOrder.AddRange(defaultOrder.Where(playerId => !lockedOrder.Contains(playerId, StringComparer.OrdinalIgnoreCase)));
+                team.DepthChart[position] = lockedOrder;
+            }
+            else
+                team.DepthChart[position] = defaultOrder;
         }
 
         return GetTeamDepthChart(team.TeamId);
     }
 
-    public TeamDepthChartResponse UpdateDepthChart(string action, string position, string playerId, string teamId = null)
+    public TeamDepthChartResponse TogglePositionLock(string position, string teamId = null)
+    {
+        var league = _context.ActiveLeague;
+        var team = GameCoreStateHelper.ResolveTeam(league, teamId);
+        if (team == null)
+            return new TeamDepthChartResponse { Ok = false, Error = "Team not found." };
+        if (string.IsNullOrWhiteSpace(position) || !team.DepthChart.ContainsKey(position))
+            return new TeamDepthChartResponse { Ok = false, Error = "Select a valid depth-chart position first." };
+
+        team.DepthChartLockedPositions ??= new List<string>();
+        var existing = team.DepthChartLockedPositions.FindIndex(value => string.Equals(value, position, StringComparison.OrdinalIgnoreCase));
+        if (existing >= 0)
+            team.DepthChartLockedPositions.RemoveAt(existing);
+        else
+            team.DepthChartLockedPositions.Add(position);
+        return GetTeamDepthChart(team.TeamId);
+    }
+
+    public TeamDepthChartResponse UpdateDepthChart(string action, string position, string playerId, string teamId = null, string targetPlayerId = null)
     {
         var league = _context.ActiveLeague;
         if (league == null)
@@ -182,6 +212,22 @@ public sealed class DepthChartService
                     group.Insert(0, playerId);
                 }
                 break;
+            case "move_before":
+                var targetIndex = group.FindIndex(candidate => string.Equals(candidate, targetPlayerId, StringComparison.OrdinalIgnoreCase));
+                if (targetIndex < 0)
+                    return new TeamDepthChartResponse { Ok = false, Error = "Drop target is not available in that position group." };
+                group.RemoveAt(index);
+                targetIndex = group.FindIndex(candidate => string.Equals(candidate, targetPlayerId, StringComparison.OrdinalIgnoreCase));
+                group.Insert(Math.Max(0, targetIndex), playerId);
+                break;
+            case "move_after":
+                var afterTargetIndex = group.FindIndex(candidate => string.Equals(candidate, targetPlayerId, StringComparison.OrdinalIgnoreCase));
+                if (afterTargetIndex < 0)
+                    return new TeamDepthChartResponse { Ok = false, Error = "Drop target is not available in that position group." };
+                group.RemoveAt(index);
+                afterTargetIndex = group.FindIndex(candidate => string.Equals(candidate, targetPlayerId, StringComparison.OrdinalIgnoreCase));
+                group.Insert(Math.Min(group.Count, afterTargetIndex + 1), playerId);
+                break;
             default:
                 return new TeamDepthChartResponse
                 {
@@ -200,7 +246,7 @@ public sealed class DepthChartService
         return GetTeamDepthChart(team.TeamId);
     }
 
-    private static List<DepthChartPositionDto> BuildDepthChart(TeamState team)
+    private List<DepthChartPositionDto> BuildDepthChart(TeamState team)
     {
         var playersById = team.Roster.ToDictionary(player => player.PlayerId, StringComparer.OrdinalIgnoreCase);
         var output = new List<DepthChartPositionDto>();
@@ -229,19 +275,33 @@ public sealed class DepthChartService
             {
                 if (!playersById.TryGetValue(ids[index], out var player))
                     continue;
-                if (!PlayerInjuryService.IsAvailableForGame(player))
-                    continue;
+                var isAvailable = PlayerInjuryService.IsAvailableForGame(player);
 
+                var evaluation = PlayerEvaluationProjectionService.Evaluate(_context.ActiveLeague, player);
                 players.Add(new DepthChartPlayerDto
                 {
                     PlayerId = player.PlayerId,
                     Name = player.Name,
                     Overall = player.Overall,
+                    EstimatedOverall = evaluation.EstimatedOverall,
+                    EstimatedOverallRange = evaluation.OverallRange,
+                    ScoutingConfidence = evaluation.Confidence,
                     Status = player.Status,
                     Injury = player.Injury,
                     InjuryDaysRemaining = player.CurrentInjury?.DaysRemaining ?? 0,
-                    IsAvailable = true,
-                    Role = availableIndex++ < requiredStarters ? "Starter" : "Backup",
+                    IsAvailable = isAvailable,
+                    Role = !isAvailable ? "Unavailable" : availableIndex++ < requiredStarters ? "Starter" : "Backup",
+                    ContractSummary = player.Contract == null || player.Contract.AnnualSalary <= 0m
+                        ? "Unavailable"
+                        : $"${player.Contract.AnnualSalary / 1_000_000m:0.00}M · {player.Contract.YearsRemaining} yr",
+                    Morale = player.Morale,
+                    MoraleTrend = player.MoraleTrend ?? "Unavailable",
+                    Potential = player.Potential,
+                    PassingYards = player.SeasonStats?.PassingYards ?? 0,
+                    RushingYards = player.SeasonStats?.RushingYards ?? 0,
+                    ReceivingYards = player.SeasonStats?.ReceivingYards ?? 0,
+                    Tackles = player.SeasonStats?.Tackles ?? 0,
+                    Sacks = player.SeasonStats?.Sacks ?? 0,
                 });
             }
 
@@ -249,6 +309,7 @@ public sealed class DepthChartService
             {
                 Position = position,
                 RequiredStarters = requiredStarters,
+                IsLocked = team.DepthChartLockedPositions?.Contains(position, StringComparer.OrdinalIgnoreCase) == true,
                 Players = players,
             });
         }
