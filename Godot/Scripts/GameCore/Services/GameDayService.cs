@@ -242,6 +242,8 @@ public sealed class GameDayService
 
         var winner = homeScore > awayScore ? homeTeam?.Name ?? homeTeamId : awayTeam?.Name ?? awayTeamId;
         var loser = homeScore > awayScore ? awayTeam?.Name ?? awayTeamId : homeTeam?.Name ?? homeTeamId;
+        var winnerScore = Math.Max(homeScore, awayScore);
+        var loserScore = Math.Min(homeScore, awayScore);
 
         return new GameResult
         {
@@ -261,7 +263,7 @@ public sealed class GameDayService
             HomeScore = homeScore,
             AwayScore = awayScore,
             Winner = winner,
-            Summary = $"{winner} defeated {loser}, {homeScore}-{awayScore}.",
+            Summary = $"{winner} defeated {loser}, {winnerScore}-{loserScore}.",
             BoxScore = BuildBoxScore(homeTeam, awayTeam, homeScore, awayScore),
         };
     }

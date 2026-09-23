@@ -84,6 +84,32 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void AwayWinnerSummaryListsWinningScoreFirst()
+    {
+        var league = new LeagueState
+        {
+            UserTeamId = "home",
+            Teams = new List<TeamState>
+            {
+                new() { TeamId = "home", Name = "Home Club", Abbreviation = "HOM", Roster = new List<PlayerState> { new() { PlayerId = "home-qb", Position = "QB", Overall = 66 } } },
+                new() { TeamId = "away", Name = "Away Club", Abbreviation = "AWY", Roster = new List<PlayerState> { new() { PlayerId = "away-qb", Position = "QB", Overall = 65 } } },
+            },
+            Schedule = new List<ScheduledGame>
+            {
+                new() { GameId = "away-win", AbsoluteWeek = 1, PhaseWeek = 1, DayIndex = 2, Phase = "Regular Season", GameType = "regular_season", HomeTeamId = "home", AwayTeamId = "away" },
+            },
+        };
+        var context = new GameCoreContext { ActiveLeague = league };
+
+        var response = new GameDayService(context).SimulateScheduledGame("away-win", allowUserTeamGame: true);
+
+        Assert.True(response.Ok, response.Error);
+        var result = Assert.Single(league.Results);
+        Assert.True(result.AwayScore > result.HomeScore);
+        Assert.Equal($"Away Club defeated Home Club, {result.AwayScore}-{result.HomeScore}.", result.Summary);
+    }
+
+    [Fact]
     public void FailedBatchReleaseIsAtomic()
     {
         var context = Bootstrap();

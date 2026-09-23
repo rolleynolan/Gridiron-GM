@@ -86,6 +86,7 @@ All notable project changes are recorded here.
 - Added the persisted Head Coach authority foundation with the twelve approved domains, Head-Coach-only validation, canonical ownership queries, safe legacy defaults, lower-staff cleanup, expired-agreement cleanup on release or reassignment, and save/load coverage. The Staff profile now reports the current GM/Head Coach authority split while negotiation economics and demand generation remain intentionally deferred.
 - Hardened staff hiring so GameCore accepts only the seven supported organization roles, canonicalizes role names at the service boundary, and leaves the staff market unchanged when an unsupported role is requested.
 - Corrected simulated team-yardage totals so box scores derive a bounded football-scale result from scoring and average roster quality instead of incorrectly summing every player's rating into thousands of yards.
+- Corrected away-team game summaries so the winning club's score is always presented first rather than retaining home-away score order after an away victory.
 
 ### Notes
 
