@@ -80,6 +80,8 @@ All notable project changes are recorded here.
 - Added direct regression coverage for transaction atomicity, legacy-save migration, draft and waiver ownership, live-game idempotency, and tiebreak precedence; the focused production-service suite now passes 47 tests.
 - Added a headless detailed-simulation benchmark for a single game, pro week, full pro regular season, and 128-team college workload proxy, with time and managed-allocation reporting.
 - Extracted smoke/benchmark command handling into a focused dashboard partial and moved playoff and benchmark behavior into non-UI services.
+- Completed the native-only dashboard cleanup by deleting the final endpoint calls, timeout/error helpers, HTTP response parsers, and unreachable backend branches. Team selection, depth-chart changes, continue/sim-until, game simulation, completed-result loading, and box-score selection now execute only through GameCore services.
+- Expanded the game-day partial to own selected-game simulation, current matchup presentation, completed-game loading, and result selection, reducing the main dashboard controller by roughly another thousand lines.
 
 ### Notes
 

@@ -113,9 +113,9 @@ diagnostic filtering in addition to the existing franchise tests and full GameCo
 The September hardening tranche is now in place:
 
 - The previously uncommitted feature work is checkpointed into reviewable local commits, with generated output excluded.
-- The unused local HTTP client/interface and duplicate legacy profile store are removed. Native-only guards have also been
-  removed from the settings, inbox, market, roster-action, training-camp, history, save/load, live-game, and player-report
-  routes. The remaining large response-parsing branches are isolated cleanup debt and are not allowed to regain a caller.
+- The unused local HTTP client/interface and duplicate legacy profile store are removed. Native-only guards, endpoint calls,
+  response-parsing branches, timeout helpers, and HTTP/RPC error paths have been deleted from the dashboard. Settings,
+  inbox, markets, roster actions, training camp, history, save/load, live games, and player reports now have one native path.
 - Postseason selection now applies the adopted NFL division and wildcard sequence from persisted regular-season schedules:
   head-to-head, division/conference/common records, strength of victory/schedule, combined scoring ranks, net points, net
   touchdowns, and a deterministic season/team draw in place of the real-world coin toss.
@@ -128,9 +128,10 @@ The September hardening tranche is now in place:
 - Game-day commands and developer commands now live in focused dashboard partials, while playoff ordering and benchmarking
   live in non-UI services.
 
-Remaining stabilization is limited to continuing the controller extraction and deleting the last unreachable response
-parsers as their surrounding workflows move to partials. Detailed snap-engine design may proceed, but each new simulation
-stage must retain direct tests and update the benchmark baseline before expanding to all 128 colleges.
+The stabilization gate is complete. Controller extraction remains an ongoing maintainability rule rather than a blocker:
+new workspace behavior must enter a focused partial or non-UI service, and touched legacy regions should move with it.
+Detailed snap-engine design may proceed, but each new simulation stage must retain direct tests and update the benchmark
+baseline before expanding the detailed engine to all 128 colleges.
 
 ## 1. C# playable season loop
 
