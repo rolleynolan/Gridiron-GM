@@ -293,6 +293,8 @@ public sealed class GameDayService
                 ["total_yards_away"] = awayYards,
                 ["turnovers_home"] = Math.Abs(homeScore - awayScore) % 3,
                 ["turnovers_away"] = (Math.Abs(homeScore - awayScore) + 1) % 3,
+                ["touchdowns_home"] = BuildScoringSchedule(homeScore, 0).Count(score => score.Points == 7),
+                ["touchdowns_away"] = BuildScoringSchedule(awayScore, 1).Count(score => score.Points == 7),
             },
             PlayerStats = BuildPlayerStats(homeTeam, homeScore)
                 .Concat(BuildPlayerStats(awayTeam, awayScore))

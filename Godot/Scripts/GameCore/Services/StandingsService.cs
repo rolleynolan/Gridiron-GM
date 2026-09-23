@@ -104,6 +104,12 @@ public sealed class StandingsService
             standing.PointDifferential = standing.PointsFor - standing.PointsAgainst;
         }
 
-        return PlayoffService.RankStandings(standings.Values);
+        return standings.Values
+            .OrderByDescending(standing => standing.WinPct)
+            .ThenByDescending(standing => standing.PointDifferential)
+            .ThenByDescending(standing => standing.PointsFor)
+            .ThenBy(standing => standing.TeamName, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(standing => standing.TeamId, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 }

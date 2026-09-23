@@ -872,6 +872,7 @@ public sealed class PlayoffService
         }
 
         var conferenceBrackets = new List<PlayoffConferenceBracket>();
+        var tiebreakers = new PlayoffTiebreakerService(league, standings);
         foreach (var conferenceGroup in teamsByConference)
         {
             var conferenceStandings = conferenceGroup.ToList();
@@ -892,13 +893,13 @@ public sealed class PlayoffService
             }
 
             var divisionWinners = divisionGroups
-                .Select(group => RankStandings(group).First())
+                .Select(group => tiebreakers.RankDivision(group).First())
                 .ToList();
-            var rankedDivisionWinners = RankStandings(divisionWinners)
+            var rankedDivisionWinners = tiebreakers.RankConference(divisionWinners)
                 .Take(4)
                 .ToList();
             var divisionWinnerIds = new HashSet<string>(rankedDivisionWinners.Select(standing => standing.TeamId), StringComparer.OrdinalIgnoreCase);
-            var wildCards = RankStandings(conferenceStandings.Where(standing => !divisionWinnerIds.Contains(standing.TeamId)))
+            var wildCards = tiebreakers.RankWildCards(conferenceStandings.Where(standing => !divisionWinnerIds.Contains(standing.TeamId)))
                 .Take(3)
                 .ToList();
             if (rankedDivisionWinners.Count != 4 || wildCards.Count != 3)
@@ -1015,20 +1016,6 @@ public sealed class PlayoffService
             PointDifferential = standing.PointDifferential,
             PointsFor = standing.PointsFor,
         };
-    }
-
-    internal static List<TeamStanding> RankStandings(IEnumerable<TeamStanding> standings)
-    {
-        // TODO: Replace this deterministic placeholder ordering with full NFL tiebreakers.
-        return standings
-            .Where(standing => standing != null)
-            .OrderByDescending(standing => standing.WinPct)
-            .ThenByDescending(standing => standing.Wins)
-            .ThenByDescending(standing => standing.PointDifferential)
-            .ThenByDescending(standing => standing.PointsFor)
-            .ThenBy(standing => standing.TeamName, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(standing => standing.TeamId, StringComparer.OrdinalIgnoreCase)
-            .ToList();
     }
 
     private static bool IsBracketValid(PlayoffBracket bracket, LeagueState league)
