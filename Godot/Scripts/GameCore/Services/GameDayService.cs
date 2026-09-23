@@ -298,12 +298,14 @@ public sealed class GameDayService
 
     private static BoxScoreState BuildBoxScore(TeamState homeTeam, TeamState awayTeam, int homeScore, int awayScore)
     {
-        var homeYards = BuildTeamYards(homeTeam, homeScore);
-        var awayYards = BuildTeamYards(awayTeam, awayScore);
         var homeScoringSchedule = BuildScoringSchedule(homeScore, 0);
         var awayScoringSchedule = BuildScoringSchedule(awayScore, 1);
         var homeTouchdowns = homeScoringSchedule.Count(score => score.Points == 7);
         var awayTouchdowns = awayScoringSchedule.Count(score => score.Points == 7);
+        var homePlayerStats = BuildPlayerStats(homeTeam, homeScore, homeTouchdowns).ToList();
+        var awayPlayerStats = BuildPlayerStats(awayTeam, awayScore, awayTouchdowns).ToList();
+        var homeYards = homePlayerStats.Sum(stats => stats.PassingYards + stats.RushingYards);
+        var awayYards = awayPlayerStats.Sum(stats => stats.PassingYards + stats.RushingYards);
 
         return new BoxScoreState
         {
@@ -317,30 +319,11 @@ public sealed class GameDayService
                 ["touchdowns_home"] = homeTouchdowns,
                 ["touchdowns_away"] = awayTouchdowns,
             },
-            PlayerStats = BuildPlayerStats(homeTeam, homeScore, homeTouchdowns)
-                .Concat(BuildPlayerStats(awayTeam, awayScore, awayTouchdowns))
+            PlayerStats = homePlayerStats
+                .Concat(awayPlayerStats)
                 .ToList(),
             PlayByPlay = BuildPlayByPlay(homeTeam, awayTeam, homeScore, awayScore, homeScoringSchedule, awayScoringSchedule),
         };
-    }
-
-    private static int BuildTeamYards(TeamState team, int score)
-    {
-        var roster = team?.Roster;
-        if (roster == null || roster.Count == 0)
-            return Math.Clamp(225 + (score * 5), 180, 625);
-
-        var ratingTotal = 0;
-        var playerCount = 0;
-        foreach (var player in roster)
-        {
-            if (player == null)
-                continue;
-            ratingTotal += player.Overall;
-            playerCount++;
-        }
-        var averageRating = playerCount > 0 ? ratingTotal / playerCount : 65;
-        return Math.Clamp(225 + (score * 5) + ((averageRating - 65) * 4), 180, 625);
     }
 
     private static List<GamePlayEventState> BuildPlayByPlay(

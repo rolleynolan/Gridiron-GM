@@ -89,6 +89,7 @@ All notable project changes are recorded here.
 - Corrected away-team game summaries so the winning club's score is always presented first rather than retaining home-away score order after an away victory.
 - Corrected the lightweight matchup score model so roster strength is monotonic and calendar week no longer inflates scoring. A bounded deterministic variation now supplies matchup variance without temporary random state, with a complete 272-game scoring-scale regression check.
 - Reconciled passing, receiving, and rushing touchdown lines with each team's recorded touchdown total. Scoring schedules are now built once and shared by team stats, player stats, and play-by-play, reducing benchmark allocation to roughly 35 KiB per game.
+- Reconciled each team's total-offense figure with its recorded passing and rushing lines, removing a separate estimate that could contradict the player box score.
 
 ### Notes
 

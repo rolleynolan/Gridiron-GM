@@ -79,8 +79,14 @@ public sealed class GameCoreRulesTests
 
         Assert.True(response.Ok, response.Error);
         var result = context.ActiveLeague.Results.Single(candidate => candidate.GameId == game.GameId);
-        Assert.InRange(result.BoxScore.TeamStats["total_yards_home"], 180, 625);
-        Assert.InRange(result.BoxScore.TeamStats["total_yards_away"], 180, 625);
+        Assert.InRange(result.BoxScore.TeamStats["total_yards_home"], 180, 700);
+        Assert.InRange(result.BoxScore.TeamStats["total_yards_away"], 180, 700);
+        Assert.Equal(
+            result.BoxScore.TeamStats["total_yards_home"],
+            result.BoxScore.PlayerStats.Where(stat => stat.TeamId == result.HomeTeamId).Sum(stat => stat.PassingYards + stat.RushingYards));
+        Assert.Equal(
+            result.BoxScore.TeamStats["total_yards_away"],
+            result.BoxScore.PlayerStats.Where(stat => stat.TeamId == result.AwayTeamId).Sum(stat => stat.PassingYards + stat.RushingYards));
     }
 
     [Fact]

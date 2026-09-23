@@ -125,8 +125,8 @@ The September hardening tranche is now in place:
   focused suite contains 62 passing tests in addition to smoke QA.
 - A headless `--gamecore-benchmark` command records elapsed time and managed allocation for one detailed game, a pro week,
   a 272-game pro season, and a projected 128-team/12-game college workload. The September 23 baseline on the current
-  workstation is 0.066 ms and roughly 35 KiB per game for the current matchup engine; the 768-game college proxy took
-  37.5 ms and allocated 26.01 MiB. These are engineering baselines, not targets for the future snap engine.
+  workstation is 0.068 ms and roughly 35 KiB per game for the current matchup engine; the 768-game college proxy took
+  38.3 ms and allocated 26.22 MiB. These are engineering baselines, not targets for the future snap engine.
 - Game-day commands and developer commands now live in focused dashboard partials, while playoff ordering and benchmarking
   live in non-UI services.
 
