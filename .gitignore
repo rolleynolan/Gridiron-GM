@@ -27,6 +27,8 @@ zz_tmp*/
 /gridiron_gm_pkg/data/saves/
 /dna_output/
 /tmp*/
+/outputs/
+/.codex-dashboard-capture/
 
 # Editor and operating-system files
 .vs/
