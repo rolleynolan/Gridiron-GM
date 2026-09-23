@@ -70,6 +70,20 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void SimulatedTeamYardageStaysWithinFootballScale()
+    {
+        var context = Bootstrap();
+        var game = context.ActiveLeague.Schedule.First();
+
+        var response = new GameDayService(context).SimulateScheduledGame(game.GameId, allowUserTeamGame: true);
+
+        Assert.True(response.Ok, response.Error);
+        var result = context.ActiveLeague.Results.Single(candidate => candidate.GameId == game.GameId);
+        Assert.InRange(result.BoxScore.TeamStats["total_yards_home"], 180, 625);
+        Assert.InRange(result.BoxScore.TeamStats["total_yards_away"], 180, 625);
+    }
+
+    [Fact]
     public void FailedBatchReleaseIsAtomic()
     {
         var context = Bootstrap();

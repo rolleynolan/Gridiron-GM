@@ -281,8 +281,8 @@ public sealed class GameDayService
 
     private static BoxScoreState BuildBoxScore(TeamState homeTeam, TeamState awayTeam, int homeScore, int awayScore)
     {
-        var homeYards = (homeTeam?.Roster.Sum(player => player.Overall) ?? 700) + (homeScore * 8);
-        var awayYards = (awayTeam?.Roster.Sum(player => player.Overall) ?? 680) + (awayScore * 8);
+        var homeYards = BuildTeamYards(homeTeam, homeScore);
+        var awayYards = BuildTeamYards(awayTeam, awayScore);
 
         return new BoxScoreState
         {
@@ -301,6 +301,25 @@ public sealed class GameDayService
                 .ToList(),
             PlayByPlay = BuildPlayByPlay(homeTeam, awayTeam, homeScore, awayScore),
         };
+    }
+
+    private static int BuildTeamYards(TeamState team, int score)
+    {
+        var roster = team?.Roster;
+        if (roster == null || roster.Count == 0)
+            return Math.Clamp(225 + (score * 5), 180, 625);
+
+        var ratingTotal = 0;
+        var playerCount = 0;
+        foreach (var player in roster)
+        {
+            if (player == null)
+                continue;
+            ratingTotal += player.Overall;
+            playerCount++;
+        }
+        var averageRating = playerCount > 0 ? ratingTotal / playerCount : 65;
+        return Math.Clamp(225 + (score * 5) + ((averageRating - 65) * 4), 180, 625);
     }
 
     private static List<GamePlayEventState> BuildPlayByPlay(TeamState homeTeam, TeamState awayTeam, int homeScore, int awayScore)
