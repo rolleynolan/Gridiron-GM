@@ -221,6 +221,55 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void MultiTeamWildcardHeadToHeadSweepSelectsSweepingClub()
+    {
+        var league = TiebreakLeague();
+        league.Teams[1].Division = "South";
+        league.Teams[2].Division = "East";
+        league.Results.Add(Game("alpha-beta", "alpha", "beta", 24, 17));
+        league.Results.Add(Game("alpha-gamma", "gamma", "alpha", 14, 20));
+        var alpha = Standing("alpha");
+        var beta = Standing("beta"); beta.Division = "South";
+        var gamma = Standing("gamma"); gamma.Division = "East";
+
+        var ranked = new PlayoffTiebreakerService(league, new[] { alpha, beta, gamma }).RankWildCards(new[] { alpha, beta, gamma });
+
+        Assert.Equal("alpha", ranked[0].TeamId);
+    }
+
+    [Fact]
+    public void MultiTeamWildcardHeadToHeadSweepEliminatesSweptClub()
+    {
+        var league = TiebreakLeague();
+        league.Teams[1].Division = "South";
+        league.Teams[2].Division = "East";
+        league.Results.Add(Game("alpha-beta", "beta", "alpha", 24, 17));
+        league.Results.Add(Game("alpha-gamma", "alpha", "gamma", 14, 20));
+        var alpha = Standing("alpha");
+        var beta = Standing("beta"); beta.Division = "South";
+        var gamma = Standing("gamma"); gamma.Division = "East";
+
+        var ranked = new PlayoffTiebreakerService(league, new[] { alpha, beta, gamma }).RankWildCards(new[] { alpha, beta, gamma });
+
+        Assert.NotEqual("alpha", ranked[0].TeamId);
+    }
+
+    [Fact]
+    public void LegacyResultsWithoutGameIdsRemainDistinctForTiebreaks()
+    {
+        var league = TiebreakLeague();
+        league.Results.Add(Game("", "alpha", "beta", 21, 10));
+        league.Results.Add(Game("", "beta", "alpha", 24, 17));
+        league.Results.Add(Game("", "alpha", "gamma", 20, 13));
+        league.Results.Add(Game("", "beta", "gamma", 10, 20));
+        var standings = new[] { Standing("alpha"), Standing("beta"), Standing("gamma", wins: 5, losses: 12) };
+
+        var ranked = new PlayoffTiebreakerService(league, standings).RankDivision(standings.Take(2));
+
+        Assert.Equal("alpha", ranked[0].TeamId);
+    }
+
+    [Fact]
     public void BenchmarkHarnessMeasuresDetailedGameWorkload()
     {
         var report = SimulationBenchmarkService.Run(FindTeamSeedPath());

@@ -21,7 +21,7 @@ public sealed class PlayoffTiebreakerService
         _league = league ?? throw new ArgumentNullException(nameof(league));
         _results = (league.Results ?? new List<GameResult>())
             .Where(ScheduleService.CountsTowardRegularSeasonStandings)
-            .GroupBy(result => result.GameId ?? "", StringComparer.OrdinalIgnoreCase)
+            .GroupBy(ResultIdentity, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
         _standings = (standings ?? Enumerable.Empty<TeamStanding>())
@@ -152,21 +152,39 @@ public sealed class PlayoffTiebreakerService
     {
         var ids = contenders.Select(team => team.TeamId).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var values = contenders.ToDictionary(team => team.TeamId, _ => (double?)null, StringComparer.OrdinalIgnoreCase);
+
+        if (requireSweepForMultiTeam && contenders.Count > 2)
+        {
+            var records = contenders.ToDictionary(
+                team => team.TeamId,
+                team =>
+                {
+                    var games = GamesFor(team.TeamId).Where(result => ids.Contains(OpponentId(result, team.TeamId))).ToList();
+                    var opponentsPlayed = games.Select(result => OpponentId(result, team.TeamId)).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+                    return (Games: games, OpponentsPlayed: opponentsPlayed, Record: Record(team.TeamId, games));
+                },
+                StringComparer.OrdinalIgnoreCase);
+
+            var sweepWinner = contenders.FirstOrDefault(team =>
+                records[team.TeamId].OpponentsPlayed == contenders.Count - 1
+                && records[team.TeamId].Record.Wins == records[team.TeamId].Games.Count);
+            if (sweepWinner != null)
+                return contenders.ToDictionary(team => team.TeamId, team => (double?)(Same(team.TeamId, sweepWinner.TeamId) ? 1d : 0d), StringComparer.OrdinalIgnoreCase);
+
+            var sweptLoser = contenders.FirstOrDefault(team =>
+                records[team.TeamId].OpponentsPlayed == contenders.Count - 1
+                && records[team.TeamId].Record.Losses == records[team.TeamId].Games.Count);
+            if (sweptLoser != null)
+                return contenders.ToDictionary(team => team.TeamId, team => (double?)(Same(team.TeamId, sweptLoser.TeamId) ? 0d : 1d), StringComparer.OrdinalIgnoreCase);
+
+            return values;
+        }
+
         foreach (var team in contenders)
         {
             var games = GamesFor(team.TeamId).Where(result => ids.Contains(OpponentId(result, team.TeamId))).ToList();
             if (games.Count == 0)
                 continue;
-
-            if (requireSweepForMultiTeam && contenders.Count > 2)
-            {
-                var opponentsPlayed = games.Select(result => OpponentId(result, team.TeamId)).Distinct(StringComparer.OrdinalIgnoreCase).Count();
-                if (opponentsPlayed != contenders.Count - 1)
-                    continue;
-                var record = Record(team.TeamId, games);
-                if (record.Wins != games.Count && record.Losses != games.Count)
-                    continue;
-            }
 
             values[team.TeamId] = Percentage(Record(team.TeamId, games));
         }
@@ -373,4 +391,11 @@ public sealed class PlayoffTiebreakerService
 
     private static bool Same(string left, string right)
         => string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+
+    private static string ResultIdentity(GameResult result)
+    {
+        if (!string.IsNullOrWhiteSpace(result?.GameId))
+            return $"id:{result.GameId}";
+        return $"legacy:{result?.AbsoluteWeek}:{result?.PhaseWeek}:{result?.HomeTeamId}:{result?.AwayTeamId}:{result?.HomeScore}:{result?.AwayScore}";
+    }
 }
