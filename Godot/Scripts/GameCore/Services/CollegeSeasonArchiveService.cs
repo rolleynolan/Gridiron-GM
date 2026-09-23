@@ -20,6 +20,17 @@ public static class CollegeSeasonArchiveService
         league.CollegeSeasonArchives.Add(new CollegeSeasonArchiveRecord
         {
             SeasonYear = universe.SeasonYear, ChampionTeamId = championship?.WinnerTeamId ?? "", ChampionTeamName = champion?.Name ?? "",
+            TeamRecords = universe.Teams.Where(team => team != null).Select(team => new CollegeTeamSeasonRecord
+            {
+                SeasonYear = universe.SeasonYear,
+                TeamId = team.TeamId,
+                TeamName = team.Name,
+                Conference = team.Conference,
+                Wins = team.Wins,
+                Losses = team.Losses,
+                FinalRanking = team.Ranking,
+                WonChampionship = string.Equals(team.TeamId, championship?.WinnerTeamId, StringComparison.OrdinalIgnoreCase),
+            }).ToList(),
             Awards = (universe.Awards ?? new List<CollegeSeasonAwardRecord>()).Where(award => award != null).Select(award => new CollegeSeasonAwardRecord { AwardName = award.AwardName, PlayerId = award.PlayerId, PlayerName = award.PlayerName, TeamId = award.TeamId, TeamName = award.TeamName, Position = award.Position, Score = award.Score, Summary = award.Summary }).ToList(),
             PostseasonGames = universe.Postseason.Games.Where(game => game != null).Select(game => new CollegePostseasonGame { Label = game.Label, HomeTeamId = game.HomeTeamId, AwayTeamId = game.AwayTeamId, HomeScore = game.HomeScore, AwayScore = game.AwayScore, WinnerTeamId = game.WinnerTeamId }).ToList(),
         });

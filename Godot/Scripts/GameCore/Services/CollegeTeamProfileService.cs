@@ -46,6 +46,23 @@ public sealed class CollegeTeamProfileService
             Wins = team.Wins,
             Losses = team.Losses,
         };
+        profile.ProgramHistory = (_context.ActiveLeague.CollegeSeasonArchives ?? new List<CollegeSeasonArchiveRecord>())
+            .Where(archive => archive != null)
+            .SelectMany(archive => archive.TeamRecords ?? new List<CollegeTeamSeasonRecord>())
+            .Where(record => record != null && string.Equals(record.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(record => record.SeasonYear)
+            .Select(record => new CollegeTeamSeasonRecord
+            {
+                SeasonYear = record.SeasonYear,
+                TeamId = record.TeamId,
+                TeamName = record.TeamName,
+                Conference = record.Conference,
+                Wins = record.Wins,
+                Losses = record.Losses,
+                FinalRanking = record.FinalRanking,
+                WonChampionship = record.WonChampionship,
+            })
+            .ToList();
 
         foreach (var game in (universe.Schedule ?? new List<CollegeScheduledGame>())
                      .Where(game => game != null &&
@@ -131,6 +148,7 @@ public sealed class CollegeTeamProfileResult
     public List<CollegeTeamScheduleEntry> Schedule { get; set; } = new();
     public List<CollegeTeamPlayerLine> StatLeaders { get; set; } = new();
     public List<CollegeTeamPlayerLine> Roster { get; set; } = new();
+    public List<CollegeTeamSeasonRecord> ProgramHistory { get; set; } = new();
 }
 
 public sealed class CollegeTeamScheduleEntry

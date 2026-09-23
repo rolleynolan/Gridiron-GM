@@ -477,6 +477,39 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void CollegeTeamProgramHistoryArchivesAndSurvivesSaveLoad()
+    {
+        var context = Bootstrap();
+        var universe = context.ActiveLeague.CollegeUniverse;
+        var team = universe.Teams.OrderBy(candidate => candidate.TeamId, StringComparer.Ordinal).First();
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+        CollegeSeasonArchiveService.EnsureArchived(context.ActiveLeague);
+        var expected = Assert.Single(context.ActiveLeague.CollegeSeasonArchives).TeamRecords.Single(record => record.TeamId == team.TeamId);
+        var saveName = $"college_program_history_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+
+        try
+        {
+            Assert.Equal(CollegeTeamCatalog.TeamCount, context.ActiveLeague.CollegeSeasonArchives[0].TeamRecords.Count);
+            Assert.Equal(team.Wins, expected.Wins);
+            Assert.Equal(team.Losses, expected.Losses);
+            Assert.Equal(team.Ranking, expected.FinalRanking);
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            var profile = new CollegeTeamProfileService(new GameCoreContext { ActiveLeague = loaded.League }).GetProfile(team.TeamId);
+            var history = Assert.Single(profile.ProgramHistory);
+            Assert.Equal(expected.SeasonYear, history.SeasonYear);
+            Assert.Equal(expected.FinalRanking, history.FinalRanking);
+            Assert.Equal(expected.WonChampionship, history.WonChampionship);
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
+    }
+
+    [Fact]
     public void HeadCoachAuthorityAcceptsOnlyCanonicalHeadCoachDomains()
     {
         var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };

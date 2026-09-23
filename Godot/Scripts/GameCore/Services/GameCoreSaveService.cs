@@ -620,7 +620,14 @@ public sealed class GameCoreSaveService
         NormalizeCollegeUniverse(league);
         foreach (var archive in league.CollegeSeasonArchives.Where(archive => archive != null))
         {
-            archive.ChampionTeamId ??= ""; archive.ChampionTeamName ??= ""; archive.Awards ??= new List<CollegeSeasonAwardRecord>(); archive.PostseasonGames ??= new List<CollegePostseasonGame>();
+            archive.ChampionTeamId ??= ""; archive.ChampionTeamName ??= ""; archive.TeamRecords ??= new List<CollegeTeamSeasonRecord>(); archive.Awards ??= new List<CollegeSeasonAwardRecord>(); archive.PostseasonGames ??= new List<CollegePostseasonGame>();
+            archive.TeamRecords = archive.TeamRecords.Where(record => record != null).ToList();
+            foreach (var record in archive.TeamRecords)
+            {
+                record.SeasonYear = record.SeasonYear <= 0 ? archive.SeasonYear : record.SeasonYear;
+                record.TeamId ??= ""; record.TeamName ??= ""; record.Conference ??= "";
+                record.Wins = Math.Max(0, record.Wins); record.Losses = Math.Max(0, record.Losses); record.FinalRanking = Math.Max(0, record.FinalRanking);
+            }
         }
         ProspectEvaluationService.EnsureEvaluations(league);
         league.Draft.Picks ??= new List<DraftPickState>();

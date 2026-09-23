@@ -37,8 +37,21 @@ public sealed class CollegeSeasonArchiveRecord
     public int SeasonYear { get; set; }
     public string ChampionTeamId { get; set; } = "";
     public string ChampionTeamName { get; set; } = "";
+    public List<CollegeTeamSeasonRecord> TeamRecords { get; set; } = new();
     public List<CollegeSeasonAwardRecord> Awards { get; set; } = new();
     public List<CollegePostseasonGame> PostseasonGames { get; set; } = new();
+}
+
+public sealed class CollegeTeamSeasonRecord
+{
+    public int SeasonYear { get; set; }
+    public string TeamId { get; set; } = "";
+    public string TeamName { get; set; } = "";
+    public string Conference { get; set; } = "";
+    public int Wins { get; set; }
+    public int Losses { get; set; }
+    public int FinalRanking { get; set; }
+    public bool WonChampionship { get; set; }
 }
 
 // Immutable award snapshots are created only after the completed college schedule supplies authoritative statistics.

@@ -96,6 +96,7 @@ All notable project changes are recorded here.
 - Expanded Full College Rankings into a read-only team encyclopedia suited to the 128-program universe. Selecting a program now derives its current record, complete season slate, final/upcoming matchup context, statistical leaders, and player availability from persisted college state without exposing hidden ratings or mutating the season. Corrected the awards empty-state copy to follow the authoritative 12-week schedule.
 - Completed the first college-team encyclopedia pass with each program's full current development roster. Player rows show position, class, season production, and availability in stable football order while continuing to omit hidden overall and potential ratings.
 - Added program/abbreviation search and conference filtering to Full College Rankings so the 128-team encyclopedia remains navigable. Filters preserve the selected program when possible, report the visible count, and provide a clear no-match state without mutating league data.
+- Added immutable year-by-year program records to college season archives. Every completed season now preserves all 128 teams' final ranking, record, conference, and championship status; the team encyclopedia displays that history and save migration safely supplies empty history for older archives.
 
 ### Notes
 
