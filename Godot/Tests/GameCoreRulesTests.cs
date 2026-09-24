@@ -845,6 +845,38 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void CollegePostseasonUsesVersionedTwelveTeamField()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+        var postseason = league.CollegeUniverse.Postseason;
+
+        Assert.True(postseason.Completed);
+        Assert.Equal(CollegePostseasonService.RuleVersion, postseason.RuleVersion);
+        Assert.Equal(11, postseason.Games.Count(game => game.Stage != "Bowl"));
+        Assert.Equal(4, postseason.Games.Count(game => game.Stage == "Bowl"));
+        Assert.Single(postseason.Games, game => game.Stage == "Championship");
+        Assert.All(postseason.Games, game => Assert.False(string.IsNullOrWhiteSpace(game.WinnerTeamId)));
+
+        var projections = new CollegePostseasonProjectionService(context).GetProjections();
+        var projectedField = projections.FirstRoundByes
+            .Concat(projections.PlayoffMatchups.SelectMany(matchup => new[] { matchup.Home, matchup.Away }))
+            .ToList();
+        Assert.True(projections.Ok, projections.Message);
+        Assert.Equal(12, projectedField.Select(team => team.TeamId).Distinct().Count());
+        Assert.Equal(5, projectedField.Count(team => team.SelectionReason == "Conference champion auto-bid"));
+        Assert.Equal(4, projections.FirstRoundByes.Count);
+        Assert.Equal(4, projections.PlayoffMatchups.Count);
+        Assert.Equal(4, projections.BowlMatchups.Count);
+
+        CollegeSeasonArchiveService.EnsureArchived(league);
+        var archive = league.CollegeSeasonArchives.Single(record => record.SeasonYear == league.SeasonYear);
+        Assert.Equal(CollegePostseasonService.RuleVersion, archive.PostseasonRuleVersion);
+        Assert.Equal(15, archive.PostseasonGames.Count);
+    }
+
+    [Fact]
     public void HeadCoachAuthorityAcceptsOnlyCanonicalHeadCoachDomains()
     {
         var candidate = new CoachState { CoachId = "candidate", Role = "Available Staff" };

@@ -53,6 +53,7 @@ public sealed class CollegeTransferRecord
 
 public sealed class CollegePostseasonState
 {
+    public string RuleVersion { get; set; } = "";
     public bool Completed { get; set; }
     public List<CollegePostseasonGame> Games { get; set; } = new();
 }
@@ -60,6 +61,9 @@ public sealed class CollegePostseasonState
 public sealed class CollegePostseasonGame
 {
     public string Label { get; set; } = "";
+    public string Stage { get; set; } = "";
+    public int HomeSeed { get; set; }
+    public int AwaySeed { get; set; }
     public string HomeTeamId { get; set; } = "";
     public string AwayTeamId { get; set; } = "";
     public int HomeScore { get; set; }
@@ -70,6 +74,7 @@ public sealed class CollegePostseasonGame
 public sealed class CollegeSeasonArchiveRecord
 {
     public int SeasonYear { get; set; }
+    public string PostseasonRuleVersion { get; set; } = "";
     public string ChampionTeamId { get; set; } = "";
     public string ChampionTeamName { get; set; } = "";
     public List<CollegeTeamSeasonRecord> TeamRecords { get; set; } = new();

@@ -622,7 +622,7 @@ public sealed class GameCoreSaveService
         NormalizeCollegeUniverse(league);
         foreach (var archive in league.CollegeSeasonArchives.Where(archive => archive != null))
         {
-            archive.ChampionTeamId ??= ""; archive.ChampionTeamName ??= ""; archive.TeamRecords ??= new List<CollegeTeamSeasonRecord>(); archive.Awards ??= new List<CollegeSeasonAwardRecord>(); archive.PostseasonGames ??= new List<CollegePostseasonGame>();
+            archive.PostseasonRuleVersion ??= ""; archive.ChampionTeamId ??= ""; archive.ChampionTeamName ??= ""; archive.TeamRecords ??= new List<CollegeTeamSeasonRecord>(); archive.Awards ??= new List<CollegeSeasonAwardRecord>(); archive.PostseasonGames ??= new List<CollegePostseasonGame>();
             archive.TeamRecords = archive.TeamRecords.Where(record => record != null).ToList();
             foreach (var record in archive.TeamRecords)
             {
@@ -773,7 +773,16 @@ public sealed class GameCoreSaveService
         universe.Schedule ??= new List<CollegeScheduledGame>();
         universe.Results ??= new List<CollegeGameResult>();
         universe.Postseason ??= new CollegePostseasonState();
+        universe.Postseason.RuleVersion ??= "";
         universe.Postseason.Games ??= new List<CollegePostseasonGame>();
+        foreach (var game in universe.Postseason.Games.Where(game => game != null))
+        {
+            game.Label ??= "";
+            game.Stage ??= "";
+            game.HomeTeamId ??= "";
+            game.AwayTeamId ??= "";
+            game.WinnerTeamId ??= "";
+        }
         universe.Awards ??= new List<CollegeSeasonAwardRecord>();
         universe.Transfers ??= new List<CollegeTransferRecord>();
         universe.RecruitingClass ??= new List<CollegeRecruitingRecord>();

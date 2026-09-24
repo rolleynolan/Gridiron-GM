@@ -1473,7 +1473,7 @@ public static class GameCoreSmokeTest
                 Require(league.SeasonYear == seasonYear + 1 && league.HistoricalSeasons.Count(record => record != null && record.SeasonYear == seasonYear) == 1, $"Season {seasonYear} rollover should preserve exactly one history record.");
                 Require(league.HistoricalDrafts.Count(draft => draft != null && draft.DraftYear == seasonYear) == 1 && league.CollegeProspects.Count == LeagueBootstrapService.StartingProspectCount && league.CollegeProspects.All(prospect => prospect.DraftClassYear == league.SeasonYear + 1), $"Season {seasonYear} rollover should archive the draft and create one next-year draft pool.");
                 Require(league.CollegeUniverse.SeasonYear == league.SeasonYear && league.CollegeUniverse.LastAdvancedAbsoluteWeek == 0 && league.CollegeUniverse.Results.Count == 0 && league.CollegeUniverse.Teams.Count == CollegeTeamCatalog.TeamCount, $"Season {seasonYear} rollover should reset the persisted college universe.");
-                Require(league.CollegeSeasonArchives.Count(record => record != null && record.SeasonYear == seasonYear) == 1 && league.CollegeSeasonArchives.Single(record => record.SeasonYear == seasonYear).PostseasonGames.Count == 5, $"Season {seasonYear} rollover should retain immutable college postseason context.");
+                Require(league.CollegeSeasonArchives.Count(record => record != null && record.SeasonYear == seasonYear) == 1 && league.CollegeSeasonArchives.Single(record => record.SeasonYear == seasonYear).PostseasonGames.Count == 15, $"Season {seasonYear} rollover should retain immutable college postseason context.");
                 Require(league.Teams.All(team => team.Roster.Count <= RosterService.RosterLimit && new ContractService(context).GetCapRoom(team) >= 0m), $"Season {seasonYear} rollover should preserve legal roster and cap state.");
                 var recordBook = new RecordBookService(context).GetRecordBook();
                 Require(recordBook.Ok && recordBook.SeasonRecords.Count > 0 && recordBook.CareerRecords.Count > 0 && recordBook.FranchiseRecords.Count > 0, $"Season {seasonYear} should retain a complete derived record book after rollover.");
@@ -1499,7 +1499,7 @@ public static class GameCoreSmokeTest
         var context = new GameCoreContext(); new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
         new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
         var postseason = context.ActiveLeague.CollegeUniverse.Postseason;
-        Require(postseason.Completed && postseason.Games.Count == 5 && postseason.Games.All(game => !string.IsNullOrWhiteSpace(game.WinnerTeamId)), "Completed college regular seasons should generate a deterministic persisted postseason slate.");
+        Require(postseason.Completed && postseason.RuleVersion == CollegePostseasonService.RuleVersion && postseason.Games.Count == 15 && postseason.Games.Count(game => game.Stage != "Bowl") == 11 && postseason.Games.Count(game => game.Stage == "Bowl") == 4 && postseason.Games.All(game => !string.IsNullOrWhiteSpace(game.WinnerTeamId)), "Completed college regular seasons should generate a deterministic persisted 12-team postseason slate.");
         var snapshot = string.Join("|", postseason.Games.Select(game => $"{game.Label}:{game.WinnerTeamId}:{game.HomeScore}:{game.AwayScore}"));
         var saves = new GameCoreSaveService(); const string saveName = "native_smoke_college_postseason.json";
         Require(saves.Save(context, saveName).Ok, "College-postseason smoke save should succeed."); var loaded = saves.Load(saveName);
@@ -1609,7 +1609,7 @@ public static class GameCoreSmokeTest
         new LeagueBootstrapService(context).CreateTestLeague(teamSeedPath);
         new CollegeUniverseService(context).AdvanceToProWeek(4);
         var projections = new CollegePostseasonProjectionService(context).GetProjections();
-        Require(projections.Ok && projections.PlayoffMatchups.Count == 2 && projections.BowlMatchups.Count == 2 && projections.PlayoffMatchups.SelectMany(matchup => new[] { matchup.Home.Ranking, matchup.Away.Ranking }).OrderBy(ranking => ranking).SequenceEqual(new[] { 1, 2, 3, 4 }) && projections.BowlMatchups.SelectMany(matchup => new[] { matchup.Home.Ranking, matchup.Away.Ranking }).OrderBy(ranking => ranking).SequenceEqual(new[] { 5, 6, 7, 8 }), "College postseason projections should derive deterministic playoff and bowl matchups from current rankings.");
+        Require(projections.Ok && projections.RuleVersion == CollegePostseasonService.RuleVersion && projections.FirstRoundByes.Count == 4 && projections.PlayoffMatchups.Count == 4 && projections.BowlMatchups.Count == 4 && projections.FirstRoundByes.Concat(projections.PlayoffMatchups.SelectMany(matchup => new[] { matchup.Home, matchup.Away })).Select(team => team.TeamId).Distinct().Count() == 12 && projections.FirstRoundByes.Concat(projections.PlayoffMatchups.SelectMany(matchup => new[] { matchup.Home, matchup.Away })).Count(team => team.SelectionReason == "Conference champion auto-bid") == 5, "College postseason projections should derive a versioned 12-team field with five conference-champion auto-bids, four byes, and four bowls from current rankings.");
         var snapshot = SnapshotCollegeProjections(projections);
         var saves = new GameCoreSaveService();
         const string saveName = "native_smoke_college_postseason_projections.json";
@@ -1620,7 +1620,7 @@ public static class GameCoreSmokeTest
     }
 
     private static string SnapshotCollegeProjections(CollegePostseasonProjectionResult projections)
-        => string.Join("|", projections.PlayoffMatchups.Concat(projections.BowlMatchups).Select(matchup => $"{matchup.Label}:{matchup.Home.TeamId}:{matchup.Away.TeamId}"));
+        => $"{projections.RuleVersion}|{string.Join(",", projections.FirstRoundByes.Select(team => team.TeamId))}|{string.Join("|", projections.PlayoffMatchups.Concat(projections.BowlMatchups).Select(matchup => $"{matchup.Label}:{matchup.Home.TeamId}:{matchup.Away.TeamId}"))}";
 
     private static void ValidateCollegeLeaders(string teamSeedPath)
     {
