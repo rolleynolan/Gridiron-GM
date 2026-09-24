@@ -2,6 +2,37 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
+## Pro clock-management continuation — September 24, 2026
+
+- [x] Review existing snap/authority/persistence code and accepted game-management scope.
+- [x] Add versioned timeouts, kneels/spikes, earlier-down kicks, and end-of-half recommendations without changing v1 live replays.
+- [x] Bind validated clock controls and timeout counts to Game Day.
+- [x] Verify deterministic scenarios, authority, save/reload, full tests/smoke, and performance; document and commit.
+
+Implemented:
+- New games use `pro-snap-v2-clock-2025` and save version **34**. Existing `pro-snap-v1-2025` games remain on their original behavior, with a frozen pre-change replay digest covering scores, RNG, drives, plays, descriptions, participants, and statistics. Both rules versions load; older aggregate playback remains supported. New timeout fields default safely without restarting an unfinished game.
+- Clock-stopping timeouts are validated for either side under **Overall Game Management**. A timeout creates an event, charges the requesting team once, stops the clock without consuming game time or RNG, and preserves the next play's queued choices. Already-stopped clocks, depleted budgets, coach-owned commands, and stale retries are rejected. The retained GM may select Use timeout or No timeout; empty input uses staff recommendations, and the opposing team's clock decisions remain independent.
+- Teams receive three timeouts per regulation half, two in regular-season overtime, and three per two-period postseason overtime half. Two-minute warnings interrupt pre-snap runoff at 2:00, or follow the conclusion of a play that crossed the threshold. They preserve the next input and do not count as snaps. Timing reference: [official NFL rulebook, rules 4 and 16](https://static.www.nfl.com/image/upload/fl_attachment/league/tqivdkzt9mu6wdgsh1ku.pdf). This expands the existing bounded rules baseline, not every special timing/penalty exception.
+- **Offensive Play-Calling** owns Kneel and Spike. Kneels credit an attempt and one lost rushing yard; spikes credit an incomplete pass attempt and a used down, including fourth-down loss of possession. Both require an eligible QB. A normal/hurry spike uses three seconds of preparation on a running clock plus one second for the snap; a kneel takes two seconds plus the selected tempo's runoff. Management's explicit Chew choice still governs runoff before a spike. Staff can recommend a safe kneel-out considering remaining downs and opposing timeouts, or a late spike when its own timeouts are exhausted.
+- The existing Go/Kick management choice is available on every scrimmage down. Special teams separately chooses Punt/Field goal; an earlier-down special-teams selection alone cannot override management's Go decision. End-of-half recommendations can select a field goal before fourth down, use timeouts, and hurry when needed. Postseason overtime period expiry is not treated as a deadline for the current possession.
+- Game Day shows timeout counts, ownership, timeout selection, and the expanded offense/down controls. The real Godot control smoke includes a charged timeout and still verifies all five result tabs and minimum-window horizontal bounds.
+- The changed season outcomes exposed a dashboard defect for teams that did not qualify for the playoffs: their next-round header stayed at Playoffs Pending. Nonqualifiers now follow the league's remaining rounds. A direct regression covers advancement through the conference championships. The benchmark test now expects the actual 783 college games (768 regular, 11 playoff, four bowls); its previous assertion excluded postseason. The balance guard permits individual blowouts up to 70 points while retaining average-scoring and home-advantage checks, rather than treating a legal 44-point margin as an engine failure.
+
+Remaining: out-of-bounds timing, procedural/injury stoppage penalties, timeout use on already-stopped clocks (including kicker icing), challenges, richer two-minute recommendations, returns, and save/log compaction. The existing coarse 24/7/38-second tempo model remains outside intentional clock-play handling. No new player ratings, art, college snap engine, or authority-negotiation design was introduced.
+
+Validation: **132 focused tests pass**, including 24 clock/compatibility cases and the nonqualifier regression. The production assembly builds without warnings/errors. Full GameCore smoke passes three-season progression, postseason, awards/records/history, and save/load. Godot editor import, project startup, and actual decision/timeout/postgame UI smoke pass. `git diff --check` is clean. The new scripts' generated UIDs are included; the twelve original untracked sidecars remain untouched.
+
+Updated isolated Debug benchmark (same command and warmup as the prior checkpoint):
+
+| Workload | Time | Managed allocation |
+| --- | ---: | ---: |
+| One pro game | 3.761 ms | 1.80 MiB |
+| 16-game pro week | 57.5 ms | 26.54 MiB |
+| 272-game pro regular season | 823.6 ms (3.028 ms/game) | 445.10 MiB cumulative |
+| Actual lightweight college season, 783 games | 107.5 ms | 8.84 MiB |
+
+Against the prior snap checkpoint, the pro season takes 3.7% longer and allocates 7.9% more while resolving clock stoppages and the resulting additional plays/decisions. Representative indented result JSON is now 360–401 KiB. The season remains under one second in this run; live DTO copying and save/log compaction remain the next performance work before further event detail expands. College resolution is unchanged. These measurements exclude disk and rendering and are not peak-memory measurements.
+
 ## Pro snap-engine checkpoint — September 24, 2026
 
 Working checklist:
@@ -56,7 +87,7 @@ The pre-snap pro baseline was 19.1 ms / 8.14 MiB for 272 aggregate results. The 
 
 Material remaining work and next continuation:
 - **Medium:** profile repeated live DTO/history copies and full-season save latency/size before adding more per-play detail; compact save/log encoding and backup retention are deferred to avoid changing the save container alongside the first engine. Atomic replacement is implemented, but rolling recovery backups are not.
-- Expand game management next: timeouts, kneel/spike, kicks before fourth down, stronger end-of-half recommendations, and richer possession/return handling; add deterministic scenario tests before tactics expand. Current clock runoff is deliberately coarse and does not implement two-minute warnings/out-of-bounds timing.
+- The v2 continuation above implements timeouts, kneels/spikes, earlier-down kicks, and two-minute warnings. Next: richer possession/returns and out-of-bounds timing, with deterministic scenarios before tactics expand. Saved v1 games retain the earlier coarse clock behavior for replay compatibility.
 - Penalties remain deferred because no authoritative penalty model exists. Also deferred: onside kicks, blocked/returned kicks, return touchdowns, detailed safety-free-kick personnel, defensive try returns, emergency cross-position personnel, formations/coverage packages, and playbook creation. Extremely depleted attacks without an available QB or RB stop with a validation error instead of using an unavailable player. Current injuries are bounded to one new injury per game using the existing medical model; balance and richer injury frequency need later tuning.
 - Preserve the lightweight college resolver until the pro engine's scenarios and performance mature. No new hidden attributes, animations, portraits, audio, or art work are part of this slice. No user design decision blocks this checkpoint; richer player attributes and playbook/penalty design require a later explicit design pass.
 - New `.uid` sidecars for this slice's new scripts are included deliberately; the twelve pre-existing untracked sidecars remain outside task commits.
