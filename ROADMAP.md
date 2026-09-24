@@ -2,6 +2,18 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
+## Pro snap-engine checkpoint — September 2026
+
+Working checklist:
+- [x] Read project authorities and recent history; baseline build, 73 focused tests, full GameCore smoke, Godot editor/project launch, and benchmark pass.
+- [x] High: prevent normal depth commands from overriding Head Coach lineup authority; prevent running-game depth edits and live-game roster/contract transactions.
+- [ ] Critical: replace live substitutions that regenerate whole-game statistics and manufacture future score increments with forward-only snap resolution.
+- [ ] Implement authoritative pro drives, plays, clock, possession, scoring, deterministic randomness, and supported decisions.
+- [ ] Integrate live persistence, legacy compatibility, Game Day controls, and existing result consequences.
+- [ ] Verify direct rules, save/reload, authority, statistics, season integration, full smoke, and benchmark; document limits and commit.
+
+Audit baseline on this workstation: 272 games in 19.1 ms, 8.14 MiB allocated; the old 768-game pro-engine college-workload proxy took 37.4 ms, 22.98 MiB. The twelve pre-existing untracked `.uid` sidecars correspond to tracked C# files and are preserved outside task commits.
+
 ## 0. Reset and audit
 
 - Make this blueprint, roadmap, and AI manual the only planning authorities.

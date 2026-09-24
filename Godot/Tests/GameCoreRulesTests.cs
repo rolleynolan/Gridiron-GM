@@ -11,6 +11,29 @@ namespace GridironGM.Tests;
 
 public sealed class GameCoreRulesTests
 {
+    [Fact]
+    public void DepthCommandsRespectCoachAuthorityAndLivePause()
+    {
+        var context = Bootstrap();
+        var team = context.ActiveLeague.Teams.Single(t => t.TeamId == context.ActiveLeague.UserTeamId);
+        var coach = team.Coaches.Single(c => c.Role == "Head Coach");
+        coach.Authority.ControlledDomains.Add(HeadCoachAuthorityService.LineupAndDepthChart);
+        var service = new DepthChartService(context);
+        var player = team.Roster.First();
+        var before = System.Text.Json.JsonSerializer.Serialize(team.DepthChart);
+        Assert.False(service.AutoFillDepthChart().Ok);
+        Assert.False(service.TogglePositionLock(player.Position).Ok);
+        Assert.False(service.UpdateDepthChart("set_starter", player.Position, player.PlayerId).Ok);
+        Assert.Equal(before, System.Text.Json.JsonSerializer.Serialize(team.DepthChart));
+        coach.Authority.ControlledDomains.Clear();
+        context.ActiveLeague.ActiveLiveGameSession = new() { Active = true, IsPaused = false };
+        Assert.False(service.AutoFillDepthChart().Ok);
+        Assert.False(ContractPhaseRules.CanManageRoster(context.ActiveLeague, out _));
+        Assert.False(ContractPhaseRules.CanSignFreeAgent(context.ActiveLeague, new PlayerState(), out _));
+        context.ActiveLeague.ActiveLiveGameSession.IsPaused = true;
+        Assert.True(service.UpdateDepthChart("set_starter", player.Position, player.PlayerId).Ok);
+    }
+
     [Theory]
     [InlineData(ScheduleService.ExclusiveNegotiationPendingPhase, false, true, false, true)]
     [InlineData(ScheduleService.FranchiseTagPendingPhase, false, false, true, false)]

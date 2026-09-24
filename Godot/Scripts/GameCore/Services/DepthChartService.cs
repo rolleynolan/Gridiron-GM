@@ -16,6 +16,16 @@ public sealed class DepthChartService
         _context = context;
     }
 
+    private static string MutationRestriction(LeagueState league, TeamState team)
+    {
+        if (string.Equals(team.TeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase)
+            && HeadCoachAuthorityService.IsHeadCoachControlled(team, HeadCoachAuthorityService.LineupAndDepthChart))
+            return "The Head Coach controls lineup and depth chart under the current agreement.";
+        if (league.ActiveLiveGameSession is { Active: true, IsPaused: false })
+            return "Pause the live game before changing the depth chart.";
+        return null;
+    }
+
     public TeamDepthChartResponse GetTeamDepthChart(string teamId = null)
     {
         var league = _context.ActiveLeague;
@@ -84,6 +94,8 @@ public sealed class DepthChartService
             };
         }
 
+        var restriction = MutationRestriction(league, team);
+        if (restriction != null) return new TeamDepthChartResponse { Ok = false, Error = restriction };
         team.DepthChartLockedPositions ??= new List<string>();
         var priorChart = team.DepthChart.ToDictionary(pair => pair.Key, pair => pair.Value?.ToList() ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
         team.DepthChart.Clear();
@@ -121,6 +133,8 @@ public sealed class DepthChartService
         var team = GameCoreStateHelper.ResolveTeam(league, teamId);
         if (team == null)
             return new TeamDepthChartResponse { Ok = false, Error = "Team not found." };
+        var restriction = MutationRestriction(league, team);
+        if (restriction != null) return new TeamDepthChartResponse { Ok = false, Error = restriction };
         if (string.IsNullOrWhiteSpace(position) || !team.DepthChart.ContainsKey(position))
             return new TeamDepthChartResponse { Ok = false, Error = "Select a valid depth-chart position first." };
 
@@ -155,6 +169,8 @@ public sealed class DepthChartService
             };
         }
 
+        var restriction = MutationRestriction(league, team);
+        if (restriction != null) return new TeamDepthChartResponse { Ok = false, Error = restriction };
         if (string.IsNullOrWhiteSpace(position) || string.IsNullOrWhiteSpace(playerId))
         {
             return new TeamDepthChartResponse

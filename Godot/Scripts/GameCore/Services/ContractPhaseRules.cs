@@ -8,6 +8,8 @@ public static class ContractPhaseRules
 {
     public static ContractPhaseStatusDto GetStatus(LeagueState league)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+            return new ContractPhaseStatusDto { Explanation = "Finish the live game before making roster or contract transactions." };
         var phase = league?.Calendar?.Phase ?? "";
         var rosterOpen = !IsRosterLocked(phase);
         var isFreeAgency = string.Equals(phase, ScheduleService.FreeAgencyPendingPhase, StringComparison.OrdinalIgnoreCase);
@@ -50,6 +52,8 @@ public static class ContractPhaseRules
 
     public static bool CanSignFreeAgent(LeagueState league, PlayerState player, out string error)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+            return CanSignFreeAgents(league, out error);
         if (string.Equals(league?.Calendar?.Phase, ScheduleService.RookieSigningPendingPhase, StringComparison.OrdinalIgnoreCase))
         {
             var allowed = UndraftedFreeAgentService.IsUndraftedRookie(player);
@@ -82,6 +86,11 @@ public static class ContractPhaseRules
 
     public static bool CanProposeTrades(LeagueState league, out string error)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+        {
+            error = "Finish the live game before making trades.";
+            return false;
+        }
         var phase = league?.Calendar?.Phase ?? "";
         var allowed = string.Equals(phase, ScheduleService.FreeAgencyPendingPhase, StringComparison.OrdinalIgnoreCase)
             || string.Equals(phase, ScheduleService.DraftPrepPendingPhase, StringComparison.OrdinalIgnoreCase)
