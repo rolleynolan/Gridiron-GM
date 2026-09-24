@@ -6,6 +6,9 @@ All notable project changes are recorded here.
 
 ### Changed
 
+- Pruned 210 rejected, superseded, or experimental visual images and removed the chronological concept/logo iteration logs. The visual-reference folder now contains only the 77 images named by the authoritative audit manifest plus three approved in-game placement examples; installed team logos remain under the runtime asset folder.
+- Added display-aware Godot layout behavior. Windowed startup now sizes itself from the active screen's usable area, supports a 1024x576 minimum, and recalculates navigation width, header height, content margins, compact typography, logo visibility, and sidebar scrolling whenever the viewport changes.
+- Replaced the simplified four-team college playoff with a versioned 12-team postseason: five ranked conference leaders receive automatic bids, seven at-large teams complete the field, the top four seeds receive first-round byes, and four additional bowls provide eight non-playoff berths. Bracket stages, seeds, projections, results, archives, and save/load normalization now preserve the full format.
 - Consolidated the active game, reference implementation, data assets, saves, and prior porting notes into this master folder.
 - Established `Godot/` as the active C# game location.
 - Established the root blueprint, roadmap, and AI instructions as the only active project-planning documents.

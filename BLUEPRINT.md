@@ -2282,6 +2282,12 @@ without overriding a domain rule, knowledge boundary, or persistence requirement
 
 Shared UI rules for every surface:
 
+- The application detects the usable display area at launch and continuously adapts to viewport changes. The shell, navigation rail,
+  top bar, content gutters, scrolling, and typography use compact and standard breakpoints so every primary control remains visible
+  from the supported 1024x576 minimum through large desktop displays; resolution changes never hide the right edge of a workspace.
+- `Visual References/AUDIT-STATUS.md` is also the retention manifest. Keep only its accepted or explicitly provisional images plus
+  approved placement examples; remove superseded drafts, rejected identities, generation logs, and experiments when a replacement
+  is accepted. Installed production assets live under `Godot/Assets` rather than in the reference archive.
 - Domain services own truth and validation. UI models format state, expose action availability, and route typed requests; they do
   not duplicate cap, phase, eligibility, simulation, scouting, or persistence logic.
 - Every consequential action has preview/review when needed, an explicit commit point, a success/failure result, and an immediate

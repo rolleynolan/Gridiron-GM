@@ -37,6 +37,10 @@ public partial class DashboardController : Control
     private TextureRect _railTeamLogo;
     private Button _shellInboxBadge;
     private Button _shellAdvance;
+    private Control _workstationAppMargin;
+    private PanelContainer _workstationTopBar;
+    private PanelContainer _workstationRail;
+    private Label _workstationBrand;
     private VBoxContainer _shellNavigation;
     private VBoxContainer _teamNavigationGroup;
     private VBoxContainer _financesNavigationGroup;
@@ -637,9 +641,9 @@ public partial class DashboardController : Control
         var muted = new Color("9cadb8");
         var green = new Color("4f9b55");
 
-        var appMargin = GetNodeOrNull<Control>("AppMargin");
-        if (appMargin != null)
-            ApplyWorkstationTheme(appMargin, slate, edge, ink, muted, green);
+        _workstationAppMargin = GetNodeOrNull<Control>("AppMargin");
+        if (_workstationAppMargin != null)
+            ApplyWorkstationTheme(_workstationAppMargin, slate, edge, ink, muted, green);
 
         var legacyTabs = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/TabButtonRow");
         var legacyActions = GetNodeOrNull<Control>("AppMargin/MainPadding/MainLayout/ActionButtonRow");
@@ -651,17 +655,14 @@ public partial class DashboardController : Control
         if (legacyHeader != null)
             legacyHeader.Visible = false;
 
-        var topBar = new PanelContainer { Name = "WorkstationTopBar", MouseFilter = MouseFilterEnum.Ignore };
-        topBar.SetAnchorsPreset(LayoutPreset.TopWide);
-        topBar.OffsetLeft = 244;
-        topBar.OffsetRight = -8;
-        topBar.OffsetBottom = 92;
-        topBar.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(navy, edge, 0, 1));
-        AddChild(topBar);
+        _workstationTopBar = new PanelContainer { Name = "WorkstationTopBar", MouseFilter = MouseFilterEnum.Ignore };
+        _workstationTopBar.SetAnchorsPreset(LayoutPreset.TopWide);
+        _workstationTopBar.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(navy, edge, 0, 1));
+        AddChild(_workstationTopBar);
         var topRow = new HFlowContainer();
         topRow.AddThemeConstantOverride("h_separation", 18);
         topRow.AddThemeConstantOverride("v_separation", 4);
-        topBar.AddChild(topRow);
+        _workstationTopBar.AddChild(topRow);
         _shellTeamLogo = CreateTeamLogoTexture(new Vector2(44, 44));
         _shellTeamLogo.TooltipText = "Controlled franchise logo";
         topRow.AddChild(_shellTeamLogo);
@@ -697,24 +698,26 @@ public partial class DashboardController : Control
         };
         topRow.AddChild(_shellAdvance);
 
-        var rail = new PanelContainer { Name = "WorkstationNavigation" };
-        rail.SetAnchorsPreset(LayoutPreset.LeftWide);
-        rail.OffsetRight = 232;
-        rail.OffsetBottom = -8;
-        rail.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(navy, edge, 0, 1));
-        AddChild(rail);
+        _workstationRail = new PanelContainer { Name = "WorkstationNavigation" };
+        _workstationRail.SetAnchorsPreset(LayoutPreset.LeftWide);
+        _workstationRail.OffsetBottom = -8;
+        _workstationRail.AddThemeStyleboxOverride("panel", CreateSurfaceStyle(navy, edge, 0, 1));
+        AddChild(_workstationRail);
+        var navigationScroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, VerticalScrollMode = ScrollContainer.ScrollMode.Auto, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        _workstationRail.AddChild(navigationScroll);
         _shellNavigation = new VBoxContainer();
+        _shellNavigation.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
         _shellNavigation.AddThemeConstantOverride("separation", 4);
-        rail.AddChild(_shellNavigation);
+        navigationScroll.AddChild(_shellNavigation);
         _railTeamLogo = CreateTeamLogoTexture(new Vector2(72, 72));
         _railTeamLogo.TooltipText = "Controlled franchise logo";
         _shellNavigation.AddChild(_railTeamLogo);
-        var brand = new Label { Text = "GRIDIRON GM\nFRANCHISE DESK" };
-        brand.AddThemeColorOverride("font_color", ink);
-        brand.AddThemeFontSizeOverride("font_size", 20);
-        brand.AddThemeConstantOverride("outline_size", 1);
-        brand.AddThemeColorOverride("font_outline_color", new Color("1d3447"));
-        _shellNavigation.AddChild(brand);
+        _workstationBrand = new Label { Text = "GRIDIRON GM\nFRANCHISE DESK" };
+        _workstationBrand.AddThemeColorOverride("font_color", ink);
+        _workstationBrand.AddThemeFontSizeOverride("font_size", 20);
+        _workstationBrand.AddThemeConstantOverride("outline_size", 1);
+        _workstationBrand.AddThemeColorOverride("font_outline_color", new Color("1d3447"));
+        _shellNavigation.AddChild(_workstationBrand);
         _shellNavigation.AddChild(CreateNavigationRule(edge));
         _shellPrimaryNavigation[0] = AddNavigationButton("HOME", "Franchise Home", async () => await SelectMainTab(0), true, green, muted, edge);
         AddNavigationButton("INBOX", "Messages and action-needed notices", ShowInboxDesk, false, green, muted, edge);
@@ -761,7 +764,58 @@ public partial class DashboardController : Control
         AddTradeNavigationButton("League Transactions", ShowLeagueTransactionsDialog, muted, edge);
         var spacer = new Control { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         _shellNavigation.AddChild(spacer);
+        ApplyResponsiveShellLayout();
         RefreshWorkstationContext();
+    }
+
+    private void ConfigureWindowForDetectedScreen()
+    {
+        var window = GetWindow();
+        if (window == null) return;
+        window.MinSize = new Vector2I(1024, 576);
+        if (DisplayServer.GetName().Equals("headless", StringComparison.OrdinalIgnoreCase) || window.Mode != Window.ModeEnum.Windowed) return;
+        var usable = DisplayServer.ScreenGetUsableRect(window.CurrentScreen);
+        if (usable.Size.X <= 0 || usable.Size.Y <= 0) return;
+        var target = new Vector2I(
+            Mathf.Clamp((int)(usable.Size.X * .92f), 1024, 1920),
+            Mathf.Clamp((int)(usable.Size.Y * .90f), 576, 1080));
+        window.Size = target;
+        window.Position = usable.Position + (usable.Size - target) / 2;
+    }
+
+    private void ApplyResponsiveShellLayout()
+    {
+        if (_workstationAppMargin == null || _workstationTopBar == null || _workstationRail == null) return;
+        var viewport = GetViewportRect().Size;
+        if (viewport.X <= 0 || viewport.Y <= 0) return;
+        var compact = viewport.X < 1400 || viewport.Y < 760;
+        var railWidth = compact ? Mathf.Clamp(viewport.X * .17f, 164f, 196f) : Mathf.Clamp(viewport.X * .145f, 220f, 268f);
+        var topHeight = compact ? 82f : 92f;
+        var gutter = compact ? 6f : 8f;
+
+        _workstationRail.OffsetRight = railWidth;
+        _workstationTopBar.OffsetLeft = railWidth + gutter + 4f;
+        _workstationTopBar.OffsetRight = -gutter;
+        _workstationTopBar.OffsetBottom = topHeight;
+        _workstationAppMargin.OffsetLeft = railWidth + gutter + 4f;
+        _workstationAppMargin.OffsetTop = topHeight + gutter;
+        _workstationAppMargin.OffsetRight = -gutter;
+        _workstationAppMargin.OffsetBottom = -gutter;
+
+        var navigationWidth = Math.Max(140f, railWidth - 22f);
+        foreach (var child in _shellNavigation.GetChildren())
+            if (child is Button button) button.CustomMinimumSize = new Vector2(navigationWidth, compact ? 28f : 34f);
+        foreach (var group in new[] { _teamNavigationGroup, _financesNavigationGroup, _leagueNavigationGroup, _scoutingNavigationGroup, _tradeNavigationGroup })
+            if (group != null)
+                foreach (var child in group.GetChildren())
+                    if (child is Button button) button.CustomMinimumSize = new Vector2(navigationWidth, compact ? 24f : 26f);
+
+        if (_railTeamLogo != null) _railTeamLogo.CustomMinimumSize = compact ? new Vector2(48, 48) : new Vector2(72, 72);
+        if (_workstationBrand != null) _workstationBrand.AddThemeFontSizeOverride("font_size", compact ? 15 : 20);
+        if (_shellTeamLogo != null) _shellTeamLogo.Visible = !compact && _shellTeamLogo.Texture != null;
+        if (_shellTeamContext != null) _shellTeamContext.Visible = !compact;
+        if (_shellCalendar != null) _shellCalendar.AddThemeFontSizeOverride("font_size", compact ? 12 : 14);
+        if (_shellRecord != null) _shellRecord.AddThemeFontSizeOverride("font_size", compact ? 12 : 14);
     }
 
     private void ToggleTeamNavigation() => ToggleNavigationGroup(_teamNavigationGroup);
@@ -1343,6 +1397,7 @@ public partial class DashboardController : Control
         }
         if (_shellAdvance != null && _calendarText != null)
             _shellAdvance.Text = _inboxMessages != null && _inboxMessages.Count > 0 ? "REVIEW INBOX" : "ADVANCE";
+        ApplyResponsiveShellLayout();
     }
 
     private void ApplyLifecyclePresentation()
@@ -1404,9 +1459,8 @@ public partial class DashboardController : Control
         if (await TryRunDeveloperCommand())
             return;
 
-        var window = GetWindow();
-        if (window != null)
-            window.MinSize = new Vector2I(1152, 648);
+        ConfigureWindowForDetectedScreen();
+        GetViewport().SizeChanged += ApplyResponsiveShellLayout;
 
         // Existing nodes
         _serverStatus = GetNodeOrWarn<Label>("AppMargin/MainPadding/MainLayout/HeaderPanel/HeaderRow/ContinueBlock/ServerStatus");
@@ -7097,7 +7151,7 @@ public partial class DashboardController : Control
     private void CreateCollegeBigBoardsWorkspace() { if (_collegeBigBoardsDialog != null) return; _collegeBigBoardsDialog = new AcceptDialog { Title = "College Football > Public Boards", MinSize = new Vector2I(900, 600), Exclusive = false }; _collegeBigBoardsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeBigBoardsDialog); }
     private void CreateCollegeAwardsWorkspace() { if (_collegeAwardsDialog != null) return; _collegeAwardsDialog = new AcceptDialog { Title = "College Football > Awards", MinSize = new Vector2I(900, 540), Exclusive = false }; _collegeAwardsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeAwardsDialog); }
     private void ShowCollegeLeaders() { foreach (var child in _collegeLeadersDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeLeadersDialog.AddChild(box); var leaders = new CollegeLeadersService(_nativeGameCoreContext).GetLeaders(5); if (!leaders.Ok || leaders.Categories.All(category => category.Leaders.Count == 0)) box.AddChild(HomeLabel(leaders.Message.Length > 0 ? leaders.Message : "College leader statistics are unavailable.", 13)); else { box.AddChild(HomeLabel($"COLLEGE LEAGUE LEADERS · {leaders.SeasonYear}", 18, new Color("f4eddf"))); var row = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; box.AddChild(row); foreach (var category in leaders.Categories) { var panel = new PanelContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel($"{category.Name.ToUpperInvariant()} · {category.StatLabel}", 12, new Color("f0c96a"))); foreach (var entry in category.Leaders) body.AddChild(HomeLabel($"{entry.PlayerName} · {entry.Position} · {entry.Value:N0}", 11)); row.AddChild(panel); } } _collegeLeadersDialog.PopupCentered(new Vector2I(900, 540)); }
-    private void ShowCollegePostseasonProjections() { foreach (var child in _collegePostseasonProjectionsDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegePostseasonProjectionsDialog.AddChild(box); var universe = _nativeGameCoreContext?.ActiveLeague?.CollegeUniverse; var teams = universe?.Teams?.Where(team => team != null).ToDictionary(team => team.TeamId, team => team.Name) ?? new Dictionary<string, string>(); if (universe?.Postseason?.Completed == true) { box.AddChild(HomeLabel($"COLLEGE POSTSEASON · {universe.SeasonYear} · FINAL RESULTS", 18, new Color("f4eddf"))); foreach (var game in universe.Postseason.Games) { var panel = new PanelContainer(); var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel(game.Label.ToUpperInvariant(), 12, new Color("f0c96a"))); body.AddChild(HomeLabel($"{teams.GetValueOrDefault(game.AwayTeamId, "Away")} {game.AwayScore}, {teams.GetValueOrDefault(game.HomeTeamId, "Home")} {game.HomeScore}", 12)); box.AddChild(panel); } } else { var projections = new CollegePostseasonProjectionService(_nativeGameCoreContext).GetProjections(); if (!projections.Ok) box.AddChild(HomeLabel(projections.Message, 13)); else { box.AddChild(HomeLabel($"COLLEGE POSTSEASON PROJECTIONS · {projections.SeasonYear}", 18, new Color("f4eddf"))); box.AddChild(HomeLabel("Current-ranking outlook only · no postseason games have been scheduled or simulated.", 11, new Color("9cadb8"))); foreach (var matchup in projections.PlayoffMatchups.Concat(projections.BowlMatchups)) box.AddChild(HomeLabel($"{matchup.Label}: #{matchup.Home.Ranking} {matchup.Home.TeamName} vs #{matchup.Away.Ranking} {matchup.Away.TeamName}", 12)); } } _collegePostseasonProjectionsDialog.PopupCentered(new Vector2I(900, 540)); }
+    private void ShowCollegePostseasonProjections() { foreach (var child in _collegePostseasonProjectionsDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegePostseasonProjectionsDialog.AddChild(box); var universe = _nativeGameCoreContext?.ActiveLeague?.CollegeUniverse; var teams = universe?.Teams?.Where(team => team != null).ToDictionary(team => team.TeamId, team => team.Name) ?? new Dictionary<string, string>(); if (universe?.Postseason?.Completed == true) { box.AddChild(HomeLabel($"COLLEGE POSTSEASON · {universe.SeasonYear} · FINAL RESULTS", 18, new Color("f4eddf"))); box.AddChild(HomeLabel(universe.Postseason.RuleVersion, 10, new Color("9cadb8"))); foreach (var game in universe.Postseason.Games) { var panel = new PanelContainer(); var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel($"{game.Stage.ToUpperInvariant()} · {game.Label.ToUpperInvariant()}", 12, new Color("f0c96a"))); body.AddChild(HomeLabel($"#{game.AwaySeed} {teams.GetValueOrDefault(game.AwayTeamId, "Away")} {game.AwayScore}, #{game.HomeSeed} {teams.GetValueOrDefault(game.HomeTeamId, "Home")} {game.HomeScore}", 12)); box.AddChild(panel); } } else { var projections = new CollegePostseasonProjectionService(_nativeGameCoreContext).GetProjections(); if (!projections.Ok) box.AddChild(HomeLabel(projections.Message, 13)); else { box.AddChild(HomeLabel($"COLLEGE POSTSEASON PROJECTIONS · {projections.SeasonYear}", 18, new Color("f4eddf"))); box.AddChild(HomeLabel("Five highest-ranked conference leaders receive auto-bids; seven at-large teams complete the field. Top four seeds receive first-round byes.", 11, new Color("9cadb8"))); box.AddChild(HomeLabel($"FIRST-ROUND BYES · {string.Join(" · ", projections.FirstRoundByes.Select(team => $"#{team.Ranking} {team.TeamName}"))}", 12, new Color("f0c96a"))); foreach (var matchup in projections.PlayoffMatchups.Concat(projections.BowlMatchups)) box.AddChild(HomeLabel($"{matchup.Label}: #{matchup.Home.Ranking} {matchup.Home.TeamName} vs #{matchup.Away.Ranking} {matchup.Away.TeamName}", 12)); } } _collegePostseasonProjectionsDialog.PopupCentered(new Vector2I(900, 700)); }
     private void ShowCollegeBigBoards() { foreach (var child in _collegeBigBoardsDialog.GetChildren()) child.QueueFree(); var box = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeBigBoardsDialog.AddChild(box); var boards = new CollegeBigBoardService(_nativeGameCoreContext).GetBoards(12); if (!boards.Ok) box.AddChild(HomeLabel(boards.Message, 13)); else { box.AddChild(HomeLabel("PUBLIC COLLEGE BIG BOARDS", 18, new Color("f4eddf"))); box.AddChild(HomeLabel("Public workout, production, team, and declared-outlook context · distinct from private scouting.", 11, new Color("9cadb8"))); var row = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; box.AddChild(row); foreach (var board in boards.Boards) { var panel = new PanelContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; var body = new VBoxContainer(); panel.AddChild(body); body.AddChild(HomeLabel(board.Name.ToUpperInvariant(), 13, new Color("f0c96a"))); foreach (var entry in board.Entries) body.AddChild(HomeLabel($"{entry.Rank}. {entry.Name} · {entry.Position} · {entry.College}", 11)); row.AddChild(panel); } } _collegeBigBoardsDialog.PopupCentered(new Vector2I(900, 600)); }
     private void CreateCollegeNewsWorkspace() { if (_collegeNewsDialog != null) return; _collegeNewsDialog = new AcceptDialog { Title = "College Football > News", MinSize = new Vector2I(900, 580), Exclusive = false }; _collegeNewsDialog.GetOkButton().Text = "CLOSE"; AddChild(_collegeNewsDialog); }
     private void ShowCollegeNews() { foreach (var child in _collegeNewsDialog.GetChildren()) child.QueueFree(); var body = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; _collegeNewsDialog.AddChild(body); var news = new CollegeNewsService(_nativeGameCoreContext).GetNews(); body.AddChild(HomeLabel($"COLLEGE FOOTBALL > NEWS{(news.Ok ? $" · {news.SeasonYear}" : "")}", 18, new Color("f4eddf"))); body.AddChild(HomeLabel("Authoritative results, rankings, performances, recruiting, transfers, and coaching context · no external feeds.", 11, new Color("9cadb8"))); var list = new ItemList { SizeFlagsVertical = Control.SizeFlags.ExpandFill }; body.AddChild(list); if (!news.Ok) list.AddItem(news.Message); else foreach (var item in news.Items) list.AddItem($"{item.Category} · {item.Headline}\n{item.Detail}"); _collegeNewsDialog.PopupCentered(new Vector2I(900, 580)); }

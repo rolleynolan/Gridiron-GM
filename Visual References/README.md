@@ -1,6 +1,6 @@
 # Visual References
 
-This folder is the project’s shared source of visual direction. Keep screenshots, rough mockups, inspiration images, and short notes here so future UI work has a clear reference point.
+This folder is the project’s approved visual direction. `AUDIT-STATUS.md` is the authoritative manifest, and only the current accepted or explicitly provisional reference for each workflow belongs here. Rejected drafts, superseded versions, generation logs, and experiments must not be retained alongside the working references.
 
 ## Suggested organization
 
@@ -13,6 +13,6 @@ This folder is the project’s shared source of visual direction. Keep screensho
 - `06 - Game Day` — game preview, live simulation, box score, and post-game screens.
 - `07 - Setup & Utility` — save/load, settings, onboarding, and confirmation states.
 
-For a screen or visual concept, add images plus a small companion note such as `roster-notes.md`. Capture: the purpose of the screen, the most important information, intended visual mood, interaction ideas, and any specific details that must be preserved.
+When a new reference is approved, add it to `AUDIT-STATUS.md` and remove the superseded image in the same change. Companion notes may capture interaction behavior that the image cannot show, but must not preserve rejected visual variants.
 
 External images are references, not final assets: record their source and use them only as inspiration unless their license permits project use.
