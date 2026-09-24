@@ -2,17 +2,64 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
-## Pro snap-engine checkpoint — September 2026
+## Pro snap-engine checkpoint — September 24, 2026
 
 Working checklist:
 - [x] Read project authorities and recent history; baseline build, 73 focused tests, full GameCore smoke, Godot editor/project launch, and benchmark pass.
 - [x] High: prevent normal depth commands from overriding Head Coach lineup authority; prevent running-game depth edits and live-game roster/contract transactions.
-- [ ] Critical: replace live substitutions that regenerate whole-game statistics and manufacture future score increments with forward-only snap resolution.
-- [ ] Implement authoritative pro drives, plays, clock, possession, scoring, deterministic randomness, and supported decisions.
-- [ ] Integrate live persistence, legacy compatibility, Game Day controls, and existing result consequences.
-- [ ] Verify direct rules, save/reload, authority, statistics, season integration, full smoke, and benchmark; document limits and commit.
+- [x] Critical: replace live substitutions that regenerate whole-game statistics and manufacture future score increments with forward-only snap resolution.
+- [x] Implement authoritative pro drives, plays, clock, possession, scoring, deterministic randomness, and supported decisions.
+- [x] Integrate live persistence, legacy compatibility, Game Day controls, and existing result consequences.
+- [x] Verify direct rules, save/reload, authority, statistics, season integration, full smoke, and benchmark; document limits.
+- [x] Preserve implementation and verification in focused local commits.
 
 Audit baseline on this workstation: 272 games in 19.1 ms, 8.14 MiB allocated; the old 768-game pro-engine college-workload proxy took 37.4 ms, 22.98 MiB. The twelve pre-existing untracked `.uid` sidecars correspond to tracked C# files and are preserved outside task commits.
+
+Verified audit corrections:
+- **Critical:** live substitutions formerly regenerated whole-game production and manufactured future scoring increments. New games resolve only the next play; substitutions leave the resolved prefix unchanged.
+- **Critical:** direct overwrite could truncate the last good save. Saving now writes and flushes a unique sibling file, then atomically replaces the destination; failed replacement retains the prior file.
+- **High:** normal depth commands could override Head Coach lineup authority or change personnel during running playback. All user mutation entry points enforce the agreement and pause boundary. Live roster/contract/trade moves are locked to preserve participant ownership.
+- **High:** calendar/full-game/playoff commands could conflict with an active live session. These commands stop before mutation; user-facing quick/live starts also require the scheduled day.
+- **High:** reconstructing a missing legacy completed playoff result simulated another game and could invent player statistics and injuries. Repair now preserves the bracket's recorded score without manufactured play history or side effects.
+- **Medium:** postseason completion did not share fatigue/statistics/result handling. All new pro completions now use one idempotent result commit. Old final-score-formula assertions and no-ties season assertions now test actual rules and statistical consistency.
+
+Implemented architecture and rules:
+- `ProSnapEngine.Step` emits one authoritative event. Quick simulation loops the same method. `ProGameState` saves possession, own-goal-relative field position, down/distance, phase, period/clock, drives, pending input, in-game unavailability, and explicit SplitMix64 random state. Seed derivation uses saved world seed, season, matchup identity, and team IDs; no global random generator or simulated future is retained.
+- `GameResult.BoxScore.PlayByPlay` is the sole resolved log. Events retain participating IDs and sparse stat deltas; `ProGameStatistics` reduces those into the existing player/team box scores. Score, quarter scoring, season production, career history, awards, standings, and records use the existing result pipeline. Net team offense subtracts sack losses from gross passing plus rushing yards. A rebuild test reconciles every numerical player/team total against the log.
+- Supported events: kickoffs, runs, complete/incomplete passes, sacks, interceptions, fumbles, downs, punts, field goals, extra points/two-point tries, touchdowns, safeties, period endings, halftime, and final results. Saved depth order, existing Overall, staff strength, fatigue, and availability shape participants/outcomes. Resolved game injuries exclude the player from later snaps and enter the existing medical history exactly once on completion.
+- Rules are explicitly versioned `pro-snap-v1-2025`: four 15-minute quarters; preseason may tie; regular-season ties enter one 10-minute overtime; postseason uses successive 15-minute overtime periods until a winner. Both teams receive an initial overtime opportunity subject to the regular-season clock, with the safety exception; later unequal scores after completed opportunities finish the game. Kickoff touchbacks start at the 35. Baseline reference: [NFL 2025 rulebook](https://operations.nfl.com/media/ntif5hxb/2025-nfl-rulebook-final.pdf), rules 6 and 16. This is a bounded subset, not a claim to implement every NFL rule or a new 2026 rulebook.
+- Four independent Head Coach domains are validated when submitting AND resolving a pending choice. Retained GM choices cover Run/Pass; Balanced/Run focus/Pass focus/Blitz; kick/try type; fourth-down Go/Kick and Normal/Hurry/Chew tempo. Empty choices use staff recommendations. Overall management decides whether to kick on fourth down; special teams chooses the kick if management selects Kick. Godot labels ownership and disables unavailable/coach-owned controls. Paused Next Play, resume, depth adjustments, and exit/save all use services.
+- Live controls and result mapping moved out of the dashboard monolith into focused partials. Current period/clock/possession update even across quarter boundaries; overtime never appears final merely because an earlier period reached zero. Postgame includes all overtime periods, actual scoring plays, expanded team/player/specialist lines, and unknown legacy quarter splits. Controls wrap and vertical scrolling preserves access at 1024x576; no visual references or branding changed.
+
+Persistence:
+- Save version **33**, with additive defaults. Existing completed results remain unchanged. A legacy unfinished game continues its saved playback exactly, with substitutions disabled for that game; its recorded stats/fatigue commit once, without inventing new injuries or snap history. New games use the new resolver.
+- Live saves retain resolved events, ordered depth, queued choices, drive state, and RNG cursor. Expected-sequence commands reject stale retries. Completed-result lookup prevents a second injury, fatigue, stats, or schedule commit. New sessions serialize only one played-event log; old `PlayedEvents` is still readable. Unsupported live rules versions fail load explicitly. Load does not write or regenerate an existing full league just to adopt this slice.
+
+Validation commands (repository root; Godot console executable from the sibling Godot 4.5.1 Mono installation):
+- `dotnet build 'Godot/Gridiron GM.csproj'` — zero warnings/errors.
+- `dotnet test 'Godot/Tests/GridironGM.Domain.Tests.csproj' --no-restore` — **107 passed**. Covers deterministic full replay, legal transitions, all supported event families, ties/overtime, stat reduction, depth/availability/injury behavior, queued-input replay/revalidation, stale retries, live disk save/load/substitution, one-time health/stat consequences, command guards, authority, standings, and legacy result preservation.
+- Godot `--headless --path Godot -- --gamecore-smoke-test` — passes college lifecycle, dashboard-to-live/save/postgame, whole-season progression, postseason, three-season continuity, history/awards/records, and save/load cleanup.
+- Godot `--headless --path Godot -- --game-day-ui-smoke` — real generated league; actual Next Play/decision signals, coach-disabled choices, full-game completion, all five postgame tabs, and horizontal bounds at 1024x576. Uses an isolated in-memory context; never writes the user's autosave. This is functional UI QA, not a new visual acceptance review.
+- Godot `--headless --path Godot --editor --quit` and `--headless --path Godot --quit-after 5` — clean import/startup.
+- Godot `--headless --path Godot -- --gamecore-benchmark` — results below. `git diff --check` passes.
+
+Benchmark, same workstation, Debug build, two warmup games; pro measures resolution without disk/rendering:
+
+| Workload | Time | Managed allocation |
+| --- | ---: | ---: |
+| One detailed pro game | 3.711 ms | 1.56 MiB |
+| 16-game pro week | 61.8 ms | 24.56 MiB |
+| 272-game pro regular season | 793.9 ms (2.919 ms/game) | 412.36 MiB total allocated |
+| Actual 128-team lightweight college season, 768 regular + 15 postseason games and lifecycle | 110.7 ms | 8.84 MiB |
+
+The pre-snap pro baseline was 19.1 ms / 8.14 MiB for 272 aggregate results. The increased cost was investigated: the new workload resolves roughly 150–200 events per game with live personnel selection, stat deltas, injuries, and persistent play/drive histories instead of an aggregate score formula. Replacing per-participant zero-stat objects with participant IDs and emitting sparse numeric deltas reduced the initial detailed-season allocation from about 468 MiB to 412 MiB. New live saves no longer repeat the event log. Representative indented final-game JSON is 329–347 KiB (serialization excluded from timed samples); 272 comparable retained results imply roughly 88 MiB before other league state. Total allocated bytes above are cumulative allocations, not peak resident memory. Current season logs are discarded by the existing rollover after summary/stat history is archived. The old 768-game college number (37.4 ms / 22.98 MiB at task baseline) was repeated pro simulation, so it is not comparable to the corrected actual college benchmark. The college resolver itself is unchanged.
+
+Material remaining work and next continuation:
+- **Medium:** profile repeated live DTO/history copies and full-season save latency/size before adding more per-play detail; compact save/log encoding and backup retention are deferred to avoid changing the save container alongside the first engine. Atomic replacement is implemented, but rolling recovery backups are not.
+- Expand game management next: timeouts, kneel/spike, kicks before fourth down, stronger end-of-half recommendations, and richer possession/return handling; add deterministic scenario tests before tactics expand. Current clock runoff is deliberately coarse and does not implement two-minute warnings/out-of-bounds timing.
+- Penalties remain deferred because no authoritative penalty model exists. Also deferred: onside kicks, blocked/returned kicks, return touchdowns, detailed safety-free-kick personnel, defensive try returns, emergency cross-position personnel, formations/coverage packages, and playbook creation. Extremely depleted attacks without an available QB or RB stop with a validation error instead of using an unavailable player. Current injuries are bounded to one new injury per game using the existing medical model; balance and richer injury frequency need later tuning.
+- Preserve the lightweight college resolver until the pro engine's scenarios and performance mature. No new hidden attributes, animations, portraits, audio, or art work are part of this slice. No user design decision blocks this checkpoint; richer player attributes and playbook/penalty design require a later explicit design pass.
+- New `.uid` sidecars for this slice's new scripts are included deliberately; the twelve pre-existing untracked sidecars remain outside task commits.
 
 ## 0. Reset and audit
 
@@ -150,7 +197,7 @@ The September hardening tranche is now in place:
 
 The stabilization gate is complete. Controller extraction remains an ongoing maintainability rule rather than a blocker:
 new workspace behavior must enter a focused partial or non-UI service, and touched legacy regions should move with it.
-Detailed snap-engine design may proceed, but each new simulation stage must retain direct tests and update the benchmark
+The first detailed pro snap foundation is implemented above. Each later simulation stage must retain direct tests and update the benchmark
 baseline before expanding the detailed engine to all 128 colleges.
 
 ## 1. C# playable season loop
@@ -272,23 +319,15 @@ Implement this route before broadening the visual rebuild:
    - Enter from the scheduled-game stop and reconcile the observer with `live-game-observer-v1.png`.
    - Preserve score, clock, possession, play log, statistics, injuries, pause/resume, and a live depth-chart substitution route.
    - Apply lineup changes only through GameCore and only to subsequent legal snaps.
-   - **Implemented for the first functional slice:** every newly simulated game now produces a deterministic, ordered GameCore playback timeline containing
-     quarter/clock, possession, down-and-distance, field position, play description, scoring state, and score after each event.
-     The timeline is part of the authoritative box score, survives save/load, and is exposed to the Godot result payload so the
-     observer can replay it without inventing a second outcome. `Watch Game` now opens a full-screen observer modeled on the
-     accepted scorebar/field/play-log/control hierarchy, with pause/resume, 1x/2x/4x speeds, all-play/key-play filtering, a live
-     running score and field-position view, box-score access, and explicit exit to postgame. Deterministic game injuries enter
-     the same playback stream as medical-timeout events. Both observer and postgame scorebars use the installed team marks with
-     nearest-neighbor filtering. Game resolution and recorded player lines now use each team's saved top available depth-chart
-     players rather than silently selecting the highest-rated roster members. The GameCore incremental-session foundation now
-     starts paused without committing a result, advances one authoritative event at a time, persists midgame progress, records
-     paused depth-chart adjustments without rewriting played events, rebuilds only the unplayed outcome from the changed lineup,
-     and commits injuries/statistics/fatigue/schedule state exactly once at completion. Watch Game now uses that incremental
-     session directly rather than atomically completing the game before playback. Live Adjustments pauses the timer, routes to
-     the familiar full depth-chart table, validates drag/drop or Set Starter through the live session, autosaves the revised
-     future, and provides an explicit Return to Live Game action. Full-game simulation is refused while a live session exists.
-     Production sprite animation and broader tactical package adjustments remain separate art/simulation workstreams.
-     Build, 31 domain tests, and the full headless GameCore smoke run pass.
+   - **Implemented and superseded by the September 24 snap foundation:** Watch Game creates a paused session with no future
+     events. Each step resolves one real play through `ProSnapEngine`, updates score/clock/possession, and appends to the saved
+     authoritative log. Pause/Next Play, retained GM decisions, staff recommendations, four coach authority domains, and
+     saved-depth substitutions affect only later plays. Resume uses the same engine as quick simulation. Leaving pauses and
+     saves; loading resumes the same RNG cursor and queued choice. Completion commits existing schedule/stat/medical/fatigue
+     consequences once. Legacy sessions preserve their old playback and cannot rebuild history through substitutions.
+     Result projections include overtime periods, actual scoring summaries, and expanded stat lines. Existing marks,
+     field/log hierarchy, speed controls, and postgame route are retained. See the checkpoint above for exact rules, testing,
+     performance, and deferred tactical work; the previous aggregate playback/rebuilt-future implementation is removed.
 5. **Postgame and return loop**
    - Bind `postgame-hub-v2.png` to the immutable completed result and existing box-score/game-log data.
    - Apply result, statistics, injuries, fatigue, milestones, standings, news, and inbox delivery exactly once.
