@@ -4,7 +4,7 @@ namespace GridironGM.GameCore.Models;
 
 public sealed class LeagueState
 {
-    public const int CurrentSaveVersion = 33;
+    public const int CurrentSaveVersion = 34;
     public const decimal DefaultSalaryCap = 255_000_000m;
 
     public string LeagueId { get; set; } = "test_league";

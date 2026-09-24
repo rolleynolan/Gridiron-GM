@@ -27,7 +27,7 @@ public partial class DashboardController
         var submitted = false;
         observer.DecisionChanged += (key, value) =>
         {
-            var decision = new ProGameDecision { Offense = key == "offense" ? value : "", Defense = key == "defense" ? value : "" };
+            var decision = new ProGameDecision { Offense = key == "offense" ? value : "", Defense = key == "defense" ? value : "", Timeout = key == "timeout" ? value : "" };
             var response = service.SubmitDecision(decision, league.ActiveLiveGameSession.NextEventIndex);
             Require(response.Ok, response.Error); submitted = true;
         };
@@ -52,6 +52,14 @@ public partial class DashboardController
         league.Teams.First(t => t.TeamId == league.UserTeamId).Coaches.First(c => c.Role == "Head Coach").Authority.ControlledDomains.Add(choice.Domain);
         observer.BindSessionControls(service.SetPaused(true).Session);
         Require(((OptionButton)observer.FindChild($"Decision-{choice.Key}", true, false)).Disabled, "Coach-owned control must be disabled.");
+        for (var guard = 0; !ProClockManagementService.CanCallTimeout(league.ActiveLiveGameSession.PendingResult, league.UserTeamId) && guard < 20; guard++)
+            observer.FindChild("NextPlay", true, false).EmitSignal(Button.SignalName.Pressed);
+        var timeout = (OptionButton)observer.FindChild("Decision-timeout", true, false);
+        Require(!timeout.Disabled, "An available clock-stopping timeout should be selectable.");
+        timeout.Select(1); timeout.EmitSignal(OptionButton.SignalName.ItemSelected, 1);
+        observer.FindChild("NextPlay", true, false).EmitSignal(Button.SignalName.Pressed);
+        Require(league.ActiveLiveGameSession.PlayedEvents.Last().TimeoutTeamId == league.UserTeamId, "Timeout did not reach GameCore.");
+        Require(ProClockManagementService.Timeouts(league.ActiveLiveGameSession.PendingResult, league.UserTeamId) == 2, "Expected one charged timeout.");
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         var liveScroll = Descendants(observer).OfType<ScrollContainer>().First();
@@ -75,6 +83,6 @@ public partial class DashboardController
             Require(scroll.GetChild<Control>(0).Size.X <= scroll.Size.X + 1, $"{tab.Text} overflows the minimum viewport horizontally.");
         }
         viewport.QueueFree();
-        GD.Print("[Game Day UI smoke] PASS real kickoff, decision signal, next snap, coach ownership, full-game result, five postgame tabs, 1024x576 horizontal bounds.");
+        GD.Print("[Game Day UI smoke] PASS real kickoff, decision signal, next snap, coach ownership, charged timeout, full-game result, five postgame tabs, 1024x576 horizontal bounds.");
     }
 }

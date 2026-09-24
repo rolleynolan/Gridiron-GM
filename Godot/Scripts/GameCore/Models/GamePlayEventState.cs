@@ -33,6 +33,7 @@ public sealed class GamePlayEventState
     public string DefensiveCall { get; set; } = "";
     public string ManagementCall { get; set; } = "";
     public string SpecialTeamsCall { get; set; } = "";
+    public string TimeoutTeamId { get; set; } = "";
     public string InjuredPlayerId { get; set; } = "";
     public PlayerInjuryState Injury { get; set; }
     public System.Collections.Generic.List<string> ParticipantIds { get; set; } = new();

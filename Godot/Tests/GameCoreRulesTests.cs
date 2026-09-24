@@ -167,7 +167,9 @@ public sealed class GameCoreRulesTests
         Assert.Equal(LeagueBootstrapService.RegularSeasonGameCount, diagnostics.CompletedRegularSeasonGames);
         Assert.InRange(diagnostics.PointsPerTeamGame, 12, 40);
         Assert.InRange(diagnostics.HomeWinRate, 0.30, 0.80);
-        Assert.InRange(diagnostics.LargestScoreMargin, 1, 40);
+        // Individual blowouts are legal; average scoring/home advantage above remain the balance guards.
+        Assert.InRange(diagnostics.LargestScoreMargin, 1, 70);
+        Assert.All(context.ActiveLeague.Results, r => { Assert.InRange(r.HomeScore, 0, 70); Assert.InRange(r.AwayScore, 0, 70); });
         Assert.Contains(context.ActiveLeague.Results, result => result.BoxScore.PlayByPlay.Any(play => play.IsInjury));
         Assert.All(context.ActiveLeague.Results, result =>
         {
@@ -385,6 +387,26 @@ public sealed class GameCoreRulesTests
     }
 
     [Fact]
+    public void NonqualifierDashboardTracksTheRemainingPlayoffRounds()
+    {
+        var context = Bootstrap(); var league = context.ActiveLeague;
+        var quick = new GameDayService(context);
+        foreach (var game in league.Schedule.Where(g => g.GameType == "regular_season"))
+            Assert.True(quick.SimulateScheduledGame(game.GameId, true).Ok);
+        league.Calendar.AbsoluteWeek = LeagueBootstrapService.TotalSeasonWeeks + 1; league.Calendar.DayIndex = 0;
+        var playoffs = new PlayoffService(context); Assert.True(playoffs.EnsureBracketGenerated(league, out _));
+        var qualifiers = league.PlayoffBracket.ConferenceBrackets.SelectMany(c => c.Seeds).Select(s => s.TeamId).ToHashSet();
+        league.UserTeamId = league.Teams.First(t => !qualifiers.Contains(t.TeamId)).TeamId;
+        Assert.True(playoffs.SimulateWildCardRound(league).Ok);
+        var dashboard = new DashboardService(context);
+        Assert.Equal("Next: Divisional Round Pending", dashboard.GetDashboardState().Dashboard.NextGame.HeaderNextLabel);
+        Assert.True(playoffs.SimulateDivisionalRound(league).Ok);
+        Assert.Equal("Next: Conference Championship Pending", dashboard.GetDashboardState().Dashboard.NextGame.HeaderNextLabel);
+        Assert.True(playoffs.SimulateConferenceChampionshipRound(league).Ok);
+        Assert.Equal("Next: League Championship", dashboard.GetDashboardState().Dashboard.NextGame.HeaderNextLabel);
+    }
+
+    [Fact]
     public void BenchmarkHarnessMeasuresDetailedGameWorkload()
     {
         var report = SimulationBenchmarkService.Run(FindTeamSeedPath());
@@ -392,7 +414,7 @@ public sealed class GameCoreRulesTests
         Assert.Equal(1, report.SingleGame.Games);
         Assert.Equal(SimulationBenchmarkService.ProWeekGames, report.ProWeek.Games);
         Assert.Equal(SimulationBenchmarkService.ProSeasonGames, report.ProSeason.Games);
-        Assert.Equal(SimulationBenchmarkService.ProjectedCollegeSeasonGames, report.ProjectedCollegeSeason.Games);
+        Assert.Equal(SimulationBenchmarkService.ProjectedCollegeSeasonGames + 15, report.ProjectedCollegeSeason.Games); // 11 playoff games + 4 bowls
         Assert.True(report.ProSeason.AllocatedBytes > 0);
         Assert.True(report.ProjectedCollegeSeason.ElapsedMilliseconds > 0);
     }

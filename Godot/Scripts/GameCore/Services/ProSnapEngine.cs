@@ -23,6 +23,8 @@ public sealed class ProSnapEngine
         _league = league;
         _result = result;
         _state = result.ProGame ?? throw new ArgumentException("This game does not contain snap state.");
+        if (_state.RulesVersion != ProGameState.LegacyRulesVersion && _state.RulesVersion != ProGameState.ClockRulesVersion)
+            throw new InvalidOperationException("Unsupported live-game rules version.");
         _home = GameCoreStateHelper.ResolveTeam(league, result.HomeTeamId) ?? throw new ArgumentException("Home team not found.");
         _away = GameCoreStateHelper.ResolveTeam(league, result.AwayTeamId) ?? throw new ArgumentException("Away team not found.");
         _players = _home.Roster.Concat(_away.Roster).ToDictionary(p => p.PlayerId, StringComparer.OrdinalIgnoreCase);
@@ -44,7 +46,7 @@ public sealed class ProSnapEngine
             GameId = gameId, Week = absoluteWeek, AbsoluteWeek = absoluteWeek, PhaseWeek = phaseWeek,
             Phase = phase, GameType = gameType, WeekLabel = weekLabel, HomeTeamId = homeId, AwayTeamId = awayId,
             HomeTeam = home.Abbreviation, AwayTeam = away.Abbreviation,
-            ProGame = new ProGameState { RandomState = seed, RequireWinner = requireWinner, HomeFieldBonus = homeFieldBonus },
+            ProGame = new ProGameState { RulesVersion = ProGameState.ClockRulesVersion, RandomState = seed, RequireWinner = requireWinner, HomeFieldBonus = homeFieldBonus },
         };
         ProGameStatistics.Initialize(result.BoxScore);
         var engine = new ProSnapEngine(league, result);
@@ -59,6 +61,8 @@ public sealed class ProSnapEngine
         if (_state.Phase == "scrimmage" && _state.ClockSeconds > 0)
         {
             var offense = Team(_state.PossessionTeamId);
+            if (ProClockManagementService.Enabled(_state) && _state.PendingDecision.Offense is "Kneel" or "Spike" && First(offense, "QB") == null)
+                throw new InvalidOperationException("An available quarterback is required for a kneel or spike.");
             if (First(offense, "QB") == null && First(offense, "RB") == null)
                 throw new InvalidOperationException($"{offense.Abbreviation} has no available quarterback or running back. Restore legal personnel before resuming.");
         }
@@ -69,10 +73,13 @@ public sealed class ProSnapEngine
             StartYardLine = _state.YardLine, OffensiveTeamId = _state.PossessionTeamId, DriveNumber = _state.CurrentDrive,
         };
         if (_state.ClockSeconds == 0 && _state.Phase != "try") EndPeriod(play);
+        else if (ProClockManagementService.Enabled(_state) && ProClockManagementService.WarningDue(_state)) TwoMinuteWarning(play);
+        else if (ProClockManagementService.Enabled(_state) && TryTimeout(play)) { }
         else if (_state.Phase == "kickoff") Kickoff(play);
         else if (_state.Phase == "try") TryAfterTouchdown(play);
         else Scrimmage(play);
-        _state.PendingDecision = new ProGameDecision();
+        if (play.PlayType == "timeout" || play.Outcome == "two_minute_warning") _state.PendingDecision.Timeout = "";
+        else _state.PendingDecision = new ProGameDecision();
         play.ClockSeconds = play.Quarter == _state.Quarter ? _state.ClockSeconds : 0;
         play.ElapsedSeconds = Math.Max(0, play.StartClockSeconds - play.ClockSeconds);
         play.HomeScore = _result.HomeScore; play.AwayScore = _result.AwayScore;
@@ -215,17 +222,34 @@ public sealed class ProSnapEngine
         var ownScore = offense == _home ? _result.HomeScore : _result.AwayScore;
         var opposingScore = offense == _home ? _result.AwayScore : _result.HomeScore;
         var tempo = _state.PendingDecision.Tempo;
-        if (string.IsNullOrEmpty(tempo)) tempo = _state.ClockSeconds < 120 && _state.Quarter % 2 == 0 ? ownScore <= opposingScore ? "Hurry" : "Chew" : "Normal";
+        var clockRules = ProClockManagementService.Enabled(_state);
+        if (string.IsNullOrEmpty(tempo)) tempo = clockRules ? ProClockManagementService.TempoRecommendation(_result)
+            : _state.ClockSeconds < 120 && _state.Quarter % 2 == 0 ? ownScore <= opposingScore ? "Hurry" : "Chew" : "Normal";
+        var clockCall = _state.PendingDecision.Offense;
+        if (clockRules && string.IsNullOrEmpty(clockCall) && First(offense, "QB") != null)
+            clockCall = ProClockManagementService.OffenseRecommendation(_result);
         play.ManagementCall = tempo;
-        var runoff = !_state.ClockRunning ? 0 : tempo == "Hurry" ? 7 : tempo == "Chew" ? 38 : 24;
+        var runoff = clockRules ? ProClockManagementService.Runoff(_state, tempo, clockCall)
+            : !_state.ClockRunning ? 0 : tempo == "Hurry" ? 7 : tempo == "Chew" ? 38 : 24;
+        if (clockRules && ProClockManagementService.HasWarning(_state) && _state.LastWarningQuarter != _state.Quarter
+            && _state.ClockSeconds > 120 && _state.ClockSeconds - runoff <= 120)
+        {
+            _state.ClockSeconds = 120; TwoMinuteWarning(play); return;
+        }
         if (runoff >= _state.ClockSeconds)
         {
             _state.ClockSeconds = 0; play.PlayType = "clock"; play.Outcome = "clock_expired"; play.Description = "The clock runs out before the next snap."; return;
         }
-        _state.ClockSeconds = Math.Max(0, _state.ClockSeconds - runoff - 5 - Roll(5));
         var fourth = _state.PendingDecision.FourthDown;
-        if (string.IsNullOrEmpty(fourth)) fourth = (_state.YardLine > 50 && _state.Distance <= 2) || (ownScore < opposingScore && _state.Quarter >= 4 && play.StartClockSeconds < 150) ? "Go" : "Kick";
-        if (_state.Down == 4 && fourth == "Kick")
+        if (string.IsNullOrEmpty(fourth)) fourth = clockRules ? ProClockManagementService.DownRecommendation(_result)
+            : (_state.YardLine > 50 && _state.Distance <= 2) || (ownScore < opposingScore && _state.Quarter >= 4 && play.StartClockSeconds < 150) ? "Go" : "Kick";
+        if (clockRules && fourth != "Kick" && clockCall is "Kneel" or "Spike")
+        {
+            _state.ClockSeconds = Math.Max(0, _state.ClockSeconds - runoff - (clockCall == "Spike" ? 1 : 2));
+            ResolveClockPlay(play, offense, clockCall); return;
+        }
+        _state.ClockSeconds = Math.Max(0, _state.ClockSeconds - runoff - 5 - Roll(5));
+        if ((_state.Down == 4 || clockRules) && fourth == "Kick")
         {
             play.ManagementCall += "; Kick";
             var special = _state.PendingDecision.SpecialTeams;
@@ -342,6 +366,54 @@ public sealed class ProSnapEngine
         MaybeInjury(play);
     }
 
+    private bool TryTimeout(GamePlayEventState play)
+    {
+        var teamId = ProClockManagementService.TimeoutRecommendation(_league, _result);
+        if (string.IsNullOrEmpty(teamId)) return false;
+        if (teamId == _home.TeamId) _state.HomeTimeouts--; else _state.AwayTimeouts--;
+        _state.ClockRunning = false;
+        play.PlayType = "timeout"; play.Outcome = "team_timeout"; play.TimeoutTeamId = teamId;
+        play.ManagementCall = "Use timeout";
+        play.Description = $"{Team(teamId).Abbreviation} calls timeout; {ProClockManagementService.Timeouts(_result, teamId)} remaining.";
+        return true;
+    }
+
+    private void TwoMinuteWarning(GamePlayEventState play)
+    {
+        _state.LastWarningQuarter = _state.Quarter; _state.ClockRunning = false;
+        play.PlayType = "clock"; play.Outcome = "two_minute_warning"; play.Description = "Two-minute warning.";
+    }
+
+    private void ResolveClockPlay(GamePlayEventState play, TeamState offense, string call)
+    {
+        var qb = First(offense, "QB"); var defenseId = Other(offense.TeamId);
+        foreach (var player in Unit(offense, OffenseRoles)) Participate(play, player, offense);
+        foreach (var player in Unit(Team(defenseId), DefenseRoles)) Participate(play, player, Team(defenseId));
+        var line = Line(play, qb, offense); play.OffensiveCall = call;
+        if (call == "Spike")
+        {
+            play.PlayType = "pass"; play.Outcome = "spike"; line.PassAttempts++;
+            play.Description = $"{qb.Name} spikes the ball to stop the clock."; _state.ClockRunning = false;
+            NextDown(play, defenseId); return;
+        }
+        play.PlayType = "run"; play.Outcome = "kneel"; play.YardsGained = -1;
+        line.RushAttempts++; line.RushingYards = -1; _state.ClockRunning = true;
+        play.Description = $"{qb.Name} kneels for a loss of one yard.";
+        _state.YardLine--;
+        if (_state.YardLine == 0)
+        {
+            play.Outcome = "safety"; Score(play, defenseId, 2); EndDrive("safety", play.Sequence);
+            play.Description += " Safety.";
+            if (_state.Quarter >= 5) _state.Completed = true;
+            _state.Phase = "kickoff"; _state.YardLine = 20; _state.Down = 1; _state.Distance = 10; _state.ClockRunning = false;
+        }
+        else
+        {
+            _state.Distance = Math.Min(100 - _state.YardLine, play.StartDistance + 1);
+            NextDown(play, defenseId);
+        }
+    }
+
     private void NextDown(GamePlayEventState play, string defenseId)
     {
         if (_state.Down < 4) { _state.Down++; return; }
@@ -421,6 +493,7 @@ public sealed class ProSnapEngine
             EndDrive("regulation ended", play.Sequence);
             if (_result.HomeScore != _result.AwayScore || (_result.GameType == "preseason" && !_state.RequireWinner)) { _state.Completed = true; return; }
             _state.Quarter = 5; _state.ClockSeconds = _state.RequireWinner ? 900 : 600;
+            if (ProClockManagementService.Enabled(_state)) _state.HomeTimeouts = _state.AwayTimeouts = _state.RequireWinner ? 3 : 2;
             _state.PossessionTeamId = Roll(2) == 0 ? _home.TeamId : _away.TeamId;
             _state.Phase = "kickoff"; _state.YardLine = 35; _state.Down = 1; _state.Distance = 10; _state.ClockRunning = false;
             play.Description += " Overtime begins; both teams have an initial possession opportunity, subject to the game clock.";
@@ -429,11 +502,14 @@ public sealed class ProSnapEngine
         if (_state.Quarter >= 5 && !_state.RequireWinner) { _state.Completed = true; return; }
         if (_state.Quarter == 2)
         {
+            if (ProClockManagementService.Enabled(_state)) _state.HomeTimeouts = _state.AwayTimeouts = 3;
             EndDrive("halftime", play.Sequence);
             _state.PossessionTeamId = _state.OpeningReceiverId; _state.Phase = "kickoff";
             _state.YardLine = 35; _state.Down = 1; _state.Distance = 10;
             play.Description = "Halftime. The other team receives the second-half kickoff.";
         }
+        if (ProClockManagementService.Enabled(_state) && _state.Quarter >= 6 && _state.Quarter % 2 == 0)
+            _state.HomeTimeouts = _state.AwayTimeouts = 3;
         _state.Quarter++; _state.ClockSeconds = 900; _state.ClockRunning = false;
     }
     private void MaybeInjury(GamePlayEventState play)

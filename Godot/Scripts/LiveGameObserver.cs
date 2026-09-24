@@ -37,6 +37,7 @@ public partial class LiveGameObserver : Control
     private Timer _timer;
     private HFlowContainer _decisionControls;
     private Button _stepButton;
+    private Label _timeouts;
     private int _playIndex = -1;
     private double _speed = 1;
     private string _homeTeamId = "";
@@ -133,6 +134,8 @@ public partial class LiveGameObserver : Control
         _decisionControls.Visible = session.Active;
         _stepButton.Visible = session.Active;
         _stepButton.Disabled = !session.IsPaused;
+        _timeouts.Text = session.TimeoutSummary;
+        _timeouts.Visible = !string.IsNullOrEmpty(session.TimeoutSummary);
         if (!session.Completed && session.Quarter > 0)
         {
             _clock.Text = $"{Ordinal(session.Quarter)} {session.ClockSeconds / 60}:{session.ClockSeconds % 60:00}";
@@ -143,7 +146,7 @@ public partial class LiveGameObserver : Control
         foreach (var option in session.Decisions)
         {
             var column = new VBoxContainer();
-            var label = option.Key switch { "offense" => "Offense", "defense" => "Defense", "special" => "Special teams", "fourth" => "Fourth down", _ => "Clock strategy" };
+            var label = option.Key switch { "offense" => "Offense", "defense" => "Defense", "special" => "Special teams", "fourth" => "Down decision", "timeout" => "Timeout", _ => "Clock strategy" };
             column.AddChild(new Label { Text = $"{label} · {option.Controller}" });
             var choices = new OptionButton { Name = $"Decision-{option.Key}", CustomMinimumSize = new Vector2(174, 28), Disabled = !session.IsPaused || !option.CanChoose };
             choices.AddItem("Staff recommendation");
@@ -192,6 +195,7 @@ public partial class LiveGameObserver : Control
         var situationPanel = PanelRow(48); root.AddChild(situationPanel);
         _situation = ScoreLabel("OPENING KICKOFF", 20, 0); _situation.SizeFlagsHorizontal = SizeFlags.ExpandFill; situationPanel.AddChild(_situation);
         _decisionControls = new HFlowContainer { Visible = false }; root.AddChild(_decisionControls);
+        _timeouts = new Label { Visible = false }; root.AddChild(_timeouts);
 
         var main = new HBoxContainer { SizeFlagsVertical = SizeFlags.ExpandFill }; main.AddThemeConstantOverride("separation", 8); root.AddChild(main);
         var fieldPanel = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(520, 240) };
@@ -207,7 +211,7 @@ public partial class LiveGameObserver : Control
         var sideColumn = new VBoxContainer(); sideColumn.AddThemeConstantOverride("separation", 7); sideMargin.AddChild(sideColumn);
         var playHeader = ScoreLabel("PLAY-BY-PLAY", 18, 0); playHeader.HorizontalAlignment = HorizontalAlignment.Left; sideColumn.AddChild(playHeader);
         _playLog = new ItemList { SizeFlagsVertical = SizeFlags.ExpandFill, AllowReselect = false }; _playLog.AddThemeFontSizeOverride("font_size", 14); sideColumn.AddChild(_playLog);
-        var integrity = new Label { Text = "Pause to choose the next play in your retained responsibilities. Resume uses staff recommendations for unselected choices.", AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        var integrity = new Label { Text = "Pause to choose in your retained responsibilities. Staff recommends unselected choices. Down decision selects Go/Kick; special teams selects the kick type. Timeouts and warnings leave the next play queued.", AutowrapMode = TextServer.AutowrapMode.WordSmart };
         integrity.AddThemeColorOverride("font_color", new Color("94aabd")); integrity.AddThemeFontSizeOverride("font_size", 12); sideColumn.AddChild(integrity);
 
         var footer = PanelRow(62); root.AddChild(footer);

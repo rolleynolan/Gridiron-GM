@@ -251,7 +251,8 @@ public sealed class GameCoreSaveService
         var live = league.ActiveLiveGameSession;
         if (live.PendingResult.ProGame != null)
         {
-            if (live.PendingResult.ProGame.RulesVersion != "pro-snap-v1-2025")
+            if (live.PendingResult.ProGame.RulesVersion != ProGameState.LegacyRulesVersion
+                && live.PendingResult.ProGame.RulesVersion != ProGameState.ClockRulesVersion)
                 throw new InvalidDataException("This live game's simulation rules are not supported by this build.");
             live.NextEventIndex = live.PendingResult.BoxScore.PlayByPlay.Count;
             live.PendingResult.ProGame.PendingDecision ??= new ProGameDecision();

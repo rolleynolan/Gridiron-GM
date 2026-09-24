@@ -552,7 +552,12 @@ public sealed class DashboardService
         var conferenceBracket = playoffBracket.ConferenceBrackets.FirstOrDefault(entry =>
             entry?.Seeds != null && entry.Seeds.Any(seed => string.Equals(seed.TeamId, userTeam.TeamId, StringComparison.OrdinalIgnoreCase)));
         if (conferenceBracket == null)
+        {
+            // Nonqualifiers still follow the league's remaining rounds through Continue.
+            if (IsWildCardRoundCompleted(playoffBracket))
+                ApplyDivisionalLabels(null, userTeam, playoffBracket, dto);
             return;
+        }
 
         var wildCardRound = conferenceBracket.Rounds?.FirstOrDefault(round =>
             string.Equals(round?.Round, "Wild Card", StringComparison.OrdinalIgnoreCase));

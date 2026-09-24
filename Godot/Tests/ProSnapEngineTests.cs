@@ -9,7 +9,7 @@ using Xunit;
 
 namespace GridironGM.Tests;
 
-public sealed class ProSnapEngineTests
+public sealed partial class ProSnapEngineTests
 {
     private static T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
     private static string Json<T>(T value) => JsonSerializer.Serialize(value);
@@ -55,6 +55,28 @@ public sealed class ProSnapEngineTests
             if (predicate(play)) return (league, game, play);
         }
         throw new Exception("Expected outcome not found in deterministic sample.");
+    }
+
+    [Fact]
+    public void VersionOneReplayRemainsCompatibleWithItsOriginalRules()
+    {
+        var league = League(); var game = Game(league);
+        game.ProGame.RulesVersion = "pro-snap-v1-2025";
+        new ProSnapEngine(league, game).Finish();
+        var projection = new
+        {
+            game.HomeScore, game.AwayScore, game.ProGame.RandomState, game.ProGame.Drives,
+            game.BoxScore.TeamStats, game.BoxScore.PlayerStats,
+            Events = game.BoxScore.PlayByPlay.Select(p => new
+            {
+                p.Sequence, p.Quarter, p.ClockSeconds, p.PossessionTeamId, p.YardLine, p.Down, p.Distance,
+                p.PlayType, p.Outcome, p.YardsGained, p.HomeScore, p.AwayScore, p.Description,
+                p.OffensiveCall, p.DefensiveCall, p.ManagementCall, p.SpecialTeamsCall,
+                p.ParticipantIds, p.StatChanges, p.InjuredPlayerId,
+            }),
+        };
+        var digest = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Json(projection))));
+        Assert.Equal("77AC0A71650CA2084A577A4F204E3E5F4028FB74EFD6D5C2F15EDBBF9450EEE5", digest);
     }
 
     [Fact]

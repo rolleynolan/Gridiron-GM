@@ -5,7 +5,12 @@ namespace GridironGM.GameCore.Models;
 /// <summary>Versioned, forward-only pro simulation cursor. Scores and statistics belong to its GameResult.</summary>
 public sealed class ProGameState
 {
-    public string RulesVersion { get; set; } = "pro-snap-v1-2025";
+    public const string LegacyRulesVersion = "pro-snap-v1-2025";
+    public const string ClockRulesVersion = "pro-snap-v2-clock-2025";
+    public string RulesVersion { get; set; } = LegacyRulesVersion;
+    public int HomeTimeouts { get; set; } = 3;
+    public int AwayTimeouts { get; set; } = 3;
+    public int LastWarningQuarter { get; set; }
     public ulong RandomState { get; set; }
     public int Quarter { get; set; } = 1;
     public int ClockSeconds { get; set; } = 900;
@@ -45,4 +50,7 @@ public sealed class ProGameDecision
     public string SpecialTeams { get; set; } = "";
     public string FourthDown { get; set; } = "";
     public string Tempo { get; set; } = "";
+    public string Timeout { get; set; } = "";
+
+    public ProGameDecision Copy() => (ProGameDecision)MemberwiseClone();
 }

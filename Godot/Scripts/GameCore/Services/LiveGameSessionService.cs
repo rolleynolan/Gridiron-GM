@@ -51,11 +51,7 @@ public sealed class LiveGameSessionService
         if (expectedSequence != session.NextEventIndex) return Fail("The game has advanced. Review the current situation.");
         decision ??= new ProGameDecision();
         if (!ProGameDecisionService.Validate(_context.ActiveLeague, session.PendingResult, decision, out var error)) return Fail(error);
-        session.PendingResult.ProGame.PendingDecision = new ProGameDecision
-        {
-            Offense = decision.Offense, Defense = decision.Defense, SpecialTeams = decision.SpecialTeams,
-            FourthDown = decision.FourthDown, Tempo = decision.Tempo,
-        };
+        session.PendingResult.ProGame.PendingDecision = decision.Copy();
         return Snapshot(session);
     }
 
@@ -132,6 +128,8 @@ public sealed class LiveGameSessionService
             ClockSeconds = session.PendingResult.ProGame?.ClockSeconds ?? 0,
             YardLine = session.PendingResult.ProGame?.YardLine ?? 0,
             PossessionTeamId = session.PendingResult.ProGame?.PossessionTeamId ?? "",
+            TimeoutSummary = ProClockManagementService.Enabled(session.PendingResult.ProGame)
+                ? $"Timeouts: {session.PendingResult.AwayTeam} {session.PendingResult.ProGame.AwayTimeouts} · {session.PendingResult.HomeTeam} {session.PendingResult.ProGame.HomeTimeouts}" : "",
             Situation = session.PendingResult.ProGame == null ? "Legacy saved playback" :
                 $"{session.PendingResult.ProGame.Phase.ToUpperInvariant()} · {session.PendingResult.ProGame.Down} & {session.PendingResult.ProGame.Distance}",
         },

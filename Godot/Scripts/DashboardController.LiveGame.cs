@@ -138,7 +138,7 @@ public partial class DashboardController
     {
         var session = _nativeGameCoreContext.ActiveLeague.ActiveLiveGameSession;
         var pending = session.PendingResult.ProGame?.PendingDecision ?? new ProGameDecision();
-        var decision = new ProGameDecision { Offense = pending.Offense, Defense = pending.Defense, SpecialTeams = pending.SpecialTeams, FourthDown = pending.FourthDown, Tempo = pending.Tempo };
+        var decision = pending.Copy();
         switch (key)
         {
             case "offense": decision.Offense = value; break;
@@ -146,6 +146,7 @@ public partial class DashboardController
             case "special": decision.SpecialTeams = value; break;
             case "fourth": decision.FourthDown = value; break;
             case "tempo": decision.Tempo = value; break;
+            case "timeout": decision.Timeout = value; break;
         }
         var response = _nativeLiveGameSessionService.SubmitDecision(decision, session.NextEventIndex);
         if (!response.Ok) _liveGameObserver.SetSessionError(response.Error);

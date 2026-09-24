@@ -23,6 +23,7 @@ public sealed class LiveGameSessionDto
     public List<GamePlayEventState> PlayedEvents { get; set; } = new();
     public List<GridironGM.GameCore.Services.GameDecisionOption> Decisions { get; set; } = new();
     public string Situation { get; set; } = "";
+    public string TimeoutSummary { get; set; } = "";
     public int Quarter { get; set; }
     public int ClockSeconds { get; set; }
     public int YardLine { get; set; }
