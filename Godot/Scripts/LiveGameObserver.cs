@@ -13,6 +13,8 @@ public partial class LiveGameObserver : Control
     public event Action AdvanceRequested;
     public event Action<bool> PauseChanged;
     public event Action AdjustmentsRequested;
+    public event Action StepRequested;
+    public event Action<string, string> DecisionChanged;
 
     private readonly List<GamePlayEventState> _plays = new();
     private Label _week;
@@ -33,6 +35,8 @@ public partial class LiveGameObserver : Control
     private Button _boxScoreButton;
     private Button _adjustmentsButton;
     private Timer _timer;
+    private HFlowContainer _decisionControls;
+    private Button _stepButton;
     private int _playIndex = -1;
     private double _speed = 1;
     private string _homeTeamId = "";
@@ -123,6 +127,33 @@ public partial class LiveGameObserver : Control
         }
     }
 
+    public void BindSessionControls(LiveGameSessionDto session)
+    {
+        foreach (var child in _decisionControls.GetChildren()) { _decisionControls.RemoveChild(child); child.QueueFree(); }
+        _decisionControls.Visible = session.Active;
+        _stepButton.Visible = session.Active;
+        _stepButton.Disabled = !session.IsPaused;
+        if (!session.Completed && session.Quarter > 0)
+        {
+            _clock.Text = $"{Ordinal(session.Quarter)} {session.ClockSeconds / 60}:{session.ClockSeconds % 60:00}";
+            var spot = session.YardLine <= 50 ? $"OWN {session.YardLine}" : $"OPP {100 - session.YardLine}";
+            _situation.Text = $"{TeamFor(session.PossessionTeamId)} BALL · {session.Situation} · {spot}";
+            _field.SetPlay(session.YardLine, session.PossessionTeamId == _homeTeamId);
+        }
+        foreach (var option in session.Decisions)
+        {
+            var column = new VBoxContainer();
+            var label = option.Key switch { "offense" => "Offense", "defense" => "Defense", "special" => "Special teams", "fourth" => "Fourth down", _ => "Clock strategy" };
+            column.AddChild(new Label { Text = $"{label} · {option.Controller}" });
+            var choices = new OptionButton { Name = $"Decision-{option.Key}", CustomMinimumSize = new Vector2(174, 28), Disabled = !session.IsPaused || !option.CanChoose };
+            choices.AddItem("Staff recommendation");
+            foreach (var choice in option.Choices) choices.AddItem(choice);
+            choices.Select(Math.Max(0, Array.IndexOf(option.Choices, option.Selected) + 1));
+            choices.ItemSelected += index => DecisionChanged?.Invoke(option.Key, index == 0 ? "" : option.Choices[(int)index - 1]);
+            column.AddChild(choices); _decisionControls.AddChild(column);
+        }
+    }
+
     public void SetSessionError(string message)
     {
         _timer.Stop();
@@ -144,42 +175,45 @@ public partial class LiveGameObserver : Control
         var margin = new MarginContainer { LayoutMode = 1, AnchorsPreset = (int)LayoutPreset.FullRect, AnchorRight = 1, AnchorBottom = 1 };
         margin.AddThemeConstantOverride("margin_left", 8); margin.AddThemeConstantOverride("margin_top", 8); margin.AddThemeConstantOverride("margin_right", 8); margin.AddThemeConstantOverride("margin_bottom", 8);
         AddChild(margin);
-        var root = new VBoxContainer(); root.AddThemeConstantOverride("separation", 8); margin.AddChild(root);
+        var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; margin.AddChild(scroll);
+        var root = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ExpandFill }; root.AddThemeConstantOverride("separation", 8); scroll.AddChild(root);
 
         var scoreboard = PanelRow(86); root.AddChild(scoreboard);
-        var scoreRow = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; scoreRow.AddThemeConstantOverride("separation", 22); scoreboard.AddChild(scoreRow);
-        _week = ScoreLabel("GAME DAY", 18, 150); scoreRow.AddChild(_week);
+        var scoreRow = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; scoreRow.AddThemeConstantOverride("separation", 8); scoreboard.AddChild(scoreRow);
+        _week = ScoreLabel("GAME DAY", 18, 110); scoreRow.AddChild(_week);
         _awayLogo = Logo(); scoreRow.AddChild(_awayLogo);
-        _awayTeam = ScoreLabel("AWAY", 24, 230); scoreRow.AddChild(_awayTeam);
+        _awayTeam = ScoreLabel("AWAY", 24, 100); scoreRow.AddChild(_awayTeam);
         _awayScore = ScoreLabel("0", 34, 65); scoreRow.AddChild(_awayScore);
-        _clock = ScoreLabel("1ST 15:00", 23, 175); scoreRow.AddChild(_clock);
+        _clock = ScoreLabel("1ST 15:00", 23, 125); scoreRow.AddChild(_clock);
         _homeScore = ScoreLabel("0", 34, 65); scoreRow.AddChild(_homeScore);
         _homeLogo = Logo(); scoreRow.AddChild(_homeLogo);
-        _homeTeam = ScoreLabel("HOME", 24, 230); scoreRow.AddChild(_homeTeam);
+        _homeTeam = ScoreLabel("HOME", 24, 100); scoreRow.AddChild(_homeTeam);
 
         var situationPanel = PanelRow(48); root.AddChild(situationPanel);
         _situation = ScoreLabel("OPENING KICKOFF", 20, 0); _situation.SizeFlagsHorizontal = SizeFlags.ExpandFill; situationPanel.AddChild(_situation);
+        _decisionControls = new HFlowContainer { Visible = false }; root.AddChild(_decisionControls);
 
         var main = new HBoxContainer { SizeFlagsVertical = SizeFlags.ExpandFill }; main.AddThemeConstantOverride("separation", 8); root.AddChild(main);
-        var fieldPanel = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(700, 420) };
+        var fieldPanel = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(520, 240) };
         fieldPanel.AddThemeStyleboxOverride("panel", Surface("0b2435", "31536b")); main.AddChild(fieldPanel);
         var fieldColumn = new VBoxContainer(); fieldPanel.AddChild(fieldColumn);
         _field = new LiveGameFieldView { SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ExpandFill }; fieldColumn.AddChild(_field);
         _lastPlay = new Label { Text = "Previous play", CustomMinimumSize = new Vector2(0, 38), VerticalAlignment = VerticalAlignment.Center, AutowrapMode = TextServer.AutowrapMode.WordSmart };
         _lastPlay.AddThemeColorOverride("font_color", new Color("f5f0dd")); _lastPlay.AddThemeFontSizeOverride("font_size", 15); fieldColumn.AddChild(_lastPlay);
 
-        var side = new PanelContainer { CustomMinimumSize = new Vector2(430, 0), SizeFlagsVertical = SizeFlags.ExpandFill };
+        var side = new PanelContainer { CustomMinimumSize = new Vector2(320, 0), SizeFlagsVertical = SizeFlags.ExpandFill };
         side.AddThemeStyleboxOverride("panel", Surface("081d2d", "31536b")); main.AddChild(side);
         var sideMargin = new MarginContainer(); sideMargin.AddThemeConstantOverride("margin_left", 12); sideMargin.AddThemeConstantOverride("margin_top", 10); sideMargin.AddThemeConstantOverride("margin_right", 12); sideMargin.AddThemeConstantOverride("margin_bottom", 10); side.AddChild(sideMargin);
         var sideColumn = new VBoxContainer(); sideColumn.AddThemeConstantOverride("separation", 7); sideMargin.AddChild(sideColumn);
         var playHeader = ScoreLabel("PLAY-BY-PLAY", 18, 0); playHeader.HorizontalAlignment = HorizontalAlignment.Left; sideColumn.AddChild(playHeader);
         _playLog = new ItemList { SizeFlagsVertical = SizeFlags.ExpandFill, AllowReselect = false }; _playLog.AddThemeFontSizeOverride("font_size", 14); sideColumn.AddChild(_playLog);
-        var integrity = new Label { Text = "Playback follows the saved GameCore result. It cannot change the final score.", AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        var integrity = new Label { Text = "Pause to choose the next play in your retained responsibilities. Resume uses staff recommendations for unselected choices.", AutowrapMode = TextServer.AutowrapMode.WordSmart };
         integrity.AddThemeColorOverride("font_color", new Color("94aabd")); integrity.AddThemeFontSizeOverride("font_size", 12); sideColumn.AddChild(integrity);
 
         var footer = PanelRow(62); root.AddChild(footer);
-        var controls = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; controls.AddThemeConstantOverride("separation", 8); footer.AddChild(controls);
+        var controls = new HFlowContainer { Alignment = FlowContainer.AlignmentMode.Center }; controls.AddThemeConstantOverride("h_separation", 8); footer.AddChild(controls);
         _pauseButton = ActionButton("Ⅱ  PAUSE", 138); _pauseButton.Pressed += TogglePause; controls.AddChild(_pauseButton);
+        _stepButton = ActionButton("NEXT PLAY", 115); _stepButton.Name = "NextPlay"; _stepButton.Visible = false; _stepButton.Pressed += () => StepRequested?.Invoke(); controls.AddChild(_stepButton);
         controls.AddChild(ScoreLabel("SPEED", 14, 62));
         foreach (var speed in new[] { 1, 2, 4 })
         {
@@ -191,7 +225,7 @@ public partial class LiveGameObserver : Control
         _highlights = new OptionButton { CustomMinimumSize = new Vector2(150, 38) }; _highlights.AddItem("ALL PLAYS"); _highlights.AddItem("KEY PLAYS"); controls.AddChild(_highlights);
         _boxScoreButton = ActionButton("BOX SCORE", 125); _boxScoreButton.Pressed += () => BoxScoreRequested?.Invoke(); controls.AddChild(_boxScoreButton);
         _adjustmentsButton = ActionButton("LIVE ADJUSTMENTS", 170); _adjustmentsButton.Disabled = true; _adjustmentsButton.TooltipText = "Pause to adjust the live depth chart for future snaps."; _adjustmentsButton.Pressed += () => AdjustmentsRequested?.Invoke(); controls.AddChild(_adjustmentsButton);
-        var exit = ActionButton("EXIT TO POSTGAME", 165); exit.Pressed += ExitObserver; controls.AddChild(exit);
+        var exit = ActionButton("RETURN TO DASHBOARD", 180); exit.Pressed += ExitObserver; controls.AddChild(exit);
         _status = ScoreLabel("PAUSED", 17, 115); controls.AddChild(_status);
 
         _timer = new Timer { OneShot = false, WaitTime = 0.9 };
@@ -217,7 +251,7 @@ public partial class LiveGameObserver : Control
         _playIndex = next;
         var play = _plays[_playIndex];
         DisplayPlay(play);
-        if (play.ClockSeconds == 0 || _playIndex == _plays.Count - 1)
+        if (play.IsFinal || _playIndex == _plays.Count - 1)
             FinishPlayback();
     }
 
@@ -225,8 +259,8 @@ public partial class LiveGameObserver : Control
     {
         _awayScore.Text = play.AwayScore.ToString();
         _homeScore.Text = play.HomeScore.ToString();
-        _clock.Text = play.ClockSeconds == 0 ? "FINAL" : $"{Ordinal(play.Quarter)} {play.ClockSeconds / 60}:{play.ClockSeconds % 60:00}";
-        _situation.Text = play.ClockSeconds == 0 ? "GAME COMPLETE" : $"{TeamFor(play.PossessionTeamId)} BALL  •  {DownText(play.Down, play.Distance)}  •  YARD LINE {play.YardLine}";
+        _clock.Text = play.IsFinal ? "FINAL" : $"{Ordinal(play.Quarter)} {play.ClockSeconds / 60}:{play.ClockSeconds % 60:00}";
+        _situation.Text = play.IsFinal ? "GAME COMPLETE" : $"{TeamFor(play.PossessionTeamId)} BALL  •  {DownText(play.Down, play.Distance)}  •  YARD LINE {play.YardLine}";
         _lastPlay.Text = $"PREVIOUS PLAY: {play.Description}";
         _playLog.AddItem($"Q{play.Quarter} {play.ClockSeconds / 60}:{play.ClockSeconds % 60:00}  {play.Description}");
         _playLog.Select(_playLog.ItemCount - 1);
@@ -269,7 +303,7 @@ public partial class LiveGameObserver : Control
 
     private string TeamFor(string teamId) => string.Equals(teamId, _homeTeamId, StringComparison.OrdinalIgnoreCase) ? _homeAbbreviation : _awayAbbreviation;
     private static string DownText(int down, int distance) => down <= 0 ? "CHANGE OF POSSESSION" : $"{down}{(down == 1 ? "ST" : down == 2 ? "ND" : down == 3 ? "RD" : "TH")} & {distance}";
-    private static string Ordinal(int quarter) => quarter switch { 1 => "1ST", 2 => "2ND", 3 => "3RD", 4 => "4TH", _ => $"Q{quarter}" };
+    private static string Ordinal(int quarter) => quarter switch { 1 => "1ST", 2 => "2ND", 3 => "3RD", 4 => "4TH", _ => $"OT{quarter - 4}" };
 
     private static PanelContainer PanelRow(float height)
     {

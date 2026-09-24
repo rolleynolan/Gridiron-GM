@@ -9,11 +9,21 @@ public partial class DashboardController
     private async Task<bool> TryRunDeveloperCommand()
     {
         var arguments = OS.GetCmdlineUserArgs();
+        if (arguments.Contains("--game-day-ui-smoke", StringComparer.Ordinal))
+        {
+            try { await RunGameDayUiSmoke(); GetTree().Quit(0); }
+            catch (Exception ex) { GD.PushError($"[Game Day UI smoke] {ex}"); GetTree().Quit(1); }
+            return true;
+        }
         if (arguments.Contains("--gamecore-benchmark", StringComparer.Ordinal))
         {
             var report = await Task.Run(() => SimulationBenchmarkService.Run(GetTeamSeedPath()));
             foreach (var sample in new[] { report.SingleGame, report.ProWeek, report.ProSeason, report.ProjectedCollegeSeason })
+            {
                 GD.Print($"[GameCore benchmark] {sample.Name}: {sample.Games} games, {sample.ElapsedMilliseconds:0.0} ms total, {sample.MillisecondsPerGame:0.000} ms/game, {sample.AllocatedBytes / 1024d / 1024d:0.00} MiB allocated, {sample.BytesPerGame / 1024d:0.0} KiB/game");
+                if (sample.RepresentativeResultBytes > 0)
+                    GD.Print($"[GameCore benchmark] Last {sample.Name} result JSON: {sample.RepresentativeResultBytes / 1024d:0.0} KiB (indented; outside timed sample)");
+            }
             GetTree().Quit(0);
             return true;
         }

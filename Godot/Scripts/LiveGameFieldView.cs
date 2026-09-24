@@ -39,11 +39,11 @@ public partial class LiveGameFieldView : Control
         var defenseColor = _homePossession ? new Color("dbe6ee") : new Color("d5a62c");
         for (var index = 0; index < 7; index++)
         {
-            var y = field.Position.Y + 70 + (index * Mathf.Max(20, (field.Size.Y - 140) / 6));
+            var y = field.Position.Y + field.Size.Y * (0.2f + index * 0.1f);
             DrawCircle(new Vector2(ballX - 16, y), 6, offenseColor);
             DrawCircle(new Vector2(ballX + 26, y), 6, defenseColor);
         }
         DrawCircle(new Vector2(ballX, field.GetCenter().Y), 4, new Color("6e301c"));
-        DrawString(ThemeDB.FallbackFont, new Vector2(field.Position.X + 12, field.End.Y - 18), "AUTHORITATIVE PLAYBACK POSITION", HorizontalAlignment.Left, -1, 13, new Color(1, 1, 1, 0.72f));
+        DrawString(ThemeDB.FallbackFont, new Vector2(field.Position.X + 12, field.End.Y - 18), "BALL POSITION", HorizontalAlignment.Left, -1, 13, new Color(1, 1, 1, 0.72f));
     }
 }
