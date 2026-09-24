@@ -154,6 +154,8 @@ public sealed class PlayoffService
 
     public WildCardSimulationResult SimulateWildCardRound(LeagueState league)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+            return new WildCardSimulationResult { Ok = false, Error = "Finish the live game before simulating the playoff round." };
         if (league == null)
         {
             return new WildCardSimulationResult
@@ -228,8 +230,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 3,
                     requireWinner: true);
-                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
-                league.Results.Add(result);
+                GameDayService.CommitResult(league, result);
                 simulatedGames++;
             }
 
@@ -363,6 +364,8 @@ public sealed class PlayoffService
 
     public PlayoffRoundSimulationResult SimulateDivisionalRound(LeagueState league)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+            return new PlayoffRoundSimulationResult { Ok = false, Error = "Finish the live game before simulating the playoff round." };
         if (league == null)
         {
             return new PlayoffRoundSimulationResult
@@ -444,8 +447,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 3,
                     requireWinner: true);
-                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
-                league.Results.Add(result);
+                GameDayService.CommitResult(league, result);
                 simulatedGames++;
             }
 
@@ -554,6 +556,8 @@ public sealed class PlayoffService
 
     public PlayoffRoundSimulationResult SimulateConferenceChampionshipRound(LeagueState league)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+            return new PlayoffRoundSimulationResult { Ok = false, Error = "Finish the live game before simulating the playoff round." };
         if (league == null)
         {
             return new PlayoffRoundSimulationResult
@@ -635,8 +639,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 3,
                     requireWinner: true);
-                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
-                league.Results.Add(result);
+                GameDayService.CommitResult(league, result);
                 simulatedGames++;
             }
 
@@ -744,6 +747,8 @@ public sealed class PlayoffService
 
     public PlayoffRoundSimulationResult SimulateLeagueChampionshipRound(LeagueState league)
     {
+        if (league?.ActiveLiveGameSession?.Active == true)
+            return new PlayoffRoundSimulationResult { Ok = false, Error = "Finish the live game before simulating the playoff round." };
         if (league == null)
         {
             return new PlayoffRoundSimulationResult
@@ -817,8 +822,7 @@ public sealed class PlayoffService
                     dayIndex: 6,
                     homeFieldBonus: 0,
                     requireWinner: true);
-                PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
-                league.Results.Add(result);
+                GameDayService.CommitResult(league, result);
                 simulatedGames++;
             }
 
@@ -1232,25 +1236,18 @@ public sealed class PlayoffService
         var winnerIsHome = string.Equals(game.WinnerTeamId, game.HomeTeamId, StringComparison.OrdinalIgnoreCase);
         var winnerName = winnerIsHome ? game.HomeTeamName : game.AwayTeamName;
         var loserName = winnerIsHome ? game.AwayTeamName : game.HomeTeamName;
-        var result = GameDayService.SimulateMatchup(
-            league,
-            game.GameId,
-            game.HomeTeamId,
-            game.AwayTeamId,
-            game.AbsoluteWeek,
-            game.PhaseWeek,
-            game.Phase,
-            game.GameType,
-            game.RoundLabel,
-            dayIndex: 6,
-            homeFieldBonus: game.NeutralSite ? 0 : 3,
-            requireWinner: true);
-        result.HomeScore = game.HomeScore.Value;
-        result.AwayScore = game.AwayScore.Value;
-        result.Winner = winnerName;
-        result.Summary = $"{winnerName} defeated {loserName}, {result.HomeScore}-{result.AwayScore}.";
-        result.BoxScore = result.BoxScore ?? new BoxScoreState();
-        PlayerInjuryService.ApplyDeterministicGameInjuries(league, result);
+        // Legacy completed brackets have no recoverable snap history. Preserve the recorded score;
+        // do not simulate a different game, manufacture its statistics, or create new injuries on load.
+        var result = new GameResult
+        {
+            GameId = game.GameId, Week = game.AbsoluteWeek, AbsoluteWeek = game.AbsoluteWeek,
+            PhaseWeek = game.PhaseWeek, Phase = game.Phase, GameType = game.GameType, WeekLabel = game.RoundLabel,
+            HomeTeamId = game.HomeTeamId, AwayTeamId = game.AwayTeamId,
+            HomeTeam = game.HomeTeamName, AwayTeam = game.AwayTeamName,
+            HomeScore = game.HomeScore.Value, AwayScore = game.AwayScore.Value, Winner = winnerName,
+            Summary = $"{winnerName} defeated {loserName}, {Math.Max(game.HomeScore.Value, game.AwayScore.Value)}-{Math.Min(game.HomeScore.Value, game.AwayScore.Value)}.",
+        };
+        result.BoxScore.Final = $"{game.HomeTeamName} {result.HomeScore}, {game.AwayTeamName} {result.AwayScore}";
         league.Results.Add(result);
     }
 

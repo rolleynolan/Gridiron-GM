@@ -102,39 +102,20 @@ public static class GameCoreStateHelper
         {
             dto.BoxScore["final"] = result.BoxScore.Final;
             dto.BoxScore["team_stats"] = new Dictionary<string, int>(result.BoxScore.TeamStats);
-            dto.BoxScore["player_stats"] = result.BoxScore.PlayerStats.Select(stat => new PlayerGameStats
+            dto.BoxScore["player_stats"] = result.BoxScore.PlayerStats.Select(stat => stat.Copy()).ToList();
+            dto.BoxScore["play_by_play"] = result.BoxScore.PlayByPlay.Select(play => play.Copy()).ToList();
+            var periods = Math.Max(4, result.BoxScore.PlayByPlay.Select(p => p.Quarter).DefaultIfEmpty(4).Max());
+            var homePeriods = new int[periods]; var awayPeriods = new int[periods];
+            var priorHome = 0; var priorAway = 0;
+            for (var quarter = 1; quarter <= periods; quarter++)
             {
-                PlayerId = stat.PlayerId,
-                PlayerName = stat.PlayerName,
-                TeamId = stat.TeamId,
-                Position = stat.Position,
-                PassingYards = stat.PassingYards,
-                PassingTouchdowns = stat.PassingTouchdowns,
-                RushingYards = stat.RushingYards,
-                RushingTouchdowns = stat.RushingTouchdowns,
-                ReceivingYards = stat.ReceivingYards,
-                ReceivingTouchdowns = stat.ReceivingTouchdowns,
-                Tackles = stat.Tackles,
-                Sacks = stat.Sacks,
-                Interceptions = stat.Interceptions,
-            }).ToList();
-            dto.BoxScore["play_by_play"] = result.BoxScore.PlayByPlay.Select(play => new GamePlayEventState
-            {
-                Sequence = play.Sequence,
-                Quarter = play.Quarter,
-                ClockSeconds = play.ClockSeconds,
-                PossessionTeamId = play.PossessionTeamId,
-                Down = play.Down,
-                Distance = play.Distance,
-                YardLine = play.YardLine,
-                YardsGained = play.YardsGained,
-                Description = play.Description,
-                HomeScore = play.HomeScore,
-                AwayScore = play.AwayScore,
-                IsScoringPlay = play.IsScoringPlay,
-                IsTurnover = play.IsTurnover,
-                IsInjury = play.IsInjury,
-            }).ToList();
+                var last = result.BoxScore.PlayByPlay.LastOrDefault(p => p.Quarter == quarter);
+                var home = last?.HomeScore ?? priorHome; var away = last?.AwayScore ?? priorAway;
+                homePeriods[quarter - 1] = home - priorHome; awayPeriods[quarter - 1] = away - priorAway;
+                priorHome = home; priorAway = away;
+            }
+            dto.BoxScore["quarter_scores"] = new Dictionary<string, int[]> { ["home"] = homePeriods, ["away"] = awayPeriods };
+            dto.BoxScore["quarter_scores_known"] = result.BoxScore.PlayByPlay.Count > 0;
         }
 
         return dto;

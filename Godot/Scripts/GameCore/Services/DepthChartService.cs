@@ -291,7 +291,9 @@ public sealed class DepthChartService
             {
                 if (!playersById.TryGetValue(ids[index], out var player))
                     continue;
-                var isAvailable = PlayerInjuryService.IsAvailableForGame(player);
+                var live = _context.ActiveLeague.ActiveLiveGameSession;
+                var gameInjury = live?.Active == true ? live.PendingResult.BoxScore.PlayByPlay.FirstOrDefault(p => p.InjuredPlayerId == player.PlayerId)?.Injury : null;
+                var isAvailable = PlayerInjuryService.IsAvailableForGame(player) && gameInjury == null;
 
                 var evaluation = PlayerEvaluationProjectionService.Evaluate(_context.ActiveLeague, player);
                 players.Add(new DepthChartPlayerDto
@@ -302,9 +304,9 @@ public sealed class DepthChartService
                     EstimatedOverall = evaluation.EstimatedOverall,
                     EstimatedOverallRange = evaluation.OverallRange,
                     ScoutingConfidence = evaluation.Confidence,
-                    Status = player.Status,
-                    Injury = player.Injury,
-                    InjuryDaysRemaining = player.CurrentInjury?.DaysRemaining ?? 0,
+                    Status = gameInjury == null ? player.Status : "Injured in this game",
+                    Injury = gameInjury?.Name ?? player.Injury,
+                    InjuryDaysRemaining = gameInjury?.DaysRemaining ?? player.CurrentInjury?.DaysRemaining ?? 0,
                     IsAvailable = isAvailable,
                     Role = !isAvailable ? "Unavailable" : availableIndex++ < requiredStarters ? "Starter" : "Backup",
                     ContractSummary = player.Contract == null || player.Contract.AnnualSalary <= 0m

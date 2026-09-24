@@ -13,6 +13,22 @@ public sealed class PlayerSeasonStats
     public int Tackles { get; set; }
     public int Sacks { get; set; }
     public int Interceptions { get; set; }
+    public int Snaps { get; set; }
+    public int PassAttempts { get; set; }
+    public int Completions { get; set; }
+    public int InterceptionsThrown { get; set; }
+    public int SacksTaken { get; set; }
+    public int SackYardsLost { get; set; }
+    public int RushAttempts { get; set; }
+    public int Receptions { get; set; }
+    public int FumblesLost { get; set; }
+    public int FieldGoalAttempts { get; set; }
+    public int FieldGoalsMade { get; set; }
+    public int ExtraPointAttempts { get; set; }
+    public int ExtraPointsMade { get; set; }
+    public int TwoPointConversions { get; set; }
+    public int Punts { get; set; }
+    public int PuntYards { get; set; }
 
     public void Add(PlayerGameStats gameStats)
     {
@@ -26,6 +42,22 @@ public sealed class PlayerSeasonStats
         Tackles += gameStats.Tackles;
         Sacks += gameStats.Sacks;
         Interceptions += gameStats.Interceptions;
+        Snaps += gameStats.Snaps;
+        PassAttempts += gameStats.PassAttempts;
+        Completions += gameStats.Completions;
+        InterceptionsThrown += gameStats.InterceptionsThrown;
+        SacksTaken += gameStats.SacksTaken;
+        SackYardsLost += gameStats.SackYardsLost;
+        RushAttempts += gameStats.RushAttempts;
+        Receptions += gameStats.Receptions;
+        FumblesLost += gameStats.FumblesLost;
+        FieldGoalAttempts += gameStats.FieldGoalAttempts;
+        FieldGoalsMade += gameStats.FieldGoalsMade;
+        ExtraPointAttempts += gameStats.ExtraPointAttempts;
+        ExtraPointsMade += gameStats.ExtraPointsMade;
+        TwoPointConversions += gameStats.TwoPointConversions;
+        Punts += gameStats.Punts;
+        PuntYards += gameStats.PuntYards;
     }
 
     public PlayerSeasonStats Copy() => new()
@@ -41,5 +73,21 @@ public sealed class PlayerSeasonStats
         Tackles = Tackles,
         Sacks = Sacks,
         Interceptions = Interceptions,
+        Snaps = Snaps,
+        PassAttempts = PassAttempts,
+        Completions = Completions,
+        InterceptionsThrown = InterceptionsThrown,
+        SacksTaken = SacksTaken,
+        SackYardsLost = SackYardsLost,
+        RushAttempts = RushAttempts,
+        Receptions = Receptions,
+        FumblesLost = FumblesLost,
+        FieldGoalAttempts = FieldGoalAttempts,
+        FieldGoalsMade = FieldGoalsMade,
+        ExtraPointAttempts = ExtraPointAttempts,
+        ExtraPointsMade = ExtraPointsMade,
+        TwoPointConversions = TwoPointConversions,
+        Punts = Punts,
+        PuntYards = PuntYards,
     };
 }

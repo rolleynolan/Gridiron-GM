@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace GridironGM.GameCore.Models;
 
@@ -10,7 +11,21 @@ public sealed class LiveGameSessionState
     public string GameId { get; set; } = "";
     public int NextEventIndex { get; set; }
     public GameResult PendingResult { get; set; } = new();
-    public List<GamePlayEventState> PlayedEvents { get; set; } = new();
+    private List<GamePlayEventState> _legacyPlayedEvents = new();
+    [JsonIgnore]
+    public List<GamePlayEventState> PlayedEvents
+    {
+        get => PendingResult?.ProGame != null ? PendingResult.BoxScore?.PlayByPlay ?? _legacyPlayedEvents : _legacyPlayedEvents;
+        set => _legacyPlayedEvents = value ?? new();
+    }
+    // Read old playback saves, but never serialize a second copy of the new authoritative log.
+    [JsonPropertyName("PlayedEvents")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<GamePlayEventState> LegacyPlayedEvents
+    {
+        get => PendingResult?.ProGame == null ? _legacyPlayedEvents : null;
+        set => _legacyPlayedEvents = value ?? new();
+    }
     public List<LiveGameAdjustmentState> Adjustments { get; set; } = new();
 }
 

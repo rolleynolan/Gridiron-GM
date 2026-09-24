@@ -45,6 +45,8 @@ public sealed class ContinueService
             };
         }
 
+        if (league.ActiveLiveGameSession?.Active == true)
+            return BuildStop(league, false, "game_day", 0, 0, 0, new ContinueEvent { Type = "game_day", Description = "Resume the live game before advancing the calendar." });
         var pendingWaiver = (league.Waivers ?? new System.Collections.Generic.List<WaiverClaimState>())
             .FirstOrDefault(waiver => waiver?.PendingConfirmation == true && string.Equals(waiver.PendingClaimTeamId, league.UserTeamId, StringComparison.OrdinalIgnoreCase));
         if (pendingWaiver?.Player != null)

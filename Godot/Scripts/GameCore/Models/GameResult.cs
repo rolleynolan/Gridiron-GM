@@ -18,4 +18,5 @@ public sealed class GameResult
     public string Winner { get; set; } = "";
     public string Summary { get; set; } = "";
     public BoxScoreState BoxScore { get; set; } = new();
+    public ProGameState ProGame { get; set; }
 }

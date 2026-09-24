@@ -54,7 +54,23 @@ public sealed class GameCoreSaveService
                 Directory.CreateDirectory(directory);
 
             var json = JsonSerializer.Serialize(context.ActiveLeague, JsonOptions);
-            File.WriteAllText(absolutePath, json);
+            // Write and flush a sibling before atomic replacement; a failed write preserves the prior save.
+            var temporaryPath = absolutePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+                    stream.Write(bytes);
+                    stream.Flush(flushToDisk: true);
+                }
+                if (File.Exists(absolutePath)) File.Replace(temporaryPath, absolutePath, null);
+                else File.Move(temporaryPath, absolutePath);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+            }
 
             return new GameCoreSaveResult
             {
@@ -232,6 +248,22 @@ public sealed class GameCoreSaveService
         league.ActiveLiveGameSession.PendingResult.BoxScore.TeamStats ??= new Dictionary<string, int>();
         league.ActiveLiveGameSession.PendingResult.BoxScore.PlayerStats ??= new List<PlayerGameStats>();
         league.ActiveLiveGameSession.PendingResult.BoxScore.PlayByPlay ??= new List<GamePlayEventState>();
+        var live = league.ActiveLiveGameSession;
+        if (live.PendingResult.ProGame != null)
+        {
+            if (live.PendingResult.ProGame.RulesVersion != "pro-snap-v1-2025")
+                throw new InvalidDataException("This live game's simulation rules are not supported by this build.");
+            live.NextEventIndex = live.PendingResult.BoxScore.PlayByPlay.Count;
+            live.PendingResult.ProGame.PendingDecision ??= new ProGameDecision();
+            live.PendingResult.ProGame.InjuredPlayerIds ??= new List<string>();
+            live.PendingResult.ProGame.OvertimePossessions ??= new List<string>();
+            live.PendingResult.ProGame.Drives ??= new List<GameDriveState>();
+        }
+        if (live.Active && league.Results.Any(r => r.GameId == live.GameId))
+        {
+            live.Active = false; live.Completed = true; live.IsPaused = true;
+            live.PendingResult = league.Results.First(r => r.GameId == live.GameId);
+        }
         league.ActiveLiveGameSession.NextEventIndex = Math.Clamp(
             league.ActiveLiveGameSession.NextEventIndex,
             0,
