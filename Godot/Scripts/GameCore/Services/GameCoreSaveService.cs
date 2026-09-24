@@ -29,7 +29,7 @@ public sealed class GameCoreSaveService
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
+        WriteIndented = false,
     };
 
     public GameCoreSaveResult Save(GameCoreContext context, string saveName = null)
@@ -53,15 +53,13 @@ public sealed class GameCoreSaveService
             if (!string.IsNullOrWhiteSpace(directory))
                 Directory.CreateDirectory(directory);
 
-            var json = JsonSerializer.Serialize(context.ActiveLeague, JsonOptions);
             // Write and flush a sibling before atomic replacement; a failed write preserves the prior save.
             var temporaryPath = absolutePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
                 using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
-                    var bytes = System.Text.Encoding.UTF8.GetBytes(json);
-                    stream.Write(bytes);
+                    JsonSerializer.Serialize(stream, context.ActiveLeague, JsonOptions);
                     stream.Flush(flushToDisk: true);
                 }
                 if (File.Exists(absolutePath)) File.Replace(temporaryPath, absolutePath, null);

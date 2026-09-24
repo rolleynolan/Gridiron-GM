@@ -21,7 +21,7 @@ public sealed class LiveGameSessionService
             return Fail("No playable user game was found.");
         if (league.Results.Any(r => r.GameId == game.GameId)) return Fail("This game is already final.");
         if (league.ActiveLiveGameSession?.Active == true)
-            return league.ActiveLiveGameSession.GameId == game.GameId ? Snapshot(league.ActiveLiveGameSession) : Fail("Another live game is already in progress.");
+            return league.ActiveLiveGameSession.GameId == game.GameId ? Snapshot(league.ActiveLiveGameSession, includeResult: true, includeTimeline: true) : Fail("Another live game is already in progress.");
         if (game.AbsoluteWeek != league.Calendar.AbsoluteWeek || game.DayIndex != league.Calendar.DayIndex)
             return Fail("Advance to the scheduled game day before starting a live game.");
         foreach (var team in league.Teams.Where(t => t.TeamId == game.HomeTeamId || t.TeamId == game.AwayTeamId))
@@ -32,7 +32,7 @@ public sealed class LiveGameSessionService
             PendingResult = ProSnapEngine.Create(league, game.GameId, game.HomeTeamId, game.AwayTeamId, game.AbsoluteWeek,
                 game.PhaseWeek, game.Phase, game.GameType, game.WeekLabel, 3, game.GameType != "regular_season" && game.GameType != "preseason"),
         };
-        return Snapshot(league.ActiveLiveGameSession);
+        return Snapshot(league.ActiveLiveGameSession, includeResult: true, includeTimeline: true);
     }
 
     public LiveGameSessionResponse SetPaused(bool paused)
@@ -61,7 +61,7 @@ public sealed class LiveGameSessionService
         if (session == null)
         {
             var completed = _context.ActiveLeague?.ActiveLiveGameSession;
-            return completed?.Completed == true ? Snapshot(completed) : Fail("No live game session is active.");
+            return completed?.Completed == true ? Snapshot(completed, includeResult: true) : Fail("No live game session is active.");
         }
         if (expectedSequence.HasValue && expectedSequence.Value != session.NextEventIndex)
             return Fail("The game has advanced; this command was not applied again.");
@@ -110,19 +110,21 @@ public sealed class LiveGameSessionService
         GameDayService.CommitResult(_context.ActiveLeague, session.PendingResult);
         new ScheduleService(_context).RefreshStatuses(_context.ActiveLeague);
         session.Active = false; session.Completed = true; session.IsPaused = true;
-        return Snapshot(session, current);
+        return Snapshot(session, current, includeResult: true);
     }
     private LiveGameSessionState ResolveActive() => _context.ActiveLeague?.ActiveLiveGameSession is { Active: true } session ? session : null;
     private static LiveGameSessionResponse Fail(string error) => new() { Ok = false, Error = error };
-    private LiveGameSessionResponse Snapshot(LiveGameSessionState session, GamePlayEventState current = null) => new()
+    private LiveGameSessionResponse Snapshot(LiveGameSessionState session, GamePlayEventState current = null,
+        bool includeResult = false, bool includeTimeline = false) => new()
     {
         Ok = true,
         Session = new LiveGameSessionDto
         {
             GameId = session.GameId, Active = session.Active, Completed = session.Completed, IsPaused = session.IsPaused,
             NextEventIndex = session.NextEventIndex, TotalEvents = session.PendingResult.BoxScore.PlayByPlay.Count,
-            CurrentEvent = current, Result = GameCoreStateHelper.ToGameResultDto(session.PendingResult),
-            PlayedEvents = session.PlayedEvents.ToList(),
+            CurrentEvent = current,
+            Result = includeResult ? GameCoreStateHelper.ToGameResultDto(session.PendingResult) : null,
+            PlayedEvents = includeTimeline ? session.PlayedEvents.ToList() : new(),
             Decisions = ProGameDecisionService.Options(_context.ActiveLeague, session.PendingResult),
             Quarter = session.PendingResult.ProGame?.Quarter ?? 0,
             ClockSeconds = session.PendingResult.ProGame?.ClockSeconds ?? 0,

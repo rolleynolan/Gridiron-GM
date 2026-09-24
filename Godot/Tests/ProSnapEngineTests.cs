@@ -357,6 +357,50 @@ public sealed partial class ProSnapEngineTests
     }
 
     [Fact]
+    public void LiveResponsesOnlyCopyTheFullTimelineWhenPresentationNeedsIt()
+    {
+        var context = new GameCoreContext(); var league = new LeagueBootstrapService(context).CreateTestLeague();
+        var scheduled = league.Schedule.First(g => g.HomeTeamId == league.UserTeamId || g.AwayTeamId == league.UserTeamId);
+        league.Calendar.AbsoluteWeek = scheduled.AbsoluteWeek; league.Calendar.DayIndex = scheduled.DayIndex;
+        var live = new LiveGameSessionService(context);
+
+        var started = live.Start(scheduled.GameId);
+        Assert.True(started.Ok, started.Error); Assert.NotNull(started.Session.Result); Assert.Empty(started.Session.PlayedEvents);
+        var paused = live.SetPaused(false);
+        Assert.Null(paused.Session.Result); Assert.Empty(paused.Session.PlayedEvents);
+        var advanced = live.Advance(0);
+        Assert.True(advanced.Ok, advanced.Error); Assert.NotNull(advanced.Session.CurrentEvent);
+        Assert.Null(advanced.Session.Result); Assert.Empty(advanced.Session.PlayedEvents);
+
+        for (var guard = 0; league.ActiveLiveGameSession.Active && guard < 1000; guard++)
+            Assert.True(live.Advance(league.ActiveLiveGameSession.NextEventIndex).Ok);
+        var completed = live.Advance();
+        Assert.True(completed.Session.Completed); Assert.NotNull(completed.Session.Result);
+        Assert.Empty(completed.Session.PlayedEvents);
+    }
+
+    [Fact]
+    public void NativeSavesAreCompactAndRemainRoundTripCompatible()
+    {
+        var context = new GameCoreContext(); new LeagueBootstrapService(context).CreateTestLeague();
+        var name = $"compact-save-{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+        var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "GridironGM", "saves", name);
+        try
+        {
+            Assert.True(saves.Save(context, name).Ok);
+            var compact = System.IO.File.ReadAllText(path);
+            var indented = JsonSerializer.Serialize(context.ActiveLeague, new JsonSerializerOptions { WriteIndented = true });
+            Assert.DoesNotContain('\n', compact); Assert.True(compact.Length < indented.Length);
+            var loaded = saves.Load(name);
+            Assert.True(loaded.Ok, loaded.Message); Assert.Equal(context.ActiveLeague.SeasonYear, loaded.League.SeasonYear);
+            Assert.Equal(context.ActiveLeague.Teams.Count, loaded.League.Teams.Count);
+        }
+        finally { saves.Delete(name); }
+    }
+
+    [Fact]
     public void QueuedDecisionsReloadExactlyAndAreRevalidatedBeforeResolving()
     {
         var league = League(); var game = Game(league); Scrimmage(game);
