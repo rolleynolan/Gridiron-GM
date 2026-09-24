@@ -15,6 +15,7 @@ public sealed class CollegeUniverseState
     public List<CollegeSeasonAwardRecord> Awards { get; set; } = new();
     public List<CollegeTransferRecord> Transfers { get; set; } = new();
     public List<CollegeRecruitingRecord> RecruitingClass { get; set; } = new();
+    public List<CollegeCoachChangeRecord> CoachingChanges { get; set; } = new();
     public bool DraftClassFinalized { get; set; }
 }
 
@@ -28,6 +29,15 @@ public sealed class CollegeRecruitingRecord
     public string PublicTier { get; set; } = "";
     public string Summary { get; set; } = "";
     public bool WillRedshirt { get; set; }
+}
+
+public sealed class CollegeCoachChangeRecord
+{
+    public int SeasonYear { get; set; }
+    public string TeamId { get; set; } = "";
+    public string PreviousCoachName { get; set; } = "";
+    public string NewCoachName { get; set; } = "";
+    public string Reason { get; set; } = "";
 }
 
 public sealed class CollegeTransferRecord
@@ -101,6 +111,18 @@ public sealed class CollegeTeamState
     public int Wins { get; set; }
     public int Losses { get; set; }
     public int Ranking { get; set; }
+    public CollegeCoachState HeadCoach { get; set; } = new();
+}
+
+public sealed class CollegeCoachState
+{
+    public string CoachId { get; set; } = "";
+    public string Name { get; set; } = "";
+    public int Age { get; set; }
+    public int ProgramRating { get; set; }
+    public int RecruitingRating { get; set; }
+    public int HiredSeasonYear { get; set; }
+    public int SeasonsAtProgram { get; set; }
 }
 
 public sealed class CollegePlayerState

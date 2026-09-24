@@ -22,6 +22,7 @@ public sealed class CollegeUniverseService
         var universe = new CollegeUniverseState { SeasonYear = league.SeasonYear };
         universe.Teams = CollegeTeamCatalog.CreateTeams();
         var generatedNames = NamePoolService.Load();
+        universe.CoachingChanges = CollegeCoachCarouselService.Apply(league, previousUniverse, universe.Teams, generatedNames);
         var validTeamIds = universe.Teams.Select(team => team.TeamId).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var playerIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var prospects = league.CollegeProspects ?? new List<CollegeProspectState>();
@@ -233,7 +234,9 @@ public sealed class CollegeUniverseService
     private static int Score(CollegeUniverseState universe, string teamId, int week, int bonus)
     {
         var strength = universe.Players.Where(player => player.TeamId == teamId && CollegePlayerInjuryService.IsAvailableForGame(player)).OrderByDescending(player => player.Overall).Take(16).DefaultIfEmpty().Average(player => player?.Overall ?? 60);
-        return Math.Clamp((int)Math.Round((strength - 54) * .62) + StableValue($"{teamId}-{week}") % 17 + bonus, 10, 55);
+        var coach = universe.Teams.FirstOrDefault(team => string.Equals(team.TeamId, teamId, StringComparison.OrdinalIgnoreCase))?.HeadCoach;
+        var coachBonus = Math.Clamp(((coach?.ProgramRating ?? 65) - 65) / 10, -2, 2);
+        return Math.Clamp((int)Math.Round((strength - 54) * .62) + StableValue($"{teamId}-{week}") % 17 + bonus + coachBonus, 10, 55);
     }
 
     private static void ApplyPlayerStats(CollegeUniverseState universe, string teamId, int score, int week)

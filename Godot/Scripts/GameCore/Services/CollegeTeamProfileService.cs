@@ -45,6 +45,10 @@ public sealed class CollegeTeamProfileService
             Ranking = team.Ranking,
             Wins = team.Wins,
             Losses = team.Losses,
+            HeadCoachName = team.HeadCoach?.Name ?? "Vacant",
+            HeadCoachTenure = team.HeadCoach?.SeasonsAtProgram ?? 0,
+            ProgramLeadership = RatingBand(team.HeadCoach?.ProgramRating ?? 65),
+            RecruitingLeadership = RatingBand(team.HeadCoach?.RecruitingRating ?? 65),
         };
         profile.ProgramHistory = (_context.ActiveLeague.CollegeSeasonArchives ?? new List<CollegeSeasonArchiveRecord>())
             .Where(archive => archive != null)
@@ -163,6 +167,9 @@ public sealed class CollegeTeamProfileService
             "EDGE" => 7, "DT" => 8, "LB" => 9, "CB" => 10, "S" => 11, "K" => 12, "P" => 13,
             _ => 14,
         };
+
+    private static string RatingBand(int rating)
+        => rating >= 82 ? "Excellent" : rating >= 72 ? "Strong" : rating >= 62 ? "Stable" : "Developing";
 }
 
 public sealed class CollegeTeamProfileResult
@@ -177,6 +184,10 @@ public sealed class CollegeTeamProfileResult
     public int Ranking { get; set; }
     public int Wins { get; set; }
     public int Losses { get; set; }
+    public string HeadCoachName { get; set; } = "";
+    public int HeadCoachTenure { get; set; }
+    public string ProgramLeadership { get; set; } = "";
+    public string RecruitingLeadership { get; set; } = "";
     public List<CollegeTeamScheduleEntry> Schedule { get; set; } = new();
     public List<CollegeTeamPlayerLine> StatLeaders { get; set; } = new();
     public List<CollegeTeamPlayerLine> Roster { get; set; } = new();

@@ -777,6 +777,7 @@ public sealed class GameCoreSaveService
         universe.Awards ??= new List<CollegeSeasonAwardRecord>();
         universe.Transfers ??= new List<CollegeTransferRecord>();
         universe.RecruitingClass ??= new List<CollegeRecruitingRecord>();
+        universe.CoachingChanges ??= new List<CollegeCoachChangeRecord>();
         universe.Transfers = universe.Transfers.Where(record => record != null).ToList();
         foreach (var transfer in universe.Transfers)
             NormalizeCollegeTransfer(transfer, universe.SeasonYear);
@@ -791,10 +792,32 @@ public sealed class GameCoreSaveService
             recruit.PublicTier ??= "";
             recruit.Summary ??= "";
         }
+        universe.CoachingChanges = universe.CoachingChanges.Where(record => record != null).ToList();
+        foreach (var change in universe.CoachingChanges)
+        {
+            change.SeasonYear = change.SeasonYear <= 0 ? universe.SeasonYear : change.SeasonYear;
+            change.TeamId ??= "";
+            change.PreviousCoachName ??= "";
+            change.NewCoachName ??= "";
+            change.Reason ??= "";
+        }
+        GeneratedNamePools collegeCoachNames = null;
         foreach (var team in universe.Teams.Where(team => team != null))
         {
             team.TeamId ??= ""; team.Name ??= ""; team.Abbreviation ??= ""; team.Conference ??= "";
             team.Wins = Math.Max(0, team.Wins); team.Losses = Math.Max(0, team.Losses); team.Ranking = Math.Max(0, team.Ranking);
+            if (team.HeadCoach == null || string.IsNullOrWhiteSpace(team.HeadCoach.CoachId) || string.IsNullOrWhiteSpace(team.HeadCoach.Name))
+            {
+                collegeCoachNames ??= NamePoolService.Load();
+                team.HeadCoach = CollegeCoachCarouselService.CreateCoach(league, team, collegeCoachNames, 0);
+            }
+            team.HeadCoach.CoachId ??= "";
+            team.HeadCoach.Name ??= "";
+            team.HeadCoach.Age = Math.Clamp(team.HeadCoach.Age <= 0 ? 45 : team.HeadCoach.Age, 30, 80);
+            team.HeadCoach.ProgramRating = Math.Clamp(team.HeadCoach.ProgramRating <= 0 ? 65 : team.HeadCoach.ProgramRating, 40, 99);
+            team.HeadCoach.RecruitingRating = Math.Clamp(team.HeadCoach.RecruitingRating <= 0 ? 65 : team.HeadCoach.RecruitingRating, 40, 99);
+            team.HeadCoach.HiredSeasonYear = team.HeadCoach.HiredSeasonYear <= 0 ? universe.SeasonYear : team.HeadCoach.HiredSeasonYear;
+            team.HeadCoach.SeasonsAtProgram = Math.Max(1, team.HeadCoach.SeasonsAtProgram);
         }
         foreach (var player in universe.Players.Where(player => player != null))
         {

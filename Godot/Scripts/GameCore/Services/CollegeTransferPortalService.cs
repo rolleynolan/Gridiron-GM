@@ -45,6 +45,7 @@ public static class CollegeTransferPortalService
                 .Where(team => team != null && !string.Equals(team.TeamId, player.TeamId, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(team => PositionDepth(returningPlayers, assignments, team.TeamId, player.Position))
                 .ThenByDescending(team => previousTeams.GetValueOrDefault(team.TeamId)?.Wins ?? 0)
+                .ThenByDescending(team => team.HeadCoach?.ProgramRating ?? 65)
                 .ThenBy(team => StableValue($"{nextSeasonYear}-{player.PlayerId}-{team.TeamId}") % 31)
                 .ThenBy(team => team.TeamId, StringComparer.Ordinal)
                 .FirstOrDefault();

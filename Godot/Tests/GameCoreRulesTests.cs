@@ -453,6 +453,8 @@ public sealed class GameCoreRulesTests
 
         Assert.True(profile.Ok, profile.Message);
         Assert.Equal(team.TeamId, profile.TeamId);
+        Assert.False(string.IsNullOrWhiteSpace(profile.HeadCoachName));
+        Assert.False(string.IsNullOrWhiteSpace(profile.ProgramLeadership));
         Assert.Equal(CollegeUniverseService.RegularSeasonWeeks, profile.Schedule.Count);
         Assert.Equal(2, profile.Schedule.Count(game => game.IsFinal));
         Assert.All(profile.Schedule.Where(game => game.IsFinal), game =>
@@ -641,6 +643,66 @@ public sealed class GameCoreRulesTests
             Assert.True(loaded.Ok, loaded.Message);
             Assert.Equal(universe.RecruitingClass.Count, loaded.League.CollegeUniverse.RecruitingClass.Count);
             Assert.All(loaded.League.CollegeUniverse.RecruitingClass, recruit => Assert.False(string.IsNullOrWhiteSpace(recruit.Summary)));
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
+    }
+
+    [Fact]
+    public void CollegeCoachCarouselPersistsBoundedChangesAndProgramContext()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        var completedUniverse = league.CollegeUniverse;
+        Assert.All(completedUniverse.Teams, team =>
+        {
+            Assert.NotNull(team.HeadCoach);
+            Assert.False(string.IsNullOrWhiteSpace(team.HeadCoach.Name));
+            Assert.InRange(team.HeadCoach.ProgramRating, 40, 99);
+            Assert.InRange(team.HeadCoach.RecruitingRating, 40, 99);
+        });
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+        var retiringTeam = completedUniverse.Teams.OrderBy(team => team.TeamId, StringComparer.Ordinal).First();
+        var previousCoachId = retiringTeam.HeadCoach.CoachId;
+        retiringTeam.HeadCoach.Age = 68;
+        league.SeasonYear++;
+
+        var nextUniverse = CollegeUniverseService.CreateInitial(league, completedUniverse);
+
+        Assert.InRange(nextUniverse.CoachingChanges.Count, 1, CollegeCoachCarouselService.MaximumAnnualChanges);
+        var retirementChange = nextUniverse.CoachingChanges.Single(change => change.TeamId == retiringTeam.TeamId);
+        var replacement = nextUniverse.Teams.Single(team => team.TeamId == retiringTeam.TeamId).HeadCoach;
+        Assert.NotEqual(previousCoachId, replacement.CoachId);
+        Assert.Equal(replacement.Name, retirementChange.NewCoachName);
+        Assert.Contains("retired", retirementChange.Reason, StringComparison.OrdinalIgnoreCase);
+        league.CollegeUniverse = nextUniverse;
+        Assert.Contains(new CollegeNewsService(context).GetNews(30).Items, item => item.Category == "COACHING");
+        var profile = new CollegeTeamProfileService(context).GetProfile(retiringTeam.TeamId);
+        Assert.Equal(replacement.Name, profile.HeadCoachName);
+        Assert.False(string.IsNullOrWhiteSpace(profile.RecruitingLeadership));
+
+        var saveName = $"college_coach_carousel_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+        try
+        {
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            Assert.Equal(nextUniverse.CoachingChanges.Count, loaded.League.CollegeUniverse.CoachingChanges.Count);
+            Assert.Equal(replacement.CoachId, loaded.League.CollegeUniverse.Teams.Single(team => team.TeamId == retiringTeam.TeamId).HeadCoach.CoachId);
+
+            var legacyTeam = nextUniverse.Teams.First(team => team.TeamId != retiringTeam.TeamId);
+            legacyTeam.HeadCoach = null;
+            league.SaveVersion = LeagueState.CurrentSaveVersion - 1;
+            Assert.True(saves.Save(context, saveName).Ok);
+            var migrated = saves.Load(saveName);
+            Assert.True(migrated.Ok, migrated.Message);
+            var migratedCoach = migrated.League.CollegeUniverse.Teams.Single(team => team.TeamId == legacyTeam.TeamId).HeadCoach;
+            Assert.NotNull(migratedCoach);
+            Assert.False(string.IsNullOrWhiteSpace(migratedCoach.CoachId));
+            Assert.False(string.IsNullOrWhiteSpace(migratedCoach.Name));
         }
         finally
         {

@@ -20,8 +20,9 @@ public static class CollegeRecruitingService
         var identityValue = StableValue($"{worldSeed}-{seasonYear}-{team?.TeamId}-{position}-{sequence}-{willRedshirt}");
         var programBaseline = StableValue($"{team?.TeamId}-recruiting-prestige") % 7 - 3;
         var recentSuccess = previousTeam == null ? 0 : Math.Clamp(previousTeam.Wins - previousTeam.Losses, -6, 6) / 2;
+        var coachContext = Math.Clamp(((team?.HeadCoach?.RecruitingRating ?? 70) - 70) / 8, -3, 3);
         var boundedVariation = StableValue($"{identityValue}-talent") % 15 - 7;
-        var overall = Math.Clamp(61 + programBaseline + recentSuccess + boundedVariation, 52, 79);
+        var overall = Math.Clamp(61 + programBaseline + recentSuccess + coachContext + boundedVariation, 52, 79);
         var potential = Math.Clamp(overall + 8 + StableValue($"{identityValue}-upside") % 14, overall, 95);
         var firstName = names?.MaleFirstNames?.Count > 0 ? names.MaleFirstNames[identityValue % names.MaleFirstNames.Count] : "Jordan";
         var lastNameValue = StableValue($"{identityValue}-last");
