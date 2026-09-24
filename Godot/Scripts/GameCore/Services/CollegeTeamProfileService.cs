@@ -63,6 +63,21 @@ public sealed class CollegeTeamProfileService
                 WonChampionship = record.WonChampionship,
             })
             .ToList();
+        profile.RecruitingClass = (universe.RecruitingClass ?? new List<CollegeRecruitingRecord>())
+            .Where(record => record != null && string.Equals(record.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(record => record.WillRedshirt)
+            .ThenBy(record => PositionOrder(record.Position))
+            .ThenBy(record => record.PlayerName, StringComparer.Ordinal)
+            .Select(record => new CollegeTeamRecruitLine
+            {
+                PlayerId = record.PlayerId,
+                PlayerName = record.PlayerName,
+                Position = record.Position,
+                PublicTier = record.PublicTier,
+                Summary = record.Summary,
+                WillRedshirt = record.WillRedshirt,
+            })
+            .ToList();
 
         foreach (var game in (universe.Schedule ?? new List<CollegeScheduledGame>())
                      .Where(game => game != null &&
@@ -166,6 +181,17 @@ public sealed class CollegeTeamProfileResult
     public List<CollegeTeamPlayerLine> StatLeaders { get; set; } = new();
     public List<CollegeTeamPlayerLine> Roster { get; set; } = new();
     public List<CollegeTeamSeasonRecord> ProgramHistory { get; set; } = new();
+    public List<CollegeTeamRecruitLine> RecruitingClass { get; set; } = new();
+}
+
+public sealed class CollegeTeamRecruitLine
+{
+    public string PlayerId { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public string PublicTier { get; set; } = "";
+    public string Summary { get; set; } = "";
+    public bool WillRedshirt { get; set; }
 }
 
 public sealed class CollegeTeamScheduleEntry

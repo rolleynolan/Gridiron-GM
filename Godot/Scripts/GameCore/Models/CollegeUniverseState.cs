@@ -14,7 +14,20 @@ public sealed class CollegeUniverseState
     public CollegePostseasonState Postseason { get; set; } = new();
     public List<CollegeSeasonAwardRecord> Awards { get; set; } = new();
     public List<CollegeTransferRecord> Transfers { get; set; } = new();
+    public List<CollegeRecruitingRecord> RecruitingClass { get; set; } = new();
     public bool DraftClassFinalized { get; set; }
+}
+
+public sealed class CollegeRecruitingRecord
+{
+    public int SeasonYear { get; set; }
+    public string PlayerId { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public string TeamId { get; set; } = "";
+    public string PublicTier { get; set; } = "";
+    public string Summary { get; set; } = "";
+    public bool WillRedshirt { get; set; }
 }
 
 public sealed class CollegeTransferRecord
@@ -115,6 +128,7 @@ public sealed class CollegePlayerState
     public List<CollegePlayerSeasonStats> CareerStats { get; set; } = new();
     public List<CollegePlayerDevelopmentRecord> DevelopmentHistory { get; set; } = new();
     public List<CollegeTransferRecord> TransferHistory { get; set; } = new();
+    public string RecruitingSummary { get; set; } = "";
     public CollegePlayerInjuryState CurrentInjury { get; set; } = new();
     public List<CollegePlayerInjuryRecord> InjuryHistory { get; set; } = new();
 }

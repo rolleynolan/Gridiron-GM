@@ -21,6 +21,7 @@ public sealed class CollegeUniverseService
     {
         var universe = new CollegeUniverseState { SeasonYear = league.SeasonYear };
         universe.Teams = CollegeTeamCatalog.CreateTeams();
+        var generatedNames = NamePoolService.Load();
         var validTeamIds = universe.Teams.Select(team => team.TeamId).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var playerIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var prospects = league.CollegeProspects ?? new List<CollegeProspectState>();
@@ -68,40 +69,35 @@ public sealed class CollegeUniverseService
             var requiredAtPosition = DevelopmentRosterPositions.Take(slot + 1).Count(candidate => candidate == position);
             if (universe.Players.Count(player => string.Equals(player.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase) && string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase)) >= requiredAtPosition)
                 continue;
-            var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{team.TeamId}-{slot}");
-            var player = new CollegePlayerState
+            var previousTeam = previousUniverse?.Teams?.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase));
+            var recruit = CollegeRecruitingService.CreateFreshman(league, team, previousTeam, position, slot + 1, false, generatedNames);
+            var initialClassYear = previousUniverse == null
+                ? 1 + StableValue($"{league.FranchiseMetadata?.World?.Seed}-{team.TeamId}-{slot}-initial-class") % 3
+                : 1;
+            recruit.Player.ClassYear = initialClassYear;
+            recruit.Player.CollegeYear = initialClassYear;
+            recruit.Player.PlayableSeasonsUsed = initialClassYear;
+            recruit.Player.Age = 17 + initialClassYear;
+            if (initialClassYear > 1)
+                recruit.Player.RecruitingSummary = "";
+            if (playerIds.Add(recruit.Player.PlayerId))
             {
-                PlayerId = $"college-{league.SeasonYear}-{team.TeamId}-{slot + 1}", Name = $"{team.Abbreviation} Prospect {slot + 1}", TeamId = team.TeamId,
-                Position = position, Overall = 58 + value % 19,
-                Potential = 70 + value % 23,
-                Age = previousUniverse == null ? 19 + value % 3 : 18,
-                ClassYear = previousUniverse == null ? 1 + value % 3 : 1,
-                CollegeYear = previousUniverse == null ? 1 + value % 3 : 1,
-                PlayableSeasonsUsed = previousUniverse == null ? 1 + value % 3 : 1,
-                DraftEligible = false,
-            };
-            if (playerIds.Add(player.PlayerId)) universe.Players.Add(player);
+                universe.Players.Add(recruit.Player);
+                if (initialClassYear == 1)
+                    universe.RecruitingClass.Add(recruit.Record);
+            }
         }
         foreach (var team in universe.Teams)
         {
-            var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{league.SeasonYear}-{team.TeamId}-redshirt");
+            var value = StableValue($"{league.FranchiseMetadata?.World?.Seed}-{league.SeasonYear}-{team.TeamId}-redshirt-position");
             var position = DevelopmentRosterPositions[value % DevelopmentRosterPositions.Length];
-            var redshirt = new CollegePlayerState
+            var previousTeam = previousUniverse?.Teams?.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase));
+            var recruit = CollegeRecruitingService.CreateFreshman(league, team, previousTeam, position, DevelopmentRosterPositions.Length + 1, true, generatedNames);
+            if (playerIds.Add(recruit.Player.PlayerId))
             {
-                PlayerId = $"college-{league.SeasonYear}-{team.TeamId}-redshirt",
-                Name = $"{team.Abbreviation} Prospect RS",
-                TeamId = team.TeamId,
-                Position = position,
-                Overall = 56 + value % 18,
-                Potential = 71 + value % 22,
-                Age = 18,
-                ClassYear = 1,
-                CollegeYear = 1,
-                PlayableSeasonsUsed = 0,
-                IsRedshirted = true,
-                DraftEligible = false,
-            };
-            if (playerIds.Add(redshirt.PlayerId)) universe.Players.Add(redshirt);
+                universe.Players.Add(recruit.Player);
+                universe.RecruitingClass.Add(recruit.Record);
+            }
         }
         universe.Schedule = BuildSchedule(universe.Teams);
         RefreshRankings(universe);

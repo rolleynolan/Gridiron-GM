@@ -776,9 +776,21 @@ public sealed class GameCoreSaveService
         universe.Postseason.Games ??= new List<CollegePostseasonGame>();
         universe.Awards ??= new List<CollegeSeasonAwardRecord>();
         universe.Transfers ??= new List<CollegeTransferRecord>();
+        universe.RecruitingClass ??= new List<CollegeRecruitingRecord>();
         universe.Transfers = universe.Transfers.Where(record => record != null).ToList();
         foreach (var transfer in universe.Transfers)
             NormalizeCollegeTransfer(transfer, universe.SeasonYear);
+        universe.RecruitingClass = universe.RecruitingClass.Where(record => record != null).ToList();
+        foreach (var recruit in universe.RecruitingClass)
+        {
+            recruit.SeasonYear = recruit.SeasonYear <= 0 ? universe.SeasonYear : recruit.SeasonYear;
+            recruit.PlayerId ??= "";
+            recruit.PlayerName ??= "";
+            recruit.Position ??= "";
+            recruit.TeamId ??= "";
+            recruit.PublicTier ??= "";
+            recruit.Summary ??= "";
+        }
         foreach (var team in universe.Teams.Where(team => team != null))
         {
             team.TeamId ??= ""; team.Name ??= ""; team.Abbreviation ??= ""; team.Conference ??= "";
@@ -825,6 +837,7 @@ public sealed class GameCoreSaveService
             player.TransferHistory = player.TransferHistory.Where(record => record != null).ToList();
             foreach (var transfer in player.TransferHistory)
                 NormalizeCollegeTransfer(transfer, universe.SeasonYear);
+            player.RecruitingSummary ??= "";
             player.CurrentInjury ??= new CollegePlayerInjuryState();
             player.CurrentInjury.Name ??= "";
             player.CurrentInjury.WeeksRemaining = Math.Max(0, player.CurrentInjury.WeeksRemaining);

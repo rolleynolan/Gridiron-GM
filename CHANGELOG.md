@@ -102,6 +102,7 @@ All notable project changes are recorded here.
 - Extended the normal pro player profile with the player's persisted school, season-by-season college production, and college career totals, so the college identity handoff remains visible after drafting or UDFA signing.
 - Added the first explicit college redshirt and eligibility lifecycle. Every program carries a deterministic first-year redshirt reserve who remains out of games and injuries, receives practice development, preserves all four playable seasons, and returns with the same identity as an active freshman; college roster and scouting context now show college year, class, redshirt state, and remaining seasons.
 - Added a bounded CPU-only college transfer portal at season rollover. Selected returning players now move toward clearer positional opportunity using program performance, development outlook, and deterministic variation; they remain immediately eligible, retain identity and prior-school statistics, and carry persisted transfer rationale into college rosters, news, save/load, and migration.
+- Added the first simulated college recruiting cycle. Program context, recent results, positional vacancies, and bounded variation now generate stable incoming freshmen and planned redshirts without guaranteeing stronger programs every top signing; recruiting classes persist and appear in each program encyclopedia and the college news feed. Name-pool discovery now also works from nested test/runtime output directories.
 
 ### Notes
 

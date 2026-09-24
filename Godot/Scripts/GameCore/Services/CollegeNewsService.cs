@@ -21,6 +21,21 @@ public sealed class CollegeNewsService
         limit = Math.Clamp(limit, 1, 30);
         var teams = (universe.Teams ?? new List<CollegeTeamState>()).Where(team => team != null).ToDictionary(team => team.TeamId, StringComparer.OrdinalIgnoreCase);
         var items = new List<CollegeNewsItem>();
+        foreach (var recruit in (universe.RecruitingClass ?? new List<CollegeRecruitingRecord>())
+                     .Where(record => record != null)
+                     .OrderBy(record => record.PublicTier == "Headline signing" ? 0 : record.PublicTier == "Priority signing" ? 1 : 2)
+                     .ThenBy(record => record.PlayerName, StringComparer.Ordinal)
+                     .Take(4))
+        {
+            var team = teams.GetValueOrDefault(recruit.TeamId)?.Name ?? "A college program";
+            items.Add(new CollegeNewsItem
+            {
+                Category = "RECRUITING",
+                ProAbsoluteWeek = 0,
+                Headline = $"{team} adds {recruit.PlayerName}",
+                Detail = $"{recruit.Position} · {recruit.Summary}",
+            });
+        }
         foreach (var transfer in (universe.Transfers ?? new List<CollegeTransferRecord>())
                      .Where(record => record != null)
                      .OrderBy(record => record.PlayerName, StringComparer.Ordinal)

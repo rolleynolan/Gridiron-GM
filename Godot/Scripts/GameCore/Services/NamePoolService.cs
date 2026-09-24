@@ -27,6 +27,8 @@ public static class NamePoolService
             var godotProjectDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Godot", "Assets", "data_seed");
             if (Directory.Exists(godotProjectDirectory))
                 directory = godotProjectDirectory;
+            else
+                directory = FindBundledDataDirectory(AppContext.BaseDirectory) ?? directory;
         }
 
         if (string.IsNullOrWhiteSpace(directory))
@@ -38,6 +40,21 @@ public static class NamePoolService
             FemaleFirstNames = ReadPool(Path.Combine(directory, "female_first_names.txt"), "female first names"),
             LastNames = ReadPool(Path.Combine(directory, "last_names.txt"), "last names"),
         };
+    }
+
+    private static string FindBundledDataDirectory(string startPath)
+    {
+        var directory = new DirectoryInfo(startPath);
+        for (var depth = 0; directory != null && depth < 8; depth++, directory = directory.Parent)
+        {
+            var direct = Path.Combine(directory.FullName, "Assets", "data_seed");
+            if (Directory.Exists(direct))
+                return direct;
+            var nested = Path.Combine(directory.FullName, "Godot", "Assets", "data_seed");
+            if (Directory.Exists(nested))
+                return nested;
+        }
+        return null;
     }
 
     private static IReadOnlyList<string> ReadPool(string path, string label)

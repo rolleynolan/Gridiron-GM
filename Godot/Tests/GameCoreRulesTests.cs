@@ -462,6 +462,8 @@ public sealed class GameCoreRulesTests
             Assert.Contains(game.Result, new[] { "W", "L" });
         });
         Assert.NotEmpty(profile.StatLeaders);
+        Assert.NotEmpty(profile.RecruitingClass);
+        Assert.Contains(profile.RecruitingClass, recruit => recruit.WillRedshirt);
         Assert.All(profile.StatLeaders, player => Assert.False(string.IsNullOrWhiteSpace(player.Availability)));
         Assert.True(profile.Roster.Count >= 16);
         Assert.Equal(
@@ -590,6 +592,55 @@ public sealed class GameCoreRulesTests
             Assert.True(loaded.Ok, loaded.Message);
             Assert.Equal(nextUniverse.Transfers.Count, loaded.League.CollegeUniverse.Transfers.Count);
             Assert.Equal(firstTransfer.ToTeamId, loaded.League.CollegeUniverse.Players.Single(player => player.PlayerId == firstTransfer.PlayerId).TeamId);
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
+    }
+
+    [Fact]
+    public void CollegeRecruitingCreatesNeedBasedFreshmenAndPersistsPublicContext()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        var universe = league.CollegeUniverse;
+
+        Assert.True(universe.RecruitingClass.Count >= CollegeTeamCatalog.TeamCount);
+        Assert.All(universe.Teams, team => Assert.Contains(universe.RecruitingClass, recruit => recruit.TeamId == team.TeamId));
+        Assert.Equal(universe.RecruitingClass.Count, universe.RecruitingClass.Select(record => record.PlayerId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.All(universe.RecruitingClass, recruit =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(recruit.PublicTier));
+            Assert.False(string.IsNullOrWhiteSpace(recruit.Summary));
+            var player = universe.Players.Single(candidate => candidate.PlayerId == recruit.PlayerId);
+            Assert.Equal(recruit.TeamId, player.TeamId);
+            Assert.Equal(recruit.Summary, player.RecruitingSummary);
+            Assert.InRange(player.Overall, 52, 79);
+            Assert.InRange(player.Potential, player.Overall, 95);
+        });
+        Assert.Contains(new CollegeNewsService(context).GetNews(30).Items, item => item.Category == "RECRUITING");
+
+        var team = universe.Teams[0];
+        var names = NamePoolService.Load();
+        var strongContext = new CollegeTeamState { TeamId = team.TeamId, Wins = 12, Losses = 0 };
+        var weakContext = new CollegeTeamState { TeamId = team.TeamId, Wins = 0, Losses = 12 };
+        var strongRecruit = CollegeRecruitingService.CreateFreshman(league, team, strongContext, "QB", 99, false, names);
+        var repeatStrongRecruit = CollegeRecruitingService.CreateFreshman(league, team, strongContext, "QB", 99, false, names);
+        var weakRecruit = CollegeRecruitingService.CreateFreshman(league, team, weakContext, "QB", 99, false, names);
+        Assert.Equal(strongRecruit.Player.Name, repeatStrongRecruit.Player.Name);
+        Assert.Equal(strongRecruit.Player.Overall, repeatStrongRecruit.Player.Overall);
+        Assert.True(strongRecruit.Player.Overall >= weakRecruit.Player.Overall);
+
+        var saveName = $"college_recruiting_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+        try
+        {
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            Assert.Equal(universe.RecruitingClass.Count, loaded.League.CollegeUniverse.RecruitingClass.Count);
+            Assert.All(loaded.League.CollegeUniverse.RecruitingClass, recruit => Assert.False(string.IsNullOrWhiteSpace(recruit.Summary)));
         }
         finally
         {
