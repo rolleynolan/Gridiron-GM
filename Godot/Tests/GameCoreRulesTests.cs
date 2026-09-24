@@ -530,8 +530,10 @@ public sealed class GameCoreRulesTests
 
         var nextUniverse = CollegeUniverseService.CreateInitial(league, completedUniverse);
         var carriedPlayer = nextUniverse.Players.Single(player => player.PlayerId == playerId);
+        var carriedTransfer = nextUniverse.Transfers.SingleOrDefault(record => record.PlayerId == playerId);
+        var expectedTeamId = carriedTransfer?.ToTeamId ?? teamId;
 
-        Assert.Equal(teamId, carriedPlayer.TeamId);
+        Assert.Equal(expectedTeamId, carriedPlayer.TeamId);
         Assert.Equal(completedClass + 1, carriedPlayer.ClassYear);
         Assert.Equal(0, carriedPlayer.GamesPlayed);
         Assert.Equal(0, carriedPlayer.PassingYards + carriedPlayer.RushingYards + carriedPlayer.ReceivingYards);
@@ -542,10 +544,57 @@ public sealed class GameCoreRulesTests
         Assert.All(nextUniverse.Teams, team => Assert.True(nextUniverse.Players.Count(player => player.TeamId == team.TeamId) >= 16));
 
         league.CollegeUniverse = nextUniverse;
-        var profilePlayer = new CollegeTeamProfileService(context).GetProfile(teamId).Roster.Single(player => player.PlayerId == playerId);
+        var profilePlayer = new CollegeTeamProfileService(context).GetProfile(expectedTeamId).Roster.Single(player => player.PlayerId == playerId);
         Assert.Equal(completedGames, profilePlayer.CareerGames);
         Assert.Equal(completedYards, profilePlayer.CareerYards);
         Assert.Equal(completedTouchdowns, profilePlayer.CareerTouchdowns);
+    }
+
+    [Fact]
+    public void CollegeTransferPortalMovesReturningPlayersAndPersistsNewsContext()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        var completedUniverse = league.CollegeUniverse;
+        new CollegeUniverseService(context).AdvanceToProWeek(CollegeUniverseService.RegularSeasonWeeks);
+        league.SeasonYear++;
+
+        var nextUniverse = CollegeUniverseService.CreateInitial(league, completedUniverse);
+
+        Assert.NotEmpty(nextUniverse.Transfers);
+        Assert.InRange(nextUniverse.Transfers.Count, 1, CollegeTransferPortalService.MaximumAnnualTransfers);
+        Assert.Equal(nextUniverse.Transfers.Count, nextUniverse.Transfers.Select(record => record.PlayerId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.All(nextUniverse.Transfers, transfer =>
+        {
+            Assert.NotEqual(transfer.FromTeamId, transfer.ToTeamId);
+            Assert.False(string.IsNullOrWhiteSpace(transfer.Reason));
+            var player = nextUniverse.Players.Single(candidate => candidate.PlayerId == transfer.PlayerId);
+            Assert.Equal(transfer.ToTeamId, player.TeamId);
+            Assert.False(player.IsRedshirted);
+            Assert.Contains(player.TransferHistory, record => record.SeasonYear == league.SeasonYear && record.ToTeamId == transfer.ToTeamId);
+        });
+
+        league.CollegeUniverse = nextUniverse;
+        var news = new CollegeNewsService(context).GetNews();
+        Assert.Contains(news.Items, item => item.Category == "TRANSFER");
+        var firstTransfer = nextUniverse.Transfers[0];
+        var profilePlayer = new CollegeTeamProfileService(context).GetProfile(firstTransfer.ToTeamId).Roster.Single(player => player.PlayerId == firstTransfer.PlayerId);
+        Assert.Contains("Transferred in", profilePlayer.TransferContext);
+
+        var saveName = $"college_transfer_portal_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+        try
+        {
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            Assert.Equal(nextUniverse.Transfers.Count, loaded.League.CollegeUniverse.Transfers.Count);
+            Assert.Equal(firstTransfer.ToTeamId, loaded.League.CollegeUniverse.Players.Single(player => player.PlayerId == firstTransfer.PlayerId).TeamId);
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
     }
 
     [Fact]

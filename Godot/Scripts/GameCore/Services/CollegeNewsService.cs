@@ -21,6 +21,21 @@ public sealed class CollegeNewsService
         limit = Math.Clamp(limit, 1, 30);
         var teams = (universe.Teams ?? new List<CollegeTeamState>()).Where(team => team != null).ToDictionary(team => team.TeamId, StringComparer.OrdinalIgnoreCase);
         var items = new List<CollegeNewsItem>();
+        foreach (var transfer in (universe.Transfers ?? new List<CollegeTransferRecord>())
+                     .Where(record => record != null)
+                     .OrderBy(record => record.PlayerName, StringComparer.Ordinal)
+                     .Take(4))
+        {
+            var fromTeam = teams.GetValueOrDefault(transfer.FromTeamId)?.Name ?? "the previous program";
+            var toTeam = teams.GetValueOrDefault(transfer.ToTeamId)?.Name ?? "a new program";
+            items.Add(new CollegeNewsItem
+            {
+                Category = "TRANSFER",
+                ProAbsoluteWeek = 0,
+                Headline = $"{transfer.PlayerName} transfers to {toTeam}",
+                Detail = $"{transfer.Position} from {fromTeam}. {transfer.Reason}",
+            });
+        }
         foreach (var result in (universe.Results ?? new List<CollegeGameResult>()).Where(result => result != null).OrderByDescending(result => result.ProAbsoluteWeek).ThenBy(result => result.GameId, StringComparer.Ordinal))
         {
             var home = teams.TryGetValue(result.HomeTeamId, out var homeTeam) ? homeTeam.Name : "Home";

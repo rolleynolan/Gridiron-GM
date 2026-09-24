@@ -107,7 +107,7 @@ public sealed class CollegeTeamProfileService
         return profile;
     }
 
-    private static CollegeTeamPlayerLine ToPlayerLine(CollegePlayerState player)
+    private CollegeTeamPlayerLine ToPlayerLine(CollegePlayerState player)
         => new()
         {
             PlayerId = player.PlayerId,
@@ -118,6 +118,13 @@ public sealed class CollegeTeamProfileService
             PlayableSeasonsUsed = player.PlayableSeasonsUsed,
             PlayableSeasonsRemaining = Math.Max(0, 4 - player.PlayableSeasonsUsed),
             IsRedshirted = player.IsRedshirted,
+            TransferContext = player.TransferHistory?
+                .Where(record => record != null)
+                .OrderByDescending(record => record.SeasonYear)
+                .Select(record => record.SeasonYear == _context.ActiveLeague.CollegeUniverse.SeasonYear
+                    ? $"Transferred in: {record.Reason}"
+                    : $"Transferred in {record.SeasonYear}")
+                .FirstOrDefault() ?? "",
             GamesPlayed = player.GamesPlayed,
             PassingYards = player.PassingYards,
             RushingYards = player.RushingYards,
@@ -182,6 +189,7 @@ public sealed class CollegeTeamPlayerLine
     public int PlayableSeasonsUsed { get; set; }
     public int PlayableSeasonsRemaining { get; set; }
     public bool IsRedshirted { get; set; }
+    public string TransferContext { get; set; } = "";
     public int GamesPlayed { get; set; }
     public int PassingYards { get; set; }
     public int RushingYards { get; set; }

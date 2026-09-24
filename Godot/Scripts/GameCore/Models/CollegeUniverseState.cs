@@ -13,7 +13,19 @@ public sealed class CollegeUniverseState
     public List<CollegeGameResult> Results { get; set; } = new();
     public CollegePostseasonState Postseason { get; set; } = new();
     public List<CollegeSeasonAwardRecord> Awards { get; set; } = new();
+    public List<CollegeTransferRecord> Transfers { get; set; } = new();
     public bool DraftClassFinalized { get; set; }
+}
+
+public sealed class CollegeTransferRecord
+{
+    public int SeasonYear { get; set; }
+    public string PlayerId { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public string FromTeamId { get; set; } = "";
+    public string ToTeamId { get; set; } = "";
+    public string Reason { get; set; } = "";
 }
 
 public sealed class CollegePostseasonState
@@ -102,6 +114,7 @@ public sealed class CollegePlayerState
     public int Touchdowns { get; set; }
     public List<CollegePlayerSeasonStats> CareerStats { get; set; } = new();
     public List<CollegePlayerDevelopmentRecord> DevelopmentHistory { get; set; } = new();
+    public List<CollegeTransferRecord> TransferHistory { get; set; } = new();
     public CollegePlayerInjuryState CurrentInjury { get; set; } = new();
     public List<CollegePlayerInjuryRecord> InjuryHistory { get; set; } = new();
 }

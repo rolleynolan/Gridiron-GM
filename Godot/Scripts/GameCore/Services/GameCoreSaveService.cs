@@ -775,6 +775,10 @@ public sealed class GameCoreSaveService
         universe.Postseason ??= new CollegePostseasonState();
         universe.Postseason.Games ??= new List<CollegePostseasonGame>();
         universe.Awards ??= new List<CollegeSeasonAwardRecord>();
+        universe.Transfers ??= new List<CollegeTransferRecord>();
+        universe.Transfers = universe.Transfers.Where(record => record != null).ToList();
+        foreach (var transfer in universe.Transfers)
+            NormalizeCollegeTransfer(transfer, universe.SeasonYear);
         foreach (var team in universe.Teams.Where(team => team != null))
         {
             team.TeamId ??= ""; team.Name ??= ""; team.Abbreviation ??= ""; team.Conference ??= "";
@@ -817,6 +821,10 @@ public sealed class GameCoreSaveService
                 record.OverallAfter = Math.Clamp(record.OverallAfter, 40, 99);
                 record.Reason ??= "";
             }
+            player.TransferHistory ??= new List<CollegeTransferRecord>();
+            player.TransferHistory = player.TransferHistory.Where(record => record != null).ToList();
+            foreach (var transfer in player.TransferHistory)
+                NormalizeCollegeTransfer(transfer, universe.SeasonYear);
             player.CurrentInjury ??= new CollegePlayerInjuryState();
             player.CurrentInjury.Name ??= "";
             player.CurrentInjury.WeeksRemaining = Math.Max(0, player.CurrentInjury.WeeksRemaining);
@@ -877,6 +885,17 @@ public sealed class GameCoreSaveService
             player.Contract.ContractType = string.IsNullOrWhiteSpace(player.Contract.ContractType) ? "Standard" : player.Contract.ContractType;
             NormalizePlayerStatistics(player);
         }
+    }
+
+    private static void NormalizeCollegeTransfer(CollegeTransferRecord transfer, int fallbackSeasonYear)
+    {
+        transfer.SeasonYear = transfer.SeasonYear <= 0 ? fallbackSeasonYear : transfer.SeasonYear;
+        transfer.PlayerId ??= "";
+        transfer.PlayerName ??= "";
+        transfer.Position ??= "";
+        transfer.FromTeamId ??= "";
+        transfer.ToTeamId ??= "";
+        transfer.Reason ??= "";
     }
 
     private static void NormalizeCoach(CoachState coach, string fallbackRole)

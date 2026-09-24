@@ -40,11 +40,24 @@ public sealed class CollegeUniverseService
             };
             if (playerIds.Add(player.PlayerId)) universe.Players.Add(player);
         }
-        foreach (var player in previousUniverse?.Players?.Where(player => player != null).OrderBy(player => player.PlayerId, StringComparer.Ordinal) ?? Enumerable.Empty<CollegePlayerState>())
+        var returningPlayers = previousUniverse?.Players?
+            .Where(player => player != null && validTeamIds.Contains(player.TeamId) && player.CollegeYear < 5 && player.PlayableSeasonsUsed < 4)
+            .OrderBy(player => player.PlayerId, StringComparer.Ordinal)
+            .ToList() ?? new List<CollegePlayerState>();
+        var transferPlan = CollegeTransferPortalService.BuildPlan(league.SeasonYear, previousUniverse, returningPlayers, universe.Teams);
+        var transfersByPlayer = transferPlan.ToDictionary(record => record.PlayerId, StringComparer.OrdinalIgnoreCase);
+        foreach (var player in returningPlayers)
         {
-            if (!validTeamIds.Contains(player.TeamId) || player.CollegeYear >= 5 || player.PlayableSeasonsUsed >= 4 || !playerIds.Add(player.PlayerId))
+            if (!playerIds.Add(player.PlayerId))
                 continue;
             ArchiveAndResetReturningPlayer(player, previousUniverse.SeasonYear);
+            if (transfersByPlayer.TryGetValue(player.PlayerId, out var transfer))
+            {
+                player.TeamId = transfer.ToTeamId;
+                player.TransferHistory ??= new List<CollegeTransferRecord>();
+                player.TransferHistory.Add(CopyTransfer(transfer));
+                universe.Transfers.Add(CopyTransfer(transfer));
+            }
             universe.Players.Add(player);
         }
         // Underclassmen make the roster and standings world persist beyond only the current draft pool.
@@ -125,6 +138,18 @@ public sealed class CollegeUniverseService
         player.Touchdowns = 0;
         player.CurrentInjury = new CollegePlayerInjuryState();
     }
+
+    private static CollegeTransferRecord CopyTransfer(CollegeTransferRecord record)
+        => new()
+        {
+            SeasonYear = record.SeasonYear,
+            PlayerId = record.PlayerId,
+            PlayerName = record.PlayerName,
+            Position = record.Position,
+            FromTeamId = record.FromTeamId,
+            ToTeamId = record.ToTeamId,
+            Reason = record.Reason,
+        };
 
     public void AdvanceToProWeek(int absoluteWeek)
     {
