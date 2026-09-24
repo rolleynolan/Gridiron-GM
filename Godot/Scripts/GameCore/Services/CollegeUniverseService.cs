@@ -224,10 +224,11 @@ public sealed class CollegeUniverseService
         if (homeScore == awayScore) homeScore++;
         var winnerId = homeScore > awayScore ? home.TeamId : away.TeamId;
         if (winnerId == home.TeamId) { home.Wins++; away.Losses++; } else { away.Wins++; home.Losses++; }
-        universe.Results.Add(new CollegeGameResult { GameId = game.GameId, ProAbsoluteWeek = game.ProAbsoluteWeek, HomeTeamId = home.TeamId, AwayTeamId = away.TeamId, HomeScore = homeScore, AwayScore = awayScore, WinnerTeamId = winnerId });
+        var playerStats = ApplyPlayerStats(universe, home.TeamId, homeScore, game.ProAbsoluteWeek)
+            .Concat(ApplyPlayerStats(universe, away.TeamId, awayScore, game.ProAbsoluteWeek))
+            .ToList();
+        universe.Results.Add(new CollegeGameResult { GameId = game.GameId, ProAbsoluteWeek = game.ProAbsoluteWeek, HomeTeamId = home.TeamId, AwayTeamId = away.TeamId, HomeScore = homeScore, AwayScore = awayScore, WinnerTeamId = winnerId, PlayerStats = playerStats });
         game.Status = "final";
-        ApplyPlayerStats(universe, home.TeamId, homeScore, game.ProAbsoluteWeek);
-        ApplyPlayerStats(universe, away.TeamId, awayScore, game.ProAbsoluteWeek);
         CollegePlayerInjuryService.ApplyDeterministicGameInjury(universe, game);
     }
 
@@ -239,16 +240,31 @@ public sealed class CollegeUniverseService
         return Math.Clamp((int)Math.Round((strength - 54) * .62) + StableValue($"{teamId}-{week}") % 17 + bonus + coachBonus, 10, 55);
     }
 
-    private static void ApplyPlayerStats(CollegeUniverseState universe, string teamId, int score, int week)
+    private static List<CollegeGamePlayerStatLine> ApplyPlayerStats(CollegeUniverseState universe, string teamId, int score, int week)
     {
+        var lines = new List<CollegeGamePlayerStatLine>();
         foreach (var player in universe.Players.Where(player => player.TeamId == teamId && CollegePlayerInjuryService.IsAvailableForGame(player)))
         {
-            var value = StableValue($"{player.PlayerId}-{week}"); player.GamesPlayed++;
-            if (player.Position == "QB") player.PassingYards += 110 + value % 190;
-            if (player.Position == "RB") player.RushingYards += 25 + value % 95;
-            if (player.Position == "WR" || player.Position == "TE") player.ReceivingYards += 20 + value % 100;
-            if (new[] { "QB", "RB", "WR", "TE" }.Contains(player.Position)) player.Touchdowns += (value + score) % 4 == 0 ? 1 : 0;
+            var value = StableValue($"{player.PlayerId}-{week}");
+            var line = new CollegeGamePlayerStatLine
+            {
+                PlayerId = player.PlayerId,
+                PlayerName = player.Name,
+                TeamId = teamId,
+                Position = player.Position,
+                PassingYards = player.Position == "QB" ? 110 + value % 190 : 0,
+                RushingYards = player.Position == "RB" ? 25 + value % 95 : 0,
+                ReceivingYards = player.Position == "WR" || player.Position == "TE" ? 20 + value % 100 : 0,
+                Touchdowns = new[] { "QB", "RB", "WR", "TE" }.Contains(player.Position) && (value + score) % 4 == 0 ? 1 : 0,
+            };
+            player.GamesPlayed++;
+            player.PassingYards += line.PassingYards;
+            player.RushingYards += line.RushingYards;
+            player.ReceivingYards += line.ReceivingYards;
+            player.Touchdowns += line.Touchdowns;
+            lines.Add(line);
         }
+        return lines;
     }
 
     private static void RefreshRankings(CollegeUniverseState universe)

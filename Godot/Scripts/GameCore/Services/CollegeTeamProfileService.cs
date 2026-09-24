@@ -104,6 +104,23 @@ public sealed class CollegeTeamProfileService
                 TeamScore = teamScore,
                 OpponentScore = opponentScore,
                 Result = result == null ? "" : teamScore > opponentScore ? "W" : "L",
+                BoxScoreLeaders = result?.PlayerStats?
+                    .Where(line => line != null && string.Equals(line.TeamId, team.TeamId, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(line => line.PassingYards + line.RushingYards + line.ReceivingYards)
+                    .ThenByDescending(line => line.Touchdowns)
+                    .ThenBy(line => line.PlayerName, StringComparer.Ordinal)
+                    .Take(3)
+                    .Select(line => new CollegeGamePlayerLine
+                    {
+                        PlayerId = line.PlayerId,
+                        PlayerName = line.PlayerName,
+                        Position = line.Position,
+                        PassingYards = line.PassingYards,
+                        RushingYards = line.RushingYards,
+                        ReceivingYards = line.ReceivingYards,
+                        Touchdowns = line.Touchdowns,
+                    })
+                    .ToList() ?? new List<CollegeGamePlayerLine>(),
             });
         }
 
@@ -214,6 +231,18 @@ public sealed class CollegeTeamScheduleEntry
     public int? TeamScore { get; set; }
     public int? OpponentScore { get; set; }
     public string Result { get; set; } = "";
+    public List<CollegeGamePlayerLine> BoxScoreLeaders { get; set; } = new();
+}
+
+public sealed class CollegeGamePlayerLine
+{
+    public string PlayerId { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string Position { get; set; } = "";
+    public int PassingYards { get; set; }
+    public int RushingYards { get; set; }
+    public int ReceivingYards { get; set; }
+    public int Touchdowns { get; set; }
 }
 
 public sealed class CollegeTeamPlayerLine

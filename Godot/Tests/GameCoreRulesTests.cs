@@ -462,6 +462,7 @@ public sealed class GameCoreRulesTests
             Assert.NotNull(game.TeamScore);
             Assert.NotNull(game.OpponentScore);
             Assert.Contains(game.Result, new[] { "W", "L" });
+            Assert.NotEmpty(game.BoxScoreLeaders);
         });
         Assert.NotEmpty(profile.StatLeaders);
         Assert.NotEmpty(profile.RecruitingClass);
@@ -703,6 +704,54 @@ public sealed class GameCoreRulesTests
             Assert.NotNull(migratedCoach);
             Assert.False(string.IsNullOrWhiteSpace(migratedCoach.CoachId));
             Assert.False(string.IsNullOrWhiteSpace(migratedCoach.Name));
+        }
+        finally
+        {
+            saves.Delete(saveName);
+        }
+    }
+
+    [Fact]
+    public void CollegeGameBoxScoresReconcileWithSeasonTotalsAndSurviveSaveLoad()
+    {
+        var context = Bootstrap();
+        var league = context.ActiveLeague;
+        new CollegeUniverseService(context).AdvanceToProWeek(3);
+        var universe = league.CollegeUniverse;
+
+        Assert.Equal(3 * CollegeTeamCatalog.TeamCount / 2, universe.Results.Count);
+        Assert.All(universe.Results, result =>
+        {
+            Assert.NotEmpty(result.PlayerStats);
+            Assert.All(result.PlayerStats, line =>
+            {
+                Assert.Contains(line.TeamId, new[] { result.HomeTeamId, result.AwayTeamId });
+                Assert.False(string.IsNullOrWhiteSpace(line.PlayerId));
+                Assert.False(string.IsNullOrWhiteSpace(line.PlayerName));
+            });
+        });
+        foreach (var player in universe.Players)
+        {
+            var lines = universe.Results.SelectMany(result => result.PlayerStats).Where(line => line.PlayerId == player.PlayerId).ToList();
+            Assert.Equal(player.PassingYards, lines.Sum(line => line.PassingYards));
+            Assert.Equal(player.RushingYards, lines.Sum(line => line.RushingYards));
+            Assert.Equal(player.ReceivingYards, lines.Sum(line => line.ReceivingYards));
+            Assert.Equal(player.Touchdowns, lines.Sum(line => line.Touchdowns));
+        }
+        var team = universe.Teams[0];
+        var profile = new CollegeTeamProfileService(context).GetProfile(team.TeamId);
+        Assert.All(profile.Schedule.Where(game => game.IsFinal), game => Assert.NotEmpty(game.BoxScoreLeaders));
+
+        var saveName = $"college_box_scores_{Guid.NewGuid():N}.json";
+        var saves = new GameCoreSaveService();
+        try
+        {
+            Assert.True(saves.Save(context, saveName).Ok);
+            var loaded = saves.Load(saveName);
+            Assert.True(loaded.Ok, loaded.Message);
+            Assert.Equal(
+                universe.Results.Sum(result => result.PlayerStats.Count),
+                loaded.League.CollegeUniverse.Results.Sum(result => result.PlayerStats.Count));
         }
         finally
         {

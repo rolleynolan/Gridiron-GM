@@ -211,4 +211,17 @@ public sealed class CollegeGameResult
     public int HomeScore { get; set; }
     public int AwayScore { get; set; }
     public string WinnerTeamId { get; set; } = "";
+    public List<CollegeGamePlayerStatLine> PlayerStats { get; set; } = new();
+}
+
+public sealed class CollegeGamePlayerStatLine
+{
+    public string PlayerId { get; set; } = "";
+    public string PlayerName { get; set; } = "";
+    public string TeamId { get; set; } = "";
+    public string Position { get; set; } = "";
+    public int PassingYards { get; set; }
+    public int RushingYards { get; set; }
+    public int ReceivingYards { get; set; }
+    public int Touchdowns { get; set; }
 }

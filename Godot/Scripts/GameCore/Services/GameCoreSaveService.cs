@@ -886,6 +886,19 @@ public sealed class GameCoreSaveService
         foreach (var result in universe.Results.Where(result => result != null))
         {
             result.GameId ??= ""; result.HomeTeamId ??= ""; result.AwayTeamId ??= ""; result.WinnerTeamId ??= "";
+            result.PlayerStats ??= new List<CollegeGamePlayerStatLine>();
+            result.PlayerStats = result.PlayerStats.Where(line => line != null).ToList();
+            foreach (var line in result.PlayerStats)
+            {
+                line.PlayerId ??= "";
+                line.PlayerName ??= "";
+                line.TeamId ??= "";
+                line.Position ??= "";
+                line.PassingYards = Math.Max(0, line.PassingYards);
+                line.RushingYards = Math.Max(0, line.RushingYards);
+                line.ReceivingYards = Math.Max(0, line.ReceivingYards);
+                line.Touchdowns = Math.Max(0, line.Touchdowns);
+            }
         }
         foreach (var game in universe.Postseason.Games.Where(game => game != null))
         {
