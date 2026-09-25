@@ -9,6 +9,17 @@ public partial class DashboardController
     private async Task<bool> TryRunDeveloperCommand()
     {
         var arguments = OS.GetCmdlineUserArgs();
+        if (arguments.Contains("--cpu-roster-diagnostic", StringComparer.Ordinal))
+        {
+            try
+            {
+                var report = await Task.Run(() => CpuRosterDiagnosticService.Run(GetTeamSeedPath(), progress: line => GD.Print($"[CPU roster] {line}")));
+                GD.Print($"[CPU roster] {report.Last()}");
+                GetTree().Quit(0);
+            }
+            catch (Exception ex) { GD.PushError($"[CPU roster] {ex}"); GetTree().Quit(1); }
+            return true;
+        }
         if (arguments.Contains("--game-day-ui-smoke", StringComparer.Ordinal))
         {
             try { await RunGameDayUiSmoke(); GetTree().Quit(0); }
