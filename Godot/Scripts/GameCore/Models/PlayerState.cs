@@ -10,6 +10,9 @@ public sealed class PlayerState
     public int Overall { get; set; }
     public int Potential { get; set; }
     public int Age { get; set; }
+    // First annual assessment in the current uninterrupted spell without a team.
+    // Zero means no observed spell; successful acquisition resets it.
+    public int UnsignedSinceSeasonYear { get; set; }
     public int Fatigue { get; set; }
     public string Status { get; set; } = "Active";
     public string Injury { get; set; } = "";

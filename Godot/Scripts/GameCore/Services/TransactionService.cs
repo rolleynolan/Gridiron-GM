@@ -17,6 +17,39 @@ public sealed class TransactionService
         _context = context;
     }
 
+    // Annual retirement rules produce the records; this boundary commits their
+    // ownership changes without rebuilding or reordering anyone's saved depth.
+    internal static void ApplyRetirements(LeagueState league, SeasonRetirementRecord season, bool recordTransactions)
+    {
+        var records = (season.Players ?? new List<PlayerRetirementRecord>())
+            .Where(r => r != null && !string.IsNullOrWhiteSpace(r.PlayerId)).ToList();
+        var retiredIds = records.Select(r => r.PlayerId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (retiredIds.Count == 0) return;
+        foreach (var team in league.Teams)
+        {
+            team.Roster.RemoveAll(p => retiredIds.Contains(p.PlayerId));
+            team.InjuredReserve.RemoveAll(p => retiredIds.Contains(p.PlayerId));
+            team.PracticeSquad.RemoveAll(p => retiredIds.Contains(p.PlayerId));
+            foreach (var ids in team.DepthChart.Values) ids.RemoveAll(retiredIds.Contains);
+        }
+        league.FreeAgents.RemoveAll(p => retiredIds.Contains(p.PlayerId));
+        league.Waivers.RemoveAll(w => retiredIds.Contains(w.Player.PlayerId));
+        league.RookieMinicamp?.InvitedPlayerIds?.RemoveAll(retiredIds.Contains);
+        if (recordTransactions)
+        {
+            foreach (var retired in records)
+            {
+                if (league.Transactions.Any(t => t.SeasonYear == season.SeasonYear && t.Type == "player_retired" && SameId(t.PlayerId, retired.PlayerId))) continue;
+                var team = league.Teams.FirstOrDefault(t => SameId(t.TeamId, retired.TeamId));
+                var player = retired.PlayerSnapshot ?? new PlayerState { PlayerId = retired.PlayerId, Name = retired.PlayerName };
+                Record(league, "player_retired", team, player, retired.ReasonLabel == "extended_free_agency"
+                    ? "Retired after an extended period without a team."
+                    : "Retired following the annual career assessment.");
+            }
+        }
+        new ContractService(new GameCoreContext { ActiveLeague = league }).RefreshCapRoom(league);
+    }
+
     public ContractTransactionResult SignFreeAgent(string playerId, string teamId, ContractOffer offer, ContractService contracts, string transactionRationale = null, string conditionalReleasePlayerId = null)
     {
         var league = _context.ActiveLeague;
@@ -49,6 +82,7 @@ public sealed class TransactionService
             ReleasePlayer(release.PlayerId, team.TeamId, contracts, $"Conditional release for {player.Name}. {transactionRationale}");
 
         player.Contract = BuildContract(league, offer, isUndraftedRookie ? "Undrafted Rookie Contract" : "Free Agent Signing");
+        player.UnsignedSinceSeasonYear = 0;
         player.Status = "Active";
         player.Morale = Math.Clamp(player.Morale + 6, 0, 100);
         player.MoraleTrend = "Improving";
@@ -687,6 +721,7 @@ public sealed class TransactionService
         league.FreeAgents.Remove(player);
         league.RookieMinicamp?.InvitedPlayerIds?.RemoveAll(id => SameId(id, player.PlayerId));
         player.Status = "Practice Squad";
+        player.UnsignedSinceSeasonYear = 0;
         player.Contract = new PlayerContractState { AnnualSalary = annualSalary, GuaranteedSalary = 0m, YearsRemaining = 1, SignedSeason = league.SeasonYear, ContractType = "Practice Squad" };
         team.PracticeSquad.Add(player);
         contracts.RefreshCapRoom(league);

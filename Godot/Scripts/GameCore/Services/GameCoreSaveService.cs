@@ -784,6 +784,7 @@ public sealed class GameCoreSaveService
 
         ScheduleService.NormalizeCalendar(league.Calendar);
         CpuRosterManagementService.NormalizePersistence(league, league.SaveVersion < 35);
+        RetirementService.NormalizePersistence(league, league.SaveVersion < 36);
         league.SaveVersion = LeagueState.CurrentSaveVersion;
 
         var context = new GameCoreContext { ActiveLeague = league };

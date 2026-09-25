@@ -13,7 +13,9 @@ public partial class DashboardController
         {
             try
             {
-                var report = await Task.Run(() => CpuRosterDiagnosticService.Run(GetTeamSeedPath(), progress: line => GD.Print($"[CPU roster] {line}")));
+                var seasonsArgument = arguments.FirstOrDefault(a => a.StartsWith("--cpu-roster-seasons=", StringComparison.Ordinal));
+                var seasons = seasonsArgument == null ? 3 : int.Parse(seasonsArgument.Split('=')[1], System.Globalization.CultureInfo.InvariantCulture);
+                var report = await Task.Run(() => CpuRosterDiagnosticService.Run(GetTeamSeedPath(), seasons, progress: line => GD.Print($"[CPU roster] {line}")));
                 GD.Print($"[CPU roster] {report.Last()}");
                 GetTree().Quit(0);
             }

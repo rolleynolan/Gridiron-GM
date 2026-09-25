@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using GridironGM.GameCore.Models;
 using GridironGM.GameCore.Utilities;
 
@@ -33,7 +34,7 @@ public sealed class RetirementService
         var existing = GetSeasonRetirementRecord(league, league.SeasonYear);
         if (existing != null && existing.Completed)
         {
-            ApplyRetirementRecordsToLeague(league, existing);
+            TransactionService.ApplyRetirements(league, existing, recordTransactions: false);
             return new RetirementGenerationResult
             {
                 Skipped = true,
@@ -54,8 +55,7 @@ public sealed class RetirementService
         seasonRecord.Players ??= new List<PlayerRetirementRecord>();
         seasonRecord.Players.Clear();
 
-        var retiresByTeam = new Dictionary<string, List<PlayerState>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var team in league.Teams.Where(team => team != null))
+        foreach (var team in league.Teams.Where(team => team != null).OrderBy(team => team.TeamId, StringComparer.Ordinal))
         {
             team.Roster ??= new List<PlayerState>();
 
@@ -66,7 +66,7 @@ public sealed class RetirementService
 
             foreach (var player in team.Roster
                          .Where(player => player != null)
-                         .OrderBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase))
+                         .OrderBy(player => player.PlayerId, StringComparer.Ordinal))
             {
                 if (!ShouldRetirePlayer(player, team, league.SeasonYear))
                     continue;
@@ -79,50 +79,32 @@ public sealed class RetirementService
                 if (remainingAtPosition - 1 < requiredStarters)
                     continue;
 
-                if (!retiresByTeam.TryGetValue(team.TeamId ?? "", out var retiredPlayers))
-                {
-                    retiredPlayers = new List<PlayerState>();
-                    retiresByTeam[team.TeamId ?? ""] = retiredPlayers;
-                }
-
-                retiredPlayers.Add(player);
                 remainingCountsByPosition[position] = remainingAtPosition - 1;
-                seasonRecord.Players.Add(new PlayerRetirementRecord
-                {
-                    SeasonYear = league.SeasonYear,
-                    PlayerId = player.PlayerId ?? "",
-                    PlayerName = player.Name ?? "",
-                    TeamId = team.TeamId ?? "",
-                    TeamName = team.Name ?? "",
-                    Position = position,
-                    Age = player.Age,
-                    Overall = player.Overall,
-                    ReasonLabel = BuildReasonLabel(player),
-                    RetiredDuringPhase = ScheduleService.RetirementPendingPhaseKey,
-                    CurrentSeasonStats = player.SeasonStats?.Copy() ?? new PlayerSeasonStats(),
-                    CareerStats = (player.CareerStats ?? new List<PlayerSeasonStats>()).Where(stats => stats != null).Select(stats => stats.Copy()).ToList(),
-                });
+                seasonRecord.Players.Add(Snapshot(league, player, team, BuildReasonLabel(player)));
             }
         }
 
-        foreach (var entry in retiresByTeam)
+        // Only unrestricted, uniquely owned free agents enter this assessment. Pending
+        // waivers and contracted reserve players retain their existing rights and rules.
+        var ownership = league.Teams.SelectMany(t => t.Roster.Concat(t.InjuredReserve).Concat(t.PracticeSquad))
+            .Concat(league.FreeAgents).Concat(league.Waivers.Select(w => w.Player))
+            .Where(p => p != null).GroupBy(p => p.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Count(), StringComparer.OrdinalIgnoreCase);
+        foreach (var player in league.FreeAgents.Where(p => p != null && !string.IsNullOrWhiteSpace(p.PlayerId))
+                     .OrderBy(p => p.PlayerId, StringComparer.Ordinal))
         {
-            var team = league.Teams.FirstOrDefault(candidate =>
-                string.Equals(candidate?.TeamId, entry.Key, StringComparison.OrdinalIgnoreCase));
-            if (team == null)
-                continue;
-
-            var retiredIds = entry.Value
-                .Where(player => player != null)
-                .Select(player => player.PlayerId ?? "")
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            team.Roster = team.Roster
-                .Where(player => player != null && !retiredIds.Contains(player.PlayerId ?? ""))
-                .ToList();
-            RebuildDepthChart(team);
+            if (ownership[player.PlayerId] != 1 || player.Contract?.YearsRemaining > 0) continue;
+            if (player.UnsignedSinceSeasonYear <= 0 || player.UnsignedSinceSeasonYear > league.SeasonYear)
+                player.UnsignedSinceSeasonYear = league.SeasonYear;
+            var yearsUnsigned = league.SeasonYear - player.UnsignedSinceSeasonYear;
+            var chance = UnsignedRetirementChance(player, yearsUnsigned);
+            if (!string.Equals(player.Status, "Retired", StringComparison.OrdinalIgnoreCase)
+                && GetDeterministicRoll(league.SeasonYear, player.PlayerId) >= chance) continue;
+            seasonRecord.Players.Add(Snapshot(league, player, null,
+                yearsUnsigned >= 2 && player.Age < 35 ? "extended_free_agency" : BuildReasonLabel(player)));
         }
 
+        TransactionService.ApplyRetirements(league, seasonRecord, recordTransactions: true);
         seasonRecord.RetiredCount = seasonRecord.Players.Count(record => record != null);
         seasonRecord.Completed = true;
 
@@ -146,48 +128,44 @@ public sealed class RetirementService
             .FirstOrDefault();
     }
 
-    private static void ApplyRetirementRecordsToLeague(LeagueState league, SeasonRetirementRecord seasonRecord)
+    public static void NormalizePersistence(LeagueState league, bool legacy)
     {
-        if (league == null || seasonRecord == null)
-            return;
-
-        var retiredIds = (seasonRecord.Players ?? new List<PlayerRetirementRecord>())
-            .Where(record => record != null && !string.IsNullOrWhiteSpace(record.PlayerId))
-            .Select(record => record.PlayerId)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var team in league.Teams.Where(team => team != null))
+        // Loading never retires anyone or reconstructs an unknown unsigned career.
+        foreach (var player in league.FreeAgents.Where(p => p != null))
         {
-            team.Roster ??= new List<PlayerState>();
-            if (retiredIds.Count > 0)
-            {
-                team.Roster = team.Roster
-                    .Where(player => player != null && !retiredIds.Contains(player.PlayerId ?? ""))
-                    .ToList();
-            }
-
-            RebuildDepthChart(team);
+            if (legacy || player.UnsignedSinceSeasonYear < 0 || player.UnsignedSinceSeasonYear > league.SeasonYear)
+                player.UnsignedSinceSeasonYear = league.SeasonYear;
         }
+        foreach (var player in league.Teams.SelectMany(t => t.Roster.Concat(t.InjuredReserve).Concat(t.PracticeSquad))
+                     .Concat(league.Waivers.Select(w => w.Player)).Where(p => p != null))
+            player.UnsignedSinceSeasonYear = 0;
     }
 
-    private static void RebuildDepthChart(TeamState team)
+    private static PlayerRetirementRecord Snapshot(LeagueState league, PlayerState player, TeamState team, string reason)
     {
-        team.DepthChart ??= new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        team.DepthChart.Clear();
-        foreach (var position in team.Roster
-                     .Where(player => player != null)
-                     .Select(player => player.Position ?? "")
-                     .Distinct(StringComparer.OrdinalIgnoreCase)
-                     .OrderBy(position => FootballPositionOrder.GetSortOrder(position))
-                     .ThenBy(position => position, StringComparer.OrdinalIgnoreCase))
+        var snapshot = JsonSerializer.SerializeToElement(player).Deserialize<PlayerState>();
+        snapshot.Status = "Retired";
+        return new PlayerRetirementRecord
         {
-            team.DepthChart[position] = team.Roster
-                .Where(player => player != null && string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(player => player.Overall)
-                .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(player => player.PlayerId ?? "")
-                .ToList();
-        }
+            SeasonYear = league.SeasonYear, PlayerId = player.PlayerId, PlayerName = player.Name,
+            TeamId = team?.TeamId ?? "", TeamName = team?.Name ?? "Free agent", Position = player.Position,
+            Age = player.Age, Overall = player.Overall, ReasonLabel = reason,
+            RetiredDuringPhase = ScheduleService.RetirementPendingPhaseKey, PlayerSnapshot = snapshot,
+            CurrentSeasonStats = snapshot.SeasonStats?.Copy() ?? new PlayerSeasonStats(),
+            CareerStats = (snapshot.CareerStats ?? new List<PlayerSeasonStats>()).Where(s => s != null).Select(s => s.Copy()).ToList(),
+        };
+    }
+
+    private static double UnsignedRetirementChance(PlayerState player, int yearsUnsigned)
+    {
+        // Two observed full cycles protect new entrants. Bounded future value gives
+        // developing players a longer opportunity; no fixed-size market cull is used.
+        var ageChance = player.Age >= 30 ? GetRetirementChance(player, null) + .03d : 0d;
+        if (yearsUnsigned < 2) return Math.Clamp(ageChance, 0d, .95d);
+        var value = FrontOfficeEvaluationService.PlayerValue(player) / 4d;
+        var opportunityFactor = value >= 80 ? .25d : value >= 70 ? .5d : 1d;
+        var marketChance = Math.Min(.85d, .20d * (yearsUnsigned - 1)) * opportunityFactor;
+        return Math.Clamp(ageChance + marketChance, 0d, .95d);
     }
 
     private static bool ShouldRetirePlayer(PlayerState player, TeamState team, int seasonYear)
@@ -251,12 +229,6 @@ public sealed class RetirementService
                 ? 0.45d
                 : 0.05d;
         }
-
-        if (string.Equals((player?.Status ?? "").Trim(), "Free Agent", StringComparison.OrdinalIgnoreCase))
-            chance += 0.03d;
-
-        if (string.Equals((team?.Abbreviation ?? "").Trim(), "FA", StringComparison.OrdinalIgnoreCase))
-            chance += 0.03d;
 
         return Math.Clamp(chance, 0d, 0.95d);
     }
