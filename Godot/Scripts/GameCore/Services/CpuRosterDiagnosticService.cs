@@ -20,11 +20,12 @@ public sealed class CpuRosterHealthReport
     public int UnsignedRetirements { get; init; }
     public int LongTermFreeAgents { get; init; }
     public int OldestFreeAgent { get; init; }
+    public int ActiveInjuries { get; init; }
     public double AverageTransactions { get; init; }
     public List<string> Unresolved { get; init; } = new();
     public List<string> PositionDepth { get; init; } = new();
     public bool StructurallyValid => IllegalRosterSizes + CapViolations + DuplicateOwnership + InvalidReserveContracts + InvalidDepthEntries + RetiredPlayersStillOwned == 0;
-    public override string ToString() => $"{SeasonYear}: missing starters={MissingStarterTeams}, illegal sizes={IllegalRosterSizes}, cap violations={CapViolations}, duplicate ownership={DuplicateOwnership}, reserve violations={InvalidReserveContracts}, invalid depth={InvalidDepthEntries}, retired still owned={RetiredPlayersStillOwned}; transactions/CPU={AverageTransactions:0.0}, free agents={FreeAgents}, unsigned retirements={UnsignedRetirements}, unsigned 3+ years={LongTermFreeAgents}, oldest FA={OldestFreeAgent}. Depth min/avg/max: {string.Join("; ", PositionDepth)}. Unresolved: {(Unresolved.Count == 0 ? "none" : string.Join("; ", Unresolved))}";
+    public override string ToString() => $"{SeasonYear}: missing starters={MissingStarterTeams}, illegal sizes={IllegalRosterSizes}, cap violations={CapViolations}, duplicate ownership={DuplicateOwnership}, reserve violations={InvalidReserveContracts}, invalid depth={InvalidDepthEntries}, retired still owned={RetiredPlayersStillOwned}; transactions/CPU={AverageTransactions:0.0}, free agents={FreeAgents}, unsigned retirements={UnsignedRetirements}, unsigned 3+ years={LongTermFreeAgents}, oldest FA={OldestFreeAgent}, active injuries={ActiveInjuries}. Depth min/avg/max: {string.Join("; ", PositionDepth)}. Unresolved: {(Unresolved.Count == 0 ? "none" : string.Join("; ", Unresolved))}";
 }
 
 public static class CpuRosterDiagnosticService
@@ -56,6 +57,7 @@ public static class CpuRosterDiagnosticService
             UnsignedRetirements = retirements.Count(r => r.SeasonYear == (transactionSeason == 0 ? league.SeasonYear : transactionSeason) && string.IsNullOrWhiteSpace(r.TeamId)),
             LongTermFreeAgents = league.FreeAgents.Count(p => p.UnsignedSinceSeasonYear > 0 && league.SeasonYear - p.UnsignedSinceSeasonYear >= 3),
             OldestFreeAgent = league.FreeAgents.Select(p => p.Age).DefaultIfEmpty().Max(),
+            ActiveInjuries = players.Count(p => p.CurrentInjury?.IsActive == true),
             AverageTransactions = teams.Count == 0 ? 0 : league.Transactions.Count(t => t.SeasonYear == (transactionSeason == 0 ? league.SeasonYear : transactionSeason)
                 && teams.Any(team => team.TeamId == t.TeamId) && t.Type is not ("cpu_roster_review" or "training_camp_decision" or "waiver_claim_submitted" or "waiver_claim_cancelled")) / (double)teams.Count,
             Unresolved = missing,
@@ -69,7 +71,7 @@ public static class CpuRosterDiagnosticService
 
     // Endurance harness uses the real calendar, contracts, injuries, draft, and save loader.
     // Explicit user decisions below are diagnostic inputs, never a production user-team delegate.
-    public static List<string> Run(string teamSeedPath, int seasons = 3, Action<string> progress = null)
+    public static List<string> Run(string teamSeedPath, int seasons = 3, Action<string> progress = null, bool injuryStress = false)
     {
         if (seasons < 1 || seasons > 30) throw new ArgumentOutOfRangeException(nameof(seasons), "Choose 1-30 diagnostic seasons.");
         var context = new GameCoreContext();
@@ -80,6 +82,8 @@ public static class CpuRosterDiagnosticService
         var watch = Stopwatch.StartNew();
         var firstYear = context.ActiveLeague.SeasonYear;
         var previousWeek = -1;
+        var stressYears = new HashSet<int>();
+        PlayerState stressPatient = null;
         try
         {
             for (var guard = 0; context.ActiveLeague.SeasonYear < firstYear + seasons; guard++)
@@ -87,6 +91,13 @@ public static class CpuRosterDiagnosticService
                 Require(guard < seasons * 700, "CPU diagnostic exceeded its calendar progress bound.");
                 var league = context.ActiveLeague;
                 MakeDiagnosticUserDecisions(context);
+                if (injuryStress && league.Calendar.Phase == ScheduleService.TrainingCampPendingPhase && stressYears.Add(league.SeasonYear))
+                {
+                    stressPatient = league.Teams.Where(t => t.TeamId != league.UserTeamId).OrderBy(t => t.TeamId, StringComparer.Ordinal)
+                        .SelectMany(t => t.Roster.OrderBy(p => p.PlayerId, StringComparer.Ordinal))
+                        .First(p => p.Position == "QB" && PlayerInjuryService.IsAvailableForGame(p));
+                    PlayerInjuryService.InjurePlayer(league, stressPatient, "Diagnostic long recovery", 540, $"diagnostic-injury-{league.SeasonYear}");
+                }
                 var year = league.SeasonYear;
                 var step = new ContinueService(context).Continue(1);
                 Require(step.Ok, $"{year} {league.Calendar.Phase}: {step.Error}");
@@ -107,6 +118,8 @@ public static class CpuRosterDiagnosticService
                     }
                 }
                 if (league.SeasonYear == year) continue;
+                if (injuryStress)
+                    Require(stressPatient?.CurrentInjury.IsActive == true, "Rollover erased a long diagnostic injury.");
                 var final = Analyze(context, year);
                 Require(final.StructurallyValid && final.MissingStarterTeams == 0, final.ToString());
                 var seasonLine = $"Completed {year}; entering {final}"; output.Add(seasonLine); progress?.Invoke(seasonLine);

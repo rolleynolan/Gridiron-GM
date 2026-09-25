@@ -182,7 +182,7 @@ public sealed class RetirementContinuityTests
             Assert.True(saves.Save(context, file).Ok);
             var loaded = saves.Load(file);
             Assert.True(loaded.Ok, loaded.Message);
-            Assert.Equal(36, loaded.League.SaveVersion);
+            Assert.Equal(LeagueState.CurrentSaveVersion, loaded.League.SaveVersion);
             Assert.Equal(savedCount, loaded.League.FreeAgents.Count);
             Assert.Equal(savedRetirements, JsonSerializer.Serialize(loaded.League.RetirementHistory));
             var transactions = loaded.League.Transactions.Count;

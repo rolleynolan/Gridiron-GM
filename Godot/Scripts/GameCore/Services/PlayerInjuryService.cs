@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using GridironGM.GameCore.Models;
 
@@ -47,6 +48,7 @@ public static class PlayerInjuryService
             DaysRemaining = daysOut,
             OccurredOn = league?.Calendar?.CurrentDate ?? "",
             GameId = gameId ?? "",
+            RecoveryProcessedThrough = league?.Calendar?.CurrentDate ?? "",
         };
         player.Injury = injuryName;
         if (string.Equals(player.Status, "Active", StringComparison.OrdinalIgnoreCase))
@@ -62,20 +64,35 @@ public static class PlayerInjuryService
         });
     }
 
-    public static void RecoverOneDay(LeagueState league)
+    public static void RecoverThroughCurrentDate(LeagueState league)
     {
-        if (league == null)
+        if (league == null || !TryDate(league.Calendar?.CurrentDate, out var today))
             return;
 
+        var medicalRates = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var team in league.Teams.OrderBy(t => t.TeamId, StringComparer.Ordinal))
+        {
+            var rate = team.Coaches?.Any(c => c.Role == "Medical Director" && c.Overall >= 85) == true ? 2 : 1;
+            foreach (var player in team.Roster.Concat(team.InjuredReserve).Concat(team.PracticeSquad))
+                medicalRates.TryAdd(player.PlayerId, rate);
+        }
         foreach (var player in AllTeamPlayers(league))
         {
             var injury = player.CurrentInjury;
             if (!(injury?.IsActive ?? false))
                 continue;
-
-            var team = league.Teams.FirstOrDefault(candidate => (candidate?.Roster ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.InjuredReserve ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.PracticeSquad ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)));
-            var medicalDirector = team?.Coaches?.FirstOrDefault(coach => string.Equals(coach.Role, "Medical Director", StringComparison.OrdinalIgnoreCase));
-            injury.DaysRemaining -= medicalDirector?.Overall >= 85 ? 2 : 1;
+            if (!TryDate(injury.RecoveryProcessedThrough, out var prior))
+            {
+                // Unknown history is observed from today, never retroactively healed.
+                injury.RecoveryProcessedThrough = FormatDate(today);
+                continue;
+            }
+            if (today <= prior) continue;
+            var days = (today - prior).Days;
+            var rate = medicalRates.GetValueOrDefault(player.PlayerId, 1);
+            var recoveryDays = (int)Math.Ceiling(injury.DaysRemaining / (double)rate);
+            injury.DaysRemaining = (int)Math.Max(0L, injury.DaysRemaining - (long)days * rate);
+            injury.RecoveryProcessedThrough = FormatDate(today);
             if (injury.DaysRemaining > 0)
                 continue;
 
@@ -84,29 +101,28 @@ public static class PlayerInjuryService
             if (string.Equals(player.Status, "Injured", StringComparison.OrdinalIgnoreCase))
                 player.Status = "Active";
             var history = player.InjuryHistory?.LastOrDefault(record => string.IsNullOrWhiteSpace(record.RecoveredOn)
-                && string.Equals(record.GameId, injury.GameId, StringComparison.OrdinalIgnoreCase));
+                && string.Equals(record.GameId, injury.GameId, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(record.OccurredOn, injury.OccurredOn, StringComparison.Ordinal)
+                && string.Equals(record.Name, injury.Name, StringComparison.Ordinal));
             if (history != null)
-                history.RecoveredOn = league.Calendar?.CurrentDate ?? "";
+                history.RecoveredOn = FormatDate(prior.AddDays(recoveryDays));
         }
     }
 
-    public static void ClearForNewSeason(LeagueState league)
+    public static void NormalizeRecoveryPersistence(LeagueState league, bool legacy)
     {
+        if (!TryDate(league.Calendar?.CurrentDate, out var today)) return;
         foreach (var player in AllTeamPlayers(league))
         {
-            if (!(player.CurrentInjury?.IsActive ?? false))
-                continue;
-
-            player.CurrentInjury.DaysRemaining = 0;
-            player.Injury = "";
-            if (string.Equals(player.Status, "Injured", StringComparison.OrdinalIgnoreCase))
-                player.Status = "Active";
-            var history = player.InjuryHistory?.LastOrDefault(record => string.IsNullOrWhiteSpace(record.RecoveredOn)
-                && string.Equals(record.GameId, player.CurrentInjury.GameId, StringComparison.OrdinalIgnoreCase));
-            if (history != null)
-                history.RecoveredOn = league.Calendar?.CurrentDate ?? "";
+            if (player.CurrentInjury?.IsActive != true) continue;
+            if (legacy || !TryDate(player.CurrentInjury.RecoveryProcessedThrough, out _))
+                player.CurrentInjury.RecoveryProcessedThrough = FormatDate(today);
         }
     }
+
+    internal static bool TryDate(string text, out DateTime date)
+        => DateTime.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+    internal static string FormatDate(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     private static IEnumerable<PlayerState> AllTeamPlayers(LeagueState league)
         => league.Teams.Where(team => team != null)

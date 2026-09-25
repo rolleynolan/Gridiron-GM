@@ -67,6 +67,7 @@ public sealed class SeasonRolloverService
         league.Schedule = LeagueBootstrapService.BuildDeterministicSchedule(league.Teams);
         league.Results = new List<GameResult>();
         league.PlayoffBracket = new PlayoffBracket();
+        var priorDate = league.Calendar.CurrentDate;
         league.Calendar = new CalendarState
         {
             Year = league.SeasonYear,
@@ -75,9 +76,10 @@ public sealed class SeasonRolloverService
             PhaseWeek = 1,
             DayIndex = 0,
             Phase = "Preseason",
-            CurrentDate = $"{league.SeasonYear}-08-01",
+            CurrentDate = priorDate,
             WeekLabel = ScheduleService.BuildCalendarWeekLabel(1),
         };
+        ScheduleService.AdvanceCalendarDate(league, new DateTime(league.SeasonYear, 8, 1));
         new ContractService(_context).RefreshCapRoom(league);
         new ScheduleService(_context).RefreshStatuses(league);
         new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
@@ -124,7 +126,6 @@ public sealed class SeasonRolloverService
 
     private static void AgePlayers(LeagueState league)
     {
-        PlayerInjuryService.ClearForNewSeason(league);
         var players = league.Teams.SelectMany(team => team?.Roster ?? Enumerable.Empty<PlayerState>())
             .Concat(league.Teams.SelectMany(team => team?.InjuredReserve ?? Enumerable.Empty<PlayerState>()))
             .Concat(league.Teams.SelectMany(team => team?.PracticeSquad ?? Enumerable.Empty<PlayerState>()))
@@ -140,7 +141,6 @@ public sealed class SeasonRolloverService
             if (player.SeasonStats.SeasonYear == league.SeasonYear && player.SeasonStats.GamesPlayed > 0)
                 player.CareerStats.Add(player.SeasonStats.Copy());
             player.SeasonStats = new PlayerSeasonStats();
-            player.Fatigue = 0;
             var team = league.Teams.FirstOrDefault(candidate => (candidate?.Roster ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.InjuredReserve ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) || (candidate?.PracticeSquad ?? new List<PlayerState>()).Any(member => string.Equals(member.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)));
             var headCoach = team?.Coaches?.FirstOrDefault(coach => string.Equals(coach.Role, "Head Coach", StringComparison.OrdinalIgnoreCase));
             var staffBonus = headCoach?.Overall >= 82 ? 1 : 0;

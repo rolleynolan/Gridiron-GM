@@ -29,8 +29,11 @@ public static class PlayerStatisticsService
     }
 
     public static void RecoverOneDay(LeagueState league)
+        => RecoverDays(league, 1);
+
+    internal static void RecoverDays(LeagueState league, int days)
     {
-        if (league == null)
+        if (league == null || days <= 0)
             return;
 
         foreach (var team in league.Teams.Where(team => team != null))
@@ -44,8 +47,10 @@ public static class PlayerStatisticsService
                          .Where(player => player != null)
                          .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
                          .Select(group => group.First()))
-                player.Fatigue = Math.Max(0, Math.Clamp(player.Fatigue, 0, 100) - 4 - conditioningBonus);
+                player.Fatigue = (int)Math.Max(0L, Math.Clamp(player.Fatigue, 0, 100) - (long)days * (4 + conditioningBonus));
         }
+        foreach (var player in league.FreeAgents.Concat(league.Waivers.Select(w => w.Player)))
+            player.Fatigue = (int)Math.Max(0L, Math.Clamp(player.Fatigue, 0, 100) - (long)days * 4);
     }
 
     public static void ApplyRegularSeasonStats(LeagueState league, GameResult result)

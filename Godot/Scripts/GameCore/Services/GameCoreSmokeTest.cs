@@ -308,15 +308,15 @@ public static class GameCoreSmokeTest
                 "Depth chart should retain visible injury context while substituting an available backup.");
             var injuryGame = GameDayService.SimulateMatchup(contractLeague, "smoke-injury-game", contractTeam.TeamId, contractLeague.Teams.First(team => team.TeamId != contractTeam.TeamId).TeamId, 1, 1, "Preseason", "preseason", "Preseason Week 1", 0, 3, true);
             Require(injuryGame.BoxScore.PlayerStats.All(line => line.PlayerId != unavailablePlayer.PlayerId), "Unavailable players should not receive game stat lines.");
-            PlayerInjuryService.RecoverOneDay(contractLeague);
+            ScheduleService.AdvanceCalendarDate(contractLeague, DateTime.Parse(contractLeague.Calendar.CurrentDate, System.Globalization.CultureInfo.InvariantCulture).AddDays(1));
             Require(unavailablePlayer.CurrentInjury.DaysRemaining == 1, "Injury recovery should advance one day at a time.");
-            PlayerInjuryService.RecoverOneDay(contractLeague);
+            ScheduleService.AdvanceCalendarDate(contractLeague, DateTime.Parse(contractLeague.Calendar.CurrentDate, System.Globalization.CultureInfo.InvariantCulture).AddDays(1));
             Require(PlayerInjuryService.IsAvailableForGame(unavailablePlayer) && unavailablePlayer.InjuryHistory.Single().RecoveredOn == contractLeague.Calendar.CurrentDate, "Recovered players should become available and retain injury history.");
             var medicalDirector = contractTeam.Coaches.First(coach => string.Equals(coach.Role, "Medical Director", StringComparison.OrdinalIgnoreCase));
             medicalDirector.Overall = 85;
             var medicalRecoveryPlayer = contractTeam.Roster.First(player => player.PlayerId != unavailablePlayer.PlayerId);
             PlayerInjuryService.InjurePlayer(contractLeague, medicalRecoveryPlayer, "Ankle sprain", 2, "smoke-medical");
-            PlayerInjuryService.RecoverOneDay(contractLeague);
+            ScheduleService.AdvanceCalendarDate(contractLeague, DateTime.Parse(contractLeague.Calendar.CurrentDate, System.Globalization.CultureInfo.InvariantCulture).AddDays(1));
             Require(PlayerInjuryService.IsAvailableForGame(medicalRecoveryPlayer), "An elite Medical Director should remove at most one additional recovery day.");
             var conditioningCoach = contractTeam.Coaches.First(coach => string.Equals(coach.Role, "Strength & Conditioning Coach", StringComparison.OrdinalIgnoreCase));
             conditioningCoach.Overall = 85;
@@ -328,12 +328,12 @@ public static class GameCoreSmokeTest
             PlayerInjuryService.ApplyDeterministicGameInjuries(contractLeague, deterministicInjuryResult);
             Require(contractLeague.Teams.SelectMany(team => team.Roster).Any(player => player.CurrentInjury.IsActive && player.CurrentInjury.GameId == "a"), "Deterministic game injury generation should create an injury.");
             for (var recoveryDay = 0; recoveryDay < 14; recoveryDay++)
-                PlayerInjuryService.RecoverOneDay(contractLeague);
+                ScheduleService.AdvanceCalendarDate(contractLeague, DateTime.Parse(contractLeague.Calendar.CurrentDate, System.Globalization.CultureInfo.InvariantCulture).AddDays(1));
             var injuredPlayer = contractTeam.Roster.First(player => player.PlayerId != unavailablePlayer.PlayerId);
             PlayerInjuryService.InjurePlayer(contractLeague, injuredPlayer, "Knee sprain", 1, "smoke-ir");
             var irResult = new TransactionService(contractContext).MoveToInjuredReserve(injuredPlayer.PlayerId, contractTeam.TeamId, contractTestService);
             Require(irResult.Ok && irResult.Accepted && contractTeam.InjuredReserve.Count == 1, "Injured player should move to injured reserve.");
-            PlayerInjuryService.RecoverOneDay(contractLeague);
+            ScheduleService.AdvanceCalendarDate(contractLeague, DateTime.Parse(contractLeague.Calendar.CurrentDate, System.Globalization.CultureInfo.InvariantCulture).AddDays(1));
             var activateResult = new TransactionService(contractContext).ActivateFromInjuredReserve(injuredPlayer.PlayerId, contractTeam.TeamId, contractTestService);
             Require(activateResult.Ok && activateResult.Accepted && contractTeam.InjuredReserve.Count == 0, "Cleared injured-reserve player should activate into an open roster slot.");
             var practiceSquadPlayer = contractLeague.FreeAgents.First(player => player.Age <= 25);
@@ -1108,7 +1108,7 @@ public static class GameCoreSmokeTest
             Require(rolloverHistory.Ok && rolloverHistory.CurrentSeason.SeasonYear == context.ActiveLeague.SeasonYear && rolloverHistory.CurrentSeason.GamesPlayed == 0 && rolloverHistory.CareerSeasons.Any(stats => stats.SeasonYear == completedSeasonYear && stats.GamesPlayed > 0), "Rollover player history should present archived seasons separately from new live totals.");
             Require(rolloverPlayers.All(player => player.SeasonStats.GamesPlayed == 0), "New player season totals should start at zero after rollover.");
             Require(rolloverPlayers.All(player => player.Fatigue == 0), "Rollover should clear player fatigue.");
-            Require(rolloverPlayers.All(player => !player.CurrentInjury.IsActive && string.IsNullOrWhiteSpace(player.Injury)), "Rollover should clear active injuries.");
+            Require(rolloverPlayers.All(player => !player.CurrentInjury.IsActive && string.IsNullOrWhiteSpace(player.Injury)), "Short injuries should recover over the elapsed offseason dates.");
             Require(context.ActiveLeague.Teams.All(team => !team.TrainingCamp.FocusApplied && !team.TrainingCamp.RosterFinalized), "Rollover should reset training-camp decisions for the new season.");
             Require(context.ActiveLeague.Teams.All(team => team.TrainingCamp.Report.Positions.Count == 0), "Rollover should clear training-camp reports for the new season.");
             Require(context.ActiveLeague.Draft.UseShortDraftAnnouncements, "The user's shortened draft-announcement preference should persist into the next season.");

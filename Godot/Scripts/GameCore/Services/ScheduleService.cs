@@ -8,6 +8,16 @@ namespace GridironGM.GameCore.Services;
 
 public sealed class ScheduleService
 {
+    // All production date movement settles health before ownership/staff can change.
+    // Repeating a date, or presenting an older one, never awards recovery twice.
+    internal static void AdvanceCalendarDate(LeagueState league, DateTime target)
+    {
+        if (!PlayerInjuryService.TryDate(league.Calendar.CurrentDate, out var prior) || target.Date <= prior.Date) return;
+        PlayerInjuryService.NormalizeRecoveryPersistence(league, legacy: false);
+        league.Calendar.CurrentDate = PlayerInjuryService.FormatDate(target.Date);
+        PlayerStatisticsService.RecoverDays(league, (target.Date - prior.Date).Days);
+        PlayerInjuryService.RecoverThroughCurrentDate(league);
+    }
     private readonly GameCoreContext _context;
     public const string PostseasonPendingPhase = "Postseason Pending";
     public const string PostseasonPendingWeekLabel = "Postseason Pending";

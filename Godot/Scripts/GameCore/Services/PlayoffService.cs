@@ -194,6 +194,7 @@ public sealed class PlayoffService
             };
         }
 
+        AdvanceToRoundDate(league, 1);
         var simulatedGames = 0;
         foreach (var game in wildCardGames)
         {
@@ -413,6 +414,7 @@ public sealed class PlayoffService
             };
         }
 
+        AdvanceToRoundDate(league, 2);
         var simulatedGames = 0;
         foreach (var game in divisionalGames)
         {
@@ -607,6 +609,7 @@ public sealed class PlayoffService
             };
         }
 
+        AdvanceToRoundDate(league, 3);
         var simulatedGames = 0;
         foreach (var game in conferenceChampionshipGames)
         {
@@ -795,6 +798,7 @@ public sealed class PlayoffService
 
         var game = round.Games[0];
         NormalizePlayoffGame(game);
+        AdvanceToRoundDate(league, 4);
         var simulatedGames = 0;
         if (string.Equals(game.Status, "completed", StringComparison.OrdinalIgnoreCase)
             && !string.IsNullOrWhiteSpace(game.WinnerTeamId)
@@ -951,6 +955,7 @@ public sealed class PlayoffService
             SeasonYear = league.SeasonYear,
             GeneratedFromAbsoluteWeek = league.Calendar?.AbsoluteWeek ?? 0,
             GeneratedAtPhaseLabel = league.Calendar?.WeekLabel ?? ScheduleService.PostseasonPendingWeekLabel,
+            CalendarAnchorDate = league.Calendar?.CurrentDate ?? "",
             ConferenceBrackets = conferenceBrackets,
             LeagueChampionshipRound = new PlayoffRound(),
             LeagueChampionRecord = new LeagueChampionRecord(),
@@ -1195,6 +1200,21 @@ public sealed class PlayoffService
         game.Status = string.IsNullOrWhiteSpace(game.Status) ? "scheduled" : game.Status;
         game.WinnerTeamId ??= "";
         game.LoserTeamId ??= "";
+    }
+
+    private static void AdvanceToRoundDate(LeagueState league, int phaseWeek)
+    {
+        var bracket = league.PlayoffBracket;
+        if (!PlayerInjuryService.TryDate(bracket.CalendarAnchorDate, out var anchor))
+        {
+            if (!PlayerInjuryService.TryDate(league.Calendar.CurrentDate, out var current)) return;
+            // Old careers have no dated round anchor. Preserve their current date and
+            // start spacing future rounds from the most recently completed/started round.
+            var playedWeek = league.Results.Where(r => r.GameType == "playoffs").Select(r => r.PhaseWeek).DefaultIfEmpty(1).Max();
+            anchor = current.AddDays(-7 * (Math.Clamp(playedWeek, 1, 4) - 1));
+            bracket.CalendarAnchorDate = PlayerInjuryService.FormatDate(anchor);
+        }
+        ScheduleService.AdvanceCalendarDate(league, anchor.AddDays(7 * (phaseWeek - 1)));
     }
 
     private static void ApplyResultToPlayoffGame(PlayoffGame game, GameResult result)

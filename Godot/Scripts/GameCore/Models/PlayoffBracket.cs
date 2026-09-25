@@ -7,6 +7,7 @@ public sealed class PlayoffBracket
     public int SeasonYear { get; set; }
     public int GeneratedFromAbsoluteWeek { get; set; }
     public string GeneratedAtPhaseLabel { get; set; } = "";
+    public string CalendarAnchorDate { get; set; } = "";
     public List<PlayoffConferenceBracket> ConferenceBrackets { get; set; } = new();
     public PlayoffRound LeagueChampionshipRound { get; set; } = new();
     public LeagueChampionRecord LeagueChampionRecord { get; set; } = new();

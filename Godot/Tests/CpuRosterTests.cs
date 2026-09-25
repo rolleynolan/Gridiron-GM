@@ -410,7 +410,9 @@ public sealed class CpuRosterTests
         context.ActiveLeague.SeasonYear++;
         context.ActiveLeague.Calendar.Phase = "Preseason"; context.ActiveLeague.Calendar.AbsoluteWeek = 1;
         Assert.Equal(1, transactions.ExpireWaivers());
-        for (var day = 0; day < 21; day++) PlayerInjuryService.RecoverOneDay(context.ActiveLeague);
+        PlayerInjuryService.NormalizeRecoveryPersistence(context.ActiveLeague, legacy: false);
+        context.ActiveLeague.Calendar.CurrentDate = DateTime.Parse(context.ActiveLeague.Calendar.CurrentDate).AddDays(21).ToString("yyyy-MM-dd");
+        PlayerInjuryService.RecoverThroughCurrentDate(context.ActiveLeague);
         Assert.Empty(player.Injury);
         Assert.False(player.CurrentInjury.IsActive);
         Assert.Equal("Free Agent", player.Status);

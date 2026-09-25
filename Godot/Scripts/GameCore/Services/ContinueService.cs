@@ -126,9 +126,7 @@ public sealed class ContinueService
 
             var priorAbsoluteWeek = league.Calendar.AbsoluteWeek;
             var priorPhase = league.Calendar.Phase ?? "";
-            AdvanceOneDay(league.Calendar);
-            PlayerStatisticsService.RecoverOneDay(league);
-            PlayerInjuryService.RecoverOneDay(league);
+            AdvanceOneDay(league);
             daysAdvanced++;
             events.Add(new ContinueEvent
             {
@@ -724,8 +722,9 @@ public sealed class ContinueService
         };
     }
 
-    private static void AdvanceOneDay(CalendarState calendar)
+    private static void AdvanceOneDay(LeagueState league)
     {
+        var calendar = league.Calendar;
         ScheduleService.NormalizeCalendar(calendar);
         calendar.DayIndex++;
         if (calendar.DayIndex > 6)
@@ -736,7 +735,7 @@ public sealed class ContinueService
         }
 
         if (DateTime.TryParse(calendar.CurrentDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-            calendar.CurrentDate = date.AddDays(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            ScheduleService.AdvanceCalendarDate(league, date.AddDays(1));
 
         ScheduleService.NormalizeCalendar(calendar);
     }
@@ -916,7 +915,7 @@ public sealed class ContinueService
         league.Calendar.DayIndex = 0;
 
         if (DateTime.TryParse(league.Calendar.CurrentDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-            league.Calendar.CurrentDate = date.AddDays(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            ScheduleService.AdvanceCalendarDate(league, date.AddDays(1));
 
         ScheduleService.NormalizeCalendar(league.Calendar);
     }
