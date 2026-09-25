@@ -2,6 +2,36 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
+## Calendar-driven medical continuity — completed September 25, 2026
+
+Smallest complete outcome: injury recovery and ordinary fatigue recovery follow actual elapsed dates through the season, playoff rounds, offseason transitions, and rollover. A new season does not heal a long injury. Save/retry/pool movement must not duplicate recovery or overwrite history.
+
+- [x] Inspect health/calendar/roster/save boundaries and approved medical direction.
+- [x] Integrate dated recovery, playoff round spacing, offseason/rollover handoff, and additive save 37 migration.
+- [x] Direct continuity, recovery-date, reserve/market, save/retry, and calendar integration tests.
+- [x] Build, focused suite, full smoke, long-run diagnostic, and relevant performance verification.
+- [x] Documentation, limitations, and focused commits.
+
+Sequencing correction: the development continuation below cannot yet be implemented as a complete approved slice. BLUEPRINT's **Player DNA and career development → Audit status and implementation acceptance** explicitly requires numeric conversion, the training catalog, phase generation, skill-group effects, and trajectory distributions to be finalized before implementation; the catalog also awaits user review. This run selects medical calendar continuity instead of silently inventing those choices. Existing medical rates/catalog remain a bounded foundation; no new treatment or training choices are introduced.
+
+Implemented behavior:
+- `ScheduleService.AdvanceCalendarDate` is the common production boundary for elapsed-date recovery. Daily Continue, offseason phase transitions, playoff round simulation, and the preseason handoff use it. Same/older dates do not award recovery again. Ordinary fatigue recovery also covers free-agent and waiver pools, and time jumps apply the existing bounded daily rates without an unbounded day-by-day loop.
+- Each injury persists `RecoveryProcessedThrough`. Recovery uses actual elapsed days and the current owner's existing medical-staff rate; basic recovery remains available without a team or medical director. Calendar movement settles recovery before subsequent transactions/staff changes. Signings/releases preserve the injury checkpoint. Treatment progression never moves a user player out of IR or practice status automatically.
+- Recovery history records the actual completion date within a skipped interval, matching the injury's occurrence date, name, and game identity. An unrelated episode with the same empty game ID is not incorrectly completed. No treatment advances merely from opening a report, retrying a checkpoint, or loading a save.
+- Removed unconditional injury/fatigue clearing at rollover. Short injuries can recover during the actual offseason interval; a long injury remains active in the new season with the remaining time intact. Normal CPU reserve/emergency services still handle its roster consequences, and user IR activation remains explicit.
+- Playoff simulation previously left all rounds on the same calendar date. A persisted bracket date anchor now spaces rounds using the existing four `PhaseWeek` values (seven days apart), so rest and rehabilitation occur before the next round. Replays and partial-round retries retain the same target date. Older undated brackets anchor from the last played round/current date on their next simulation action, without moving the calendar on load.
+- Additive save **37** retains injury checkpoints and playoff anchors. Legacy active injuries start at the loaded date with unchanged remaining days and history, avoiding retroactive healing. No pro resolver/event-generation changes or college injury-rule changes were made.
+
+Validation passes **181 tests**, including twelve new cases for all five ownership pools, repeat/backward date handling, actual recovery dates, changing medical support after signing/release, episode matching, native save 36/37 continuity, offseason Continue fatigue/health, long-injury rollover and explicit user IR activation, and playoff timing/retry/reload. Production build has zero warnings/errors; full three-season GameCore smoke, editor import/startup, and `git diff --check` pass. Existing injury/history projections receive authoritative state without a presentation change.
+
+The diagnostic now reports active injuries and accepts `--cpu-roster-injury-stress`. This optional developer-only scenario applies one 540-day recovery to an available CPU quarterback during each camp through the existing injury service, then fails if rollover erases it. It does not alter production injury frequency or write a user save. Command: Godot `--headless --path Godot -- --cpu-roster-diagnostic --cpu-roster-seasons=15 --cpu-roster-injury-stress`.
+
+**15 stress seasons completed (2026–2040, entering 2041) in 92.3 seconds**, with annual disk reloads. All measured structural checks and Week 1/rollover starter checks passed, and every rollover retained the injected long recovery. The final state has one active injury, 5,010 free agents, 852 unsigned retirements in the completed year, 2,086 players observed unsigned for three or more years, and 48.1 recorded transactions per CPU club. Late year-end market counts were 5,015, 4,990, 4,946, and 5,010. The ordinary three-season diagnostic also passes in the full test suite. These are standard-world observations, not a universal injury/market balance guarantee.
+
+Isolated resolver benchmark: one game **3.416 ms / 1.80 MiB**, 16-game week **55.4 ms / 26.54 MiB**, 272-game season **829.0 ms / 445.54 MiB**, and 783 college games **105.1 ms / 8.84 MiB** cumulative allocations. Resolver timing is effectively unchanged from the preceding checkpoint; the 92.3-second endurance measurement includes calendar recovery, CPU work, and disk reloads. Implementation/test/diagnostic commit: `237ffa3`. The twelve pre-existing untracked sidecars are preserved.
+
+Remaining scope: this preserves the existing short-injury catalog and medical/conditioning rates; it does not yet implement delayed diagnosis, estimated recovery ranges, setbacks, limited medical clearance, permanent damage, rust, or snap limits. The offseason still advances through its existing coarse phase dates; this is not a full calendar/waiver-deadline redesign. The next approved medical slice is dated diagnosis/recovery reporting and clearance context through the existing injury/profile surfaces. Activity-based development remains deferred until its explicitly unreviewed choices are resolved.
+
 ## Unsigned-player career continuity — completed September 25, 2026
 
 Smallest complete outcome: the existing annual retirement lifecycle includes unsigned players, preserves their identity/history, and limits sustained market growth through deterministic career attrition. Keep draft declarations and every eligible UDFA available; measure long-run roster health before changing pipeline intake.
