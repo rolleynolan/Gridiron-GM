@@ -2,6 +2,45 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
+## Unsigned-player career continuity — completed September 25, 2026
+
+Smallest complete outcome: the existing annual retirement lifecycle includes unsigned players, preserves their identity/history, and limits sustained market growth through deterministic career attrition. Keep draft declarations and every eligible UDFA available; measure long-run roster health before changing pipeline intake.
+
+- [x] Inspect retirement, player development, market entry, transaction acquisition, and history/save boundaries.
+- [x] Integrate unsigned tenure, value/age-aware retirement, immutable player snapshots, and authoritative retirement transactions.
+- [x] Add save 36 migration without retroactive retirement or replay; preserve saved depth order.
+- [x] Direct determinism, history, acquisition-reset, migration, and replay tests.
+- [x] Extended normal-calendar roster/market diagnostic and required build/smoke validation.
+- [x] Record measured balance limits, next continuation, and focused commits.
+
+Implemented in `47b39b4`:
+- The annual retirement pass previously visited only active rosters, leaving unsigned players in the market indefinitely. It now assesses uniquely owned, uncontracted free agents as well. Pending waivers and contracted reserves do not enter the unsigned assessment. Existing team-player retirement eligibility and starter-count protections remain.
+- `UnsignedSinceSeasonYear` records the first observed annual assessment of the current spell without a team. Successful active or practice-squad acquisition resets it; declined offers do not. Young entrants receive two observed cycles before market-related attrition. Subsequent chances rise with time unsigned, using the shared CPU evaluator's bounded future value to retain stronger opportunities longer. Veteran age-related retirement still applies. Rates are deterministic tuning constants, not a fixed pool-size cap or a new visible player rating.
+- `RetirementService` evaluates and snapshots; `TransactionService` removes retired identities from incompatible ownership pools and invitations, refreshes cap room, removes only their depth entries, and records one concise retirement transaction. This also fixes the previous retirement pass's unconditional reordering of every team's saved depth, including the user's. Stable team/player order and the existing deterministic year/identity roll drive decisions. A completed annual record prevents repeat assessments, tenure changes, and duplicate ledger entries.
+- New retirement records retain a detached full player snapshot: identity, college and pro statistics, development, health, and the contract at retirement. Existing history/record-book projections continue using their established historical fields. Retired players cannot be acquired from the market. This preserves information needed for future rights/return work without implementing comebacks or changing finance rules.
+- Additive save **36** persists unsigned tenure and new retirement snapshots. Older saves begin observing unsigned tenure in the loaded season; they do not retire anyone on load or replay a completed retirement pass. Old historical records remain valid without inventing missing player attributes. No college declaration, draft intake, UDFA entry, game resolver, or UI layout was changed.
+
+Validation: **169 tests passed**, including nine new direct cases for collection-order determinism, replay, entry protection/value sensitivity, snapshot isolation and career record retention, saved depth preservation, retained contract data, active/practice acquisition reset, invalid ownership/contract safeguards, and native save 35/36 continuity. Production build has zero warnings/errors. Full three-season GameCore smoke (including college, history, save/load and the saved game-day flow), Godot editor import, startup, and `git diff --check` pass. No presentation change required a separate UI smoke.
+
+Extended command: Godot `--headless --path Godot -- --cpu-roster-diagnostic --cpu-roster-seasons=15` (default remains three; allowed range 1–30). The report now also counts retired identities still owned, annual unsigned retirements, players unsigned for three or more years, and oldest market age. Retired ownership is a structural failure; population sizes remain balance observations.
+
+The normal-calendar **15-season run completed 2026–2040, entering 2041, in 93.8 seconds**, with annual disk reloads. Every measured checkpoint had zero structural failures; all Week 1 and rollover checks had zero missing starters/unresolved clubs, and the existing pregame guard remained active throughout. Selected year-end observations:
+
+| Completed season | Free agents entering next season | Unsigned retirements | Recorded transactions per CPU club |
+| --- | ---: | ---: | ---: |
+| 2026 | 557 | 7 | 37.5 |
+| 2028 | 2,500 | 45 | 45.5 |
+| 2030 | 3,567 | 347 | 38.6 |
+| 2035 | 4,839 | 719 | 44.4 |
+| 2037 | 5,035 | 843 | 45.2 |
+| 2038 | 5,035 | 892 | 45.7 |
+| 2039 | 4,988 | 903 | 45.9 |
+| 2040 | 5,045 | 879 | 49.4 |
+
+The final market contains 2,091 players observed unsigned for at least three years; its oldest player is 38. This shows a late-run population plateau for the standard world, not proof of ideal talent distribution or balance across all worlds. Transaction averages now include team-player retirements. The isolated unchanged resolver benchmark passes at **827.6 ms / 444.97 MiB** for 272 pro games, **65.4 ms / 26.54 MiB** for a 16-game week, **4.354 ms / 1.80 MiB** for one game, and **109.4 ms / 8.84 MiB** for 783 college games. Calendar work and disk persistence are represented by the endurance timing, not those resolver samples.
+
+Remaining limits and next substantial continuation: the current shared annual development model still improves unsigned players without tracking training activity, and the market remains large. Implement the blueprint's activity-based development/readiness foundation across roster, practice, and unsigned states before deeper CPU franchise strategy, and retain long-run market-quality diagnostics while doing so. This slice does not add retirement-return negotiations, reinstatement, Reserve/Retired accounting, reserve-player retirement selection, or reconstruct old retired identities; those require their own rights/rules slice. No new user-design decision blocks this completed unsigned-career foundation. The twelve pre-existing untracked sidecars remain untouched.
+
 ## CPU roster lifecycle — completed September 25, 2026
 
 Smallest complete outcome: CPU clubs assess, retain, acquire, draft, cut, and repair rosters through the existing rules/transaction services from offseason through Week 1, then sustain legal rosters through several seasons. The user club is excluded.
