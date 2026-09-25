@@ -5011,7 +5011,7 @@ public partial class DashboardController : Control
         ApplyPendingTradeFinderAssets();
         var evaluation = new FrontOfficeEvaluationService(_nativeGameCoreContext).EvaluateTeam(partnerId);
         _tradePartnerEvaluation.Text = evaluation.Ok
-            ? $"COUNTERPARTY FRONT OFFICE REPORT | {evaluation.TeamName}\nCap room: {GameCoreStateHelper.FormatCapRoom(evaluation.CapRoom)} | Roster: {evaluation.RosterSize}/53 | Avg age: {evaluation.AverageAge} | Avg potential: {evaluation.AveragePotential} | Expiring: {evaluation.ExpiringContracts} | Picks: {evaluation.DraftPicksAvailable}\n{evaluation.Rationale}"
+            ? $"COUNTERPARTY ROSTER REPORT | {evaluation.TeamName}\nCap room: {GameCoreStateHelper.FormatCapRoom(evaluation.CapRoom)} | Roster: {evaluation.RosterSize}/53 | Avg age: {evaluation.AverageAge} | Expiring: {evaluation.ExpiringContracts} | Picks: {evaluation.DraftPicksAvailable}\n{evaluation.Rationale}"
             : evaluation.Error;
         UpdateTradePackagePreview();
     }

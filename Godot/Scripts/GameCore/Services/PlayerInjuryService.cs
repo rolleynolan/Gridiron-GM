@@ -113,6 +113,8 @@ public static class PlayerInjuryService
             .SelectMany(team => (team.Roster ?? new List<PlayerState>())
                 .Concat(team.InjuredReserve ?? new List<PlayerState>())
                 .Concat(team.PracticeSquad ?? new List<PlayerState>()))
+            .Concat(league.FreeAgents ?? new List<PlayerState>())
+            .Concat((league.Waivers ?? new List<WaiverClaimState>()).Select(waiver => waiver.Player))
             .Where(player => player != null)
             .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First());

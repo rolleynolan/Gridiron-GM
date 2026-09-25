@@ -217,6 +217,8 @@ public sealed class PlayoffService
             }
             else
             {
+                if (!new CpuRosterManagementService(_context).PrepareForGame(game.GameId, game.HomeTeamId, game.AwayTeamId, out var rosterError))
+                    return new WildCardSimulationResult { Ok = false, Error = rosterError };
                 result = GameDayService.SimulateMatchup(
                     league,
                     game.GameId,
@@ -434,6 +436,8 @@ public sealed class PlayoffService
             }
             else
             {
+                if (!new CpuRosterManagementService(_context).PrepareForGame(game.GameId, game.HomeTeamId, game.AwayTeamId, out var rosterError))
+                    return new PlayoffRoundSimulationResult { Ok = false, Error = rosterError };
                 result = GameDayService.SimulateMatchup(
                     league,
                     game.GameId,
@@ -626,6 +630,8 @@ public sealed class PlayoffService
             }
             else
             {
+                if (!new CpuRosterManagementService(_context).PrepareForGame(game.GameId, game.HomeTeamId, game.AwayTeamId, out var rosterError))
+                    return new PlayoffRoundSimulationResult { Ok = false, Error = rosterError };
                 result = GameDayService.SimulateMatchup(
                     league,
                     game.GameId,
@@ -809,6 +815,8 @@ public sealed class PlayoffService
             }
             else
             {
+                if (!new CpuRosterManagementService(_context).PrepareForGame(game.GameId, game.HomeTeamId, game.AwayTeamId, out var rosterError))
+                    return new PlayoffRoundSimulationResult { Ok = false, Error = rosterError };
                 result = GameDayService.SimulateMatchup(
                     league,
                     game.GameId,

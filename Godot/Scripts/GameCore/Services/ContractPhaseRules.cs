@@ -16,6 +16,7 @@ public static class ContractPhaseRules
         var isExclusiveNegotiation = string.Equals(phase, ScheduleService.ExclusiveNegotiationPendingPhase, StringComparison.OrdinalIgnoreCase);
         var isFranchiseTag = string.Equals(phase, ScheduleService.FranchiseTagPendingPhase, StringComparison.OrdinalIgnoreCase);
         var isInSeason = string.Equals(phase, "Preseason", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(phase, ScheduleService.PostseasonPendingPhase, StringComparison.OrdinalIgnoreCase)
             || string.Equals(phase, "Regular Season", StringComparison.OrdinalIgnoreCase);
         var isTrainingCamp = string.Equals(phase, ScheduleService.TrainingCampPendingPhase, StringComparison.OrdinalIgnoreCase);
         var canSign = rosterOpen && (isFreeAgency || isTrainingCamp || isInSeason);
@@ -100,8 +101,7 @@ public static class ContractPhaseRules
     }
 
     private static bool IsRosterLocked(string phase)
-        => string.Equals(phase, ScheduleService.PostseasonPendingPhase, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(phase, ScheduleService.SeasonCompletePhase, StringComparison.OrdinalIgnoreCase)
+        => string.Equals(phase, ScheduleService.SeasonCompletePhase, StringComparison.OrdinalIgnoreCase)
             || string.Equals(ScheduleService.GetOffseasonPhaseKey(phase), ScheduleService.OffseasonPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
             || string.Equals(ScheduleService.GetOffseasonPhaseKey(phase), ScheduleService.StaffCarouselPendingPhaseKey, StringComparison.OrdinalIgnoreCase)
             || string.Equals(ScheduleService.GetOffseasonPhaseKey(phase), ScheduleService.RetirementPendingPhaseKey, StringComparison.OrdinalIgnoreCase)

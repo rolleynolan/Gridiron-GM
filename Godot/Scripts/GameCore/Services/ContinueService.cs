@@ -56,11 +56,13 @@ public sealed class ContinueService
             maxDays = 1;
 
         _scheduleService.RefreshStatuses(league);
+        new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
         if (string.Equals(league.Calendar?.Phase, ScheduleService.PostseasonPendingPhase, StringComparison.OrdinalIgnoreCase))
             return ContinuePlayoffsOneRound();
         if (string.Equals(league.Calendar?.Phase, ScheduleService.SeasonCompletePhase, StringComparison.OrdinalIgnoreCase))
         {
             MoveLeagueToOffseasonPending(league);
+            new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
             return BuildStop(
                 league,
                 true,
@@ -136,6 +138,7 @@ public sealed class ContinueService
 
             _scheduleService.RefreshStatuses(league);
             var expiredWaivers = new TransactionService(_context).ExpireWaivers();
+            new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
             if (expiredWaivers > 0)
             {
                 events.Add(new ContinueEvent
@@ -753,7 +756,7 @@ public sealed class ContinueService
 
         if (ScheduleService.IsTerminalOffseasonPlaceholderPhase(currentPhase))
         {
-            var trainingCampCpuRepairs = new CpuRosterManagementService(_context).RepairCpuStarterShortages();
+            var trainingCampCpuRepairs = new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
             var cpuCuts = new RosterConstructionService(_context).ProcessCpuTrainingCampCuts();
             var userRoster = _rosterService.GetTeamRoster();
             if (!userRoster.Ok || !userRoster.RosterStatus.IsValid)
@@ -830,6 +833,7 @@ public sealed class ContinueService
         {
             var transitionPhase = ScheduleService.GetNextOffseasonPlaceholderPhase(currentPhase);
             MoveLeagueToOffseasonPhase(league, transitionPhase);
+            new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
             return BuildStop(
                 league,
                 true,
@@ -876,7 +880,7 @@ public sealed class ContinueService
             : 0;
         var openingFreeAgency = string.Equals(nextPhaseKey, ScheduleService.FreeAgencyPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
         var openingDraft = string.Equals(nextPhaseKey, ScheduleService.DraftPendingPhaseKey, StringComparison.OrdinalIgnoreCase);
-        var cpuRepairs = openingFreeAgency ? new CpuRosterManagementService(_context).RepairCpuStarterShortages() : new CpuRosterRepairResult();
+        var cpuRepairs = new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
         if (openingDraft)
             new CollegeDraftPipelineService(_context).FinalizeCurrentDraftClass();
         if (openingDraft)

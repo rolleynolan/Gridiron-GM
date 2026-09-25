@@ -30,4 +30,18 @@ public static class DepthChartRules
 
     public static int GetRequiredStarters(string position)
         => RequiredStartersByPosition.TryGetValue(position ?? "", out var value) ? value : 1;
+
+    // The lightweight college catalog has OT/OG. New pro entrants receive one stable,
+    // concrete position; this grants no secondary-position or position-switch eligibility.
+    public static string ProEntryPosition(string position, string playerId)
+    {
+        uint hash = 2166136261;
+        foreach (var character in playerId ?? "") hash = unchecked((hash ^ character) * 16777619);
+        return position?.ToUpperInvariant() switch
+        {
+            "OT" => hash % 2 == 0 ? "LT" : "RT",
+            "OG" => hash % 2 == 0 ? "LG" : "RG",
+            _ => position ?? "",
+        };
+    }
 }

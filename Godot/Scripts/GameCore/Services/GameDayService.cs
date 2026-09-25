@@ -142,6 +142,8 @@ public sealed class GameDayService
             };
         }
 
+        if (!new CpuRosterManagementService(_context).PrepareForGame(game.GameId, game.HomeTeamId, game.AwayTeamId, out var rosterError))
+            return new GameResultResponse { Ok = false, Error = rosterError };
         foreach (var team in league.Teams.Where(t => t.TeamId == game.HomeTeamId || t.TeamId == game.AwayTeamId))
             if (!team.Coaches.Any(c => c.Role == "Head Coach"))
                 return new GameResultResponse { Ok = false, Error = $"{team.Name} must appoint a Head Coach before playing." };

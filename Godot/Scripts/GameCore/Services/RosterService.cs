@@ -126,7 +126,7 @@ public sealed class RosterService
         };
     }
 
-    private static int GetRosterLimit(LeagueState league)
+    public static int GetRosterLimit(LeagueState league)
     {
         var phase = league?.Calendar?.Phase ?? "";
         return string.Equals(phase, ScheduleService.DraftPendingPhase, StringComparison.OrdinalIgnoreCase)

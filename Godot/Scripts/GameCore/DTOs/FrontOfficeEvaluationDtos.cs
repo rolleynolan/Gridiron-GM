@@ -11,7 +11,6 @@ public sealed class FrontOfficeEvaluationResponse
     public int RosterSize { get; set; }
     public decimal CapRoom { get; set; }
     public int AverageAge { get; set; }
-    public int AveragePotential { get; set; }
     public int ExpiringContracts { get; set; }
     public int DraftPicksAvailable { get; set; }
     public List<string> PositionNeeds { get; set; } = new();

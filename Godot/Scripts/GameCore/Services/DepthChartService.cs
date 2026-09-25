@@ -110,6 +110,7 @@ public sealed class DepthChartService
                 .OrderByDescending(PlayerInjuryService.IsAvailableForGame)
                 .ThenByDescending(player => player.Overall)
                 .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(player => player.PlayerId, StringComparer.Ordinal)
                 .Select(player => player.PlayerId)
                 .ToList();
             if (team.DepthChartLockedPositions.Contains(position, StringComparer.OrdinalIgnoreCase)
@@ -268,6 +269,7 @@ public sealed class DepthChartService
         var output = new List<DepthChartPositionDto>();
         var positions = team.Roster
             .Select(player => player.Position)
+            .Concat(DepthChartRules.RequiredStartersByPosition.Keys)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(position => FootballPositionOrder.GetSortOrder(position))
             .ThenBy(position => position, StringComparer.OrdinalIgnoreCase);
@@ -280,6 +282,7 @@ public sealed class DepthChartService
                     .Where(player => string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(player => player.Overall)
                     .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(player => player.PlayerId, StringComparer.Ordinal)
                     .Select(player => player.PlayerId)
                     .ToList();
 

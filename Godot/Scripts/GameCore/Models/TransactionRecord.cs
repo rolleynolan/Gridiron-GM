@@ -4,6 +4,7 @@ public sealed class TransactionRecord
 {
     public string TransactionId { get; set; } = "";
     public int SeasonYear { get; set; }
+    public int AbsoluteWeek { get; set; }
     public string DateLabel { get; set; } = "";
     public string Phase { get; set; } = "";
     public string Type { get; set; } = "";

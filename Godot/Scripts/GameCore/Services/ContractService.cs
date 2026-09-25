@@ -24,7 +24,7 @@ public sealed class ContractService
     public decimal GetCapRoom(TeamState team)
     {
         var league = _context.ActiveLeague;
-        return Math.Max(0m, (league?.SalaryCap ?? LeagueState.DefaultSalaryCap) - GetCommittedSalary(team));
+        return (league?.SalaryCap ?? LeagueState.DefaultSalaryCap) - GetCommittedSalary(team);
     }
 
     public decimal GetRequiredAnnualSalary(PlayerState player, TeamState team)
@@ -142,7 +142,7 @@ public sealed class ContractService
             return;
 
         foreach (var team in league.Teams.Where(team => team != null))
-            team.CapRoom = Math.Max(0m, league.SalaryCap - GetCommittedSalary(team));
+            team.CapRoom = league.SalaryCap - GetCommittedSalary(team);
     }
 
     public static void MigrateLegacyContracts(LeagueState league)

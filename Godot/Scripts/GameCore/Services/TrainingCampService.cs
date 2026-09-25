@@ -71,6 +71,7 @@ public sealed class TrainingCampService
             .Where(PlayerInjuryService.IsAvailableForGame)
             .OrderBy(player => player.Overall)
             .ThenBy(player => player.Age)
+            .ThenBy(player => player.PlayerId, StringComparer.Ordinal)
             .Take(3)
             .ToList();
         if (players.Count == 0)

@@ -783,6 +783,7 @@ public sealed class GameCoreSaveService
             league.Schedule = LeagueBootstrapService.BuildDeterministicSchedule(league.Teams);
 
         ScheduleService.NormalizeCalendar(league.Calendar);
+        CpuRosterManagementService.NormalizePersistence(league, league.SaveVersion < 35);
         league.SaveVersion = LeagueState.CurrentSaveVersion;
 
         var context = new GameCoreContext { ActiveLeague = league };

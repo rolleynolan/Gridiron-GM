@@ -38,6 +38,10 @@ public sealed class SeasonRolloverService
             message = "Choose a training-camp focus and finalize the legal roster before starting the season.";
             return false;
         }
+        var cpu = new CpuRosterManagementService(_context);
+        cpu.ProcessCurrentCheckpoint();
+        foreach (var team in league.Teams.Where(team => team.TeamId != league.UserTeamId))
+            if (!cpu.PrepareForGame($"opening-{league.SeasonYear + 1}", team.TeamId, team.TeamId, out message)) return false;
 
         var useShortDraftAnnouncements = league.Draft?.UseShortDraftAnnouncements == true;
         var completedCollegeUniverse = league.CollegeUniverse;
@@ -76,6 +80,7 @@ public sealed class SeasonRolloverService
         };
         new ContractService(_context).RefreshCapRoom(league);
         new ScheduleService(_context).RefreshStatuses(league);
+        new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
         message = $"Season {league.SeasonYear} preseason has begun.";
         return true;
     }
@@ -124,6 +129,7 @@ public sealed class SeasonRolloverService
             .Concat(league.Teams.SelectMany(team => team?.InjuredReserve ?? Enumerable.Empty<PlayerState>()))
             .Concat(league.Teams.SelectMany(team => team?.PracticeSquad ?? Enumerable.Empty<PlayerState>()))
             .Concat(league.FreeAgents)
+            .Concat(league.Waivers.Select(waiver => waiver.Player))
             .Where(player => player != null)
             .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First());

@@ -51,7 +51,7 @@ public sealed class TradeMarketService
         var transactions = new TransactionService(_context);
         var contracts = new ContractService(_context);
         var candidates = new List<(TradeMarketOfferState Offer, double Ratio)>();
-        foreach (var partner in league.Teams.Where(team => team != null && !string.Equals(team.TeamId, user.TeamId, StringComparison.OrdinalIgnoreCase)))
+        foreach (var partner in league.Teams.Where(team => team != null && !string.Equals(team.TeamId, user.TeamId, StringComparison.OrdinalIgnoreCase)).OrderBy(team => team.TeamId, StringComparer.Ordinal))
         {
             var report = new FrontOfficeEvaluationService(_context).EvaluateTeam(partner.TeamId);
             var offeredPositions = players.Select(id => user.Roster.First(player => string.Equals(player.PlayerId, id, StringComparison.OrdinalIgnoreCase)).Position).ToList();
@@ -87,6 +87,8 @@ public sealed class TradeMarketService
             if (bestPickNumber == 0)
             {
                 foreach (var candidate in partner.Roster
+                             .Where(player => FrontOfficeEvaluationService.CanRemove(partner, player)
+                                 && !FrontOfficeEvaluationService.IsProtectedStarter(partner, player))
                              .Where(player => string.IsNullOrWhiteSpace(state.RequestedPosition) || PositionsMatch(player.Position, state.RequestedPosition))
                              .OrderByDescending(player => player.Overall)
                              .ThenBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase))

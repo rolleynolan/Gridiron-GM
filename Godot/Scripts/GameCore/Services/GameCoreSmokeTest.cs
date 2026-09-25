@@ -263,11 +263,12 @@ public static class GameCoreSmokeTest
             Require(finalizedClaim.Ok && finalizedClaim.Accepted && claimTeam.Roster.Any(player => player.PlayerId == waiverPlayer.PlayerId) && !claimTeam.Roster.Contains(conditionalReleasePlayer) && contractLeague.FreeAgents.Contains(conditionalReleasePlayer) && !contractLeague.Waivers.Any(waiver => waiver.Player.PlayerId == waiverPlayer.PlayerId), "Final confirmation should atomically execute the conditional release and waiver transfer.");
             Require(contractLeague.Transactions.Any(transaction => transaction.Type == "player_released" && transaction.PlayerId == conditionalReleasePlayer.PlayerId), "A finalized conditional waiver release should create a transaction record.");
             var queuedWaiverPlayer = contractTeam.Roster.First();
+            queuedWaiverPlayer.Overall = 99; // A worthwhile acquisition when the next CPU re-evaluates confirmation.
             Require(waiverTransactions.PlaceOnWaivers(queuedWaiverPlayer.PlayerId, contractTeam.TeamId, contractTestService).Accepted, "Second waiver placement should succeed for queue validation.");
             contractLeague.Waivers.Single(waiver => waiver.Player.PlayerId == queuedWaiverPlayer.PlayerId).Claims.Clear();
             var cancelledConditionalRelease = claimTeam.Roster.First(player => player.PlayerId != waiverPlayer.PlayerId);
             var nextClaimTeam = contractLeague.Teams.First(team => team.TeamId == waiverPriority[1]);
-            var nextConditionalRelease = nextClaimTeam.Roster.First();
+            var nextConditionalRelease = FrontOfficeEvaluationService.CutCandidates(nextClaimTeam, queuedWaiverPlayer).First();
             Require(waiverTransactions.SubmitWaiverClaim(queuedWaiverPlayer.PlayerId, claimTeam.TeamId, contractTestService, cancelledConditionalRelease.PlayerId).Accepted, "User queue entry should succeed for cancellation validation.");
             Require(waiverTransactions.SubmitWaiverClaim(queuedWaiverPlayer.PlayerId, nextClaimTeam.TeamId, contractTestService, nextConditionalRelease.PlayerId).Accepted, "A competing CPU queue entry should persist before resolution.");
             contractLeague.Calendar.AbsoluteWeek++;

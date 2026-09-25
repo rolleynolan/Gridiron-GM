@@ -24,6 +24,8 @@ public sealed class LiveGameSessionService
             return league.ActiveLiveGameSession.GameId == game.GameId ? Snapshot(league.ActiveLiveGameSession, includeResult: true, includeTimeline: true) : Fail("Another live game is already in progress.");
         if (game.AbsoluteWeek != league.Calendar.AbsoluteWeek || game.DayIndex != league.Calendar.DayIndex)
             return Fail("Advance to the scheduled game day before starting a live game.");
+        if (!new CpuRosterManagementService(_context).PrepareForGame(game.GameId, game.HomeTeamId, game.AwayTeamId, out var rosterError))
+            return Fail(rosterError);
         foreach (var team in league.Teams.Where(t => t.TeamId == game.HomeTeamId || t.TeamId == game.AwayTeamId))
             if (!team.Coaches.Any(c => c.Role == "Head Coach")) return Fail($"{team.Name} must appoint a Head Coach before playing.");
         league.ActiveLiveGameSession = new LiveGameSessionState

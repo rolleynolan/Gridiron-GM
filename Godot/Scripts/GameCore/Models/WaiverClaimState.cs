@@ -8,6 +8,7 @@ public sealed class WaiverClaimState
     public int ExpiresAbsoluteWeek { get; set; }
     public string PendingClaimTeamId { get; set; } = "";
     public bool PendingConfirmation { get; set; }
+    public System.Collections.Generic.List<string> ResolutionOrder { get; set; } = new();
     public string ConditionalReleasePlayerId { get; set; } = "";
     public System.Collections.Generic.List<string> DeclinedTeamIds { get; set; } = new();
     public System.Collections.Generic.List<WaiverClaimEntryState> Claims { get; set; } = new();

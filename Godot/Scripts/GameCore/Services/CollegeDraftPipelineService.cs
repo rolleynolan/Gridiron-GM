@@ -58,7 +58,7 @@ public sealed class CollegeDraftPipelineService
                     CollegeTeamId = player.TeamId,
                     College = team?.Name ?? "",
                     Name = player.Name,
-                    Position = player.Position,
+                    Position = Utilities.DepthChartRules.ProEntryPosition(player.Position, player.PlayerId),
                     Overall = player.Overall,
                     Potential = player.Potential,
                     Age = player.Age,

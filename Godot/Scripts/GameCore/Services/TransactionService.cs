@@ -17,13 +17,14 @@ public sealed class TransactionService
         _context = context;
     }
 
-    public ContractTransactionResult SignFreeAgent(string playerId, string teamId, ContractOffer offer, ContractService contracts, string transactionRationale = null)
+    public ContractTransactionResult SignFreeAgent(string playerId, string teamId, ContractOffer offer, ContractService contracts, string transactionRationale = null, string conditionalReleasePlayerId = null)
     {
         var league = _context.ActiveLeague;
         var team = ResolveTeam(league, teamId);
         var player = league?.FreeAgents?.FirstOrDefault(candidate => SameId(candidate?.PlayerId, playerId));
         if (team == null || player == null)
             return Failure("Team or free agent was not found.");
+        if (!HasUniqueOwnership(league, player.PlayerId)) return Failure("Player ownership is inconsistent.");
         if (!ContractPhaseRules.CanSignFreeAgent(league, player, out var phaseError))
             return Failure(phaseError);
         if (!IsValidOffer(offer))
@@ -33,19 +34,26 @@ public sealed class TransactionService
             return Failure("Undrafted rookie contracts require a three-year term.");
 
         var requiredSalary = GetAdjustedRequirement(league, player, team, contracts);
-        var capRoom = contracts.GetCapRoom(team);
+        var release = string.IsNullOrWhiteSpace(conditionalReleasePlayerId) ? null : team.Roster.FirstOrDefault(p => SameId(p.PlayerId, conditionalReleasePlayerId));
+        if (!string.IsNullOrWhiteSpace(conditionalReleasePlayerId) && release == null) return Failure("The conditional release is no longer on this roster.");
+        var capRoom = contracts.GetCapRoom(team) + Math.Max(0m, release?.Contract?.AnnualSalary ?? 0m);
         if (offer.AnnualSalary > capRoom)
             return new ContractTransactionResult { Ok = false, Message = "Offer exceeds available cap room.", RequiredAnnualSalary = requiredSalary, CapRoomAfterSigning = capRoom };
         if (offer.AnnualSalary < requiredSalary || offer.GuaranteedSalary < offer.AnnualSalary * 0.15m)
             return new ContractTransactionResult { Ok = true, Accepted = false, Message = "The player declined the offer.", RequiredAnnualSalary = requiredSalary, CapRoomAfterSigning = capRoom };
-        if (team.Roster.Count >= RosterService.RosterLimit)
-            return Failure($"Roster is full at {RosterService.RosterLimit} players. Release a player before signing.");
+        if (team.Roster.Count - (release == null ? 0 : 1) >= RosterService.GetRosterLimit(league))
+            return Failure($"Roster is full at {RosterService.GetRosterLimit(league)} players. Release a player before signing.");
+
+        // All parts are validated above. No rejected offer can execute its attached release.
+        if (release != null)
+            ReleasePlayer(release.PlayerId, team.TeamId, contracts, $"Conditional release for {player.Name}. {transactionRationale}");
 
         player.Contract = BuildContract(league, offer, isUndraftedRookie ? "Undrafted Rookie Contract" : "Free Agent Signing");
         player.Status = "Active";
         player.Morale = Math.Clamp(player.Morale + 6, 0, 100);
         player.MoraleTrend = "Improving";
         team.Roster.Add(player);
+        AddToDepthChart(team, player);
         league.FreeAgents.Remove(player);
         league.RookieMinicamp?.InvitedPlayerIds?.RemoveAll(id => SameId(id, player.PlayerId));
         InvalidateTrainingCampFinalization(league, team);
@@ -57,17 +65,19 @@ public sealed class TransactionService
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Free agent signed.", RequiredAnnualSalary = requiredSalary, CapRoomAfterSigning = team.CapRoom };
     }
 
-    public ContractTransactionResult ReleasePlayer(string playerId, string teamId, ContractService contracts)
+    public ContractTransactionResult ReleasePlayer(string playerId, string teamId, ContractService contracts, string transactionRationale = null)
     {
         var league = _context.ActiveLeague;
         var team = ResolveTeam(league, teamId);
-        var player = team?.Roster?.FirstOrDefault(candidate => SameId(candidate?.PlayerId, playerId));
+        var player = team == null ? null : team.Roster.Concat(team.InjuredReserve).Concat(team.PracticeSquad).FirstOrDefault(candidate => SameId(candidate?.PlayerId, playerId));
         if (team == null || player == null)
             return Failure("Team or rostered player was not found.");
         if (!CanMutateRoster(league, out var phaseError))
             return Failure(phaseError);
 
         team.Roster.Remove(player);
+        team.InjuredReserve.Remove(player);
+        team.PracticeSquad.Remove(player);
         RemoveFromDepthChart(team, player.PlayerId);
         player.Status = "Free Agent";
         player.Morale = Math.Clamp(player.Morale - 8, 0, 100);
@@ -76,7 +86,7 @@ public sealed class TransactionService
         league.FreeAgents.Add(player);
         InvalidateTrainingCampFinalization(league, team);
         contracts.RefreshCapRoom(league);
-        Record(league, "player_released", team, player, "Released to free agency.");
+        Record(league, "player_released", team, player, $"Released to free agency. {transactionRationale}".Trim());
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Player released to free agency.", CapRoomAfterSigning = team.CapRoom };
     }
 
@@ -126,7 +136,7 @@ public sealed class TransactionService
         };
     }
 
-    public ContractTransactionResult ReSignPlayer(string playerId, string teamId, ContractOffer offer, ContractService contracts)
+    public ContractTransactionResult ReSignPlayer(string playerId, string teamId, ContractOffer offer, ContractService contracts, string transactionRationale = null)
     {
         var league = _context.ActiveLeague;
         var team = ResolveTeam(league, teamId);
@@ -150,7 +160,7 @@ public sealed class TransactionService
         player.Morale = Math.Clamp(player.Morale + 5, 0, 100);
         player.MoraleTrend = "Improving";
         contracts.RefreshCapRoom(league);
-        Record(league, "contract_extended", team, player, $"{offer.Years}-year extension at {offer.AnnualSalary:0} annually.");
+        Record(league, "contract_extended", team, player, $"{offer.Years}-year extension at {offer.AnnualSalary:0} annually. {transactionRationale}".Trim());
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Player re-signed.", RequiredAnnualSalary = requiredSalary, CapRoomAfterSigning = team.CapRoom };
     }
 
@@ -199,13 +209,14 @@ public sealed class TransactionService
             return 0;
 
         var expired = 0;
-        foreach (var team in league.Teams.Where(team => team != null))
+        foreach (var team in league.Teams.Where(team => team != null).OrderBy(team => team.TeamId, StringComparer.Ordinal))
         {
-            foreach (var player in team.Roster.ToList())
+            foreach (var player in team.Roster.Concat(team.InjuredReserve).Concat(team.PracticeSquad).OrderBy(p => p.PlayerId, StringComparer.Ordinal).ToList())
             {
                 if (player?.Contract == null || player.Contract.YearsRemaining <= 0)
                     continue;
-                if (string.Equals(player.Contract.ContractType, "Franchise Tag", StringComparison.OrdinalIgnoreCase)
+                if ((string.Equals(player.Contract.ContractType, "Franchise Tag", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(player.Contract.ContractType, "Extension", StringComparison.OrdinalIgnoreCase))
                     && player.Contract.SignedSeason == league.SeasonYear)
                     continue;
 
@@ -214,6 +225,8 @@ public sealed class TransactionService
                     continue;
 
                 team.Roster.Remove(player);
+                team.InjuredReserve.Remove(player);
+                team.PracticeSquad.Remove(player);
                 RemoveFromDepthChart(team, player.PlayerId);
                 player.Status = "Free Agent";
                 var wasFranchiseTag = string.Equals(player.Contract.ContractType, "Franchise Tag", StringComparison.OrdinalIgnoreCase);
@@ -232,7 +245,7 @@ public sealed class TransactionService
         return expired;
     }
 
-    public bool DraftRookie(DraftPickState pick, CollegeProspectState prospect, TeamState team, out string error)
+    public bool DraftRookie(DraftPickState pick, CollegeProspectState prospect, TeamState team, out string error, string transactionRationale = null)
     {
         var league = _context.ActiveLeague;
         if (league == null || pick == null || prospect == null || team == null)
@@ -255,12 +268,23 @@ public sealed class TransactionService
             error = "This prospect or pick has already been used.";
             return false;
         }
+        if (!SameId(pick.TeamId, team.TeamId) || !league.Teams.Contains(team)
+            || !league.Draft.Picks.Contains(pick) || !league.CollegeProspects.Contains(prospect))
+        {
+            error = "Draft pick, prospect, and team must belong to the active draft.";
+            return false;
+        }
+        if (GetRookieAnnualSalary(pick.Round) > new ContractService(_context).GetCapRoom(team))
+        {
+            error = "Rookie contract exceeds available cap room.";
+            return false;
+        }
 
         var player = new PlayerState
         {
             PlayerId = string.IsNullOrWhiteSpace(prospect.CollegePlayerId) ? $"rookie-{league.SeasonYear}-{prospect.ProspectId}" : prospect.CollegePlayerId,
             Name = prospect.Name,
-            Position = prospect.Position,
+            Position = DepthChartRules.ProEntryPosition(prospect.Position, string.IsNullOrWhiteSpace(prospect.CollegePlayerId) ? prospect.ProspectId : prospect.CollegePlayerId),
             Trait = string.IsNullOrWhiteSpace(prospect.Trait) ? "Development-minded" : prospect.Trait,
             College = prospect.College,
             CollegePlayerId = prospect.CollegePlayerId,
@@ -273,7 +297,7 @@ public sealed class TransactionService
             MoraleTrend = "Improving",
             Contract = BuildRookieContract(league, pick.Round),
         };
-        if (league.Teams.SelectMany(candidate => candidate?.Roster ?? Enumerable.Empty<PlayerState>())
+        if (OwnedPlayers(league)
             .Any(candidate => SameId(candidate?.PlayerId, player.PlayerId)))
         {
             error = "This rookie already belongs to a roster.";
@@ -287,6 +311,7 @@ public sealed class TransactionService
         pick.PlayerId = player.PlayerId;
         prospect.DraftedByTeamId = team.TeamId;
         team.Roster.Add(player);
+        AddToDepthChart(team, player);
         league.Draft.RecapEntries ??= new List<DraftClassRecapEntry>();
         league.Draft.RecapEntries.Add(new DraftClassRecapEntry
         {
@@ -318,7 +343,7 @@ public sealed class TransactionService
             ContractType = player.Contract.ContractType,
         });
         new ContractService(_context).RefreshCapRoom(league);
-        Record(league, "draft_pick_made", team, player, $"Round {pick.Round}, pick {pick.PickInRound} (overall {pick.OverallPick}).");
+        Record(league, "draft_pick_made", team, player, $"Round {pick.Round}, pick {pick.PickInRound} (overall {pick.OverallPick}). {transactionRationale}".Trim());
         error = "";
         return true;
     }
@@ -349,7 +374,7 @@ public sealed class TransactionService
             : "";
     }
 
-    public ContractTransactionResult PlaceOnWaivers(string playerId, string teamId, ContractService contracts)
+    public ContractTransactionResult PlaceOnWaivers(string playerId, string teamId, ContractService contracts, string transactionRationale = null)
     {
         var league = _context.ActiveLeague;
         var team = ResolveTeam(league, teamId);
@@ -371,10 +396,10 @@ public sealed class TransactionService
             ExpiresAbsoluteWeek = (league.Calendar?.AbsoluteWeek ?? 0) + 1,
         };
         league.Waivers.Add(waiver);
-        SeedCpuWaiverClaims(league, waiver, contracts);
+        SubmitRecommendedWaiverClaims(waiver);
         InvalidateTrainingCampFinalization(league, team);
         contracts.RefreshCapRoom(league);
-        Record(league, "player_waived", team, player, "Placed on waivers for one league week.");
+        Record(league, "player_waived", team, player, $"Placed on waivers for one league week. {transactionRationale}".Trim());
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Player placed on waivers.", CapRoomAfterSigning = team.CapRoom };
     }
 
@@ -401,12 +426,14 @@ public sealed class TransactionService
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Waiver claim completed.", CapRoomAfterSigning = team.CapRoom };
     }
 
-    public ContractTransactionResult SubmitWaiverClaim(string playerId, string teamId, ContractService contracts, string conditionalReleasePlayerId = null)
+    public ContractTransactionResult SubmitWaiverClaim(string playerId, string teamId, ContractService contracts, string conditionalReleasePlayerId = null, string transactionRationale = null)
     {
         var league = _context.ActiveLeague;
         var team = ResolveTeam(league, teamId);
         var waiver = league?.Waivers?.FirstOrDefault(candidate => SameId(candidate?.Player?.PlayerId, playerId));
         if (team == null || waiver?.Player == null) return Failure("Team or waived player was not found.");
+        if (SameId(team.TeamId, waiver.WaivedByTeamId)) return Failure("A team cannot claim its own waived player.");
+        if (!HasUniqueOwnership(league, playerId)) return Failure("Player ownership is inconsistent.");
         if (!CanMutateRoster(league, out var phaseError)) return Failure(phaseError);
         if (waiver.DeclinedTeamIds?.Any(id => SameId(id, team.TeamId)) == true) return Failure("This team already declined its confirmation opportunity for that player.");
         waiver.Claims ??= new List<WaiverClaimEntryState>();
@@ -421,7 +448,7 @@ public sealed class TransactionService
 
         waiver.Claims.Add(new WaiverClaimEntryState { TeamId = team.TeamId, ConditionalReleasePlayerId = conditionalRelease?.PlayerId ?? "" });
         var releaseNote = conditionalRelease == null ? "No conditional release attached." : $"Conditional release: {conditionalRelease.Name}.";
-        Record(league, "waiver_claim_submitted", team, waiver.Player, $"Claim entered for resolution in authoritative waiver order. {releaseNote}");
+        Record(league, "waiver_claim_submitted", team, waiver.Player, $"Claim entered for resolution in authoritative waiver order. {releaseNote} {transactionRationale}".Trim());
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = $"Claim submitted for resolution when the waiver period closes; no player has transferred. {releaseNote}", CapRoomAfterSigning = contracts.GetCapRoom(team) };
     }
 
@@ -431,6 +458,7 @@ public sealed class TransactionService
         var team = ResolveTeam(league, teamId);
         var waiver = league?.Waivers?.FirstOrDefault(candidate => SameId(candidate?.Player?.PlayerId, playerId));
         if (team == null || waiver?.Player == null || !waiver.PendingConfirmation || !SameId(waiver.PendingClaimTeamId, team.TeamId)) return Failure("No pending waiver confirmation was found for this team and player.");
+        if (!HasUniqueOwnership(league, playerId)) return Failure("Player ownership is inconsistent.");
         if (!CanMutateRoster(league, out var phaseError)) return Failure(phaseError);
         var conditionalRelease = string.IsNullOrWhiteSpace(waiver.ConditionalReleasePlayerId) ? null : team.Roster.FirstOrDefault(player => SameId(player.PlayerId, waiver.ConditionalReleasePlayerId));
         if (!string.IsNullOrWhiteSpace(waiver.ConditionalReleasePlayerId) && conditionalRelease == null) return Failure("The attached conditional release is no longer on this roster. Review the claim before finalizing.");
@@ -455,6 +483,7 @@ public sealed class TransactionService
         waiver.ConditionalReleasePlayerId = "";
         waiver.Player.Status = "Active";
         team.Roster.Add(waiver.Player);
+        AddToDepthChart(team, waiver.Player);
         league.Waivers.Remove(waiver);
         InvalidateTrainingCampFinalization(league, team);
         contracts.RefreshCapRoom(league);
@@ -483,11 +512,14 @@ public sealed class TransactionService
     public int ExpireWaivers()
     {
         var league = _context.ActiveLeague;
-        if (league == null)
+        if (league == null || !CanMutateRoster(league, out _))
             return 0;
 
         var due = league.Waivers
-            .Where(waiver => waiver?.Player != null && !waiver.PendingConfirmation && waiver.ExpiresAbsoluteWeek <= (league.Calendar?.AbsoluteWeek ?? 0))
+            .Where(waiver => waiver?.Player != null && !waiver.PendingConfirmation
+                && (waiver.SeasonYear < league.SeasonYear || waiver.ExpiresAbsoluteWeek <= (league.Calendar?.AbsoluteWeek ?? 0)))
+            .OrderBy(waiver => waiver.SeasonYear).ThenBy(waiver => waiver.ExpiresAbsoluteWeek)
+            .ThenBy(waiver => waiver.Player.PlayerId, StringComparer.Ordinal)
             .ToList();
         var resolved = 0;
         var contracts = new ContractService(_context);
@@ -508,6 +540,10 @@ public sealed class TransactionService
             .OrderBy(claim => priority.TryGetValue(claim.TeamId, out var rank) ? rank : int.MaxValue)
             .ThenBy(claim => claim.TeamId, StringComparer.OrdinalIgnoreCase)
             .ToList();
+        waiver.ResolutionOrder ??= new List<string>();
+        if (waiver.ResolutionOrder.Count == 0)
+            waiver.ResolutionOrder = orderedClaims.Select(claim => claim.TeamId).ToList();
+        orderedClaims = orderedClaims.OrderBy(claim => waiver.ResolutionOrder.IndexOf(claim.TeamId)).ToList();
 
         foreach (var claim in orderedClaims)
         {
@@ -526,6 +562,13 @@ public sealed class TransactionService
                 waiver.DeclinedTeamIds.Add(claim.TeamId);
                 continue;
             }
+            if (!SameId(team.TeamId, league.UserTeamId)
+                && !FrontOfficeEvaluationService.ConfirmWaiver(league, team, waiver.Player, conditionalRelease))
+            {
+                waiver.DeclinedTeamIds.Add(claim.TeamId);
+                Record(league, "waiver_claim_cancelled", team, waiver.Player, "CPU passed after rechecking current need, availability, and the conditional release.");
+                continue;
+            }
 
             waiver.PendingClaimTeamId = team.TeamId;
             waiver.PendingConfirmation = true;
@@ -538,47 +581,20 @@ public sealed class TransactionService
         }
 
         waiver.Player.Status = "Free Agent";
+        waiver.Player.Contract = new PlayerContractState { ContractType = "Free Agent" };
+        Record(league, "waiver_expired", ResolveTeam(league, waiver.WaivedByTeamId), waiver.Player, "Cleared waivers and entered free agency without the inherited contract.");
         if (!league.FreeAgents.Any(player => SameId(player.PlayerId, waiver.Player.PlayerId))) league.FreeAgents.Add(waiver.Player);
         league.Waivers.Remove(waiver);
         return true;
     }
 
-    private void SeedCpuWaiverClaims(LeagueState league, WaiverClaimState waiver, ContractService contracts)
+    public void SubmitRecommendedWaiverClaims(WaiverClaimState waiver)
     {
-        if (waiver?.Player == null)
-            return;
-
-        var candidates = new List<(TeamState Team, PlayerState ConditionalRelease, int Improvement)>();
-        foreach (var team in league.Teams.Where(team => !SameId(team.TeamId, league.UserTeamId) && !SameId(team.TeamId, waiver.WaivedByTeamId)))
-        {
-            var replacement = team.Roster
-                .Where(player => string.Equals(player.Position, waiver.Player.Position, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(player => player.Overall)
-                .ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
-                .FirstOrDefault();
-            var improvement = waiver.Player.Overall - (replacement?.Overall ?? 50);
-            if (improvement < 4)
-                continue;
-
-            var conditionalRelease = team.Roster.Count >= RosterService.RosterLimit
-                ? replacement ?? team.Roster.OrderBy(player => player.Overall).ThenBy(player => player.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault()
-                : null;
-            var projectedCapRoom = contracts.GetCapRoom(team) + Math.Max(0m, conditionalRelease?.Contract?.AnnualSalary ?? 0m);
-            if ((waiver.Player.Contract?.AnnualSalary ?? 0m) > projectedCapRoom)
-                continue;
-            candidates.Add((team, conditionalRelease, improvement));
-        }
-
-        foreach (var candidate in candidates.OrderByDescending(candidate => candidate.Improvement).ThenBy(candidate => candidate.Team.TeamId, StringComparer.OrdinalIgnoreCase).Take(4))
-        {
-            waiver.Claims.Add(new WaiverClaimEntryState
-            {
-                TeamId = candidate.Team.TeamId,
-                ConditionalReleasePlayerId = candidate.ConditionalRelease?.PlayerId ?? "",
-            });
-            var releaseNote = candidate.ConditionalRelease == null ? "No conditional release." : $"Conditional release: {candidate.ConditionalRelease.Name}.";
-            Record(league, "waiver_claim_submitted", candidate.Team, waiver.Player, $"CPU claim entered from a {candidate.Improvement}-point position upgrade evaluation. {releaseNote}");
-        }
+        if (!CanMutateRoster(_context.ActiveLeague, out _)) return;
+        var contracts = new ContractService(_context);
+        foreach (var proposal in FrontOfficeEvaluationService.ProposeWaiverClaims(_context.ActiveLeague, waiver, contracts))
+            SubmitWaiverClaim(waiver.Player.PlayerId, proposal.Team.TeamId, contracts, proposal.Release?.PlayerId,
+                $"CPU claim: added useful {waiver.Player.Position} depth after reviewing availability and current roster needs.");
     }
 
     public ContractTransactionResult MoveToInjuredReserve(string playerId, string teamId, ContractService contracts)
@@ -621,6 +637,7 @@ public sealed class TransactionService
         team.InjuredReserve.Remove(player);
         player.Status = "Active";
         team.Roster.Add(player);
+        AddToDepthChart(team, player);
         InvalidateTrainingCampFinalization(league, team);
         contracts.RefreshCapRoom(league);
         Record(league, "activated_from_ir", team, player, "Activated from injured reserve.");
@@ -642,7 +659,7 @@ public sealed class TransactionService
         return Math.Clamp(300_000m + abilityPremium + opportunityAdjustment + moraleAdjustment, 250_000m, 900_000m);
     }
 
-    public ContractTransactionResult SignToPracticeSquad(string playerId, string teamId, ContractService contracts, decimal annualSalary = 0m)
+    public ContractTransactionResult SignToPracticeSquad(string playerId, string teamId, ContractService contracts, decimal annualSalary = 0m, string transactionRationale = null)
     {
         var league = _context.ActiveLeague;
         var team = ResolveTeam(league, teamId);
@@ -653,6 +670,7 @@ public sealed class TransactionService
             return Failure(phaseError);
         if (player.Age > 25)
             return Failure("Practice squad eligibility is limited to players age 25 or younger.");
+        if (!HasUniqueOwnership(league, playerId)) return Failure("Player ownership is inconsistent.");
         team.PracticeSquad ??= new List<PlayerState>();
         if (team.PracticeSquad.Count >= 16)
             return Failure("Practice squad is full at 16 players.");
@@ -667,11 +685,12 @@ public sealed class TransactionService
             return new ContractTransactionResult { Ok = true, Accepted = false, Message = "The player declined the practice-squad offer based on pay and the projected opportunity at their position.", RequiredAnnualSalary = requiredSalary, CapRoomAfterSigning = contracts.GetCapRoom(team) };
 
         league.FreeAgents.Remove(player);
+        league.RookieMinicamp?.InvitedPlayerIds?.RemoveAll(id => SameId(id, player.PlayerId));
         player.Status = "Practice Squad";
         player.Contract = new PlayerContractState { AnnualSalary = annualSalary, GuaranteedSalary = 0m, YearsRemaining = 1, SignedSeason = league.SeasonYear, ContractType = "Practice Squad" };
         team.PracticeSquad.Add(player);
         contracts.RefreshCapRoom(league);
-        Record(league, "practice_squad_signed", team, player, $"Accepted a one-year practice-squad offer at {GameCoreStateHelper.FormatCapRoom(annualSalary)} annually after evaluating pay and positional opportunity.");
+        Record(league, "practice_squad_signed", team, player, $"Accepted a one-year practice-squad offer at {GameCoreStateHelper.FormatCapRoom(annualSalary)} annually after evaluating pay and positional opportunity. {transactionRationale}".Trim());
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Player accepted the practice-squad offer.", RequiredAnnualSalary = requiredSalary, CapRoomAfterSigning = team.CapRoom };
     }
 
@@ -709,6 +728,7 @@ public sealed class TransactionService
         InvalidateTrainingCampFinalization(league, team);
         contracts.RefreshCapRoom(league);
         Record(league, "practice_squad_signed_active", team, player, $"Signed permanently to the active roster at {activeSalary:0} annually.");
+        AddToDepthChart(team, player);
         return new ContractTransactionResult { Ok = true, Accepted = true, Message = "Practice-squad player signed permanently to the active roster.", CapRoomAfterSigning = team.CapRoom };
     }
 
@@ -717,6 +737,12 @@ public sealed class TransactionService
         var league = _context.ActiveLeague;
         if (league != null && team != null)
             Record(league, "training_camp_decision", team, null, details);
+    }
+
+    public void RecordRosterDecision(TeamState team, string details)
+    {
+        if (_context.ActiveLeague != null && team != null)
+            Record(_context.ActiveLeague, "cpu_roster_review", team, null, details);
     }
 
     public TradeProposalResult SubmitUserTradeProposal(TradeProposal proposal, ContractService contracts)
@@ -755,6 +781,8 @@ public sealed class TransactionService
         if (!HasCapRoomAfterTrade(league, proposer, offeredPlayers, requestedPlayers)
             || !HasCapRoomAfterTrade(league, receiver, requestedPlayers, offeredPlayers))
             return TradeFailure("Trade would exceed available salary-cap space.");
+        if (!HasCpuStarterCoverageAfterTrade(receiver, requestedPlayers, offeredPlayers))
+            return TradeFailure("The counterparty would lose required available starter coverage.");
 
         var offeredValue = GetTradeValue(offeredPlayers, offeredPicks, league.Teams.Count);
         var requestedValue = GetTradeValue(requestedPlayers, requestedPicks, league.Teams.Count);
@@ -816,9 +844,11 @@ public sealed class TransactionService
         var rationale = $"Package value: offer {offeredValue}, request {requestedValue}; {receiver.Name} requires at least {threshold:0}. " +
             $"Projected roster: {proposer.Name} {proposerRosterAfter}/{RosterService.RosterLimit}, {receiver.Name} {receiverRosterAfter}/{RosterService.RosterLimit}. " +
             $"Projected cap room: {proposer.Name} {GameCoreStateHelper.FormatCapRoom(proposerCapAfter)}, {receiver.Name} {GameCoreStateHelper.FormatCapRoom(receiverCapAfter)}.";
-        var canSubmit = rosterValid && capValid;
+        var coverageValid = HasCpuStarterCoverageAfterTrade(receiver, requestedPlayers, offeredPlayers);
+        var canSubmit = rosterValid && capValid && coverageValid;
         var message = !rosterValid ? $"Preview blocks submission: trade would exceed the {RosterService.RosterLimit}-player active-roster limit."
             : !capValid ? "Preview blocks submission: trade would exceed available salary-cap space."
+            : !coverageValid ? "Preview blocks submission: the counterparty would lose required available starter coverage."
             : "Preview is valid. Submit explicitly to request the counterparty decision.";
         return new TradeProposalPreview { Ok = true, CanSubmit = canSubmit, Message = message, Rationale = rationale, OfferedValue = offeredValue, RequestedValue = requestedValue, ProposerRosterAfter = proposerRosterAfter, ReceiverRosterAfter = receiverRosterAfter, ProposerCapRoomAfter = proposerCapAfter, ReceiverCapRoomAfter = receiverCapAfter };
     }
@@ -870,9 +900,18 @@ public sealed class TransactionService
     private static bool HasCapRoomAfterTrade(LeagueState league, TeamState team, IEnumerable<PlayerState> outgoing, IEnumerable<PlayerState> incoming)
         => GetCapRoomAfterTrade(league, team, outgoing, incoming) >= 0m;
 
+    private static bool HasCpuStarterCoverageAfterTrade(TeamState team, IEnumerable<PlayerState> outgoing, IEnumerable<PlayerState> incoming)
+    {
+        var removed = outgoing.Select(p => p.PlayerId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var after = team.Roster.Where(p => !removed.Contains(p.PlayerId)).Concat(incoming).ToList();
+        return DepthChartRules.RequiredStartersByPosition.All(pair =>
+            after.Count(p => SameId(p.Position, pair.Key) && PlayerInjuryService.IsAvailableForGame(p))
+            >= Math.Min(pair.Value, team.Roster.Count(p => SameId(p.Position, pair.Key) && PlayerInjuryService.IsAvailableForGame(p))));
+    }
+
     private static decimal GetCapRoomAfterTrade(LeagueState league, TeamState team, IEnumerable<PlayerState> outgoing, IEnumerable<PlayerState> incoming)
     {
-        var currentSalary = team.Roster.Sum(player => Math.Max(0m, player?.Contract?.AnnualSalary ?? 0m));
+        var currentSalary = team.Roster.Concat(team.InjuredReserve).Concat(team.PracticeSquad).Sum(player => Math.Max(0m, player?.Contract?.AnnualSalary ?? 0m));
         var outgoingSalary = outgoing.Sum(player => Math.Max(0m, player?.Contract?.AnnualSalary ?? 0m));
         var incomingSalary = incoming.Sum(player => Math.Max(0m, player?.Contract?.AnnualSalary ?? 0m));
         return league.SalaryCap - (currentSalary - outgoingSalary + incomingSalary);
@@ -893,6 +932,7 @@ public sealed class TransactionService
             RemoveFromDepthChart(from, player.PlayerId);
             player.Status = "Active";
             to.Roster.Add(player);
+            AddToDepthChart(to, player);
         }
     }
 
@@ -907,7 +947,7 @@ public sealed class TransactionService
 
     private static decimal GetAdjustedRequirement(LeagueState league, PlayerState player, TeamState team, ContractService contracts)
     {
-        var negotiation = league.FranchiseMetadata?.GmProfileSnapshot?.Attributes?.Negotiation ?? 50;
+        var negotiation = SameId(team.TeamId, league.UserTeamId) ? league.FranchiseMetadata?.GmProfileSnapshot?.Attributes?.Negotiation ?? 50 : 50;
         return Math.Round(contracts.GetRequiredAnnualSalary(player, team) * (1m - Math.Clamp((negotiation - 50) / 600m, -0.05m, 0.05m)), 0, MidpointRounding.AwayFromZero);
     }
 
@@ -921,9 +961,11 @@ public sealed class TransactionService
     private static PlayerContractState BuildContract(LeagueState league, ContractOffer offer, string type)
         => new() { AnnualSalary = offer.AnnualSalary, GuaranteedSalary = offer.GuaranteedSalary, YearsRemaining = offer.Years, SignedSeason = league.SeasonYear, ContractType = type };
 
+    public static decimal GetRookieAnnualSalary(int round) => Math.Max(550_000m, 850_000m - (Math.Max(1, round) - 1) * 50_000m);
+
     private static PlayerContractState BuildRookieContract(LeagueState league, int round)
     {
-        var annualSalary = Math.Max(550_000m, 850_000m - (Math.Max(1, round) - 1) * 50_000m);
+        var annualSalary = GetRookieAnnualSalary(round);
         return new PlayerContractState
         {
             AnnualSalary = annualSalary,
@@ -939,6 +981,19 @@ public sealed class TransactionService
         foreach (var depthChart in team.DepthChart.Values)
             depthChart.RemoveAll(id => SameId(id, playerId));
     }
+
+    private static void AddToDepthChart(TeamState team, PlayerState player)
+    {
+        if (!team.DepthChart.TryGetValue(player.Position, out var ids)) team.DepthChart[player.Position] = ids = new List<string>();
+        if (!ids.Contains(player.PlayerId, StringComparer.OrdinalIgnoreCase)) ids.Add(player.PlayerId);
+    }
+
+    private static IEnumerable<PlayerState> OwnedPlayers(LeagueState league)
+        => league.Teams.SelectMany(team => team.Roster.Concat(team.InjuredReserve).Concat(team.PracticeSquad))
+            .Concat(league.FreeAgents).Concat(league.Waivers.Select(waiver => waiver.Player));
+
+    private static bool HasUniqueOwnership(LeagueState league, string playerId)
+        => OwnedPlayers(league).Count(player => SameId(player?.PlayerId, playerId)) == 1;
 
     private static void InvalidateTrainingCampFinalization(LeagueState league, TeamState team)
     {
@@ -957,6 +1012,7 @@ public sealed class TransactionService
         {
             TransactionId = $"{league.SeasonYear}-{league.Transactions.Count + 1:00000}",
             SeasonYear = league.SeasonYear,
+            AbsoluteWeek = league.Calendar?.AbsoluteWeek ?? 0,
             DateLabel = league.Calendar?.CurrentDate ?? "",
             Phase = league.Calendar?.Phase ?? "",
             Type = type,

@@ -93,8 +93,17 @@ public sealed class DraftService
 
             var prospect = SelectCpuProspect(league, pick);
             var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase));
+            if (team != null)
+            {
+                var cpu = new CpuRosterManagementService(_context);
+                cpu.CutToLimit(team, 89);
+                cpu.RelieveCapPressure(team, cpu.DraftReserve(team));
+            }
             var error = "";
-            if (prospect == null || team == null || !new TransactionService(_context).DraftRookie(pick, prospect, team, out error))
+            var need = team == null || prospect == null ? null : FrontOfficeEvaluationService.AssessPositions(team).FirstOrDefault(n => n.Position == GetProPosition(prospect));
+            var rationale = need?.Priority >= 60 ? "CPU drafted the highest-value prospect after balancing urgent roster needs with available draft value."
+                : "CPU favored available draft value and long-term positional depth over a marginal immediate need.";
+            if (prospect == null || team == null || !new TransactionService(_context).DraftRookie(pick, prospect, team, out error, rationale))
             {
                 LastMessage = string.IsNullOrWhiteSpace(error) ? "CPU draft selection could not be completed." : error;
                 return false;
@@ -245,20 +254,19 @@ public sealed class DraftService
     private static CollegeProspectState SelectCpuProspect(LeagueState league, DraftPickState pick)
     {
         var team = league.Teams.FirstOrDefault(candidate => string.Equals(candidate?.TeamId, pick.TeamId, StringComparison.OrdinalIgnoreCase));
+        if (team == null) return null;
+        var needs = FrontOfficeEvaluationService.AssessPositions(team).ToDictionary(n => n.Position, StringComparer.OrdinalIgnoreCase);
         return league.CollegeProspects
             .Where(prospect => prospect != null && string.IsNullOrWhiteSpace(prospect.DraftedByTeamId) && IsDraftEligible(league, prospect))
-            .OrderByDescending(prospect => GetCpuValue(prospect, team))
+            .Where(prospect => needs.ContainsKey(GetProPosition(prospect)))
+            .OrderByDescending(prospect => FrontOfficeEvaluationService.DraftValue(prospect, needs[GetProPosition(prospect)]))
             .ThenByDescending(prospect => prospect.Potential)
             .ThenBy(prospect => prospect.ProspectId, StringComparer.OrdinalIgnoreCase)
             .FirstOrDefault();
     }
 
-    private static int GetCpuValue(CollegeProspectState prospect, TeamState team)
-    {
-        var positionCount = team?.Roster?.Count(player => string.Equals(player?.Position, prospect.Position, StringComparison.OrdinalIgnoreCase)) ?? 0;
-        var needBonus = positionCount switch { 0 => 12, 1 => 8, 2 => 4, _ => 0 };
-        return prospect.Overall * 3 + prospect.Potential + needBonus;
-    }
+    public static string GetProPosition(CollegeProspectState prospect)
+        => DepthChartRules.ProEntryPosition(prospect.Position, string.IsNullOrWhiteSpace(prospect.CollegePlayerId) ? prospect.ProspectId : prospect.CollegePlayerId);
 
     private static bool IsDraftEligible(LeagueState league, CollegeProspectState prospect)
     {
@@ -269,7 +277,7 @@ public sealed class DraftService
         return collegePlayer?.DraftEligible ?? true; // Retains compatibility for intentionally supported pre-universe saves.
     }
 
-    private static void CompleteDraft(LeagueState league)
+    private void CompleteDraft(LeagueState league)
     {
         league.Draft.IsCompleted = true;
         UndraftedFreeAgentService.OpenMarket(league);
@@ -277,5 +285,6 @@ public sealed class DraftService
         league.Calendar.Week = league.Calendar.AbsoluteWeek;
         league.Calendar.DayIndex = 0;
         ScheduleService.NormalizeCalendar(league.Calendar);
+        new CpuRosterManagementService(_context).ProcessCurrentCheckpoint();
     }
 }

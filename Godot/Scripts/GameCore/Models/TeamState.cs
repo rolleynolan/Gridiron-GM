@@ -20,6 +20,7 @@ public sealed class TeamState
     public Dictionary<string, List<string>> DepthChart { get; set; } = new();
     public List<string> DepthChartLockedPositions { get; set; } = new();
     public TrainingCampState TrainingCamp { get; set; } = new();
+    public CpuRosterState CpuRoster { get; set; } = new();
     public int FranchiseTagSeason { get; set; }
     public string FranchiseTagPlayerId { get; set; } = "";
 }
