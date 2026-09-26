@@ -72,7 +72,7 @@ public static class PlayerInjuryService
         var medicalRates = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var team in league.Teams.OrderBy(t => t.TeamId, StringComparer.Ordinal))
         {
-            var rate = team.Coaches?.Any(c => c.Role == "Medical Director" && c.Overall >= 85) == true ? 2 : 1;
+            var rate = GetDailyRecoveryRate(team);
             foreach (var player in team.Roster.Concat(team.InjuredReserve).Concat(team.PracticeSquad))
                 medicalRates.TryAdd(player.PlayerId, rate);
         }
@@ -123,6 +123,9 @@ public static class PlayerInjuryService
     internal static bool TryDate(string text, out DateTime date)
         => DateTime.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
     internal static string FormatDate(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    public static int GetDailyRecoveryRate(TeamState team)
+        => team?.Coaches?.Any(c => string.Equals(c.Role, "Medical Director", StringComparison.OrdinalIgnoreCase) && c.Overall >= 85) == true ? 2 : 1;
 
     private static IEnumerable<PlayerState> AllTeamPlayers(LeagueState league)
         => league.Teams.Where(team => team != null)

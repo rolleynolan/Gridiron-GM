@@ -2,6 +2,24 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
+## Medical reporting and clearance context — completed September 25, 2026
+
+Smallest complete outcome: existing injury and player-profile surfaces use one authoritative, read-only medical projection for diagnosis, staff-selected treatment, dated estimated clearance, current restrictions, and IR activation context. Reporting must not advance recovery or promise an exact return date.
+
+- [x] Share the persisted medical-staff recovery rate between treatment progression and report projection.
+- [x] Replace exact UI countdowns and blank return fields with dated, explicitly non-guaranteed clearance windows.
+- [x] Distinguish medical clearance, game availability, performance readiness, and post-clearance IR activation.
+- [x] Preserve incomplete legacy injuries without inventing diagnosis timing or a return date.
+- [x] Add direct projection/idempotence tests and verify build, full tests, smoke, editor import, and startup.
+
+`PlayerMedicalReportService` derives reports only from the saved calendar, current injury episode, ownership roster, and existing Medical Director rate. Opening or repeating a report cannot mutate league state. Active diagnosed injuries show a conservative date range around the current deterministic recovery outlook and label it as an estimate separate from performance readiness. The treatment is informational and staff-selected; no treatment-choice mechanic was added. Cleared IR players remain explicitly ineligible until the existing activation transaction succeeds. Legacy injuries without a valid current timetable display a pending medical evaluation instead of fabricated precision.
+
+The user Team > Injuries workspace, general league injury table, and Player Profile history now consume that projection. The league table includes both active-roster injuries and IR players, with report date and estimated-clearance columns; the player profile keeps dated injury history below the current report. No save migration is required because the projection is deterministic from save-37 state.
+
+Validation: **185 tests pass**, including four new cases for non-mutating dated reports, shared staff-rate behavior, cleared-IR activation context, and incomplete legacy records. Production build completes with zero warnings/errors; the full three-season GameCore smoke, Godot editor import, project startup, and `git diff --check` pass.
+
+Remaining medical scope is unchanged where design or deeper mechanics are still needed: delayed diagnosis workflows, setbacks, limited clearance, permanent damage, recovery rust, snap limits, and a broader injury/treatment catalog are not implemented by this reporting slice.
+
 ## Calendar-driven medical continuity — completed September 25, 2026
 
 Smallest complete outcome: injury recovery and ordinary fatigue recovery follow actual elapsed dates through the season, playoff rounds, offseason transitions, and rollover. A new season does not heal a long injury. Save/retry/pool movement must not duplicate recovery or overwrite history.
@@ -30,7 +48,7 @@ The diagnostic now reports active injuries and accepts `--cpu-roster-injury-stre
 
 Isolated resolver benchmark: one game **3.416 ms / 1.80 MiB**, 16-game week **55.4 ms / 26.54 MiB**, 272-game season **829.0 ms / 445.54 MiB**, and 783 college games **105.1 ms / 8.84 MiB** cumulative allocations. Resolver timing is effectively unchanged from the preceding checkpoint; the 92.3-second endurance measurement includes calendar recovery, CPU work, and disk reloads. Implementation/test/diagnostic commit: `237ffa3`. The twelve pre-existing untracked sidecars are preserved.
 
-Remaining scope: this preserves the existing short-injury catalog and medical/conditioning rates; it does not yet implement delayed diagnosis, estimated recovery ranges, setbacks, limited medical clearance, permanent damage, rust, or snap limits. The offseason still advances through its existing coarse phase dates; this is not a full calendar/waiver-deadline redesign. The next approved medical slice is dated diagnosis/recovery reporting and clearance context through the existing injury/profile surfaces. Activity-based development remains deferred until its explicitly unreviewed choices are resolved.
+Remaining scope: this preserves the existing short-injury catalog and medical/conditioning rates; it does not yet implement delayed diagnosis, setbacks, limited medical clearance, permanent damage, rust, or snap limits. The offseason still advances through its existing coarse phase dates; this is not a full calendar/waiver-deadline redesign. Dated diagnosis/recovery reporting and clearance context are completed in the next checkpoint above. Activity-based development remains deferred until its explicitly unreviewed choices are resolved.
 
 ## Unsigned-player career continuity — completed September 25, 2026
 

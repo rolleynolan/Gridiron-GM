@@ -6506,10 +6506,10 @@ public partial class DashboardController : Control
         foreach (var player in team?.Roster ?? Enumerable.Empty<PlayerState>())
         {
             var activeInjury = player.CurrentInjury?.IsActive == true || !string.IsNullOrWhiteSpace(player.Injury);
-            var row = InjuryRow.FromPlayer(player, false);
+            var row = InjuryRow.FromPlayer(league, team, player, false);
             if (activeInjury) injured.Add(row); else healthy.Add(row);
         }
-        foreach (var player in team?.InjuredReserve ?? Enumerable.Empty<PlayerState>()) ir.Add(InjuryRow.FromPlayer(player, true));
+        foreach (var player in team?.InjuredReserve ?? Enumerable.Empty<PlayerState>()) ir.Add(InjuryRow.FromPlayer(league, team, player, true));
         PopulateInjuryPanel("healthy", healthy, false); PopulateInjuryPanel("injured", injured, true); PopulateInjuryPanel("ir", ir, true);
     }
 
@@ -8286,31 +8286,30 @@ public partial class DashboardController : Control
         try
         {
             EnsureNativeGameCoreServices();
-            var response = _nativeRosterService.GetTeamRoster(ResolveNativeScheduleTeamId(teamId));
-            if (response == null || !response.Ok)
+            var league = _nativeGameCoreContext?.ActiveLeague;
+            var resolvedTeamId = ResolveNativeScheduleTeamId(teamId);
+            var team = league?.Teams?.FirstOrDefault(candidate => string.Equals(candidate.TeamId, resolvedTeamId, StringComparison.OrdinalIgnoreCase));
+            if (league == null || team == null)
             {
-                ShowInjuriesMessage(string.IsNullOrWhiteSpace(response?.Error) ? "Injury report unavailable." : response.Error);
+                ShowInjuriesMessage("Injury report unavailable.");
                 return;
             }
 
             var entries = new Godot.Collections.Array();
-            if (response.Players != null)
+            foreach (var (player, isOnIr) in team.Roster.Select(player => (player, false)).Concat(team.InjuredReserve.Select(player => (player, true))))
             {
-                foreach (var player in response.Players)
+                var report = PlayerMedicalReportService.Build(league, team, player, isOnIr);
+                if (!report.HasActiveInjury && !isOnIr) continue;
+                entries.Add(new Godot.Collections.Dictionary
                 {
-                    if (string.IsNullOrWhiteSpace(player?.Injury))
-                        continue;
-                    entries.Add(new Godot.Collections.Dictionary
-                    {
-                        ["name"] = player?.Name ?? "",
-                        ["position"] = player?.Position ?? "",
-                        ["injury_status"] = player?.Status ?? "",
-                        ["injury_name"] = player?.Injury ?? "",
-                        ["return_date"] = "",
-                        ["days_remaining"] = "",
-                        ["ir"] = string.Equals(player?.Status, "ir", StringComparison.OrdinalIgnoreCase),
-                    });
-                }
+                    ["name"] = player?.Name ?? "",
+                    ["position"] = player?.Position ?? "",
+                    ["injury_status"] = report.ClearanceStatus,
+                    ["injury_name"] = report.Diagnosis,
+                    ["return_date"] = report.EstimatedClearanceWindow,
+                    ["report_date"] = report.ReportedOn,
+                    ["ir"] = isOnIr,
+                });
             }
 
             PopulateInjuryTree(entries);
@@ -10220,10 +10219,10 @@ public partial class DashboardController : Control
         _injuriesTree.SetColumnCustomMinimumWidth(2, 78);
         _injuriesTree.SetColumnTitle(3, "Injury");
         _injuriesTree.SetColumnCustomMinimumWidth(3, 120);
-        _injuriesTree.SetColumnTitle(4, "Return");
-        _injuriesTree.SetColumnCustomMinimumWidth(4, 78);
-        _injuriesTree.SetColumnTitle(5, "Days Left");
-        _injuriesTree.SetColumnCustomMinimumWidth(5, 62);
+        _injuriesTree.SetColumnTitle(4, "Estimated Clearance");
+        _injuriesTree.SetColumnCustomMinimumWidth(4, 170);
+        _injuriesTree.SetColumnTitle(5, "Report Date");
+        _injuriesTree.SetColumnCustomMinimumWidth(5, 82);
         _injuriesTree.SetColumnTitle(6, "IR");
         _injuriesTree.SetColumnCustomMinimumWidth(6, 34);
     }
@@ -11255,7 +11254,7 @@ public partial class DashboardController : Control
             var status = FmtString(GetFirstNonNil(entry, "injury_status", "status"), "");
             var injury = FmtString(GetFirstNonNil(entry, "injury_name", "injury"), "");
             var returnDate = FmtString(GetFirstNonNil(entry, "injury_end_date", "return_date", "return"), "");
-            var daysLeft = FmtInt(GetFirstNonNil(entry, "days_remaining", "days_left"), "");
+            var reportDate = FmtString(GetFirstNonNil(entry, "report_date"), "");
             var onIr = GetBoolValue(GetFirstNonNil(entry, "on_injured_reserve", "ir"), false);
             var irText = onIr ? "Yes" : "";
 
@@ -11268,7 +11267,7 @@ public partial class DashboardController : Control
             item.SetText(2, status);
             item.SetText(3, injury);
             item.SetText(4, returnDate);
-            item.SetText(5, daysLeft);
+            item.SetText(5, reportDate);
             item.SetText(6, irText);
         }
     }
@@ -14190,11 +14189,23 @@ public partial class DashboardController : Control
         if (player == null)
             return "RECENT HISTORY\nPlayer history is unavailable.";
 
-        var lines = new List<string> { "RECENT HISTORY" };
-        var activeInjury = player.CurrentInjury?.IsActive == true
-            ? $"Current injury: {player.CurrentInjury.Name} · {player.CurrentInjury.DaysRemaining} day(s) remaining"
-            : "Health: no active injury";
-        lines.Add(activeInjury);
+        var lines = new List<string> { "MEDICAL REPORT" };
+        var league = _nativeGameCoreContext?.ActiveLeague;
+        var team = league?.Teams?.FirstOrDefault(candidate =>
+            (candidate.Roster ?? new List<PlayerState>()).Any(item => string.Equals(item.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase))
+            || (candidate.InjuredReserve ?? new List<PlayerState>()).Any(item => string.Equals(item.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase))
+            || (candidate.PracticeSquad ?? new List<PlayerState>()).Any(item => string.Equals(item.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)));
+        var isOnIr = team?.InjuredReserve?.Any(item => string.Equals(item.PlayerId, player.PlayerId, StringComparison.OrdinalIgnoreCase)) == true;
+        var medical = PlayerMedicalReportService.Build(league, team, player, isOnIr);
+        lines.Add($"Diagnosis: {medical.Diagnosis}");
+        lines.Add($"Evaluation: {medical.EvaluationStatus}");
+        lines.Add($"Treatment: {medical.Treatment}");
+        lines.Add($"Clearance: {medical.ClearanceStatus}");
+        lines.Add($"Estimated clearance: {medical.EstimatedClearanceWindow}");
+        lines.Add(medical.EstimateContext);
+        lines.Add($"Restrictions: {medical.Restrictions}");
+        lines.Add(string.Empty);
+        lines.Add("RECENT HISTORY");
 
         foreach (var injury in (player.InjuryHistory ?? new List<PlayerInjuryRecord>())
                      .OrderByDescending(record => record.SeasonYear)
@@ -14224,7 +14235,7 @@ public partial class DashboardController : Control
         foreach (var transaction in transactions)
             lines.Add($"{transaction.DateLabel}: {transaction.Type} · {(string.IsNullOrWhiteSpace(transaction.Details) ? transaction.TeamName : transaction.Details)}");
 
-        if (lines.Count == 2 && player.CurrentInjury?.IsActive != true)
+        if ((player.InjuryHistory?.Count ?? 0) == 0 && (player.DevelopmentHistory?.Count ?? 0) == 0 && transactions.Count == 0)
             lines.Add("No archived development, injury, or transaction events are recorded yet.");
         return string.Join("\n", lines);
     }
@@ -14236,8 +14247,7 @@ public partial class DashboardController : Control
         var fatigue = SafeIntDisplay(player, "fatigue", fallback: "0");
         var available = GetBoolValue(GetFirstNonNil(player, "is_available"), true);
         var injury = SafeString(player, "injury", "");
-        var injuryDays = SafeIntDisplay(player, "injury_days_remaining", fallback: "0");
-        var availability = available ? "Available" : string.IsNullOrWhiteSpace(injury) ? "Unavailable" : $"{injury} ({injuryDays}d)";
+        var availability = available ? "Available" : string.IsNullOrWhiteSpace(injury) ? "Unavailable" : injury;
         var nativePlayer = _nativeGameCoreContext?.ActiveLeague?.Teams
             .SelectMany(team => team?.Roster ?? Enumerable.Empty<PlayerState>())
             .FirstOrDefault(candidate => string.Equals(candidate?.PlayerId, playerId, StringComparison.OrdinalIgnoreCase));
@@ -14486,26 +14496,9 @@ public partial class DashboardController : Control
     }
     private readonly record struct InjuryRow(string PlayerId, string Name, string Position, string Availability, string InjuryStatus, string Recovery)
     {
-        public static InjuryRow FromPlayer(PlayerState player, bool isInjuredReserve)
+        public static InjuryRow FromPlayer(LeagueState league, TeamState team, PlayerState player, bool isInjuredReserve)
         {
-            var injury = !string.IsNullOrWhiteSpace(player?.CurrentInjury?.Name)
-                ? player.CurrentInjury.Name
-                : !string.IsNullOrWhiteSpace(player?.Injury)
-                    ? player.Injury
-                    : "Injury detail unavailable";
-            var daysRemaining = player?.CurrentInjury?.DaysRemaining ?? 0;
-            var recovery = daysRemaining > 0
-                ? $"{daysRemaining} day{(daysRemaining == 1 ? string.Empty : "s")} remaining"
-                : "Recovery estimate unavailable";
-            var guidance = isInjuredReserve
-                ? "IR: plan without this player; review activation when healthy."
-                : daysRemaining <= 0
-                    ? "Review availability before changing depth."
-                    : daysRemaining <= 3
-                        ? "Near return: keep the current backup ready."
-                        : daysRemaining <= 7
-                            ? "Short absence: review the next depth option."
-                            : "Extended absence: consider a depth-chart or roster response.";
+            var report = PlayerMedicalReportService.Build(league, team, player, isInjuredReserve);
             var availability = isInjuredReserve
                 ? "Injured Reserve"
                 : PlayerInjuryService.IsAvailableForGame(player)
@@ -14513,9 +14506,9 @@ public partial class DashboardController : Control
                     : string.IsNullOrWhiteSpace(player?.Status)
                         ? "Availability unavailable"
                         : player.Status;
-            var rosterStatus = string.IsNullOrWhiteSpace(player?.Status) ? "Status unavailable" : player.Status;
-            var injuryStatus = isInjuredReserve ? $"{injury} · IR" : $"{injury} · {rosterStatus}";
-            return new InjuryRow(player?.PlayerId ?? string.Empty, player?.Name ?? "Unknown player", player?.Position ?? "—", availability, injuryStatus, $"{recovery} · {guidance}");
+            var injuryStatus = $"{report.Diagnosis} · {report.ClearanceStatus}";
+            var recovery = $"{report.EstimatedClearanceWindow} · {report.EstimateContext} · {report.Restrictions}";
+            return new InjuryRow(player?.PlayerId ?? string.Empty, player?.Name ?? "Unknown player", player?.Position ?? "—", availability, injuryStatus, recovery);
         }
     }
 

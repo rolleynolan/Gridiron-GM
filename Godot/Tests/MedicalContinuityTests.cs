@@ -184,6 +184,64 @@ public sealed class MedicalContinuityTests
         Assert.Equal(16, restored.FreeAgents.Single(p => p.PlayerId == patient.PlayerId).CurrentInjury.DaysRemaining);
     }
 
+    [Fact]
+    public void MedicalReportPublishesDatedRangeClearanceAndAutomaticTreatmentWithoutMutation()
+    {
+        var league = League(); var team = league.Teams[0]; var player = Player(); team.Roster.Add(player);
+        PlayerInjuryService.InjurePlayer(league, player, "Shoulder strain", 10);
+        var before = JsonSerializer.Serialize(league);
+
+        var report = PlayerMedicalReportService.Build(league, team, player, false);
+
+        Assert.Equal("Shoulder strain", report.Diagnosis);
+        Assert.Equal("Diagnosis recorded", report.EvaluationStatus);
+        Assert.Equal("Not medically cleared", report.ClearanceStatus);
+        Assert.Equal("2026-08-05 to 2026-08-07", report.EstimatedClearanceWindow);
+        Assert.Contains("staff selected", report.Treatment);
+        Assert.Contains("not guaranteed", report.EstimateContext);
+        Assert.Contains("Unavailable for game selection", report.Restrictions);
+        Assert.Equal(before, JsonSerializer.Serialize(league));
+    }
+
+    [Fact]
+    public void MedicalProjectionUsesTheSamePersistedStaffRateAsRecovery()
+    {
+        var league = League(); var team = league.Teams[0]; var player = Player(); team.Roster.Add(player);
+        PlayerInjuryService.InjurePlayer(league, player, "Knee sprain", 10);
+        var supported = PlayerMedicalReportService.Build(league, team, player, false);
+        team.Coaches.Clear();
+        var ordinary = PlayerMedicalReportService.Build(league, team, player, false);
+
+        Assert.Equal("2026-08-05 to 2026-08-07", supported.EstimatedClearanceWindow);
+        Assert.Equal("2026-08-09 to 2026-08-13", ordinary.EstimatedClearanceWindow);
+    }
+
+    [Fact]
+    public void ClearedIrPlayerStillReportsActivationRequirement()
+    {
+        var league = League(); var team = league.Teams[0]; var player = Player(); player.Status = "IR"; team.InjuredReserve.Add(player);
+
+        var report = PlayerMedicalReportService.Build(league, team, player, true);
+
+        Assert.False(report.HasActiveInjury);
+        Assert.Equal("No active injury", report.Diagnosis);
+        Assert.Equal("Medically cleared; roster activation required", report.ClearanceStatus);
+        Assert.Contains("Not game-eligible", report.Restrictions);
+    }
+
+    [Fact]
+    public void IncompleteLegacyInjuryDoesNotInventARecoveryDate()
+    {
+        var league = League(); var team = league.Teams[0]; var player = Player(); player.Injury = "Legacy injury"; player.Status = "Injured"; team.Roster.Add(player);
+
+        var report = PlayerMedicalReportService.Build(league, team, player, false);
+
+        Assert.True(report.HasActiveInjury);
+        Assert.Equal("Legacy injury", report.Diagnosis);
+        Assert.Equal("Recovery timetable under evaluation", report.EvaluationStatus);
+        Assert.Equal("Pending medical evaluation", report.EstimatedClearanceWindow);
+    }
+
     private static void Recover(LeagueState league, string date)
     {
         league.Calendar.CurrentDate = date;
