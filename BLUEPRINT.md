@@ -814,6 +814,19 @@ illustrative medical data, and final rules-bound details remain open to refineme
 
 ### Player retirement and rare returns
 
+Approved workshop direction, September 26, 2026: a GM may try to persuade a player considering retirement to continue,
+but must offer a credible reason that matters to that player. Supported reasons include a championship opportunity,
+more money through a valid contract offer, and a promised coaching role after retirement. Persuasion is not guaranteed
+and must respect medical eligibility and ordinary contract/staff authority. This concerns a player considering retirement;
+it does not override the player-initiated comeback rule below once the player has retired.
+
+Retired players can become coaches. A promised future coaching role must be a meaningful, persisted commitment rather
+than a free persuasion bonus. Exact coaching eligibility, aptitude generation, available roles, compensation, timing,
+promise fulfillment/breach consequences, conversation limits, and persuasion probabilities still require design review.
+Retirement decision factors and their distributions also remain under review, including continued high-level play,
+voluntary departure while still effective, steep decline, accumulated injuries, and a severe medical event. Do not treat
+the provisional runtime's annual age table or injury-name checks as the final decision model.
+
 Unlike GM retirement, player retirement can rarely be reversed. A retired player may announce an intention to return and
 become available subject to reinstatement, existing team rights, and league eligibility rules. Preserve the same player
 identity, age, career statistics, development DNA, and retirement/return history; returning does not reset ability or health.
@@ -870,8 +883,9 @@ motivations, and permanent time-away effects remain open design decisions.
 
 #### Functionality
 
-Player DNA includes a hidden, generated career-development trajectory. Regression is not restricted to old age: a young or
-prime-age player can enter a genuine decline even while healthy, playing, training, and earning XP. The trajectory supplies
+Player DNA includes three hidden, generated career-development trajectories: physical, technical, and mental. They belong
+to the same persistent player identity but can follow different paths. Regression is not restricted to old age: a young or
+prime-age player can enter a genuine decline even while healthy, playing, training, and earning XP. These trajectories supply
 a signed development influence, including negative pressure strong enough to outweigh positive XP-driven development during
 an appropriate decline phase. Merely reducing an XP multiplier to zero is insufficient because it cannot produce actual
 rating loss. XP remains earned experience; regression acts on underlying skills rather than requiring negative XP.
@@ -900,11 +914,31 @@ fractional progress where needed, and enforce underlying skill bounds after reso
 DNA phase must be able to produce net regression despite ordinary positive XP gains; management can mitigate the loss but
 cannot assume that sufficient routine playing time guarantees continuous improvement.
 
-Physical, technical, and mental skills may develop differently. Aging remains a distinct influence, so a late resurgence
-can come from improved technique or decision-making while physical ability continues to decline. Overall remains a derived
-summary. Temporary form, morale, fatigue, scheme fit, and a revised scouting estimate must not be mistaken for permanent
-development or counted again as permanent rating loss. The DNA trajectory shapes development pressure; actual career outcomes
+Approved workshop resolution, September 26, 2026: physical, technical, and mental abilities each have their own trajectory,
+including possible rare downturns and resurgences. Physical ability is more susceptible to lasting age-related decline.
+Technical ability develops through repetition and typically retains learned execution longer, with milder and less frequent
+age-related loss than physical ability. Mental ability can continue improving while physical ability declines, but can also
+plateau or regress. Technical retention is a population tendency, not immunity from permanent decline.
+
+Age-related onset, pace, and affected abilities vary by the individual career DNA; there is no universal position-specific
+birthday that starts rating loss. Aging remains an identifiable influence within that model, separate from injury
+consequences and other career phases. Do not charge the same loss twice. An older receiver can retain route technique while
+losing acceleration; lost speed alone must not also subtract route-running skill. Temporary rust after time away is a
+readiness effect, not automatic loss of learned technique. Overall remains a derived summary. Temporary form, morale,
+fatigue, scheme fit, and revised scouting estimates must not be mistaken for permanent development. Actual career outcomes
 also depend on opportunity, training, health, and environment.
+
+All players possess the complete underlying skill catalog. Starting abilities reflect their relevant population and
+individual identity: a typical defensive tackle has very poor passing technique rather than an absent passing skill,
+and general strength does not imply skilled throwing. The initial 21-skill workshop proposal needs expansion and review;
+neither that catalog nor its proposed Overall weights is approved as final.
+
+Generate continuous player characteristics and trajectory parameters from distributions characterized by their means and
+standard deviations, with most players near the relevant population's average and progressively fewer extreme outliers.
+Use appropriate position/skill populations, bounds, and relationships between qualities rather than one universal average
+or independently unrelated skills. These generate enduring characteristics, not fresh weekly or seasonal talent rolls.
+Exact distributions, correlations, tail frequencies, and numeric parameters remain tuning/design work. Discrete decisions
+such as retirement or accepting an offer use conditional probabilities rather than being forced into a normal distribution.
 
 #### Football experience and training focus
 
@@ -928,6 +962,14 @@ Staff build the weekly training schedule by default. The GM can review and chang
 focuses, within the same time, workload, availability, and medical constraints used by staff. Show the proposed schedule,
 current activities, individual overrides, and expected development/readiness tradeoffs before advancing through the work.
 This default scheduling support preserves the GM's existing control over camp focuses and practice-rep decisions.
+
+Approved schedule rules: every team has exactly three training slots on an eligible day. Each selected activity occupies
+one slot regardless of light, standard, or heavy intensity. Staff quality never changes the number of slots. There are no
+selectable training sessions on game day or the day immediately before or after a game. The adjacent days are labeled
+Travel for away games and automatic Rest for home games; Travel receives the same rest/recovery treatment as Rest.
+Game day remains Game activity, with actual participation, fatigue, injuries, and experience rather than a free rest award.
+Overlapping game restrictions cannot create extra slots. Rest/recovery activities must also be available within the
+selectable catalog; exact recovery effects and medical restrictions remain to be reviewed with that catalog.
 
 Heavier training offers greater development opportunity at the cost of additional fatigue and injury risk. Present these
 tradeoffs in planning and staff reports without promising exact gains or guaranteed injury outcomes. Resolve actual workload,
@@ -1029,7 +1071,19 @@ describe a player losing ground despite productive training or showing signs of 
 of recovery or expose hidden DNA values. Actual development history and changes in staff assessment remain distinguishable.
 This uses existing decision surfaces; it does not introduce a separate Development screen.
 
+Approved reporting cadence: each Tuesday, scouts/coaches report what they observed during practices and games since the
+previous weekly report. Reports reflect available evidence and can retain an older assessment when there is insufficient
+new information. They do not reveal true skills or advance development. Actual skill changes still take effect at their
+activity/calendar event, not on report day. Persist report windows so retries and reloads cannot duplicate an assessment.
+
 #### Audit status and implementation acceptance
+
+Workshop checkpoint, September 26, 2026: the shared physical/technical/mental DNA model, stronger technical retention,
+individual aging, distribution-based generation direction, universal skill possession, three-slot schedule, protected
+game/travel/rest days, Tuesday observations, retirement-persuasion direction, and retired-player coaching are approved.
+This is partial design resolution, not approval of the entire initial numeric proposal or authorization to implement it.
+Expand and review the skill catalog; finalize XP conversion and Potential's role, Overall weights, trajectory distributions,
+the training/recovery catalog and workload effects, and retirement/coaching commitments before the affected runtime work.
 
 Design requirement recorded September 8, 2026. The current C# annual development foundation uses age bands and does not yet
 implement DNA trajectories or XP opposing regression. XP activity categories and relative gains are now defined above;
@@ -2417,9 +2471,11 @@ Approved controls: select a specific drill with predefined skill focuses, and ch
 where permitted. The table above describes draft activity families; the selectable catalog must expand them into named
 drills with fixed skill mappings rather than an attribute picker. The exact drill list remains proposed content.
 
-Proposed workload accounting: a heavier session consumes more
-of the same limited day; it does not create free extra repetitions. Offseason/minicamp versions retain their approved low
-skill-XP and conditioning emphasis. A permanent DNA downturn can still outweigh all earned development.
+Approved workload accounting: each selected session consumes one of three fixed daily slots regardless of intensity;
+heavier work increases workload, fatigue, and health exposure rather than consuming additional slots. Staff do not add slots.
+The game day and its adjacent travel/rest days have no selectable training, as defined above. The activity catalog must
+include selectable rest/recovery work, with exact effects still under review. Offseason/minicamp versions retain their
+approved low skill-XP and conditioning emphasis. A permanent DNA downturn can still outweigh all earned development.
 
 ### Proposed prospect interview question pool
 

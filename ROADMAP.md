@@ -2,6 +2,42 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
+## Player-development workshop — partial design approval, September 26, 2026
+
+Current task is design resolution only. Do not start the new runtime development system until the remaining affected rules
+are reviewed and the user explicitly authorizes implementation. Save version remains **38**; the existing runtime checkpoint
+is `8565f95`, with **190 tests reported passing** in that checkpoint. This documentation update does not rerun or change them.
+
+- [x] Audit the current player, annual/camp development, statistics, roster pools, medical recovery, staff, scouting,
+  retirement, college handoff, and persistence paths.
+- [x] Record three persistent DNA trajectories: physical, technical, and mental, with greater typical technical retention,
+  individual aging rather than fixed positional decline birthdays, and distribution-based population variation.
+- [x] Record that every player possesses the full skill catalog, with position-appropriate starting abilities; the proposed
+  21-skill catalog needs expansion and its Overall weights remain provisional.
+- [x] Record three fixed daily training slots, one slot per selection at any intensity, no staff-created slots, and no
+  selectable sessions on the day before, of, or after a game. Adjacent away-game days are Travel; home-game days are Rest;
+  Travel counts as rest. Game participation retains its own workload and experience.
+- [x] Record Tuesday observation reports, retirement persuasion requiring a credible reason, and the direction that retired
+  players can become coaches, including possible future coaching-role promises.
+- [ ] Finalize the expanded skills/Overall model and explain/approve XP conversion and Potential's influence.
+- [ ] Finalize trajectory generation, aging parameters, correlations, and population/acceptance distributions.
+- [ ] Review the named training/rest/recovery catalog, intensity/workload limits, practice opportunity, and readiness effects.
+- [ ] Complete staff/modifier and observation details; define retirement decisions and persuasion/coaching commitment rules.
+- [ ] Approve migration and event continuity details, balance targets, and the final implementation decision package.
+- [ ] Consolidate approved documentation and deliver the complete implementation handoff before runtime authorization.
+
+The eventual development macro-slice should sequence shared skills/DNA and additive migration, authoritative activity/time
+processing across all ownership pools, college/pro identity continuity, legal schedules, and persisted observations on
+existing surfaces. Replace the provisional annual and camp rating bonuses without stacking old and new development.
+Validate deterministic retries/reloads, migration preservation, pool movement, staff authority, and long-run career/talent
+distributions. Retirement persuasion and player-to-coach commitments require their own completed rules before implementation;
+their approval in principle does not authorize invented contracts, promises, or medical outcomes.
+
+Unaccepted workshop numbers remain proposals: no XP rates, growth-reference formula, fixed age cutoffs, weighted skill table,
+weekly activity caps, training injury probabilities, or persuasion probabilities were adopted by this checkpoint. The earlier
+proposal that heavy sessions consume extra time slots is superseded. No runtime, saves, UI, assets, or pre-existing `.uid`
+sidecars change. Next continuation: expand/review the skill catalog and clarify Potential/learning before locking numeric rules.
+
 ## Rolling save recovery and play-log compaction — completed September 25, 2026
 
 Smallest complete outcome: every successful save keeps a bounded recoverable history, damaged or unavailable primaries are reported rather than silently replaced, recovery is an explicit user action, and detailed pro play logs take materially less disk space without changing simulation state or breaking older saves.
