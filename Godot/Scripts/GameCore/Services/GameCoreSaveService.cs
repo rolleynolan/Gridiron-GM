@@ -18,18 +18,31 @@ public class GameCoreSaveResult
 public sealed class GameCoreLoadResult : GameCoreSaveResult
 {
     public bool SaveMissing { get; set; }
+    public bool SaveCorrupt { get; set; }
+    public bool RecoveryAvailable { get; set; }
+    public int AvailableBackupCount { get; set; }
     public LeagueState League { get; set; }
+}
+
+public sealed class GameCoreSaveStorageInfo
+{
+    public bool PrimaryExists { get; init; }
+    public long PrimaryBytes { get; init; }
+    public int BackupCount { get; init; }
+    public long BackupBytes { get; init; }
 }
 
 public sealed class GameCoreSaveService
 {
     public const string AutosaveFileName = "native_autosave.json";
     public const string NamedSaveFileName = "native_save.json";
+    public const int RollingBackupLimit = 3;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         WriteIndented = false,
+        Converters = { new GamePlayEventStateJsonConverter() },
     };
 
     public GameCoreSaveResult Save(GameCoreContext context, string saveName = null)
@@ -62,7 +75,11 @@ public sealed class GameCoreSaveService
                     JsonSerializer.Serialize(stream, context.ActiveLeague, JsonOptions);
                     stream.Flush(flushToDisk: true);
                 }
-                if (File.Exists(absolutePath)) File.Replace(temporaryPath, absolutePath, null);
+                if (File.Exists(absolutePath))
+                {
+                    RotateBackups(absolutePath);
+                    File.Replace(temporaryPath, absolutePath, BuildBackupPath(absolutePath, 1), ignoreMetadataErrors: true);
+                }
                 else File.Move(temporaryPath, absolutePath);
             }
             finally
@@ -97,11 +114,14 @@ public sealed class GameCoreSaveService
         {
             if (!File.Exists(absolutePath))
             {
+                var backupCount = CountBackups(absolutePath);
                 return new GameCoreLoadResult
                 {
                     Ok = false,
                     SaveMissing = true,
-                    Message = "No native save found.",
+                    RecoveryAvailable = backupCount > 0,
+                    AvailableBackupCount = backupCount,
+                    Message = backupCount > 0 ? "The primary save is unavailable, but a recovery backup exists." : "No native save found.",
                     SavePath = logicalPath,
                 };
             }
@@ -120,13 +140,77 @@ public sealed class GameCoreSaveService
         }
         catch (Exception ex)
         {
+            var backupCount = CountBackups(absolutePath);
             return new GameCoreLoadResult
             {
                 Ok = false,
+                SaveCorrupt = File.Exists(absolutePath),
+                RecoveryAvailable = backupCount > 0,
+                AvailableBackupCount = backupCount,
                 Message = $"Unable to load native save. {ex.Message}",
                 SavePath = logicalPath,
             };
         }
+    }
+
+    public GameCoreLoadResult LoadBackup(string saveName = null, int backupIndex = 1)
+    {
+        var logicalPath = BuildLogicalSavePath(saveName);
+        var absolutePath = ResolveAbsoluteSavePath(logicalPath);
+        if (backupIndex < 1 || backupIndex > RollingBackupLimit)
+            return new GameCoreLoadResult { Ok = false, SaveMissing = true, Message = "That recovery backup does not exist.", SavePath = logicalPath };
+        return LoadAbsolutePath(BuildBackupPath(absolutePath, backupIndex), logicalPath, isBackup: true);
+    }
+
+    public GameCoreSaveResult RecoverFromBackup(string saveName = null, int backupIndex = 1)
+    {
+        var logicalPath = BuildLogicalSavePath(saveName);
+        var absolutePath = ResolveAbsoluteSavePath(logicalPath);
+        var backupPath = BuildBackupPath(absolutePath, backupIndex);
+        var checkedBackup = LoadAbsolutePath(backupPath, logicalPath, isBackup: true);
+        if (!checkedBackup.Ok)
+            return new GameCoreSaveResult { Ok = false, Message = checkedBackup.Message, SavePath = logicalPath };
+
+        try
+        {
+            var temporaryPath = absolutePath + "." + Guid.NewGuid().ToString("N") + ".recovery.tmp";
+            try
+            {
+                File.Copy(backupPath, temporaryPath, overwrite: false);
+                using (var stream = new FileStream(temporaryPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    stream.Flush(flushToDisk: true);
+                if (File.Exists(absolutePath))
+                {
+                    var corruptPath = absolutePath + ".corrupt-" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+                    File.Replace(temporaryPath, absolutePath, corruptPath, ignoreMetadataErrors: true);
+                }
+                else File.Move(temporaryPath, absolutePath);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+            }
+            return new GameCoreSaveResult { Ok = true, Message = "Native save recovered from a rolling backup.", SavePath = logicalPath };
+        }
+        catch (Exception ex)
+        {
+            return new GameCoreSaveResult { Ok = false, Message = $"Unable to recover native save. {ex.Message}", SavePath = logicalPath };
+        }
+    }
+
+    public GameCoreSaveResult RecoverFromLatestValidBackup(string saveName = null)
+    {
+        for (var index = 1; index <= RollingBackupLimit; index++)
+        {
+            var candidate = LoadBackup(saveName, index);
+            if (candidate.Ok) return RecoverFromBackup(saveName, index);
+        }
+        return new GameCoreSaveResult
+        {
+            Ok = false,
+            Message = "No valid recovery backup is available.",
+            SavePath = BuildLogicalSavePath(saveName),
+        };
     }
 
     public GameCoreSaveResult Delete(string saveName = null)
@@ -136,17 +220,16 @@ public sealed class GameCoreSaveService
 
         try
         {
-            if (!File.Exists(absolutePath))
+            if (File.Exists(absolutePath)) File.Delete(absolutePath);
+            for (var index = 1; index <= RollingBackupLimit; index++)
             {
-                return new GameCoreSaveResult
-                {
-                    Ok = true,
-                    Message = "No native save found.",
-                    SavePath = logicalPath,
-                };
+                var backup = BuildBackupPath(absolutePath, index);
+                if (File.Exists(backup)) File.Delete(backup);
             }
-
-            File.Delete(absolutePath);
+            var directory = Path.GetDirectoryName(absolutePath);
+            if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
+                foreach (var corrupt in Directory.EnumerateFiles(directory, Path.GetFileName(absolutePath) + ".corrupt-*"))
+                    File.Delete(corrupt);
             return new GameCoreSaveResult
             {
                 Ok = true,
@@ -171,6 +254,56 @@ public sealed class GameCoreSaveService
         var absolutePath = ResolveAbsoluteSavePath(logicalPath);
         return File.Exists(absolutePath);
     }
+
+    public GameCoreSaveStorageInfo GetStorageInfo(string saveName = null)
+    {
+        var absolutePath = ResolveAbsoluteSavePath(BuildLogicalSavePath(saveName));
+        var backups = Enumerable.Range(1, RollingBackupLimit)
+            .Select(index => BuildBackupPath(absolutePath, index))
+            .Where(File.Exists)
+            .Select(path => new FileInfo(path))
+            .ToList();
+        return new GameCoreSaveStorageInfo
+        {
+            PrimaryExists = File.Exists(absolutePath),
+            PrimaryBytes = File.Exists(absolutePath) ? new FileInfo(absolutePath).Length : 0,
+            BackupCount = backups.Count,
+            BackupBytes = backups.Sum(file => file.Length),
+        };
+    }
+
+    private static GameCoreLoadResult LoadAbsolutePath(string absolutePath, string logicalPath, bool isBackup)
+    {
+        try
+        {
+            if (!File.Exists(absolutePath))
+                return new GameCoreLoadResult { Ok = false, SaveMissing = true, Message = isBackup ? "No recovery backup found." : "No native save found.", SavePath = logicalPath };
+            using var stream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var league = JsonSerializer.Deserialize<LeagueState>(stream, JsonOptions);
+            NormalizeLeague(league);
+            return new GameCoreLoadResult { Ok = true, Message = isBackup ? "Recovery backup validated." : "Native game loaded.", SavePath = logicalPath, League = league };
+        }
+        catch (Exception ex)
+        {
+            return new GameCoreLoadResult { Ok = false, SaveCorrupt = true, Message = $"Unable to load {(isBackup ? "recovery backup" : "native save")}. {ex.Message}", SavePath = logicalPath };
+        }
+    }
+
+    private static void RotateBackups(string absolutePath)
+    {
+        var oldest = BuildBackupPath(absolutePath, RollingBackupLimit);
+        if (File.Exists(oldest)) File.Delete(oldest);
+        for (var index = RollingBackupLimit - 1; index >= 1; index--)
+        {
+            var source = BuildBackupPath(absolutePath, index);
+            if (File.Exists(source)) File.Move(source, BuildBackupPath(absolutePath, index + 1));
+        }
+    }
+
+    private static int CountBackups(string absolutePath)
+        => Enumerable.Range(1, RollingBackupLimit).Count(index => File.Exists(BuildBackupPath(absolutePath, index)));
+
+    private static string BuildBackupPath(string absolutePath, int backupIndex) => absolutePath + $".backup{backupIndex}";
 
     private static string BuildLogicalSavePath(string saveName)
     {

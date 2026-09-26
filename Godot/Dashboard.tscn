@@ -1472,6 +1472,12 @@ custom_minimum_size = Vector2(145, 40)
 layout_mode = 2
 text = "LOAD SAVE"
 
+[node name="BtnStartupRecover" type="Button" parent="StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow"]
+visible = false
+custom_minimum_size = Vector2(205, 40)
+layout_mode = 2
+text = "RECOVER LATEST BACKUP"
+
 [node name="BtnStartupNewGame" type="Button" parent="StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow"]
 custom_minimum_size = Vector2(160, 40)
 layout_mode = 2

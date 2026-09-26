@@ -152,6 +152,7 @@ public partial class DashboardController : Control
     private Label _lblStartupStatus;
     private Button _btnStartupContinue;
     private Button _btnStartupLoadGame;
+    private Button _btnStartupRecover;
     private Button _btnStartupNewGame;
     private Button _btnStartupExit;
     private ConfirmationDialog _newGameConfirmDialog;
@@ -618,6 +619,7 @@ public partial class DashboardController : Control
     private int _currentMainTab = 0;
     private string _pendingNativeStatusMessage = "";
     private NativeStartupState _nativeStartupState = NativeStartupState.Unknown;
+    private string _pendingRecoverySaveName;
 
     private T GetNodeOrWarn<T>(string path, string missingMessage = null) where T : Node
     {
@@ -1437,6 +1439,7 @@ public partial class DashboardController : Control
         foreach (var path in new[]
         {
             "StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupContinue",
+            "StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupRecover",
             "StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupNewGame",
             "GameDayPopup/CenterWrap/Panel/Margin/Content/ButtonRow/BtnGameDaySim",
             "PostGameRecapPopup/CenterWrap/Panel/Margin/Content/ButtonRow/BtnPostGameBoxScore",
@@ -1555,6 +1558,7 @@ public partial class DashboardController : Control
         _lblStartupStatus = GetNodeOrWarn<Label>("StartupPanel/CenterWrap/Panel/Margin/Content/LblStartupStatus");
         _btnStartupContinue = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupContinue");
         _btnStartupLoadGame = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupLoadGame");
+        _btnStartupRecover = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupRecover");
         _btnStartupNewGame = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupNewGame");
         _btnStartupExit = GetNodeOrWarn<Button>("StartupPanel/CenterWrap/Panel/Margin/Content/StartupButtonRow/BtnStartupExit");
         _newGameConfirmDialog = GetNodeOrWarn<ConfirmationDialog>("NewGameConfirmDialog");
@@ -1701,6 +1705,8 @@ public partial class DashboardController : Control
             _btnStartupContinue.Pressed += async () => await ContinueNativeStartup();
         if (_btnStartupLoadGame != null)
             _btnStartupLoadGame.Pressed += async () => await LoadNativeGame();
+        if (_btnStartupRecover != null)
+            _btnStartupRecover.Pressed += async () => await RecoverNativeStartup();
         if (_btnStartupNewGame != null)
             _btnStartupNewGame.Pressed += async () => await NewGame();
         if (_btnStartupExit != null)
@@ -1918,9 +1924,10 @@ public partial class DashboardController : Control
             return true;
         }
 
-        _nativeStartupState = loadResult.SaveMissing
+        _nativeStartupState = loadResult.SaveMissing && !loadResult.RecoveryAvailable
             ? NativeStartupState.MissingAutosave
             : NativeStartupState.CorruptAutosave;
+        _pendingRecoverySaveName = ResolveRecoverySaveName(loadResult);
         SetPrimaryStatus(loadResult.SaveMissing ? "No native save found." : "Unable to load native save.");
         if (!string.IsNullOrWhiteSpace(loadResult.Message))
             SetStateDumpText(loadResult.Message);
@@ -1940,18 +1947,24 @@ public partial class DashboardController : Control
         var hasNamedSave = saveService.SaveExists(GameCoreSaveService.NamedSaveFileName);
         var hasAnySave = hasAutosave || hasNamedSave;
         var corruptAutosave = autosaveResult != null && !autosaveResult.Ok && !autosaveResult.SaveMissing;
+        var recoveryAvailable = autosaveResult?.RecoveryAvailable == true;
+        var damagedOrMissingPrimary = corruptAutosave || recoveryAvailable;
 
         if (_lblStartupWarning != null)
         {
-            _lblStartupWarning.Visible = corruptAutosave;
-            _lblStartupWarning.Text = corruptAutosave
-                ? "Unable to load native save."
+            _lblStartupWarning.Visible = damagedOrMissingPrimary;
+            _lblStartupWarning.Text = damagedOrMissingPrimary
+                ? "The primary save is unavailable."
                 : "";
         }
 
         if (_lblStartupStatus != null)
         {
-            if (corruptAutosave)
+            if (recoveryAvailable)
+                _lblStartupStatus.Text = recoveryAvailable
+                    ? $"The save could not be loaded. {autosaveResult.AvailableBackupCount} rolling backup(s) are available; recovery preserves the damaged file."
+                    : "";
+            else if (corruptAutosave)
                 _lblStartupStatus.Text = "The autosave could not be loaded. Start a new game or try loading an existing native save.";
             else if (!hasAnySave)
                 _lblStartupStatus.Text = "No native save found. Start a new game to begin.";
@@ -1962,13 +1975,18 @@ public partial class DashboardController : Control
         if (_btnStartupContinue != null)
         {
             _btnStartupContinue.Disabled = !hasAutosave;
-            _btnStartupContinue.Text = corruptAutosave ? "RETRY AUTOSAVE" : "CONTINUE FRANCHISE";
+            _btnStartupContinue.Text = damagedOrMissingPrimary ? "RETRY AUTOSAVE" : "CONTINUE FRANCHISE";
         }
 
         if (_btnStartupLoadGame != null)
         {
             _btnStartupLoadGame.Disabled = !hasAnySave;
             _btnStartupLoadGame.Text = hasAnySave ? "LOAD SAVE" : "LOAD SAVE (NONE FOUND)";
+        }
+        if (_btnStartupRecover != null)
+        {
+            _btnStartupRecover.Visible = recoveryAvailable;
+            _btnStartupRecover.Disabled = !recoveryAvailable;
         }
     }
 
@@ -4122,7 +4140,9 @@ public partial class DashboardController : Control
             var saves = GetNativeGameCoreSaveService();
             var named = saves?.SaveExists(GameCoreSaveService.NamedSaveFileName) == true ? "available" : "not found";
             var autosave = saves?.SaveExists() == true ? "available" : "not found";
-            _franchiseSaveStatus.Text = $"Named franchise save: {named}. Autosave: {autosave}. Successful explicit saves also update the existing autosave.";
+            var namedBackups = saves?.GetStorageInfo(GameCoreSaveService.NamedSaveFileName).BackupCount ?? 0;
+            var autosaveBackups = saves?.GetStorageInfo().BackupCount ?? 0;
+            _franchiseSaveStatus.Text = $"Named franchise save: {named} ({namedBackups} rolling backup(s)). Autosave: {autosave} ({autosaveBackups} rolling backup(s)). Successful explicit saves also update the autosave.";
         }
         if (_franchiseDeveloperToggle != null)
             _franchiseDeveloperToggle.SetPressedNoSignal(_debugPanel?.Visible ?? false);
@@ -7683,6 +7703,22 @@ public partial class DashboardController : Control
         }
     }
 
+    private async Task RecoverNativeStartup()
+    {
+        if (_btnStartupRecover != null) _btnStartupRecover.Disabled = true;
+        var result = GetNativeGameCoreSaveService().RecoverFromLatestValidBackup(_pendingRecoverySaveName);
+        if (!result.Ok)
+        {
+            SetPrimaryStatus("Save recovery failed.");
+            SetStateDumpText(result.Message);
+            RefreshStartupPanelButtons();
+            return;
+        }
+
+        var named = string.Equals(_pendingRecoverySaveName, GameCoreSaveService.NamedSaveFileName, StringComparison.OrdinalIgnoreCase);
+        await LoadNativeGameInternal(named, "Franchise recovered from the latest valid backup.");
+    }
+
     private async Task LoadNativeGameInternal(bool preferNamedSave, string successMessage)
     {
         EnsureNativeGameCoreServices();
@@ -7701,10 +7737,11 @@ public partial class DashboardController : Control
 
         if (!loadResult.Ok || loadResult.League == null)
         {
-            _nativeStartupState = loadResult.SaveMissing
+            _nativeStartupState = loadResult.SaveMissing && !loadResult.RecoveryAvailable
                 ? NativeStartupState.MissingAutosave
                 : NativeStartupState.CorruptAutosave;
             _nativeGameCoreContext.ActiveLeague = null;
+            _pendingRecoverySaveName = ResolveRecoverySaveName(loadResult);
             SetPrimaryStatus(loadResult.SaveMissing ? "No native save found." : "Unable to load native save.");
             SetStateDumpText(loadResult.Message);
             ShowStartupPanel(loadResult);
@@ -7712,6 +7749,7 @@ public partial class DashboardController : Control
         }
 
         _nativeGameCoreContext.ActiveLeague = loadResult.League;
+        _pendingRecoverySaveName = null;
         _nativeStartupState = NativeStartupState.Ready;
         ResetDashboardPreviewUiState();
         ResetClientCachesForNewGame();
@@ -7727,10 +7765,15 @@ public partial class DashboardController : Control
             return;
 
         var autosaveResult = _nativeStartupState == NativeStartupState.CorruptAutosave
-            ? new GameCoreLoadResult { Ok = false, SaveMissing = false, Message = "Unable to load native save." }
+            ? GetNativeGameCoreSaveService().Load(_pendingRecoverySaveName)
             : null;
         ShowStartupPanel(autosaveResult);
     }
+
+    private static string ResolveRecoverySaveName(GameCoreLoadResult result)
+        => result?.SavePath?.EndsWith(GameCoreSaveService.NamedSaveFileName, StringComparison.OrdinalIgnoreCase) == true
+            ? GameCoreSaveService.NamedSaveFileName
+            : null;
 
     private string ResolveNativeRosterDepthChartTeamId()
     {
