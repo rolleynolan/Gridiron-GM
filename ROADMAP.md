@@ -2,7 +2,7 @@
 
 Build one playable C# vertical slice at a time. Do not start a later layer until the current slice is saved, loaded, tested, and usable through Godot.
 
-## Player-development workshop — partial design approval, September 26, 2026
+## Player-development workshop — partial design approval, updated September 27, 2026
 
 Current task is design resolution only. Do not start the new runtime development system until the remaining affected rules
 are reviewed and the user explicitly authorizes implementation. Save version remains **38**; the existing runtime checkpoint
@@ -12,14 +12,20 @@ is `8565f95`, with **190 tests reported passing** in that checkpoint. This docum
   retirement, college handoff, and persistence paths.
 - [x] Record three persistent DNA trajectories: physical, technical, and mental, with greater typical technical retention,
   individual aging rather than fixed positional decline birthdays, and distribution-based population variation.
-- [x] Record that every player possesses the full skill catalog, with position-appropriate starting abilities; the proposed
-  21-skill catalog needs expansion and its Overall weights remain provisional.
+- [x] Record that every player possesses the full skill catalog, with position-appropriate starting abilities. The expanded
+  September 27 catalog has 47 ratings (10 physical, 7 mental, 30 technical); Overall weights remain provisional.
 - [x] Record three fixed daily training slots, one slot per selection at any intensity, no staff-created slots, and no
   selectable sessions on the day before, of, or after a game. Adjacent away-game days are Travel; home-game days are Rest;
   Travel counts as rest. Game participation retains its own workload and experience.
 - [x] Record Tuesday observation reports, retirement persuasion requiring a credible reason, and the direction that retired
   players can become coaches, including possible future coaching-role promises.
-- [ ] Finalize the expanded skills/Overall model and explain/approve XP conversion and Potential's influence.
+- [x] Record the revised passing, carrying, receiving, blocking, pass-rush, coverage and specialist skills; remove duplicate
+  generic Evasion/Contact Running/Field Vision and trainable Holding. Separate release duration, throw velocity and range;
+  Mechanics governs throwing consistency. Juke/Spin use Agility; Trucking uses Strength/Contact Balance; body dimensions
+  are actual measurements with distinct, bounded simulation effects. Rushing/return vision belong to mental DNA.
+- [x] Record generated persistent career curves, with a majority of standard rise/peak/decline shapes and rarer departures,
+  plus catalog data requirements, interaction pseudocode, invariants and acceptance checks in BLUEPRINT.
+- [ ] Finalize Overall weights and explain/approve XP conversion and Potential's influence.
 - [ ] Finalize trajectory generation, aging parameters, correlations, and population/acceptance distributions.
 - [ ] Review the named training/rest/recovery catalog, intensity/workload limits, practice opportunity, and readiness effects.
 - [ ] Complete staff/modifier and observation details; define retirement decisions and persuasion/coaching commitment rules.
@@ -36,7 +42,17 @@ their approval in principle does not authorize invented contracts, promises, or 
 Unaccepted workshop numbers remain proposals: no XP rates, growth-reference formula, fixed age cutoffs, weighted skill table,
 weekly activity caps, training injury probabilities, or persuasion probabilities were adopted by this checkpoint. The earlier
 proposal that heavy sessions consume extra time slots is superseded. No runtime, saves, UI, assets, or pre-existing `.uid`
-sidecars change. Next continuation: expand/review the skill catalog and clarify Potential/learning before locking numeric rules.
+sidecars change. Next continuation: clarify and approve Potential/learning, then specify Overall weights, numeric interaction
+rules and migration. The hidden per-skill growth-reference recommendation and associated numeric examples remain proposals.
+
+The requested Sol Medium runtime handoff is not yet unblocked by catalog approval alone. Once the remaining affected rules
+and runtime work are authorized, the first bounded slice should establish the authoritative catalog/skill model, deterministic
+generation and approved save migration, derived Overall and dated observed profile values, routing every existing pro/college/
+camp rating writer through the same authority. Preserve the current snap resolver through a derived-Overall adapter initially;
+action-specific use of the new skills and body measurements requires separately specified coefficients and validation. Do not
+claim that storing a rating already makes the snap engine use it, or leave legacy direct Overall writes as a second authority.
+The full implementation-ready formulas, migration algorithm, direct tests and acceptance thresholds must be completed before
+handing that slice to Sol Medium. No runtime implementation is authorized by this documentation/push request.
 
 ## Rolling save recovery and play-log compaction — completed September 25, 2026
 

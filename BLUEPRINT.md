@@ -930,8 +930,8 @@ also depend on opportunity, training, health, and environment.
 
 All players possess the complete underlying skill catalog. Starting abilities reflect their relevant population and
 individual identity: a typical defensive tackle has very poor passing technique rather than an absent passing skill,
-and general strength does not imply skilled throwing. The initial 21-skill workshop proposal needs expansion and review;
-neither that catalog nor its proposed Overall weights is approved as final.
+and general strength does not imply skilled throwing. The expanded catalog below supersedes the initial 21-skill and
+40-skill proposals. Overall weights remain provisional and must not be inferred from the number of skills in a group.
 
 Generate continuous player characteristics and trajectory parameters from distributions characterized by their means and
 standard deviations, with most players near the relevant population's average and progressively fewer extreme outliers.
@@ -939,6 +939,127 @@ Use appropriate position/skill populations, bounds, and relationships between qu
 or independently unrelated skills. These generate enduring characteristics, not fresh weekly or seasonal talent rolls.
 Exact distributions, correlations, tail frequencies, and numeric parameters remain tuning/design work. Discrete decisions
 such as retirement or accepting an offer use conditional probabilities rather than being forced into a normal distribution.
+
+#### Expanded skill catalog and interactions — approved September 27, 2026
+
+The current catalog contains 47 underlying ratings: 10 physical, 7 mental, and 30 technical. Every player possesses every
+rating, using the shared hidden 1-100 scale with fractional progress. Football presentation groups are distinct from DNA
+families: Rushing Vision and Kick-Return Vision are mental skills even when shown alongside ball carrying or special teams.
+This catalog does not add roster positions or grant position/two-way eligibility.
+
+| Football group | DNA family | Ratings |
+| --- | --- | --- |
+| Shared physical abilities (10) | Physical | Speed, Acceleration, Agility, Strength, Jumping, Throwing Power, Throw Velocity, Kicking Power, Stamina, Contact Balance |
+| Shared mental abilities (5) | Mental | Recognition, Anticipation, Decisions, Concentration, Composure |
+| Context-specific vision (2) | Mental | Rushing Vision, Kick-Return Vision |
+| Passing (5) | Technical | Short Accuracy, Intermediate Accuracy, Deep Accuracy, Mechanics, Release Quickness |
+| Ball carrying (4) | Technical | Ball Security, Juke, Spin, Trucking |
+| Receiving (6) | Technical | Catching, Catch in Traffic, Spectacular Catch, Ball Tracking, Route Running, Releases |
+| Blocking (5) | Technical | Pass-Block Footwork, Run-Block Footwork, Pass-Block Technique, Run-Block Technique, Hand Placement |
+| Pass rush / block defeat (3) | Technical | Finesse Rush, Power Rush, Block Shedding |
+| Coverage (3) | Technical | Man Coverage, Zone Coverage, Press Coverage |
+| Tackling (1) | Technical | Tackling |
+| Specialist execution (3) | Technical | Kicking Accuracy, Punt Control, Long Snapping |
+
+Recognition identifies the current football situation; Anticipation predicts its development; Decisions selects a response.
+Concentration describes sustained attention and Composure describes baseline execution under pressure. Position-relevant
+evidence is required to assess these qualities; they are not a second generic Awareness/Football IQ multiplier.
+
+Position relevance is explicit. QB emphasizes passing; RB emphasizes carrying and rushing vision, with receiving/protection
+where actually used; WR emphasizes receiving and relevant carrying; TE combines receiving/blocking. LT/RT and LG/C/RG use
+the blocking catalog with different position weights. EDGE/DT emphasize applicable rush/block-defeat skills and tackling;
+LB combines tackling, block defeat, coverage, and actual rush duties; CB/S emphasize coverage, tracking/catching and tackling.
+K/P emphasize their kicking/punting skills. Returns use return vision and applicable carrying/receiving skills. Long snapping
+is relevant to that actual duty, not a blanket bonus for every center. Shared physical/mental contributions depend on the
+position. A player's primary-position Overall must not rise just because an unrelated skill improves.
+
+Passing separates three different quantities: Throwing Power is usable range, Throw Velocity is the pace of the ball on the
+intended throw, and Release Quickness is how quickly the throwing motion delivers the ball. Release time is the resulting
+duration, not a second independently trainable rating. Deciding when to throw is separate from executing that motion.
+Power and velocity are correlated at generation but remain distinct. High general Strength does not substitute for either
+passing technique or throwing-specific ability.
+
+Mechanics describes consistency of throwing execution: reproducing intended accuracy/placement, velocity, and delivery.
+Accuracy ratings establish placement ability at their respective depths. Better Mechanics reduces execution variability;
+do not also award a generic flat accuracy/power bonus for the same effect. Placement is part of accuracy, not an extra rating.
+The exact depth boundaries, timing/velocity conversions, and execution distributions still require numeric specification.
+
+Juke and Spin replace generic Evasion; Trucking replaces generic Contact Running. Resolve learned move technique together
+with its physical support: Juke uses Agility, with Acceleration relevant to exploiting the opening; Spin uses Agility and
+Contact Balance when absorbing contact; Trucking uses Strength and Contact Balance, with mass relevant to the collision.
+Contact Balance is the physical ability to remain upright and maintain control through contact, also useful after catches.
+An agile player does not automatically have skilled juke technique, and Strength alone does not guarantee effective trucking.
+Resolve one combined interaction rather than awarding independent success bonuses for every contributing rating.
+
+Rushing Vision identifies developing lanes, blocking paths and cutbacks on running plays. Kick-Return Vision identifies
+lanes and developing coverage in the return context. They are correlated but distinct; neither confers automatic mastery
+of the other. Remove generic Field Vision rather than counting a third vision rating underneath both.
+
+Receiving distinguishes securing routine opportunities (Catching), executing through contact/disruption (Catch in Traffic),
+and difficult extension/adjustment/acrobatic opportunities (Spectacular Catch). Ball Tracking covers judging flight and
+positioning/timing before the attempt. Select or blend the relevant execution skills once for the situation; do not multiply
+all three catch skills as separate bonuses. Spectacular Catch does not make routine catches artificially acrobatic.
+
+Blocking footwork governs positioning/movement; pass/run technique governs leverage, recovery and sustaining the relevant
+block; Hand Placement governs effective contact. These replace the prior footwork/hands and positioning/engagement proposal.
+Keep pass-rush techniques and coverage techniques as separate presentation groups. Tackling remains applicable beyond both.
+
+Holding uses a shared baseline for all players, not a trainable skill or player-specific hidden aptitude. This does not
+guarantee a successful kick operation: poor snaps and disrupted execution can still matter through supported simulation
+rules. Do not introduce another Holding rating under a different name.
+
+Height, weight, arm length and hand dimensions are actual measurements, never 1-100 ratings. Specify the measured quantity
+(for example hand span versus hand length), units and known/unknown status. Body size has bounded, situation-specific effects:
+reach and engagement/catch windows, contact mass and displacement, and relevant ball-control context. It is not a universal
+Overall bonus. Avoid counting a physical effect twice: rated Acceleration/Agility already describe those abilities, so body
+weight must not also impose a generic duplicate penalty. Existing saves with missing measurements must not present fabricated
+measurements as known facts. Exact dimensional effect functions remain to be specified before resolver integration.
+
+Stamina is lasting exertion capacity; readiness, conditioning/rust, Fatigue and current medical restrictions are temporary
+state. Named hidden traits such as Composed or Work Ethic remain bounded tendencies under the existing trait catalog,
+discovery and three-trait rules, not replacements for the underlying ratings. Overall, role summaries and staff Potential
+assessments remain derived values; measurements, temporary state, traits and development parameters are separate data kinds.
+
+#### Generated curves and implementation contract boundary
+
+Generate the physical, technical and mental career curves with player creation and preserve them with the career identity.
+Most players have a broadly standard rise, peak and decline; progressively fewer have unusual early downturns, extended
+peaks, multiple peaks or later resurgences. Curve timing, strength, duration and smoothness vary by player and family using
+the distribution rules above. The technical curve typically retains ability longer than the physical curve. The curves
+are related, not identical. Later turning points belong to the generated career identity; a poor season does not reroll
+the curve. Actual ratings remain outcomes of those tendencies plus activity, opportunity, health and support, not exact
+future ratings that the simulation forces the player to reach. No screen or staff forecast may reveal future curve segments.
+
+The following structural contract is approved; numerical coefficients and unresolved systems are not implicitly approved:
+
+- Catalog entries require stable IDs, display labels, one DNA family, football display group, meaning, relevant positions/
+  duties, and references to their eventual simulation/training consumers. Removed proposal names must not survive as duplicate
+  ratings. Preserve catalog version and ID meaning across saves; do not serialize by UI order or reuse an ID for another skill.
+- Player data must distinguish fractional true skills, versioned curve identity/parameters, processed-time/activity state,
+  body measurements with known status, and dated staff observations. Exact capacity/Potential fields remain pending below.
+- Bounded interaction pseudocode: validate the action/role and medical eligibility; select relevant technique and physical/
+  mental inputs; combine them once using nonnegative normalized weights; apply distinct measured-body/context effects once;
+  resolve bounded execution variation. Mechanics controls throwing consistency rather than another blanket rating bonus.
+  Approved coefficient tables are required before using this skeleton to change live resolution.
+- Generation is a deterministic function of persisted world seed, permanent career identity and generator version. Never
+  seed skill/curve generation from current team, UI activity, wall-clock time or an unordered collection. College/pro handoff,
+  transactions and reloads preserve that identity. Observations do not mutate true skills or regenerate curves.
+- Future migration must be additive from save 38 (use the next available version), with no retroactive activity or elapsed-time
+  development and no duplication of completed camp/yearly events. Exact skill reconstruction and old-Potential conversion are
+  still proposals awaiting approval. No save/version/runtime changes are made by this documentation checkpoint.
+- Acceptance checks must verify 47 unique ratings with the stated family counts; every player has all skills; irrelevant
+  skills cannot inflate primary-position Overall; role eligibility is unchanged; Release Quickness, Throw Velocity and range
+  remain distinct; Mechanics changes consistency without a duplicate bonus; move success combines technique and support;
+  dimensions retain units/known status; Holding is not trainable; and immutable generated curves survive save/load and pool
+  transitions. Statistical fixtures must check correlation, rare tails and a majority of broadly standard career shapes.
+  Exact population tolerances and resolver outcome tests await numeric approval.
+
+Potential decision still pending: the latest recommendation replaces a single hard-cap driver with hidden per-skill
+development references, bounded learning responsiveness, and a separate evidence-based staff forecast. A reference would
+slow positive gains without forcing growth below it or decline above it; negative DNA effects remain possible. The proposed
+88%/50%/12% resistance examples, support caps, scouting uncertainty widths, migration reconstruction and detailed forecast
+semantics have not been approved. Preserve them as workshop proposals, not implementation defaults. XP conversion, Overall
+weights, body-effect coefficients, full drill/recovery workload effects and retirement/coaching commitments also remain open.
 
 #### Football experience and training focus
 
@@ -1082,7 +1203,8 @@ Workshop checkpoint, September 26, 2026: the shared physical/technical/mental DN
 individual aging, distribution-based generation direction, universal skill possession, three-slot schedule, protected
 game/travel/rest days, Tuesday observations, retirement-persuasion direction, and retired-player coaching are approved.
 This is partial design resolution, not approval of the entire initial numeric proposal or authorization to implement it.
-Expand and review the skill catalog; finalize XP conversion and Potential's role, Overall weights, trajectory distributions,
+The September 27 catalog/interaction resolution above supersedes the earlier catalog proposals. Finalize XP conversion and
+Potential's role, Overall weights, trajectory distributions,
 the training/recovery catalog and workload effects, and retirement/coaching commitments before the affected runtime work.
 
 Design requirement recorded September 8, 2026. The current C# annual development foundation uses age bands and does not yet
@@ -2437,8 +2559,8 @@ more broadly than the target design; implementation progress remains in ROADMAP.
 
 ### Proposed training activity catalog
 
-Activity names and coverage below are draft content. They describe skill families, not a finalized attribute schema or extra
-visible ratings. Map them to the authoritative rating catalog during implementation. Staff schedules select appropriate work
+Activity names and coverage below remain draft content. They describe activity families, not extra visible ratings.
+Map them to the approved expanded skill catalog when finalizing the drills. Staff schedules select appropriate work
 by position, phase, health, and workload. General work distributes opportunity broadly; targeted work concentrates it.
 Football activity XP, hidden DNA, observation delays, and reduced practice-squad training XP remain as already approved.
 
@@ -2464,7 +2586,7 @@ Football activity XP, hidden DNA, observation delays, and reduced practice-squad
 | Pursuit and tackling | Angles, tackling technique, run fits | Defensive roles; contact level must follow phase rules |
 | Coverage and ball skills | Man/zone responsibilities, reaction, playing the ball | DB/LB roles as applicable |
 | Kicking and punting | Accuracy, power, placement, operation timing | Specialist repetition and leg workload |
-| Special-teams execution | Snapping, holding, returns, coverage, lane discipline | Supported unit duties; no custom special-teams play design |
+| Special-teams execution | Long snapping, returns, coverage, lane discipline, and shared-baseline holding operations | Supported unit duties; Holding has no trainable rating; no custom special-teams play design |
 | Situational team practice | Red zone, short yardage, two minute, third down | Shared execution/preparation; distribute XP only to actual participation |
 
 Approved controls: select a specific drill with predefined skill focuses, and choose light, standard, or heavy intensity
